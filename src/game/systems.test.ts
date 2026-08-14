@@ -13,7 +13,7 @@ import { seasonOf } from "./season";
 import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
 import { World } from "../sim/world";
-import { buildMap, tileCenter, VALLEY } from "../world/maps";
+import { buildMap, mineTemplate, tileCenter, VALLEY } from "../world/maps";
 import { generateWild } from "../world/wild";
 import type { WorldSnap } from "../sim/net";
 
@@ -431,6 +431,188 @@ describe("living systems", () => {
     assert.ok(b.fish);
     const snap = w.snapshot("a");
     assert.ok(snap.prompt.includes("两人同钓"));
+  });
+
+  it("two people both have to lie down before the night turns", () => {
+    const w = new World("BED");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    const bed = w.valley.find("A")[0];
+    const stand = tileCenter(bed.x, bed.y + 1);
+    a.x = stand.x - 8;
+    a.y = stand.y;
+    b.x = stand.x + 8;
+    b.y = stand.y;
+    a.facing = 0;
+    b.facing = 0;
+    const day = w.save.day;
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(w.save.day, day);
+    assert.ok(w.toasts.some((t) => t.text.includes("先躺下")));
+    w.setInput("b", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(w.save.day, day + 1);
+  });
+
+  it("a ripe plot can grow a stray plant", () => {
+    const w = new World("PLOT");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.rand = () => 0.01;
+    const plots = w.valley.find("P");
+    w.save.plots[0] = { seed: "tomato_seed", stage: 3 };
+    const stand = tileCenter(plots[0].x, plots[0].y + 1);
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 0;
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.ok(countOf(w.save.bag, "tomato") >= 1);
+    assert.ok(countOf(w.save.bag, "osmanthus") >= 1);
+    assert.ok(w.toasts.some((t) => t.text.includes("异株")));
+  });
+
+  it("a vein floor pays extra ore when you dig", () => {
+    const w = new World("VEIN");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.mineMap = buildMap(mineTemplate(1, 1), "mine");
+    w.encounter = "vein";
+    const ore = w.mineMap.find("o")[0];
+    assert.ok(ore);
+    const stand = tileCenter(ore.x, ore.y + 1);
+    p.zone = "mine";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 0;
+    const before = countOf(w.save.bag, "ore");
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.ok(countOf(w.save.bag, "ore") > before);
+    assert.ok(w.toasts.some((t) => t.text.includes("矿脉")));
+  });
+
+  it("rain puts wild fires out faster than clear weather", () => {
+    const wet = new World("RAIN");
+    wet.save.weather = "rain";
+    wet.fires.set("3,3", 10);
+    wet.tick(4);
+    assert.equal(wet.fires.has("3,3"), false);
+    assert.ok(wet.toasts.some((t) => t.text.includes("雨把火")));
+    const dry = new World("DRY");
+    dry.save.weather = "clear";
+    dry.fires.set("3,3", 10);
+    dry.tick(4);
+    assert.ok((dry.fires.get("3,3") ?? 0) > 5);
+  });
+
+  it("sitting together at a night fire adds a little bond", () => {
+    const w = new World("HEARTH");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    const bed = w.valley.find("A")[0];
+    const c = tileCenter(bed.x, bed.y);
+    a.x = c.x - 10;
+    a.y = c.y;
+    b.x = c.x + 10;
+    b.y = c.y;
+    w.clock = 0.9;
+    const bond = w.save.bond;
+    for (let i = 0; i < 16; i++) w.tick(0.5);
+    assert.ok(w.save.bond > bond);
+    assert.equal(w.hearthDone, true);
+    assert.ok(w.toasts.some((t) => t.text.includes("火边坐了一会儿")));
+  });
+
+  it("a dying torch goes out and leaves the hand empty", () => {
+    const w = new World("BURNT");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.held = "torch:ready:100";
+    p.torch = 0.05;
+    w.tick(0.1);
+    assert.equal(p.torch, 0);
+    assert.equal(p.held, "");
+    assert.ok(w.toasts.some((t) => t.text.includes("燃尽")));
+  });
+
+  it("disconnect keeps the body; reconnect sits back down in the same seat", () => {
+    const w = new World("REJOIN");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    assert.ok(a);
+    a.x = 333;
+    a.y = 222;
+    a.zone = "wild";
+    a.hunger = 61;
+    w.markAway("a");
+    const sb = w.snapshot("b");
+    assert.equal(sb.partner?.online, false);
+    assert.equal(w.present().length, 1);
+    const hung = a.hunger;
+    w.tick(2);
+    assert.equal(a.hunger, hung);
+    assert.equal(w.reclaim("阿左", "left"), "a");
+    w.markBack("a");
+    assert.equal(a.x, 333);
+    assert.equal(a.zone, "wild");
+    assert.equal(w.snapshot("b").partner?.online, true);
+    assert.equal(w.present().length, 2);
+  });
+
+  it("an evening loop can starve, get bitten, cook at a fire, and pass a dish", () => {
+    const w = new World("NIGHT");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    a.hunger = 40;
+    w.clock = 0.2;
+    w.tick(8);
+    assert.ok(a.hunger < 40);
+    w.wildMap = buildMap(generateWild(11), "wild");
+    const fire = w.wildMap.find("K")[0];
+    assert.ok(fire);
+    w.fires.set(`${fire.x},${fire.y}`, 40);
+    const stand = tileCenter(fire.x, fire.y + 1);
+    a.zone = "wild";
+    a.x = stand.x;
+    a.y = stand.y;
+    a.facing = 0;
+    a.held = "meat:raw:100";
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.ok(a.held.includes(":cooked"));
+    a.hp = 20;
+    a.held = "";
+    a.torch = 0;
+    w.clock = 0.9;
+    w.howled = true;
+    w.fires.clear();
+    w.tick(3);
+    assert.ok(a.hp < 20);
+    w.rushed = true;
+    a.zone = "kitchen";
+    b.zone = "kitchen";
+    const floor = tileCenter(4, 5);
+    a.x = floor.x;
+    a.y = floor.y;
+    b.x = floor.x + 120;
+    b.y = floor.y;
+    a.facing = 1;
+    a.held = "dish:herb-tea";
+    b.held = "";
+    a.cool = 0;
+    w.setInput("a", { x: 0, y: 0, action: false, held: false, ping: false });
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(b.held, "dish:herb-tea");
   });
 
   it("shouting puts a ping pulse on the actor snap", () => {

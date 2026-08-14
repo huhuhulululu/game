@@ -56,12 +56,34 @@ wss.on("connection", (ws) => {
     if (msg.t === "hello") {
       const room = (msg.room || code()).toUpperCase();
       const rec = roomOf(room);
-      if (rec.clients.size >= 2) {
+      const name = msg.name || "过路人";
+      const taken = rec.world.reclaim(name, msg.prefer);
+      if (taken) {
+        for (const [oldWs, id] of rec.clients) {
+          if (id !== taken) continue;
+          rec.clients.delete(oldWs);
+          try {
+            oldWs.close();
+          } catch {
+            /* seat stolen by reconnect */
+          }
+        }
+        rec.clients.set(ws, taken);
+        rec.world.markBack(taken);
+        joined = { room, id: taken };
+        rec.idle = 0;
+        rec.world.dirty = true;
+        const seat = rec.world.players.get(taken);
+        ws.send(JSON.stringify({ t: "joined", side: seat?.side ?? "left", room }));
+        broadcast(rec, true);
+        return;
+      }
+      if (rec.world.players.size >= 2 || rec.clients.size >= 2) {
         ws.send(JSON.stringify({ t: "err", text: "这间山谷已经有两个人了" }));
         return;
       }
       const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-      const side = rec.world.addPlayer(id, msg.name || "过路人", msg.prefer);
+      const side = rec.world.addPlayer(id, name, msg.prefer);
       rec.clients.set(ws, id);
       joined = { room, id };
       rec.world.dirty = true;
@@ -73,15 +95,16 @@ wss.on("connection", (ws) => {
     const rec = rooms.get(joined.room);
     if (!rec) return;
     if (msg.t === "input") rec.world.setInput(joined.id, msg);
-    if (msg.t === "sleep") rec.world.sleep();
+    if (msg.t === "sleep") rec.world.sleep(joined.id);
     if (msg.t === "take") rec.world.takeItem(msg.id, joined.id);
   });
   ws.on("close", () => {
     if (!joined) return;
     const rec = rooms.get(joined.room);
     if (!rec) return;
-    rec.world.removePlayer(joined.id);
+    if (!rec.clients.has(ws)) return;
     rec.clients.delete(ws);
+    rec.world.markAway(joined.id);
     if (rec.clients.size === 0) rec.idle = Date.now();
     else broadcast(rec, true);
   });

@@ -40,7 +40,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         else if (top.includes("咬") || top.includes("倒")) ctx.audio.tone("hit");
         else if (top.includes("上了") || top.includes("出锅") || top.includes("写入")) ctx.audio.tone("serve");
         else if (top.includes("糊") || top.includes("堂口") || top.includes("烤")) ctx.audio.tone("sizzle");
-        else if (top.includes("火") || top.includes("旧营") || top.includes("喊")) ctx.audio.tone("soft");
+        else if (top.includes("火") || top.includes("旧营") || top.includes("喊") || top.includes("躺") || top.includes("雨"))
+          ctx.audio.tone("soft");
         else ctx.audio.tone("drop");
       }
       if (Date.now() - persistAt > 4000) {
@@ -270,7 +271,9 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
             ? " · " + compass(snap.partnerAt.x - snap.youAt.x, snap.partnerAt.y - snap.youAt.y)
             : ""
         }`
-      : "等另一部手机进来";
+      : partner?.name && partner.name !== "还没来"
+        ? `${partner.name} 断线了，人还在原地`
+        : "等另一部手机进来";
     hud.innerHTML = `
       <div class="live-top">
         <div>
