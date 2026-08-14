@@ -36,6 +36,8 @@ export const MONSTERS: Record<string, MonsterDef> = {
   shadow: { id: "shadow", name: "长影", hp: 22, atk: 5, speed: 32, xp: 7, hue: "#3a3344" },
   lantern: { id: "lantern", name: "提灯", hp: 28, atk: 6, speed: 24, xp: 12, hue: "#d4a24a" },
   twin: { id: "twin", name: "双生影", hp: 36, atk: 7, speed: 34, xp: 16, hue: "#8a3a16" },
+  silk: { id: "silk", name: "丝巢虫", hp: 14, atk: 4, speed: 40, xp: 5, hue: "#5a3a28" },
+  marsh: { id: "marsh", name: "沼沫", hp: 18, atk: 3, speed: 22, xp: 5, hue: "#4a5a3a" },
 };
 
 export type Encounter = "empty" | "pack" | "ambush" | "elite" | "vein" | "shrine";

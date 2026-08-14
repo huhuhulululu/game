@@ -13,8 +13,8 @@ import { emptySave } from "../game/save";
 import { CUSTOMERS, ENCOUNTERS, FISH, MONSTERS } from "../game/tables";
 import { rollWeather, weatherById } from "../game/weather";
 import type { SaveData, Skills, Zone } from "../game/types";
-import { KITCHEN, TILE, VALLEY, buildMap, mineTemplate, tileCenter, toTile, type GridMap } from "../world/maps";
-import { generateWild, packFog, tileKey } from "../world/wild";
+import { KITCHEN, TILE, VALLEY, buildMap, mineTemplate, replaceTile, tileCenter, toTile, type GridMap } from "../world/maps";
+import { biomeName, generateWild, packFog, tileKey } from "../world/wild";
 import type { ActorSnap, InputState, WorldSnap } from "./net";
 
 const DIRS = [
@@ -219,7 +219,13 @@ export class World {
       potReady: this.potReady ? potById(this.potReady).name : this.potCook > 0 ? "在煮" : "",
       plots: this.save.plots,
       partner: other
-        ? { name: other.name, zone: other.zone, online: true }
+        ? {
+            name: other.name,
+            zone: other.zone,
+            online: true,
+            biome: other.zone === "wild" ? this.biomeAt(other) : undefined,
+            ping: other.ping,
+          }
         : { name: you?.side === "left" ? this.save.rightName || "还没来" : this.save.leftName || "还没来", zone: "valley", online: false },
       zone,
       tiles: this.mapFor(zone).rows,
@@ -227,9 +233,15 @@ export class World {
       encounter: this.encounter,
       clock: this.clock,
       night: this.isNight(),
+      dusk: this.clock > 0.5 && !this.isNight(),
       lit: you ? this.isLit(you) : true,
       rush: this.rushed,
       revealed: you ? this.revealedList(you.side, zone) : [],
+      visible: you ? this.visibleList(you) : [],
+      fires: this.fireKeys(zone),
+      youAt: you ? { x: you.x, y: you.y } : { x: 0, y: 0 },
+      partnerAt: other ? { x: other.x, y: other.y, zone: other.zone } : null,
+      biome: you && zone === "wild" ? this.biomeAt(you) : "",
       actors: [...this.players.values()]
         .filter((p) => p.zone === zone)
         .map((p) => this.actorSnap(p)),
@@ -391,9 +403,12 @@ export class World {
       if (cell === "leave") return "回山谷";
       if (cell === "dock") return "下竿";
       if (cell === "bush") return "采";
+      if (cell === "tree") return "砍";
+      if (cell === "rock") return "砸";
       if (cell === "fire") return "添火";
       if (cell === "relic") return "翻残骸";
       if (cell === "hole") return "钻洞";
+      if (cell === "nest") return "挥";
       return this.isNight() && !this.isLit(p) ? "太暗了" : "";
     }
     return "";
@@ -450,6 +465,8 @@ export class World {
       if (cell === "leave") return this.leaveToValley(p);
       if (cell === "dock") return this.cast(p);
       if (cell === "bush") return this.forage(p, chance(0.35, this.rand) ? "mushroom" : "herb", 0.75);
+      if (cell === "tree") return this.chopTree(p, f.x, f.y);
+      if (cell === "rock") return this.crackRock(p, f.x, f.y);
       if (cell === "fire") return this.stoke(p, f.x, f.y);
       if (cell === "relic") return this.relic(p, f.x, f.y);
       if (cell === "hole") return this.hole(p);
@@ -627,20 +644,13 @@ export class World {
     const luck = this.power(p).luck;
     this.giveLoot(p, "ore_node", luck, false);
     this.toast(`${p.name} 挖了一处矿`);
-    const rows = this.mineMap?.rows;
-    if (rows) {
-      const next = rows.map((r, iy) => (iy === y ? r.slice(0, x) + "." + r.slice(x + 1) : r));
-      this.mineMap = buildMap(next, "mine");
-    }
+    if (this.mineMap) this.mineMap = replaceTile(this.mineMap, "mine", x, y, ".");
   }
 
   private chest(p: Actor, x: number, y: number): void {
     this.giveLoot(p, "chest", this.power(p).luck, this.near(p, this.other(p)));
     this.toast(`${p.name} 开了匣`);
-    if (this.mineMap) {
-      const next = this.mineMap.rows.map((r, iy) => (iy === y ? r.slice(0, x) + "." + r.slice(x + 1) : r));
-      this.mineMap = buildMap(next, "mine");
-    }
+    if (this.mineMap) this.mineMap = replaceTile(this.mineMap, "mine", x, y, ".");
   }
 
   private swing(p: Actor): void {
@@ -985,6 +995,61 @@ export class World {
     return packFog(new Set(out));
   }
 
+  private visibleList(p: Actor): number[] {
+    const map = this.mapFor(p.zone);
+    const t = toTile(p.x, p.y);
+    const r = this.visionRadius(p);
+    const out: number[] = [];
+    for (let y = t.y - r; y <= t.y + r; y++) {
+      for (let x = t.x - r; x <= t.x + r; x++) {
+        if (x < 0 || y < 0 || x >= map.w || y >= map.h) continue;
+        if (Math.hypot(x - t.x, y - t.y) <= r) out.push(tileKey(x, y, map.w));
+      }
+    }
+    return packFog(new Set(out));
+  }
+
+  private visionRadius(p: Actor): number {
+    if (p.zone !== "wild") return 8;
+    if (this.isNight() && !this.isLit(p)) return 2;
+    if (this.isNight()) return 4;
+    return 5;
+  }
+
+  private fireKeys(zone: Zone): number[] {
+    if (zone !== "wild" || !this.wildMap) return [];
+    const out: number[] = [];
+    for (const key of this.fires.keys()) {
+      const [x, y] = key.split(",").map(Number);
+      out.push(tileKey(x, y, this.wildMap.w));
+    }
+    return out;
+  }
+
+  private biomeAt(p: Actor): string {
+    const map = this.mapFor(p.zone);
+    const t = toTile(p.x, p.y);
+    return biomeName(map.rows[t.y]?.[t.x] ?? ".");
+  }
+
+  private paintWild(x: number, y: number, ch: string): void {
+    if (!this.wildMap) return;
+    this.wildMap = replaceTile(this.wildMap, "wild", x, y, ch);
+  }
+
+  private chopTree(p: Actor, x: number, y: number): void {
+    addToBag(this.save.bag, "wood", chance(0.35, this.rand) ? 2 : 1);
+    const nearSavanna = [this.wildMap?.rows[y]?.[x - 1], this.wildMap?.rows[y]?.[x + 1]].includes("s");
+    this.paintWild(x, y, nearSavanna ? "s" : ".");
+    this.toast(`${p.name} 砍下一截青木`);
+  }
+
+  private crackRock(p: Actor, x: number, y: number): void {
+    this.giveLoot(p, "ore_node", this.power(p).luck, this.near(p, this.other(p)));
+    this.paintWild(x, y, "^");
+    this.toast(`${p.name} 砸开一块石头`);
+  }
+
   private keepGear(p: Actor, gear: GearInst): void {
     this.save.gear.push(gear);
     const f = this.fighter(p);
@@ -1026,14 +1091,22 @@ export class World {
   }
 
   private tickFog(): void {
-    for (const p of this.players.values()) {
+    const pair = [...this.players.values()];
+    const share = pair.length === 2 && this.near(pair[0], pair[1]);
+    for (const p of pair) {
       const map = this.mapFor(p.zone);
       const t = toTile(p.x, p.y);
-      const r = 5;
+      const r = this.visionRadius(p);
       for (let y = t.y - r; y <= t.y + r; y++) {
         for (let x = t.x - r; x <= t.x + r; x++) {
           if (x < 0 || y < 0 || x >= map.w || y >= map.h) continue;
-          if (Math.hypot(x - t.x, y - t.y) <= r) this.explored[p.side].add(`${p.zone}:${x},${y}`);
+          if (Math.hypot(x - t.x, y - t.y) > r) continue;
+          const key = `${p.zone}:${x},${y}`;
+          this.explored[p.side].add(key);
+          if (share) {
+            const o = pair.find((q) => q.id !== p.id);
+            if (o) this.explored[o.side].add(key);
+          }
         }
       }
     }
@@ -1084,29 +1157,41 @@ export class World {
     }
   }
 
+  private spawnWild(kind: string, x: number, y: number): void {
+    const def = MONSTERS[kind] ?? MONSTERS.slime;
+    const c = tileCenter(x, y);
+    this.enemies.push({
+      x: c.x,
+      y: c.y,
+      hp: def.hp,
+      maxHp: def.hp,
+      atk: def.atk,
+      speed: def.speed,
+      xp: def.xp,
+      hue: def.hue,
+      name: def.name,
+      kind,
+      zone: "wild",
+    });
+  }
+
   private enterWild(p: Actor): void {
     if (!this.wildMap) {
       this.wildMap = buildMap(generateWild(this.room.split("").reduce((s, c) => s + c.charCodeAt(0), 17)), "wild");
       this.enemies = this.enemies.filter((e) => e.zone !== "wild");
       for (const s of this.wildMap.find("e")) {
-        const def = MONSTERS.slime;
-        const c = tileCenter(s.x, s.y);
-        this.enemies.push({
-          x: c.x,
-          y: c.y,
-          hp: def.hp,
-          maxHp: def.hp,
-          atk: def.atk,
-          speed: def.speed,
-          xp: def.xp,
-          hue: "#4a5a3a",
-          name: "沼沫",
-          kind: "slime",
-          zone: "wild",
-        });
+        const nbs = [
+          this.wildMap.rows[s.y]?.[s.x - 1],
+          this.wildMap.rows[s.y]?.[s.x + 1],
+          this.wildMap.rows[s.y - 1]?.[s.x],
+          this.wildMap.rows[s.y + 1]?.[s.x],
+        ];
+        const kind = nbs.some((c) => c === "m" || c === "n") ? "marsh" : "shadow";
+        this.spawnWild(kind, s.x, s.y);
       }
+      for (const s of this.wildMap.find("n")) this.spawnWild("silk", s.x, s.y);
     }
-    const leave = this.wildMap.find("L")[0] ?? { x: 21, y: 22 };
+    const leave = this.wildMap.find("L")[0] ?? { x: 24, y: 27 };
     const c = tileCenter(leave.x, leave.y - 1);
     p.zone = "wild";
     p.x = c.x;

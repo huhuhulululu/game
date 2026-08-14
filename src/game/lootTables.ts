@@ -97,6 +97,32 @@ export const LOOT_TABLES: Record<string, LootTable> = {
       },
     ],
   },
+  silk: {
+    pools: [
+      {
+        rolls: 1,
+        bonus_rolls: 0.08,
+        entries: [
+          { type: "item", name: "morsel", weight: 18 },
+          { type: "item", name: "herb", weight: 12 },
+          { type: "empty", weight: 10 },
+        ],
+      },
+    ],
+  },
+  marsh: {
+    pools: [
+      {
+        rolls: 1,
+        bonus_rolls: 0.1,
+        entries: [
+          { type: "item", name: "mushroom", weight: 22, functions: [{ function: "set_count", count: { min: 1, max: 2 } }] },
+          { type: "item", name: "herb", weight: 10 },
+          { type: "empty", weight: 8 },
+        ],
+      },
+    ],
+  },
   rain_bonus: {
     pools: [
       {

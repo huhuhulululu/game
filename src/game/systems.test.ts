@@ -9,6 +9,7 @@ import { rollLootTable } from "./loot";
 import { LOOT_TABLES } from "./lootTables";
 import { pickWeighted } from "./rng";
 import { World } from "../sim/world";
+import { buildMap, tileCenter } from "../world/maps";
 import { generateWild } from "../world/wild";
 
 describe("living systems", () => {
@@ -87,11 +88,41 @@ describe("living systems", () => {
     assert.ok(Array.isArray(out));
   });
 
-  it("wild map is a black-start island with an exit and set pieces", () => {
+  it("wild map is a black-start island with biomes and set pieces", () => {
     const rows = generateWild(99);
     assert.ok(rows.length > 10);
-    assert.ok(rows.some((r) => r.includes("L")));
-    assert.ok(rows.some((r) => r.includes("K")));
-    assert.ok(rows.some((r) => r.includes("R")));
+    const all = rows.join("");
+    assert.ok(all.includes("L"));
+    assert.ok(all.includes("K"));
+    assert.ok(all.includes("R"));
+    assert.ok(all.includes("t"));
+    assert.ok(all.includes("m"));
+    assert.ok(all.includes("s"));
+    assert.ok(all.includes("^"));
+  });
+
+  it("walking the wild fills fog; partners share what they see when near", () => {
+    const w = new World("WILD");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    w.wildMap = buildMap(generateWild(7), "wild");
+    const leave = w.wildMap.find("L")[0];
+    const c = tileCenter(leave.x, leave.y - 1);
+    a.zone = "wild";
+    a.x = c.x;
+    a.y = c.y;
+    b.zone = "wild";
+    b.x = c.x + 20;
+    b.y = c.y;
+    w.tick(0.05);
+    const sa = w.snapshot("a");
+    const sb = w.snapshot("b");
+    assert.ok(sa.revealed.length > 8);
+    assert.ok(sa.visible.length > 0);
+    assert.equal(sa.zone, "wild");
+    assert.ok(sa.revealed.length === sb.revealed.length);
   });
 });

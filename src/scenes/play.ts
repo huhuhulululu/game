@@ -3,11 +3,13 @@ import { connectRoom } from "../net/client";
 import type { WorldSnap } from "../sim/net";
 import { consume, mountStick } from "../ui/stick";
 import { TILE } from "../world/maps";
+import { compass } from "../world/wild";
 import { el } from "../ui/dom";
 
 const CELL_FILL: Record<string, string> = {
   "#": "#2a1c16",
   T: "#243228",
+  t: "#2a4a30",
   ".": "#3a4a34",
   ",": "#6a5a40",
   "~": "#2a4454",
@@ -36,6 +38,9 @@ const CELL_FILL: Record<string, string> = {
   H: "#1a1010",
   V: "#c9a06a",
   "^": "#4a4038",
+  b: "#5a5248",
+  n: "#3a2018",
+  s: "#6a6a38",
   L: "#c9a06a",
   W: "#f4e7d2",
   X: "#3a2020",
@@ -56,6 +61,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   const room = ctx.roomCode || "HOME";
   let snap: WorldSnap | null = null;
   let cam = { x: 0, y: 0 };
+  let open: "" | "bag" | "book" | "map" = "";
 
   const net = connectRoom(
     room,
@@ -106,18 +112,43 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const ox = w / 2 - cam.x;
     const oy = h / 2 - cam.y - 20;
     const rows = snap.tiles;
+    const mw = rows[0]?.length ?? 1;
     for (let y = 0; y < rows.length; y++) {
       for (let x = 0; x < rows[y].length; x++) {
         const ch = rows[y][x];
-        g.fillStyle = CELL_FILL[ch] ?? (snap.zone === "mine" ? "#2a2430" : "#3d4a36");
+        const key = y * mw + x;
+        let fill = CELL_FILL[ch] ?? (snap.zone === "mine" ? "#2a2430" : "#3d4a36");
         if (snap.zone === "wild") {
-          const seen = snap.revealed.includes(y * rows[0].length + x);
-          if (!seen) g.fillStyle = "#050403";
+          const seen = snap.revealed.includes(key);
+          const vis = snap.visible.includes(key);
+          if (!seen) fill = "#050403";
+          else if (!vis) fill = shade(fill, 0.42);
         }
+        g.fillStyle = fill;
         g.fillRect(ox + x * TILE, oy + y * TILE, TILE - 1, TILE - 1);
       }
     }
+    if (snap.zone === "wild") {
+      for (const key of snap.fires) {
+        const x = key % mw;
+        const y = Math.floor(key / mw);
+        const cx = ox + x * TILE + TILE / 2;
+        const cy = oy + y * TILE + TILE / 2;
+        const glow = g.createRadialGradient(cx, cy, 4, cx, cy, 54);
+        glow.addColorStop(0, "rgba(232,140,60,0.55)");
+        glow.addColorStop(1, "rgba(232,140,60,0)");
+        g.fillStyle = glow;
+        g.beginPath();
+        g.arc(cx, cy, 54, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
     for (const e of snap.enemies) {
+      if (snap.zone === "wild") {
+        const tx = Math.floor(e.x / TILE);
+        const ty = Math.floor(e.y / TILE);
+        if (!snap.visible.includes(ty * mw + tx)) continue;
+      }
       g.fillStyle = e.hue;
       g.beginPath();
       g.arc(ox + e.x, oy + e.y, 11, 0, Math.PI * 2);
@@ -143,8 +174,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     if (snap.weather.id === "rain" || snap.weather.id === "storm") {
       g.strokeStyle = "rgba(200,220,230,0.35)";
       for (let i = 0; i < 40; i++) {
-        const x = ((i * 47 + Date.now() / 8) % w);
-        const y = ((i * 89 + Date.now() / 5) % h);
+        const x = (i * 47 + Date.now() / 8) % w;
+        const y = (i * 89 + Date.now() / 5) % h;
         g.beginPath();
         g.moveTo(x, y);
         g.lineTo(x - 4, y + 14);
@@ -155,15 +186,59 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       g.fillStyle = "rgba(210,210,200,0.12)";
       g.fillRect(0, 0, w, h);
     }
+    if (snap.dusk) {
+      g.fillStyle = "rgba(80,40,16,0.18)";
+      g.fillRect(0, 0, w, h);
+    }
     if (snap.night) {
       g.fillStyle = snap.lit ? "rgba(8,6,12,0.28)" : "rgba(4,2,8,0.62)";
       g.fillRect(0, 0, w, h);
     }
   };
 
+  const paintAtlas = () => {
+    const atlas = hud.querySelector("#atlas") as HTMLCanvasElement | null;
+    if (!atlas || !snap || snap.zone !== "wild") return;
+    const rows = snap.tiles;
+    const mw = rows[0]?.length ?? 1;
+    const mh = rows.length;
+    const cell = Math.max(3, Math.min(6, Math.floor(220 / mw)));
+    atlas.width = mw * cell;
+    atlas.height = mh * cell;
+    const g = atlas.getContext("2d");
+    if (!g) return;
+    g.fillStyle = "#050403";
+    g.fillRect(0, 0, atlas.width, atlas.height);
+    for (let y = 0; y < mh; y++) {
+      for (let x = 0; x < mw; x++) {
+        const key = y * mw + x;
+        if (!snap.revealed.includes(key)) continue;
+        const ch = rows[y][x];
+        let fill = CELL_FILL[ch] ?? "#3d4a36";
+        if (!snap.visible.includes(key)) fill = shade(fill, 0.5);
+        if (snap.fires.includes(key)) fill = "#e08a4f";
+        g.fillStyle = fill;
+        g.fillRect(x * cell, y * cell, cell, cell);
+      }
+    }
+    const you = snap.youAt;
+    g.fillStyle = "#c45c26";
+    g.fillRect(Math.floor(you.x / TILE) * cell - 1, Math.floor(you.y / TILE) * cell - 1, cell + 2, cell + 2);
+    if (snap.partnerAt && snap.partnerAt.zone === "wild") {
+      g.fillStyle = snap.partner?.ping ? "#f4e7d2" : "#3f6d5c";
+      g.fillRect(
+        Math.floor(snap.partnerAt.x / TILE) * cell - 1,
+        Math.floor(snap.partnerAt.y / TILE) * cell - 1,
+        cell + 2,
+        cell + 2,
+      );
+    }
+  };
+
   const paintHud = () => {
     if (!snap) return;
     const partner = snap.partner;
+    const phase = snap.night ? "夜" : snap.dusk ? "黄昏" : "昼";
     const place =
       snap.zone === "mine"
         ? `矿 ${snap.floor}层 · ${snap.encounter}`
@@ -172,19 +247,24 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
             ? "厨房 · 堂口热"
             : "厨房"
           : snap.zone === "wild"
-            ? "荒野"
+            ? `荒野${snap.biome ? " · " + snap.biome : ""}`
             : "山谷";
+    const partnerLine = partner?.online
+      ? `${partner.name} 在${placeOf(partner.zone)}${partner.biome ? "·" + partner.biome : ""}${
+          snap.zone === "wild" && snap.partnerAt?.zone === "wild"
+            ? " · " + compass(snap.partnerAt.x - snap.youAt.x, snap.partnerAt.y - snap.youAt.y)
+            : ""
+        }`
+      : "等另一部手机进来";
     hud.innerHTML = `
       <div class="live-top">
         <div>
           <b>${place}</b>
           <span>房间 ${snap.room}</span>
         </div>
-        <div class="live-meta">${snap.night ? "夜" : "昼"} · ${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
+        <div class="live-meta">${phase} · ${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
       </div>
-      <div class="partner ${partner?.online ? "on" : ""}">${
-        partner?.online ? `${partner.name} 在${placeOf(partner.zone)}` : "等另一部手机进来"
-      }</div>
+      <div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>
       ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
       ${snap.pot.length || snap.potReady ? `<div class="fortune-chip">锅：${snap.potReady || snap.pot.join("、") || "空"}</div>` : ""}
       <div class="prompt">${snap.prompt}</div>
@@ -202,31 +282,34 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       <button class="bag-toggle" type="button" id="bag-btn">袋</button>
       <button class="bag-toggle book-toggle" type="button" id="book-btn">菜单</button>
       <button class="bag-toggle map-toggle" type="button" id="map-btn">图</button>
-      <div class="bag-panel hidden" id="bag">${
+      <div class="bag-panel ${open === "bag" ? "" : "hidden"}" id="bag">${
         snap.bag.map((s) => `<button type="button" data-take="${s.id}">${s.name}×${s.n}</button>`).join("") || "空"
       }${snap.gear.length ? `<span>${snap.gear.join(" · ")}</span>` : ""}</div>
-      <div class="bag-panel hidden" id="book">${snap.cookbook.map((n) => `<span>${n}</span>`).join("") || "还没写出第一道"}</div>
-      <div class="bag-panel hidden" id="map">${
-        snap.zone === "wild"
-          ? `已照亮 ${snap.revealed.length} 格 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}`
-          : "出谷之后，地图才会一点点亮起来。"
+      <div class="bag-panel ${open === "book" ? "" : "hidden"}" id="book">${
+        snap.cookbook.map((n) => `<span>${n}</span>`).join("") || "还没写出第一道"
       }</div>
+      <div class="bag-panel map-panel ${open === "map" ? "" : "hidden"}" id="map">
+        ${
+          snap.zone === "wild"
+            ? `<p>已照亮 ${snap.revealed.length} 格 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}</p><canvas id="atlas"></canvas>`
+            : "<p>出谷之后，地图才会一点点亮起来。两人走近，会把看见的路写进彼此的图里。</p>"
+        }
+      </div>
     `;
-    hud.querySelector("#bag-btn")?.addEventListener("click", () => {
-      hud.querySelector("#bag")?.classList.toggle("hidden");
-    });
-    hud.querySelector("#book-btn")?.addEventListener("click", () => {
-      hud.querySelector("#book")?.classList.toggle("hidden");
-    });
-    hud.querySelector("#map-btn")?.addEventListener("click", () => {
-      hud.querySelector("#map")?.classList.toggle("hidden");
-    });
+    const toggle = (id: "bag" | "book" | "map") => {
+      open = open === id ? "" : id;
+      paintHud();
+    };
+    hud.querySelector("#bag-btn")?.addEventListener("click", () => toggle("bag"));
+    hud.querySelector("#book-btn")?.addEventListener("click", () => toggle("book"));
+    hud.querySelector("#map-btn")?.addEventListener("click", () => toggle("map"));
     hud.querySelectorAll("[data-take]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = (btn as HTMLElement).dataset.take;
         if (id) net.send({ t: "take", id });
       });
     });
+    paintAtlas();
   };
 
   let lastHud = "";
@@ -253,14 +336,20 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           snap.pot,
           snap.cookbook,
           snap.night,
+          snap.dusk,
           snap.lit,
           snap.rush,
           snap.revealed.length,
+          snap.visible.length,
+          snap.biome,
+          snap.fires.length,
         ])
       : "";
     if (key !== lastHud) {
       lastHud = key;
       paintHud();
+    } else if (open === "map") {
+      paintAtlas();
     }
     raf = requestAnimationFrame(loop);
   };
@@ -279,4 +368,12 @@ function placeOf(z: string): string {
   if (z === "kitchen") return "厨房";
   if (z === "wild") return "荒野";
   return "山谷";
+}
+
+function shade(hex: string, amt: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.floor(((n >> 16) & 255) * amt);
+  const g = Math.floor(((n >> 8) & 255) * amt);
+  const b = Math.floor((n & 255) * amt);
+  return `rgb(${r},${g},${b})`;
 }

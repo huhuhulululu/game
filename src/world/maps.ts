@@ -110,7 +110,11 @@ export type Cell =
   | "hole"
   | "hill"
   | "gate"
-  | "spawn";
+  | "spawn"
+  | "tree"
+  | "rock"
+  | "nest"
+  | "savanna";
 
 const VALLEY_KEY: Record<string, Cell> = {
   "#": "wall",
@@ -167,6 +171,10 @@ const WILD_KEY: Record<string, Cell> = {
   H: "hole",
   L: "leave",
   e: "spawn",
+  t: "tree",
+  b: "rock",
+  n: "nest",
+  s: "savanna",
 };
 
 const MINE_KEY: Record<string, Cell> = {
@@ -225,6 +233,10 @@ export function buildMap(rows: string[], kind: "valley" | "kitchen" | "mine" | "
     "hole",
     "hill",
     "gate",
+    "tree",
+    "rock",
+    "nest",
+    "savanna",
   ]);
   return {
     rows,
@@ -249,6 +261,11 @@ export function buildMap(rows: string[], kind: "valley" | "kitchen" | "mine" | "
     },
     pantryId: (x, y) => PANTRY_AT[rows[y]?.[x]] ?? null,
   };
+}
+
+export function replaceTile(map: GridMap, kind: "valley" | "kitchen" | "mine" | "wild", x: number, y: number, ch: string): GridMap {
+  const next = map.rows.map((r, iy) => (iy === y ? r.slice(0, x) + ch + r.slice(x + 1) : r));
+  return buildMap(next, kind);
 }
 
 export function tileCenter(tx: number, ty: number): { x: number; y: number } {

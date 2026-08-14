@@ -228,6 +228,26 @@ button {
   display: none;
 }
 
+.map-panel {
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: min(92vw, 280px);
+}
+
+.map-panel p {
+  margin: 0 0 8px;
+  color: var(--gold-soft);
+  line-height: 1.5;
+}
+
+.map-panel canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  border: 1px solid rgba(201, 160, 106, 0.25);
+}
+
 .scene {
   position: absolute;
   inset: 0;

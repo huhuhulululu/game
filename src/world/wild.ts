@@ -1,9 +1,14 @@
 import { mulberry } from "../game/rng";
 
+export const WILD_W = 48;
+export const WILD_H = 32;
+
+export type WildBiome = "forest" | "grass" | "marsh" | "savanna" | "rocky" | "water" | "road";
+
 /** Don't Starve-like surface: biomes, road, set pieces. Seeded per room. */
 export function generateWild(seed: number): string[] {
-  const w = 42;
-  const h = 28;
+  const w = WILD_W;
+  const h = WILD_H;
   const rand = mulberry(seed >>> 0);
   const g: string[][] = Array.from({ length: h }, () => Array.from({ length: w }, () => "."));
 
@@ -16,54 +21,98 @@ export function generateWild(seed: number): string[] {
     g[y][w - 1] = "#";
   }
 
-  const blob = (cx: number, cy: number, r: number, ch: string, p: number) => {
-    for (let y = 1; y < h - 1; y++) {
-      for (let x = 1; x < w - 1; x++) {
-        const d = Math.hypot(x - cx, y - cy);
-        if (d < r && rand() < p) g[y][x] = ch;
+  const sites: { x: number; y: number; b: WildBiome }[] = [
+    { x: 11 + Math.floor(rand() * 5), y: 8 + Math.floor(rand() * 4), b: "forest" },
+    { x: 36 + Math.floor(rand() * 4), y: 8 + Math.floor(rand() * 3), b: "forest" },
+    { x: 38 + Math.floor(rand() * 3), y: 21 + Math.floor(rand() * 3), b: "marsh" },
+    { x: 8 + Math.floor(rand() * 4), y: 20 + Math.floor(rand() * 3), b: "marsh" },
+    { x: 24 + Math.floor(rand() * 3), y: 5 + Math.floor(rand() * 3), b: "rocky" },
+    { x: 22 + Math.floor(rand() * 4), y: 14 + Math.floor(rand() * 3), b: "savanna" },
+    { x: 24, y: 27, b: "water" },
+  ];
+
+  const nearest = (x: number, y: number): WildBiome => {
+    let best: WildBiome = "grass";
+    let d0 = 1e9;
+    for (const s of sites) {
+      const d = Math.hypot(x - s.x, y - s.y);
+      if (d < d0) {
+        d0 = d;
+        best = s.b;
       }
     }
+    return best;
   };
 
-  blob(10, 8, 7, "T", 0.72);
-  blob(30, 9, 6, "T", 0.65);
-  blob(32, 20, 6, "m", 0.7);
-  blob(12, 20, 5, "m", 0.55);
-  blob(22, 6, 4, "^", 0.5);
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const b = nearest(x, y);
+      if (b === "forest") g[y][x] = rand() < 0.22 ? "T" : rand() < 0.45 ? "t" : ".";
+      else if (b === "marsh") g[y][x] = rand() < 0.72 ? "m" : ".";
+      else if (b === "savanna") g[y][x] = "s";
+      else if (b === "rocky") g[y][x] = rand() < 0.55 ? "^" : ".";
+      else if (b === "water") g[y][x] = rand() < 0.8 ? "~" : ".";
+    }
+  }
 
   for (let x = 2; x < w - 2; x++) {
-    if (rand() < 0.55) g[h - 3][x] = "~";
-    if (rand() < 0.35) g[h - 4][x] = "~";
+    if (rand() < 0.7) g[h - 3][x] = "~";
+    if (rand() < 0.45) g[h - 4][x] = "~";
   }
 
-  const roadX = 21;
+  const roadX = 24;
   for (let y = h - 5; y >= 3; y--) {
     g[y][roadX] = ",";
-    if (rand() < 0.2) g[y][roadX + (rand() < 0.5 ? -1 : 1)] = ",";
+    if (rand() < 0.28) g[y][roadX + (rand() < 0.5 ? -1 : 1)] = ",";
   }
 
-  const place = (ch: string, n: number) => {
+  const sprinkle = (ok: (ch: string) => boolean, ch: string, n: number) => {
     let left = n;
-    let guard = 80;
+    let guard = 200;
     while (left > 0 && guard-- > 0) {
       const x = 2 + Math.floor(rand() * (w - 4));
       const y = 2 + Math.floor(rand() * (h - 6));
-      if (g[y][x] === "." || g[y][x] === "T" || g[y][x] === "m") {
+      if (ok(g[y][x])) {
         g[y][x] = ch;
         left -= 1;
       }
     }
   };
 
-  place("F", 10);
-  place("K", 2);
-  place("R", 3);
-  place("H", 2);
-  place("e", 5);
+  sprinkle((c) => c === "." || c === "s", "F", 16);
+  sprinkle((c) => c === "^" || c === ".", "b", 8);
+  sprinkle((c) => c === "m" || c === "T" || c === "t", "n", 5);
+  sprinkle((c) => c === "." || c === "s" || c === "m", "K", 3);
+  sprinkle((c) => c === "." || c === "s" || c === "^", "R", 4);
+  sprinkle((c) => c === "." || c === "m" || c === "s", "H", 2);
+  sprinkle((c) => c === "m" || c === "." || c === "s", "e", 7);
 
   g[h - 5][roadX] = "L";
   g[h - 4][roadX] = "D";
+  g[h - 5][roadX - 1] = ",";
+  g[h - 5][roadX + 1] = ",";
   return g.map((row) => row.join(""));
+}
+
+export function biomeOf(ch: string): WildBiome {
+  if (ch === "T" || ch === "t") return "forest";
+  if (ch === "m" || ch === "n") return "marsh";
+  if (ch === "s") return "savanna";
+  if (ch === "^" || ch === "b") return "rocky";
+  if (ch === "~") return "water";
+  if (ch === ",") return "road";
+  return "grass";
+}
+
+export function biomeName(ch: string): string {
+  const b = biomeOf(ch);
+  if (b === "forest") return "林";
+  if (b === "marsh") return "沼";
+  if (b === "savanna") return "荒草";
+  if (b === "rocky") return "石丘";
+  if (b === "water") return "岸";
+  if (b === "road") return "路";
+  return "野地";
 }
 
 export function packFog(set: Set<number>): number[] {
@@ -72,4 +121,17 @@ export function packFog(set: Set<number>): number[] {
 
 export function tileKey(x: number, y: number, w: number): number {
   return y * w + x;
+}
+
+export function compass(dx: number, dy: number): string {
+  const m = Math.hypot(dx, dy);
+  if (m < 48) return "就在身旁";
+  const ax = Math.abs(dx);
+  const ay = Math.abs(dy);
+  if (ax > ay * 1.4) return dx > 0 ? "东边" : "西边";
+  if (ay > ax * 1.4) return dy > 0 ? "南边" : "北边";
+  if (dx > 0 && dy > 0) return "东南";
+  if (dx > 0) return "东北";
+  if (dy > 0) return "西南";
+  return "西北";
 }
