@@ -1,0 +1,10 @@
+{
+  "name": "并肩山谷",
+  "short_name": "并肩",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1b1410",
+  "theme_color": "#1b1410",
+  "start_url": "./",
+  "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

@@ -1,0 +1,96 @@
+import type { Zone } from "../game/types";
+
+export interface InputState {
+  x: number;
+  y: number;
+  action: boolean;
+  held: boolean;
+  ping: boolean;
+}
+
+export interface ActorSnap {
+  id: string;
+  name: string;
+  side: "left" | "right";
+  x: number;
+  y: number;
+  zone: Zone;
+  hp: number;
+  maxHp: number;
+  facing: number;
+  held: string;
+  heldName: string;
+  fishing: string;
+  hunger: number;
+}
+
+export interface EnemySnap {
+  x: number;
+  y: number;
+  hp: number;
+  maxHp: number;
+  hue: string;
+  name: string;
+}
+
+export interface OrderSnap {
+  name: string;
+  recipe: string;
+  left: number;
+}
+
+export interface WorldSnap {
+  you: string;
+  room: string;
+  day: number;
+  gold: number;
+  bond: number;
+  fortune: { title: string; life: string; tilt: string } | null;
+  weather: { id: string; name: string };
+  waitingFortune: ("left" | "right")[];
+  bag: { id: string; n: number; name: string }[];
+  gear: string[];
+  cookbook: string[];
+  pot: string[];
+  potReady: string;
+  plots: { seed?: string; stage: number }[];
+  partner: { name: string; zone: Zone; online: boolean; biome?: string; ping?: number } | null;
+  zone: Zone;
+  tiles: string[];
+  floor: number;
+  encounter: string;
+  clock: number;
+  night: boolean;
+  dusk: boolean;
+  lit: boolean;
+  rush: boolean;
+  revealed: number[];
+  visible: number[];
+  fires: number[];
+  youAt: { x: number; y: number };
+  partnerAt: { x: number; y: number; zone: Zone } | null;
+  biome: string;
+  season: string;
+  hp: number;
+  maxHp: number;
+  hunger: number;
+  mapRev: number;
+  full: boolean;
+  actors: ActorSnap[];
+  enemies: EnemySnap[];
+  orders: OrderSnap[];
+  toasts: string[];
+  prompt: string;
+  skills: { fish: number; cook: number; fight: number; forge: number };
+}
+
+export type ClientMsg =
+  | { t: "hello"; room: string; name: string; prefer?: "left" | "right" }
+  | { t: "input"; x: number; y: number; action: boolean; held: boolean; ping: boolean }
+  | { t: "sleep" }
+  | { t: "take"; id: string };
+
+export type ServerMsg =
+  | { t: "joined"; side: "left" | "right"; room: string }
+  | { t: "snap"; snap: WorldSnap }
+  | { t: "err"; text: string };
