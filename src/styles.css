@@ -170,6 +170,12 @@ button {
   max-width: 28rem;
 }
 
+.err {
+  margin-top: 8px;
+  color: #e08a4f;
+  font-size: 13px;
+}
+
 .prompt {
   margin-top: 10px;
   letter-spacing: 0.2em;

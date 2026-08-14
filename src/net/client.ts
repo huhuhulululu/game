@@ -15,6 +15,7 @@ export function mergeSnap(prev: WorldSnap | null, next: WorldSnap): WorldSnap {
     fires: next.full ? next.fires : prev.fires,
     visible: next.visible,
     bag: next.bag,
+    ice: next.ice,
     cookbook: next.cookbook,
     full: false,
   };

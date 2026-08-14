@@ -22,6 +22,7 @@ export interface ActorSnap {
   heldName: string;
   fishing: string;
   hunger: number;
+  torch: boolean;
 }
 
 export interface EnemySnap {
@@ -48,7 +49,8 @@ export interface WorldSnap {
   fortune: { title: string; life: string; tilt: string } | null;
   weather: { id: string; name: string };
   waitingFortune: ("left" | "right")[];
-  bag: { id: string; n: number; name: string }[];
+  bag: { id: string; n: number; name: string; fresh?: number }[];
+  ice: { id: string; n: number; name: string; fresh?: number }[];
   gear: string[];
   cookbook: string[];
   pot: string[];
