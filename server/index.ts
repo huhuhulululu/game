@@ -71,6 +71,7 @@ wss.on("connection", (ws) => {
     if (!rec) return;
     if (msg.t === "input") rec.world.setInput(joined.id, msg);
     if (msg.t === "sleep") rec.world.sleep();
+    if (msg.t === "take") rec.world.takeItem(msg.id, joined.id);
   });
   ws.on("close", () => {
     if (!joined) return;

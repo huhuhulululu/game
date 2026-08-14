@@ -79,7 +79,16 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const g = canvas.getContext("2d");
     if (!g || !snap) return;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const bg = snap.zone === "mine" ? "#120e14" : snap.zone === "kitchen" ? "#1a120e" : "#141810";
+    const bg =
+      snap.zone === "mine"
+        ? "#120e14"
+        : snap.zone === "kitchen"
+          ? "#1a120e"
+          : snap.weather.id === "rain" || snap.weather.id === "storm"
+            ? "#12161c"
+            : snap.weather.id === "fog"
+              ? "#1a1c1a"
+              : "#141810";
     g.fillStyle = bg;
     g.fillRect(0, 0, w, h);
 
@@ -121,6 +130,21 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       g.fillText(a.name, ox + a.x, oy + a.y - 18);
       if (a.held) g.fillText(a.held.split(":")[0], ox + a.x, oy + a.y + 22);
     }
+    if (snap.weather.id === "rain" || snap.weather.id === "storm") {
+      g.strokeStyle = "rgba(200,220,230,0.35)";
+      for (let i = 0; i < 40; i++) {
+        const x = ((i * 47 + Date.now() / 8) % w);
+        const y = ((i * 89 + Date.now() / 5) % h);
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x - 4, y + 14);
+        g.stroke();
+      }
+    }
+    if (snap.weather.id === "fog") {
+      g.fillStyle = "rgba(210,210,200,0.12)";
+      g.fillRect(0, 0, w, h);
+    }
   };
 
   const paintHud = () => {
@@ -133,12 +157,13 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           <b>${place}</b>
           <span>房间 ${snap.room}</span>
         </div>
-        <div class="live-meta">金 ${snap.gold} · 默契 ${snap.bond}</div>
+        <div class="live-meta">${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
       </div>
       <div class="partner ${partner?.online ? "on" : ""}">${
         partner?.online ? `${partner.name} 在${placeOf(partner.zone)}` : "等另一部手机进来"
       }</div>
       ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
+      ${snap.pot.length || snap.potReady ? `<div class="fortune-chip">锅：${snap.potReady || snap.pot.join("、") || "空"}</div>` : ""}
       <div class="prompt">${snap.prompt}</div>
       <div class="toasts">${snap.toasts.map((t) => `<p>${t}</p>`).join("")}</div>
       ${
@@ -152,10 +177,23 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           : ""
       }
       <button class="bag-toggle" type="button" id="bag-btn">袋</button>
-      <div class="bag-panel hidden" id="bag">${snap.bag.map((s) => `<span>${s.name}×${s.n}</span>`).join("") || "空"}</div>
+      <button class="bag-toggle book-toggle" type="button" id="book-btn">菜单</button>
+      <div class="bag-panel hidden" id="bag">${
+        snap.bag.map((s) => `<button type="button" data-take="${s.id}">${s.name}×${s.n}</button>`).join("") || "空"
+      }${snap.gear.length ? `<span>${snap.gear.join(" · ")}</span>` : ""}</div>
+      <div class="bag-panel hidden" id="book">${snap.cookbook.map((n) => `<span>${n}</span>`).join("") || "还没写出第一道"}</div>
     `;
     hud.querySelector("#bag-btn")?.addEventListener("click", () => {
       hud.querySelector("#bag")?.classList.toggle("hidden");
+    });
+    hud.querySelector("#book-btn")?.addEventListener("click", () => {
+      hud.querySelector("#book")?.classList.toggle("hidden");
+    });
+    hud.querySelectorAll("[data-take]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = (btn as HTMLElement).dataset.take;
+        if (id) net.send({ t: "take", id });
+      });
     });
   };
 
@@ -170,7 +208,9 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       ping: consume(stick.input, "ping"),
     });
     paint();
-    const key = snap ? JSON.stringify([snap.toasts, snap.prompt, snap.gold, snap.partner, snap.fortune, snap.bag, snap.orders]) : "";
+    const key = snap
+      ? JSON.stringify([snap.toasts, snap.prompt, snap.gold, snap.partner, snap.fortune, snap.bag, snap.orders, snap.weather, snap.pot, snap.cookbook])
+      : "";
     if (key !== lastHud) {
       lastHud = key;
       paintHud();

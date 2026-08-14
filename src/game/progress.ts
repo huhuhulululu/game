@@ -1,19 +1,27 @@
+import type { GearInst } from "./affix";
 import { addToBag } from "./bag";
 import { maxHp, todayEvent, todayGuest, xpToNext } from "./content";
 import { item } from "./items";
 import type { FighterSave, SaveData } from "./types";
 
-export function fighterPower(f: FighterSave, other: FighterSave, bond: number) {
-  const w = f.weapon ? item(f.weapon) : undefined;
-  const c = f.charm ? item(f.charm) : undefined;
-  const ow = other.weapon ? item(other.weapon) : undefined;
-  const oc = other.charm ? item(other.charm) : undefined;
-  const pairWeapon = !!(w?.pairId && ow?.id === w.pairId);
-  const pairCharm = !!(c?.pairId && oc?.id === c.pairId);
+function piece(gear: GearInst[] | undefined, uid?: string, base?: string) {
+  const inst = uid ? gear?.find((g) => g.uid === uid) : undefined;
+  if (inst) return { atk: inst.atk, luck: inst.luck, bond: inst.bond, pairId: item(inst.base).pairId, id: inst.base };
+  const def = base ? item(base) : undefined;
+  return { atk: def?.atk ?? 0, luck: def?.luck ?? 0, bond: def?.bond ?? 0, pairId: def?.pairId, id: def?.id };
+}
+
+export function fighterPower(f: FighterSave, other: FighterSave, bond: number, gear: GearInst[] = []) {
+  const w = piece(gear, f.weaponUid, f.weapon);
+  const c = piece(gear, f.charmUid, f.charm);
+  const ow = piece(gear, other.weaponUid, other.weapon);
+  const oc = piece(gear, other.charmUid, other.charm);
+  const pairWeapon = !!(w.pairId && ow.id === w.pairId);
+  const pairCharm = !!(c.pairId && oc.id === c.pairId);
   return {
-    atk: f.atk + (w?.atk ?? 0) + (pairWeapon ? 3 : 0) + Math.floor(bond / 20),
-    luck: f.luck + (c?.luck ?? 0) + (pairCharm ? 6 : 0),
-    bondBonus: (w?.bond ?? 0) + (c?.bond ?? 0) + (pairWeapon ? 2 : 0) + (pairCharm ? 3 : 0),
+    atk: f.atk + w.atk + (pairWeapon ? 3 : 0) + Math.floor(bond / 20),
+    luck: f.luck + c.luck + (pairCharm ? 6 : 0),
+    bondBonus: w.bond + c.bond + (pairWeapon ? 2 : 0) + (pairCharm ? 3 : 0),
     pairWeapon,
     pairCharm,
     maxHp: maxHp(f.level),

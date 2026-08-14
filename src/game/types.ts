@@ -46,6 +46,8 @@ export interface FighterSave {
   luck: number;
   weapon?: string;
   charm?: string;
+  weaponUid?: string;
+  charmUid?: string;
 }
 
 export interface Plot {
@@ -93,8 +95,12 @@ export interface SaveData {
   leftSkills: Skills;
   rightSkills: Skills;
   fishAlbum: string[];
+  fishBest: Record<string, number>;
   knownRecipes: string[];
+  cookbook: string[];
   fortuneId: string | null;
+  weather: string;
+  gear: import("./affix").GearInst[];
 }
 
 export interface DayResult {

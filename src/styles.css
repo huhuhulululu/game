@@ -192,6 +192,18 @@ button {
   color: var(--gold-soft);
 }
 
+.book-toggle {
+  top: 48px;
+}
+
+.bag-panel button {
+  pointer-events: auto;
+  border: 1px solid rgba(201, 160, 106, 0.25);
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--gold-soft);
+}
+
 .bag-panel {
   pointer-events: auto;
   margin-top: 48px;

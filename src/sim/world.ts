@@ -1,11 +1,17 @@
+import { craftGear, makeGear, type GearInst } from "../game/affix";
 import { addToBag, countOf, takeFromBag } from "../game/bag";
-import { RECIPES, maxHp, shopStock, todayEvent } from "../game/content";
+import { maxHp, shopStock, todayEvent } from "../game/content";
+import { gradeName, rollCatch } from "../game/fishQuality";
+import { matchPot, potById, POT_RECIPES } from "../game/food";
 import { fortuneById, rollFortune, type Fortune } from "../game/fortune";
 import { item } from "../game/items";
+import { rollLootTable } from "../game/loot";
+import { LOOT_TABLES } from "../game/lootTables";
 import { fighterPower, grantXp, growPlots } from "../game/progress";
-import { chance, mulberry, pickWeighted, pickWeightedRecord } from "../game/rng";
+import { chance, mulberry, pickWeighted } from "../game/rng";
 import { emptySave } from "../game/save";
-import { CUSTOMERS, ENCOUNTERS, FISH, FORGE_PREFIX, MONSTERS } from "../game/tables";
+import { CUSTOMERS, ENCOUNTERS, FISH, MONSTERS } from "../game/tables";
+import { rollWeather, weatherById } from "../game/weather";
 import type { SaveData, Skills, Zone } from "../game/types";
 import { KITCHEN, VALLEY, buildMap, mineTemplate, tileCenter, toTile, type GridMap } from "../world/maps";
 import type { ActorSnap, InputState, WorldSnap } from "./net";
@@ -76,12 +82,17 @@ export class World {
   orders: Order[] = [];
   orderAcc = 0;
   growAcc = 0;
+  weatherAcc = 0;
+  pot: string[] = [];
+  potCook = 0;
+  potReady: string | null = null;
   rand = mulberry(Date.now() % 1e9);
   asked: ("left" | "right")[] = [];
 
   constructor(public room: string) {
     const home = this.valley.find("A")[0] ?? { x: 8, y: 8 };
     this.home = tileCenter(home.x, home.y);
+    this.save.weather = rollWeather(this.rand).id;
   }
 
   home = { x: 200, y: 200 };
@@ -143,14 +154,15 @@ export class World {
     this.mineMap = null;
     this.enemies = [];
     this.orders = [];
-    this.toast(`歇了一夜。${grown[0] ?? "田还在长"}`);
+    this.save.weather = rollWeather(this.rand, this.save.weather).id;
+    this.toast(`歇了一夜 · ${weatherById(this.save.weather).name}。${grown[0] ?? "田还在长"}`);
   }
 
   tick(dt: number): void {
     this.growAcc += dt;
     if (this.growAcc > 80) {
       this.growAcc = 0;
-      growPlots(this.save, this.isSplit());
+      growPlots(this.save, this.isSplit() || weatherById(this.save.weather).grow > 0);
     }
     for (const p of this.players.values()) {
       p.cool = Math.max(0, p.cool - dt);
@@ -161,6 +173,8 @@ export class World {
     }
     this.tickMine(dt);
     this.tickKitchen(dt);
+    this.tickWeather(dt);
+    this.tickPot(dt);
     this.toasts = this.toasts.filter((t) => {
       t.t -= dt;
       return t.t > 0;
@@ -180,8 +194,13 @@ export class World {
       gold: this.save.gold,
       bond: this.save.bond,
       fortune: fortune ? { title: fortune.title, life: fortune.life, tilt: fortune.tilt } : null,
+      weather: { id: weatherById(this.save.weather).id, name: weatherById(this.save.weather).name },
       waitingFortune: this.asked,
       bag: this.save.bag.map((s) => ({ ...s, name: item(s.id).name })),
+      gear: this.save.gear.map((g) => g.name),
+      cookbook: this.save.cookbook.map((id) => potById(id).name),
+      pot: this.pot.map((id) => item(id.split(":")[0]).name),
+      potReady: this.potReady ? potById(this.potReady).name : this.potCook > 0 ? "在煮" : "",
       plots: this.save.plots,
       partner: other
         ? { name: other.name, zone: other.zone, online: true }
@@ -196,7 +215,7 @@ export class World {
       enemies: zone === "mine" ? this.enemies.map((e) => ({ x: e.x, y: e.y, hp: e.hp, maxHp: e.maxHp, hue: e.hue, name: e.name })) : [],
       orders: this.orders.map((o) => ({
         name: CUSTOMERS.find((c) => c.id === o.customer)?.name ?? "客人",
-        recipe: RECIPES.find((r) => r.id === o.recipe)?.name ?? o.recipe,
+        recipe: potById(o.recipe).name,
         left: Math.max(0, o.t),
       })),
       toasts: this.toasts.map((t) => t.text),
@@ -331,8 +350,12 @@ export class World {
       if (cell === "pantry") return "取";
       if (cell === "cut") return "切";
       if (cell === "stove") return "炉";
-      if (cell === "plate") return "盘";
-      if (cell === "window") return "上菜";
+      if (cell === "plate") {
+        if (this.potReady) return `取 · ${potById(this.potReady).name}`;
+        if (this.potCook > 0) return "锅还在响";
+        if (this.pot.length >= 2) return `开煮 · ${this.pot.length}样`;
+        return this.pot.length ? `入锅 · ${this.pot.length}/4` : "入锅";
+      }
       if (cell === "trash") return "丢掉";
     }
     return "";
@@ -376,7 +399,7 @@ export class World {
       if (cell === "pantry") return this.pantry(p, map.pantryId(f.x, f.y));
       if (cell === "cut") return this.cut(p, f.x, f.y);
       if (cell === "stove") return this.stove(p, f.x, f.y);
-      if (cell === "plate") return this.plate(p);
+      if (cell === "plate") return this.potAct(p);
       if (cell === "window") return this.serve(p);
       if (cell === "trash") {
         p.held = "";
@@ -398,7 +421,7 @@ export class World {
 
   private cast(p: Actor): void {
     const skill = this.skills(p).fish;
-    const window = 0.55 + skill * 0.04 + (this.fortune()?.fish ?? 0) / 200;
+    const window = 0.55 + skill * 0.04 + ((this.fortune()?.fish ?? 0) + weatherById(this.save.weather).fish) / 200;
     p.fish = { phase: "wait", t: 1.1 + this.rand() * 2.2, window };
   }
 
@@ -435,11 +458,13 @@ export class World {
       this.toast(`${p.name} 捞到水底匣`);
       return;
     }
-    const bagId = hit.id === "silver" ? "rare_fish" : "fish";
-    addToBag(this.save.bag, bagId);
+    const caught = rollCatch(hit.id, this.rand, this.save.fishBest[hit.id]);
+    addToBag(this.save.bag, caught.bagId);
     this.save.fishTotal += 1;
     if (!this.save.fishAlbum.includes(hit.id)) this.save.fishAlbum.push(hit.id);
-    this.toast(`${p.name} 钓上${hit.name}`);
+    if (caught.record) this.save.fishBest[hit.id] = caught.weight;
+    const rec = caught.record ? " · 新纪录" : "";
+    this.toast(`${p.name} 钓上${gradeName(caught.grade)}${caught.name} ${caught.weight}${rec}`);
   }
 
   private plot(p: Actor, x: number, y: number): void {
@@ -550,11 +575,9 @@ export class World {
   }
 
   private dig(p: Actor, x: number, y: number): void {
-    const luck = fighterPower(this.fighter(p), this.other(p) ? this.fighter(this.other(p)!) : this.fighter(p), this.save.bond).luck;
-    const extra = (this.fortune()?.mine ?? 0) + luck;
-    const id = chance(0.12 + extra / 200, this.rand) ? "gem" : "ore";
-    addToBag(this.save.bag, id);
-    this.toast(`${p.name} 挖到${item(id).name}`);
+    const luck = this.power(p).luck;
+    this.giveLoot(p, "ore_node", luck, false);
+    this.toast(`${p.name} 挖了一处矿`);
     const rows = this.mineMap?.rows;
     if (rows) {
       const next = rows.map((r, iy) => (iy === y ? r.slice(0, x) + "." + r.slice(x + 1) : r));
@@ -563,9 +586,8 @@ export class World {
   }
 
   private chest(p: Actor, x: number, y: number): void {
-    const id = chance(0.5, this.rand) ? "iron_blade" : "lucky_bell";
-    addToBag(this.save.bag, id);
-    this.toast(`${p.name} 开出${item(id).name}`);
+    this.giveLoot(p, "chest", this.power(p).luck, this.near(p, this.other(p)));
+    this.toast(`${p.name} 开了匣`);
     if (this.mineMap) {
       const next = this.mineMap.rows.map((r, iy) => (iy === y ? r.slice(0, x) + "." + r.slice(x + 1) : r));
       this.mineMap = buildMap(next, "mine");
@@ -574,7 +596,7 @@ export class World {
 
   private swing(p: Actor): void {
     const o = this.other(p);
-    const pow = fighterPower(this.fighter(p), o ? this.fighter(o) : this.fighter(p), this.save.bond);
+    const pow = this.power(p);
     const pairNear = this.near(p, o);
     const d = DIRS[p.facing];
     const reach = 34;
@@ -597,30 +619,10 @@ export class World {
       const share = pairNear && o;
       grantXp(this.fighter(p), e.xp);
       if (share) grantXp(this.fighter(o), Math.ceil(e.xp * 0.7));
-      const drop = this.rollCombatDrop(p, pairNear);
-      if (drop) {
-        addToBag(this.save.bag, drop);
-        this.toast(`${e.name} 掉了${item(drop).name}`);
-      } else this.toast(`${p.name} 打倒了${e.name}`);
+      const drops = this.giveLoot(p, e.kind, pow.luck, pairNear);
+      if (chance(0.35, this.rand)) addToBag(this.save.bag, chance(0.25, this.rand) ? "meat" : "morsel");
+      this.toast(drops[0] ? `${e.name} 掉了${drops[0]}` : `${p.name} 打倒了${e.name}`);
     }
-  }
-
-  private rollCombatDrop(p: Actor, pairNear: boolean): string | null {
-    const luck = fighterPower(this.fighter(p), this.other(p) ? this.fighter(this.other(p)!) : this.fighter(p), this.save.bond).luck;
-    if (!chance(0.45 + luck / 80 + (this.fortune()?.mine ?? 0) / 120, this.rand)) return null;
-    return pickWeightedRecord(
-      {
-        ore: 30,
-        mushroom: 22,
-        tea: 10,
-        gem: 8 + (pairNear ? 4 : 0),
-        wood: 10,
-        iron_blade: 4,
-        twin_left: pairNear ? 3 : 1,
-        twin_right: pairNear ? 3 : 1,
-      },
-      this.rand,
-    );
   }
 
   private tickMine(dt: number): void {
@@ -646,11 +648,20 @@ export class World {
 
   private pantry(p: Actor, id: string | null): void {
     if (!id || p.held) return;
-    if (countOf(this.save.bag, id) <= 0) {
+    const choices = id === "fish" ? ["rare_fish_heavy", "fish_heavy", "rare_fish", "fish_thick", "fish"] : [id];
+    const found = choices.find((x) => countOf(this.save.bag, x) > 0);
+    if (!found) {
       this.toast(`没有${item(id).name}`);
       return;
     }
-    takeFromBag(this.save.bag, id);
+    takeFromBag(this.save.bag, found);
+    p.held = item(found).cook === "none" ? `${found}:ready` : `${found}:raw`;
+  }
+
+  takeItem(id: string, playerId: string): void {
+    const p = this.players.get(playerId);
+    if (!p || p.held) return;
+    if (!takeFromBag(this.save.bag, id)) return;
     p.held = item(id).cook === "none" ? `${id}:ready` : `${id}:raw`;
   }
 
@@ -723,8 +734,8 @@ export class World {
     this.orderAcc += dt;
     if (this.orders.length < 3 && this.orderAcc > 7) {
       this.orderAcc = 0;
-      const known = RECIPES.filter((r) => this.save.knownRecipes.includes(r.id));
-      const rec = known[Math.floor(this.rand() * known.length)] ?? RECIPES[0];
+      const known = POT_RECIPES.filter((r) => this.save.cookbook.includes(r.id) && r.id !== "wet-goop");
+      const rec = known[Math.floor(this.rand() * known.length)] ?? potById("herb-tea");
       const cus = CUSTOMERS[Math.floor(this.rand() * CUSTOMERS.length)];
       this.orders.push({ customer: cus.id, recipe: rec.id, t: 36 + (this.fortune()?.cook ?? 0) });
     }
@@ -734,42 +745,67 @@ export class World {
     if (lost.length) this.toast("有人等不及，走了");
   }
 
-  private plate(p: Actor): void {
-    const key = "plate";
-    const st = this.stations.get(key);
-    if (p.held && !p.held.startsWith("plate:")) {
+  private potAct(p: Actor): void {
+    if (this.potReady) {
+      if (p.held) return;
+      p.held = `dish:${this.potReady}`;
+      this.potReady = null;
+      return;
+    }
+    if (this.potCook > 0) {
+      this.toast("锅还在响");
+      return;
+    }
+    if (p.held && !p.held.startsWith("dish:") && !p.held.startsWith("plate:")) {
+      if (this.pot.length >= 4) {
+        this.toast("四格满了，像饥荒的锅");
+        return;
+      }
       const [id, state] = p.held.split(":");
-      const ready = state === "prepped" || state === "cooked" || state === "ready" || item(id).cook === "none";
-      if (!ready) {
+      const ready = !state || state === "prepped" || state === "cooked" || state === "ready" || item(id).cook === "none";
+      if (!ready && item(id).cook && item(id).cook !== "none") {
         this.toast("还没处理好");
         return;
       }
-      const part = item(id).cook === "none" ? `${id}:ready` : `${id}:${state}`;
-      const existing = st?.item?.startsWith("plate:") ? st.item.slice(6).split(",").filter(Boolean) : [];
-      existing.push(part);
-      this.stations.set(key, { key, item: `plate:${existing.join(",")}`, t: 0, need: 0, ready: true });
+      this.pot.push(id);
       p.held = "";
+      this.toast(`入锅 ${item(id).name} · ${this.pot.length}/4`);
+      if (this.pot.length === 4) this.startPot(p);
       return;
     }
-    if (!p.held && st?.item) {
-      p.held = st.item;
-      this.stations.delete(key);
+    if (!p.held && this.pot.length >= 2) this.startPot(p);
+  }
+
+  private startPot(p: Actor): void {
+    this.potCook = Math.max(2.2, 5.5 - this.skills(p).cook * 0.08);
+    this.toast(`${p.name} 把锅盖上了`);
+  }
+
+  private tickPot(dt: number): void {
+    if (this.potCook <= 0) return;
+    this.potCook -= dt;
+    if (this.potCook > 0) return;
+    const recipe = matchPot(this.pot, this.rand);
+    this.pot = [];
+    this.potReady = recipe.id;
+    if (!this.save.cookbook.includes(recipe.id)) {
+      this.save.cookbook.push(recipe.id);
+      this.save.knownRecipes = this.save.cookbook;
+      this.toast(`写入菜单：${recipe.name}`);
+    } else {
+      this.toast(`出锅：${recipe.name}`);
     }
   }
 
   private serve(p: Actor): void {
-    if (!p.held.startsWith("plate:")) {
-      this.toast("手里没有成菜");
+    if (!p.held.startsWith("dish:")) {
+      this.toast("手里没有出锅的菜");
       return;
     }
-    const parts = p.held.slice(6).split(",").filter(Boolean).sort();
-    const match = RECIPES.find((r) => [...r.parts].sort().join() === parts.join());
-    if (!match) {
-      this.toast("这盘还不成席");
-      return;
-    }
+    const match = potById(p.held.slice(5));
     const order = this.orders.find((o) => o.recipe === match.id) ?? this.orders[0];
-    const tip = 1 + Math.floor(this.rand() * 4) + Math.floor((this.fortune()?.cook ?? 0) / 8);
+    const weather = weatherById(this.save.weather);
+    const tip = 1 + Math.floor(this.rand() * 4) + Math.floor(((this.fortune()?.cook ?? 0) + weather.cook) / 8);
     const gold = match.gold + tip + (this.isSplit() ? 2 : 0);
     this.save.gold += gold;
     this.save.bond += match.bond;
@@ -784,21 +820,12 @@ export class World {
           { id: "tomato_seed", w: 20 },
           { id: "wheat_seed", w: 16 },
           { id: "osmanthus", w: 8 },
-          { id: "garden-noodle", w: 10 },
-          { id: "fish-noodle", w: 8 },
-          { id: "osmanthus-fish", w: 5 },
+          { id: "morsel", w: 8 },
         ],
         this.rand,
       ).id;
-      if (RECIPES.some((r) => r.id === gift)) {
-        if (!this.save.knownRecipes.includes(gift)) {
-          this.save.knownRecipes.push(gift);
-          extra = `客人留下了「${RECIPES.find((r) => r.id === gift)?.name}」`;
-        }
-      } else {
-        addToBag(this.save.bag, gift);
-        extra = `客人留下了${item(gift).name}`;
-      }
+      addToBag(this.save.bag, gift);
+      extra = `客人留下了${item(gift).name}`;
     }
     this.toast(`${p.name} 上了${match.name} · ${gold}金${extra ? " · " + extra : ""}`);
   }
@@ -844,18 +871,63 @@ export class World {
     }
     takeFromBag(this.save.bag, "ore", 2);
     takeFromBag(this.save.bag, "wood", 1);
-    const pref = pickWeighted(
-      FORGE_PREFIX.map((x) => ({ ...x, w: x.w + this.skills(p).forge + (this.fortune()?.mine ?? 0) })),
-      this.rand,
-    );
+    const base = this.skills(p).forge >= 4 ? "iron_blade" : "wood_blade";
+    const gear = craftGear(base, 2 + this.mineFloor + this.skills(p).forge, this.skills(p).forge, this.rand);
+    this.keepGear(p, gear);
     this.skills(p).forge += 1;
-    if (pref.pair) {
-      addToBag(this.save.bag, p.side === "left" ? "twin_left" : "twin_right");
-      this.toast(`${p.name} 打出并肩之刃的一半`);
-      return;
+    this.toast(`${p.name} 锻出${gear.name}`);
+  }
+
+  private power(p: Actor) {
+    const o = this.other(p);
+    return fighterPower(this.fighter(p), o ? this.fighter(o) : this.fighter(p), this.save.bond, this.save.gear);
+  }
+
+  private tickWeather(dt: number): void {
+    this.weatherAcc += dt;
+    if (this.weatherAcc < 90) return;
+    this.weatherAcc = 0;
+    this.save.weather = rollWeather(this.rand, this.save.weather).id;
+    this.toast(`天气转成${weatherById(this.save.weather).name}`);
+  }
+
+  private giveLoot(p: Actor, table: string, luck: number, pairNear: boolean): string[] {
+    const def = LOOT_TABLES[table];
+    if (!def) return [];
+    const weather = weatherById(this.save.weather);
+    const stacks = rollLootTable(def, {
+      rand: this.rand,
+      luck: luck + weather.mine / 10,
+      weather: this.save.weather,
+      pairNear,
+    });
+    const names: string[] = [];
+    for (const s of stacks) {
+      const it = item(s.id);
+      if (it.kind === "equip" || s.enchant) {
+        const gear = makeGear(s.id, 1 + this.mineFloor + (s.enchant ?? 0), luck, this.rand, pairNear);
+        this.keepGear(p, gear);
+        names.push(gear.name);
+      } else {
+        addToBag(this.save.bag, s.id, s.n);
+        names.push(`${it.name}${s.n > 1 ? "×" + s.n : ""}`);
+      }
     }
-    addToBag(this.save.bag, pref.id === "spirit" || pref.atk >= 2 ? "iron_blade" : "wood_blade");
-    this.toast(`${p.name} 打出「${pref.name}」刃`);
+    return names;
+  }
+
+  private keepGear(p: Actor, gear: GearInst): void {
+    this.save.gear.push(gear);
+    const f = this.fighter(p);
+    const slot = item(gear.base).slot;
+    if (slot === "weapon" && gear.atk >= (this.save.gear.find((g) => g.uid === f.weaponUid)?.atk ?? 0)) {
+      f.weapon = gear.base;
+      f.weaponUid = gear.uid;
+    }
+    if (slot === "charm" && gear.luck >= (this.save.gear.find((g) => g.uid === f.charmUid)?.luck ?? 0)) {
+      f.charm = gear.base;
+      f.charmUid = gear.uid;
+    }
   }
 }
 

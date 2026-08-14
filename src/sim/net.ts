@@ -44,8 +44,13 @@ export interface WorldSnap {
   gold: number;
   bond: number;
   fortune: { title: string; life: string; tilt: string } | null;
+  weather: { id: string; name: string };
   waitingFortune: ("left" | "right")[];
   bag: { id: string; n: number; name: string }[];
+  gear: string[];
+  cookbook: string[];
+  pot: string[];
+  potReady: string;
   plots: { seed?: string; stage: number }[];
   partner: { name: string; zone: Zone; online: boolean } | null;
   zone: Zone;
@@ -63,7 +68,8 @@ export interface WorldSnap {
 export type ClientMsg =
   | { t: "hello"; room: string; name: string; prefer?: "left" | "right" }
   | { t: "input"; x: number; y: number; action: boolean; held: boolean; ping: boolean }
-  | { t: "sleep" };
+  | { t: "sleep" }
+  | { t: "take"; id: string };
 
 export type ServerMsg =
   | { t: "joined"; side: "left" | "right"; room: string }

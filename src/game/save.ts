@@ -34,8 +34,12 @@ export function emptySave(): SaveData {
     leftSkills: { fish: 1, cook: 1, fight: 1, forge: 1 },
     rightSkills: { fish: 1, cook: 1, fight: 1, forge: 1 },
     fishAlbum: [],
+    fishBest: {},
     knownRecipes: ["herb-tea", "mushroom-soup", "tomato-egg"],
+    cookbook: ["herb-tea", "mushroom-soup", "tomato-egg"],
     fortuneId: null,
+    weather: "clear",
+    gear: [],
   };
 }
 
@@ -56,6 +60,9 @@ export function loadSave(): SaveData {
       plots: parsed.plots?.length ? parsed.plots : base.plots,
       memories: parsed.memories ?? [],
       days: parsed.days ?? [],
+      gear: parsed.gear ?? [],
+      fishBest: parsed.fishBest ?? {},
+      cookbook: parsed.cookbook ?? parsed.knownRecipes ?? base.cookbook,
     };
   } catch {
     return emptySave();

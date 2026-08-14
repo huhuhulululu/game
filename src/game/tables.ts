@@ -3,19 +3,21 @@ export interface FishDef {
   name: string;
   skill: number;
   w: number;
+  minW: number;
+  maxW: number;
   pair?: boolean;
   trash?: boolean;
   treasure?: boolean;
 }
 
 export const FISH: FishDef[] = [
-  { id: "crucian", name: "鲫", skill: 0, w: 28 },
-  { id: "carp", name: "鲤", skill: 2, w: 18 },
-  { id: "catfish", name: "鲶", skill: 5, w: 10 },
-  { id: "eel", name: "鳗", skill: 7, w: 6 },
-  { id: "silver", name: "银鳞", skill: 8, w: 3, pair: true },
-  { id: "boot", name: "旧靴", skill: 0, w: 8, trash: true },
-  { id: "box", name: "水底匣", skill: 3, w: 5, treasure: true },
+  { id: "crucian", name: "鲫", skill: 0, w: 28, minW: 40, maxW: 56 },
+  { id: "carp", name: "鲤", skill: 2, w: 18, minW: 80, maxW: 140 },
+  { id: "catfish", name: "鲶", skill: 5, w: 10, minW: 160, maxW: 240 },
+  { id: "eel", name: "鳗", skill: 7, w: 6, minW: 165, maxW: 212 },
+  { id: "silver", name: "银鳞", skill: 8, w: 3, minW: 90, maxW: 160, pair: true },
+  { id: "boot", name: "旧靴", skill: 0, w: 8, minW: 10, maxW: 20, trash: true },
+  { id: "box", name: "水底匣", skill: 3, w: 5, minW: 20, maxW: 40, treasure: true },
 ];
 
 export interface MonsterDef {

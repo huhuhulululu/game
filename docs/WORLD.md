@@ -42,6 +42,14 @@
 - 镜头跟着自己。对方在别的地方时，只看到「她在河边」。
 - 对方钓到稀的、打造出锋刃、客人留下一张方子，两部手机都会闪一句。
 
+## 借用的公开规则（不抄素材，只抄算法）
+
+- **掉落**：我的世界战利品表（pools / rolls / bonus_rolls×运气 / weight / empty）。见 [Loot table](https://minecraft.wiki/w/Loot_table)。
+- **装备**：暗黑 II 的品质管线（unique/rare/magic/normal）+ 前缀/后缀、同组不叠。见公开的 item generation 笔记。
+- **天气**：星露谷式权重表（晴、雨、雷雨、雾、风），雨偏钓鱼，雷雨偏矿。
+- **做饭**：饥荒锅。四种食材、标签加总（肉/鱼/菜/蛋/甜/填料）、优先级最高的菜胜出，对不上就是「一锅糊涂」。菜单靠自己煮出来，像 DST 的 Cookbook。[Crock Pot](https://dontstarve.wiki.gg/wiki/Crock_Pot) / [Food Value](https://dontstarve.wiki.gg/wiki/Food_Value)。
+- **鱼品质**：饥荒联机版海鱼重量 `rand*(max-min)+min`，过了区间 70% 算沉重。[Weight](https://dontstarve.wiki.gg/wiki/Weight)。沉重的鱼在锅里的鱼值和肉值更高。
+
 ## 明确不做
 
 - 每天浇水、每天同一套日常才能进步。
