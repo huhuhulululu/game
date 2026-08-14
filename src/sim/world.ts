@@ -1,0 +1,866 @@
+import { addToBag, countOf, takeFromBag } from "../game/bag";
+import { RECIPES, maxHp, shopStock, todayEvent } from "../game/content";
+import { fortuneById, rollFortune, type Fortune } from "../game/fortune";
+import { item } from "../game/items";
+import { fighterPower, grantXp, growPlots } from "../game/progress";
+import { chance, mulberry, pickWeighted, pickWeightedRecord } from "../game/rng";
+import { emptySave } from "../game/save";
+import { CUSTOMERS, ENCOUNTERS, FISH, FORGE_PREFIX, MONSTERS } from "../game/tables";
+import type { SaveData, Skills, Zone } from "../game/types";
+import { KITCHEN, VALLEY, buildMap, mineTemplate, tileCenter, toTile, type GridMap } from "../world/maps";
+import type { ActorSnap, InputState, WorldSnap } from "./net";
+
+const DIRS = [
+  { x: 0, y: -1 },
+  { x: 1, y: 0 },
+  { x: 0, y: 1 },
+  { x: -1, y: 0 },
+];
+
+interface Actor {
+  id: string;
+  name: string;
+  side: "left" | "right";
+  x: number;
+  y: number;
+  zone: Zone;
+  hp: number;
+  facing: number;
+  held: string;
+  cool: number;
+  fish: { phase: "off" | "wait" | "bite"; t: number; window: number } | null;
+  chop: { t: number; id: string; key: string } | null;
+  input: InputState;
+  askedFortune: boolean;
+  ping: number;
+}
+
+interface Enemy {
+  x: number;
+  y: number;
+  hp: number;
+  maxHp: number;
+  atk: number;
+  speed: number;
+  xp: number;
+  hue: string;
+  name: string;
+  kind: string;
+}
+
+interface Order {
+  customer: string;
+  recipe: string;
+  t: number;
+}
+
+interface Station {
+  key: string;
+  item: string;
+  t: number;
+  need: number;
+  ready: boolean;
+}
+
+export class World {
+  save: SaveData = emptySave();
+  players = new Map<string, Actor>();
+  toasts: { text: string; t: number }[] = [];
+  valley = buildMap(VALLEY, "valley");
+  kitchenMap = buildMap(KITCHEN, "kitchen");
+  mineMap: GridMap | null = null;
+  mineFloor = 0;
+  encounter = "";
+  enemies: Enemy[] = [];
+  stations = new Map<string, Station>();
+  orders: Order[] = [];
+  orderAcc = 0;
+  growAcc = 0;
+  rand = mulberry(Date.now() % 1e9);
+  asked: ("left" | "right")[] = [];
+
+  constructor(public room: string) {
+    const home = this.valley.find("A")[0] ?? { x: 8, y: 8 };
+    this.home = tileCenter(home.x, home.y);
+  }
+
+  home = { x: 200, y: 200 };
+
+  addPlayer(id: string, name: string, prefer?: "left" | "right"): "left" | "right" {
+    const used = [...this.players.values()].map((p) => p.side);
+    const side: "left" | "right" =
+      prefer && !used.includes(prefer) ? prefer : used.includes("left") ? "right" : "left";
+    if (side === "left") this.save.leftName = name;
+    else this.save.rightName = name;
+    const spawn = this.home;
+    const fighter = side === "left" ? this.save.left : this.save.right;
+    this.players.set(id, {
+      id,
+      name,
+      side,
+      x: spawn.x + (side === "left" ? -16 : 16),
+      y: spawn.y,
+      zone: "valley",
+      hp: maxHp(fighter.level),
+      facing: 2,
+      held: "",
+      cool: 0,
+      fish: null,
+      chop: null,
+      input: { x: 0, y: 0, action: false, held: false, ping: false },
+      askedFortune: false,
+      ping: 0,
+    });
+    this.toast(`${name} 进了山谷`);
+    return side;
+  }
+
+  removePlayer(id: string): void {
+    const p = this.players.get(id);
+    if (p) this.toast(`${p.name} 先回去了`);
+    this.players.delete(id);
+  }
+
+  setInput(id: string, input: InputState): void {
+    const p = this.players.get(id);
+    if (!p) return;
+    const prev = p.input.action;
+    p.input = input;
+    if (input.action && !prev) this.act(p);
+    if (input.ping) {
+      p.ping = 1.6;
+      const other = this.other(p);
+      this.toast(other ? `${p.name} 在${zoneName(p.zone)}喊了一声` : `${p.name} 喊了一声`);
+    }
+  }
+
+  sleep(): void {
+    const grown = growPlots(this.save, this.isSplit());
+    this.save.day += 1;
+    this.save.fortuneId = null;
+    this.asked = [];
+    for (const p of this.players.values()) p.askedFortune = false;
+    this.mineMap = null;
+    this.enemies = [];
+    this.orders = [];
+    this.toast(`歇了一夜。${grown[0] ?? "田还在长"}`);
+  }
+
+  tick(dt: number): void {
+    this.growAcc += dt;
+    if (this.growAcc > 80) {
+      this.growAcc = 0;
+      growPlots(this.save, this.isSplit());
+    }
+    for (const p of this.players.values()) {
+      p.cool = Math.max(0, p.cool - dt);
+      p.ping = Math.max(0, p.ping - dt);
+      this.move(p, dt);
+      this.tickFish(p, dt);
+      this.tickChop(p, dt);
+    }
+    this.tickMine(dt);
+    this.tickKitchen(dt);
+    this.toasts = this.toasts.filter((t) => {
+      t.t -= dt;
+      return t.t > 0;
+    });
+  }
+
+  snapshot(id: string): WorldSnap {
+    const you = this.players.get(id);
+    const other = you ? this.other(you) : undefined;
+    const fortune = fortuneById(this.save.fortuneId);
+    const skills = you ? this.skills(you) : this.save.leftSkills;
+    const zone = you?.zone ?? "valley";
+    return {
+      you: id,
+      room: this.room,
+      day: this.save.day,
+      gold: this.save.gold,
+      bond: this.save.bond,
+      fortune: fortune ? { title: fortune.title, life: fortune.life, tilt: fortune.tilt } : null,
+      waitingFortune: this.asked,
+      bag: this.save.bag.map((s) => ({ ...s, name: item(s.id).name })),
+      plots: this.save.plots,
+      partner: other
+        ? { name: other.name, zone: other.zone, online: true }
+        : { name: you?.side === "left" ? this.save.rightName || "还没来" : this.save.leftName || "还没来", zone: "valley", online: false },
+      zone,
+      tiles: this.mapFor(zone).rows,
+      floor: this.mineFloor,
+      encounter: this.encounter,
+      actors: [...this.players.values()]
+        .filter((p) => p.zone === zone)
+        .map((p) => this.actorSnap(p)),
+      enemies: zone === "mine" ? this.enemies.map((e) => ({ x: e.x, y: e.y, hp: e.hp, maxHp: e.maxHp, hue: e.hue, name: e.name })) : [],
+      orders: this.orders.map((o) => ({
+        name: CUSTOMERS.find((c) => c.id === o.customer)?.name ?? "客人",
+        recipe: RECIPES.find((r) => r.id === o.recipe)?.name ?? o.recipe,
+        left: Math.max(0, o.t),
+      })),
+      toasts: this.toasts.map((t) => t.text),
+      prompt: you ? this.prompt(you) : "",
+      skills,
+    };
+  }
+
+  private actorSnap(p: Actor): ActorSnap {
+    const f = p.side === "left" ? this.save.left : this.save.right;
+    return {
+      id: p.id,
+      name: p.name,
+      side: p.side,
+      x: p.x,
+      y: p.y,
+      zone: p.zone,
+      hp: p.hp,
+      maxHp: maxHp(f.level),
+      facing: p.facing,
+      held: p.held,
+      fishing: p.fish?.phase ?? "off",
+    };
+  }
+
+  private skills(p: Actor): Skills {
+    return p.side === "left" ? this.save.leftSkills : this.save.rightSkills;
+  }
+
+  private fighter(p: Actor) {
+    return p.side === "left" ? this.save.left : this.save.right;
+  }
+
+  private other(p: Actor): Actor | undefined {
+    return [...this.players.values()].find((o) => o.id !== p.id);
+  }
+
+  private fortune(): Fortune | null {
+    return fortuneById(this.save.fortuneId);
+  }
+
+  private near(a: Actor, b: Actor | undefined): boolean {
+    if (!b || a.zone !== b.zone) return false;
+    return Math.hypot(a.x - b.x, a.y - b.y) < 90;
+  }
+
+  private isSplit(): boolean {
+    const ps = [...this.players.values()];
+    return ps.length === 2 && ps[0].zone !== ps[1].zone;
+  }
+
+  private pairFishing(): boolean {
+    const ps = [...this.players.values()];
+    return ps.length === 2 && ps.every((p) => p.zone === "valley" && p.fish);
+  }
+
+  private mapFor(zone: Zone): GridMap {
+    if (zone === "kitchen") return this.kitchenMap;
+    if (zone === "mine") return this.mineMap ?? this.valley;
+    return this.valley;
+  }
+
+  private toast(text: string): void {
+    this.toasts.unshift({ text, t: 4.2 });
+    this.toasts = this.toasts.slice(0, 4);
+  }
+
+  private move(p: Actor, dt: number): void {
+    if (p.fish?.phase === "wait" || p.fish?.phase === "bite") return;
+    if (p.chop) return;
+    const ix = p.input.x;
+    const iy = p.input.y;
+    if (Math.abs(ix) < 0.2 && Math.abs(iy) < 0.2) return;
+    if (Math.abs(ix) > Math.abs(iy)) p.facing = ix > 0 ? 1 : 3;
+    else p.facing = iy > 0 ? 2 : 0;
+    const speed = 118;
+    const nx = p.x + ix * speed * dt;
+    const ny = p.y + iy * speed * dt;
+    if (this.free(p.zone, nx, p.y)) p.x = nx;
+    if (this.free(p.zone, p.x, ny)) p.y = ny;
+  }
+
+  private free(zone: Zone, px: number, py: number): boolean {
+    const map = this.mapFor(zone);
+    const t = toTile(px, py);
+    const inset = 10;
+    const corners = [
+      [px - inset, py - inset],
+      [px + inset, py - inset],
+      [px - inset, py + inset],
+      [px + inset, py + inset],
+    ];
+    return corners.every(([x, y]) => {
+      const c = toTile(x, y);
+      return map.walk(c.x, c.y) || (c.x === t.x && c.y === t.y && map.walk(t.x, t.y));
+    });
+  }
+
+  private facingTile(p: Actor) {
+    const d = DIRS[p.facing];
+    const t = toTile(p.x, p.y);
+    return { x: t.x + d.x, y: t.y + d.y };
+  }
+
+  private prompt(p: Actor): string {
+    if (p.fish?.phase === "wait") return "水面还没动";
+    if (p.fish?.phase === "bite") return "起竿";
+    const map = this.mapFor(p.zone);
+    const f = this.facingTile(p);
+    const cell = map.cell(f.x, f.y);
+    const ch = map.rows[f.y]?.[f.x];
+    if (p.zone === "valley") {
+      if (cell === "dock") return "下竿";
+      if (cell === "plot") return "田";
+      if (cell === "bush" || cell === "osmanthus") return "采";
+      if (ch === "E") return "进矿";
+      if (ch === "I") return "进厨房";
+      if (ch === "A") return "歇一夜（田会自己长）";
+      if (cell === "shop") return "摊位";
+      if (cell === "forge") return "打造";
+      if (cell === "gacha" || cell === "board") return this.save.fortuneId ? "今日已问过" : "问今日";
+    }
+    if (p.zone === "mine") {
+      if (cell === "leave") return "出矿";
+      if (cell === "stairs") return "再下一层";
+      if (cell === "ore") return "挖";
+      if (cell === "chest") return "开匣";
+      return "挥";
+    }
+    if (p.zone === "kitchen") {
+      if (cell === "leave") return "出厨房";
+      if (cell === "pantry") return "取";
+      if (cell === "cut") return "切";
+      if (cell === "stove") return "炉";
+      if (cell === "plate") return "盘";
+      if (cell === "window") return "上菜";
+      if (cell === "trash") return "丢掉";
+    }
+    return "";
+  }
+
+  private act(p: Actor): void {
+    if (p.cool > 0) return;
+    p.cool = 0.18;
+    if (p.fish?.phase === "bite") {
+      this.hook(p);
+      return;
+    }
+    if (p.fish?.phase === "wait") return;
+    const map = this.mapFor(p.zone);
+    const f = this.facingTile(p);
+    const cell = map.cell(f.x, f.y);
+    const ch = map.rows[f.y]?.[f.x];
+
+    if (p.zone === "valley") {
+      if (cell === "dock") return this.cast(p);
+      if (cell === "plot") return this.plot(p, f.x, f.y);
+      if (cell === "bush") return this.forage(p, "herb", 0.7);
+      if (cell === "osmanthus") return this.forage(p, "osmanthus", 0.35);
+      if (ch === "E") return this.enterMine(p);
+      if (ch === "I") return this.enterKitchen(p);
+      if (ch === "A") return this.sleep();
+      if (cell === "shop") return this.shop(p);
+      if (cell === "forge") return this.forge(p);
+      if (cell === "gacha" || cell === "board") return this.askFortune(p);
+      if (this.tryGive(p)) return;
+    }
+    if (p.zone === "mine") {
+      if (cell === "leave") return this.leaveToValley(p);
+      if (cell === "stairs") return this.downFloor();
+      if (cell === "ore") return this.dig(p, f.x, f.y);
+      if (cell === "chest") return this.chest(p, f.x, f.y);
+      return this.swing(p);
+    }
+    if (p.zone === "kitchen") {
+      if (cell === "leave") return this.leaveToValley(p);
+      if (cell === "pantry") return this.pantry(p, map.pantryId(f.x, f.y));
+      if (cell === "cut") return this.cut(p, f.x, f.y);
+      if (cell === "stove") return this.stove(p, f.x, f.y);
+      if (cell === "plate") return this.plate(p);
+      if (cell === "window") return this.serve(p);
+      if (cell === "trash") {
+        p.held = "";
+        return;
+      }
+      this.tryGive(p);
+    }
+  }
+
+  private tryGive(p: Actor): boolean {
+    const o = this.other(p);
+    if (!o || !this.near(p, o) || !p.held || o.held) return false;
+    o.held = p.held;
+    p.held = "";
+    this.save.bond += 1;
+    this.toast(`${p.name} 把东西递给了 ${o.name}`);
+    return true;
+  }
+
+  private cast(p: Actor): void {
+    const skill = this.skills(p).fish;
+    const window = 0.55 + skill * 0.04 + (this.fortune()?.fish ?? 0) / 200;
+    p.fish = { phase: "wait", t: 1.1 + this.rand() * 2.2, window };
+  }
+
+  private tickFish(p: Actor, dt: number): void {
+    if (!p.fish) return;
+    p.fish.t -= dt;
+    if (p.fish.phase === "wait" && p.fish.t <= 0) {
+      p.fish.phase = "bite";
+      p.fish.t = p.fish.window;
+    } else if (p.fish.phase === "bite" && p.fish.t <= 0) {
+      p.fish = null;
+      this.toast("走了");
+    }
+  }
+
+  private hook(p: Actor): void {
+    const skill = this.skills(p);
+    const tilt = this.fortune()?.fish ?? 0;
+    const pair = this.pairFishing();
+    const pool = FISH.filter((f) => skill.fish >= f.skill && (!f.pair || pair)).map((f) => ({
+      ...f,
+      w: f.w + (f.pair && pair ? 10 : 0) + (tilt > 0 && !f.trash ? 6 : 0),
+    }));
+    const hit = pickWeighted(pool, this.rand);
+    p.fish = null;
+    skill.fish += 1;
+    if (hit.trash) {
+      this.toast(`${p.name} 钓上${hit.name}`);
+      return;
+    }
+    if (hit.treasure) {
+      addToBag(this.save.bag, chance(0.5, this.rand) ? "gem" : "tea");
+      this.save.gold += 8;
+      this.toast(`${p.name} 捞到水底匣`);
+      return;
+    }
+    const bagId = hit.id === "silver" ? "rare_fish" : "fish";
+    addToBag(this.save.bag, bagId);
+    this.save.fishTotal += 1;
+    if (!this.save.fishAlbum.includes(hit.id)) this.save.fishAlbum.push(hit.id);
+    this.toast(`${p.name} 钓上${hit.name}`);
+  }
+
+  private plot(p: Actor, x: number, y: number): void {
+    const plots = this.valley.find("P");
+    const i = plots.findIndex((t) => t.x === x && t.y === y);
+    if (i < 0) return;
+    const plot = this.save.plots[i] ?? (this.save.plots[i] = { stage: 0 });
+    if (plot.seed && plot.stage >= 3) {
+      const grow = item(plot.seed).growInto;
+      if (grow) addToBag(this.save.bag, grow, this.isSplit() ? 2 : 1);
+      this.toast(`收了${grow ? item(grow).name : "一垄"}`);
+      plot.seed = undefined;
+      plot.stage = 0;
+      return;
+    }
+    if (plot.seed) {
+      this.toast(`还在长 · ${plot.stage}/3`);
+      return;
+    }
+    const seed = ["tomato_seed", "greens_seed", "wheat_seed"].find((id) => countOf(this.save.bag, id) > 0);
+    if (!seed) {
+      this.toast("袋子里没有种");
+      return;
+    }
+    takeFromBag(this.save.bag, seed);
+    plot.seed = seed;
+    plot.stage = 0;
+    this.toast(`${p.name} 种下${item(seed).name}`);
+  }
+
+  private forage(p: Actor, id: string, pHit: number): void {
+    if (this.rand() > pHit) {
+      this.toast("这一丛还早");
+      return;
+    }
+    addToBag(this.save.bag, id);
+    this.toast(`${p.name} 采到${item(id).name}`);
+  }
+
+  private enterMine(p: Actor): void {
+    if (!this.mineMap) this.downFloor(true);
+    const leave = this.mineMap?.find("L")[0] ?? { x: 2, y: 2 };
+    const c = tileCenter(leave.x + 1, leave.y);
+    p.zone = "mine";
+    p.x = c.x;
+    p.y = c.y;
+    this.toast(`${p.name} 进了矿`);
+  }
+
+  private enterKitchen(p: Actor): void {
+    const leave = this.kitchenMap.find("L")[0] ?? { x: 2, y: 6 };
+    const c = tileCenter(leave.x + 1, leave.y);
+    p.zone = "kitchen";
+    p.x = c.x;
+    p.y = c.y;
+    this.toast(`${p.name} 进了厨房`);
+  }
+
+  private leaveToValley(p: Actor): void {
+    p.zone = "valley";
+    p.x = this.home.x;
+    p.y = this.home.y + 30;
+    this.toast(`${p.name} 回到山谷`);
+  }
+
+  private downFloor(first = false): void {
+    this.mineFloor = first ? 1 : this.mineFloor + 1;
+    if (this.mineFloor > 5) {
+      this.toast("矿底没有路了");
+      this.mineFloor = 5;
+      return;
+    }
+    this.mineMap = buildMap(mineTemplate(this.save.day * 13 + this.mineFloor, this.mineFloor), "mine");
+    this.enemies = [];
+    const ev = pickWeighted(
+      ENCOUNTERS.map((e) => ({ ...e, w: e.w + (this.fortune()?.mine ?? 0) })),
+      this.rand,
+    ).id;
+    this.encounter = ev;
+    const spawns = this.mineMap.find("e");
+    const kinds = ev === "elite" ? ["lantern"] : ev === "ambush" ? ["bat", "bat", "shadow"] : ev === "empty" ? [] : ["slime", "shadow"];
+    if (ev === "pack") kinds.push("slime");
+    if (this.isSplit() && ev !== "empty") kinds.push("twin");
+    kinds.forEach((kind, i) => {
+      const def = MONSTERS[kind];
+      const s = spawns[i % Math.max(1, spawns.length)] ?? { x: 4, y: 4 };
+      const c = tileCenter(s.x, s.y);
+      this.enemies.push({
+        x: c.x + i * 6,
+        y: c.y,
+        hp: def.hp + this.mineFloor * 3,
+        maxHp: def.hp + this.mineFloor * 3,
+        atk: def.atk,
+        speed: def.speed,
+        xp: def.xp,
+        hue: def.hue,
+        name: def.name,
+        kind,
+      });
+    });
+    if (ev === "vein") this.toast("这一层矿脉很响");
+    if (ev === "shrine") {
+      this.save.bond += 2;
+      this.toast("神龛亮了一下，默契 +2");
+    }
+    if (ev === "ambush") this.toast("伏击");
+    if (ev === "empty") this.toast("空荡荡的一层");
+  }
+
+  private dig(p: Actor, x: number, y: number): void {
+    const luck = fighterPower(this.fighter(p), this.other(p) ? this.fighter(this.other(p)!) : this.fighter(p), this.save.bond).luck;
+    const extra = (this.fortune()?.mine ?? 0) + luck;
+    const id = chance(0.12 + extra / 200, this.rand) ? "gem" : "ore";
+    addToBag(this.save.bag, id);
+    this.toast(`${p.name} 挖到${item(id).name}`);
+    const rows = this.mineMap?.rows;
+    if (rows) {
+      const next = rows.map((r, iy) => (iy === y ? r.slice(0, x) + "." + r.slice(x + 1) : r));
+      this.mineMap = buildMap(next, "mine");
+    }
+  }
+
+  private chest(p: Actor, x: number, y: number): void {
+    const id = chance(0.5, this.rand) ? "iron_blade" : "lucky_bell";
+    addToBag(this.save.bag, id);
+    this.toast(`${p.name} 开出${item(id).name}`);
+    if (this.mineMap) {
+      const next = this.mineMap.rows.map((r, iy) => (iy === y ? r.slice(0, x) + "." + r.slice(x + 1) : r));
+      this.mineMap = buildMap(next, "mine");
+    }
+  }
+
+  private swing(p: Actor): void {
+    const o = this.other(p);
+    const pow = fighterPower(this.fighter(p), o ? this.fighter(o) : this.fighter(p), this.save.bond);
+    const pairNear = this.near(p, o);
+    const d = DIRS[p.facing];
+    const reach = 34;
+    let hit = false;
+    for (const e of this.enemies) {
+      const along = (e.x - p.x) * d.x + (e.y - p.y) * d.y;
+      const dist = Math.hypot(e.x - p.x, e.y - p.y);
+      if (along > 4 && dist < reach + 10) {
+        const crit = pairNear && chance(0.18 + (this.fortune()?.pair ?? 0) / 100, this.rand);
+        e.hp -= pow.atk + (crit ? 4 : 0);
+        hit = true;
+      }
+    }
+    if (!hit) return;
+    this.skills(p).fight += 1;
+    const dead = this.enemies.filter((e) => e.hp <= 0);
+    this.enemies = this.enemies.filter((e) => e.hp > 0);
+    for (const e of dead) {
+      this.save.killsTotal += 1;
+      const share = pairNear && o;
+      grantXp(this.fighter(p), e.xp);
+      if (share) grantXp(this.fighter(o), Math.ceil(e.xp * 0.7));
+      const drop = this.rollCombatDrop(p, pairNear);
+      if (drop) {
+        addToBag(this.save.bag, drop);
+        this.toast(`${e.name} 掉了${item(drop).name}`);
+      } else this.toast(`${p.name} 打倒了${e.name}`);
+    }
+  }
+
+  private rollCombatDrop(p: Actor, pairNear: boolean): string | null {
+    const luck = fighterPower(this.fighter(p), this.other(p) ? this.fighter(this.other(p)!) : this.fighter(p), this.save.bond).luck;
+    if (!chance(0.45 + luck / 80 + (this.fortune()?.mine ?? 0) / 120, this.rand)) return null;
+    return pickWeightedRecord(
+      {
+        ore: 30,
+        mushroom: 22,
+        tea: 10,
+        gem: 8 + (pairNear ? 4 : 0),
+        wood: 10,
+        iron_blade: 4,
+        twin_left: pairNear ? 3 : 1,
+        twin_right: pairNear ? 3 : 1,
+      },
+      this.rand,
+    );
+  }
+
+  private tickMine(dt: number): void {
+    const miners = [...this.players.values()].filter((p) => p.zone === "mine");
+    if (!miners.length) return;
+    for (const e of this.enemies) {
+      const t = miners.slice().sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y))[0];
+      const dx = t.x - e.x;
+      const dy = t.y - e.y;
+      const m = Math.hypot(dx, dy) || 1;
+      e.x += (dx / m) * e.speed * dt;
+      e.y += (dy / m) * e.speed * dt;
+      if (m < 18 && t.cool < 0.05) {
+        t.hp -= e.atk * dt * 0.7;
+        if (t.hp <= 0) {
+          t.hp = maxHp(this.fighter(t).level);
+          this.leaveToValley(t);
+          this.toast(`${t.name} 被送出了矿道`);
+        }
+      }
+    }
+  }
+
+  private pantry(p: Actor, id: string | null): void {
+    if (!id || p.held) return;
+    if (countOf(this.save.bag, id) <= 0) {
+      this.toast(`没有${item(id).name}`);
+      return;
+    }
+    takeFromBag(this.save.bag, id);
+    p.held = item(id).cook === "none" ? `${id}:ready` : `${id}:raw`;
+  }
+
+  private cut(p: Actor, x: number, y: number): void {
+    const key = `c:${x},${y}`;
+    const st = this.stations.get(key);
+    if (st?.ready) {
+      if (p.held) return;
+      p.held = st.item;
+      this.stations.delete(key);
+      return;
+    }
+    if (!p.held.endsWith(":raw")) return;
+    const id = p.held.split(":")[0];
+    const need = item(id).cook;
+    if (need !== "chop" && need !== "both") {
+      this.toast("这个不用切");
+      return;
+    }
+    p.chop = { t: Math.max(0.45, 1.15 - this.skills(p).cook * 0.03), id, key };
+    p.held = "";
+    this.stations.set(key, { key, item: "", t: 0, need: 1, ready: false });
+  }
+
+  private tickChop(p: Actor, dt: number): void {
+    if (!p.chop) return;
+    if (!p.input.held) return;
+    p.chop.t -= dt;
+    if (p.chop.t <= 0) {
+      const id = p.chop.id;
+      const next = `${id}:prepped`;
+      this.stations.set(p.chop.key, { key: p.chop.key, item: next, t: 0, need: 0, ready: true });
+      p.chop = null;
+      this.skills(p).cook += 1;
+    }
+  }
+
+  private stove(p: Actor, x: number, y: number): void {
+    const key = `s:${x},${y}`;
+    const st = this.stations.get(key);
+    if (st?.ready) {
+      if (p.held) return;
+      p.held = st.item;
+      this.stations.delete(key);
+      return;
+    }
+    if (st && !st.ready) return;
+    if (!p.held) return;
+    const [id, state] = p.held.split(":");
+    const need = item(id).cook;
+    const ok = need === "cook" && state === "raw" || need === "both" && state === "prepped";
+    if (!ok) {
+      this.toast("现在还不能下锅");
+      return;
+    }
+    p.held = "";
+    this.stations.set(key, { key, item: `${id}:cooked`, t: 0, need: Math.max(0.8, 2 - this.skills(p).cook * 0.04), ready: false });
+  }
+
+  private tickKitchen(dt: number): void {
+    for (const st of this.stations.values()) {
+      if (st.ready || !st.need) continue;
+      if (st.key.startsWith("s:")) {
+        st.t += dt;
+        if (st.t >= st.need) st.ready = true;
+      }
+    }
+    const cooks = [...this.players.values()].filter((p) => p.zone === "kitchen");
+    if (!cooks.length) return;
+    this.orderAcc += dt;
+    if (this.orders.length < 3 && this.orderAcc > 7) {
+      this.orderAcc = 0;
+      const known = RECIPES.filter((r) => this.save.knownRecipes.includes(r.id));
+      const rec = known[Math.floor(this.rand() * known.length)] ?? RECIPES[0];
+      const cus = CUSTOMERS[Math.floor(this.rand() * CUSTOMERS.length)];
+      this.orders.push({ customer: cus.id, recipe: rec.id, t: 36 + (this.fortune()?.cook ?? 0) });
+    }
+    for (const o of this.orders) o.t -= dt;
+    const lost = this.orders.filter((o) => o.t <= 0);
+    this.orders = this.orders.filter((o) => o.t > 0);
+    if (lost.length) this.toast("有人等不及，走了");
+  }
+
+  private plate(p: Actor): void {
+    const key = "plate";
+    const st = this.stations.get(key);
+    if (p.held && !p.held.startsWith("plate:")) {
+      const [id, state] = p.held.split(":");
+      const ready = state === "prepped" || state === "cooked" || state === "ready" || item(id).cook === "none";
+      if (!ready) {
+        this.toast("还没处理好");
+        return;
+      }
+      const part = item(id).cook === "none" ? `${id}:ready` : `${id}:${state}`;
+      const existing = st?.item?.startsWith("plate:") ? st.item.slice(6).split(",").filter(Boolean) : [];
+      existing.push(part);
+      this.stations.set(key, { key, item: `plate:${existing.join(",")}`, t: 0, need: 0, ready: true });
+      p.held = "";
+      return;
+    }
+    if (!p.held && st?.item) {
+      p.held = st.item;
+      this.stations.delete(key);
+    }
+  }
+
+  private serve(p: Actor): void {
+    if (!p.held.startsWith("plate:")) {
+      this.toast("手里没有成菜");
+      return;
+    }
+    const parts = p.held.slice(6).split(",").filter(Boolean).sort();
+    const match = RECIPES.find((r) => [...r.parts].sort().join() === parts.join());
+    if (!match) {
+      this.toast("这盘还不成席");
+      return;
+    }
+    const order = this.orders.find((o) => o.recipe === match.id) ?? this.orders[0];
+    const tip = 1 + Math.floor(this.rand() * 4) + Math.floor((this.fortune()?.cook ?? 0) / 8);
+    const gold = match.gold + tip + (this.isSplit() ? 2 : 0);
+    this.save.gold += gold;
+    this.save.bond += match.bond;
+    this.save.dishesTotal += 1;
+    this.skills(p).cook += 2;
+    p.held = "";
+    if (order) this.orders.splice(this.orders.indexOf(order), 1);
+    let extra = "";
+    if (chance(0.22 + (this.fortune()?.cook ?? 0) / 80, this.rand)) {
+      const gift = pickWeighted(
+        [
+          { id: "tomato_seed", w: 20 },
+          { id: "wheat_seed", w: 16 },
+          { id: "osmanthus", w: 8 },
+          { id: "garden-noodle", w: 10 },
+          { id: "fish-noodle", w: 8 },
+          { id: "osmanthus-fish", w: 5 },
+        ],
+        this.rand,
+      ).id;
+      if (RECIPES.some((r) => r.id === gift)) {
+        if (!this.save.knownRecipes.includes(gift)) {
+          this.save.knownRecipes.push(gift);
+          extra = `客人留下了「${RECIPES.find((r) => r.id === gift)?.name}」`;
+        }
+      } else {
+        addToBag(this.save.bag, gift);
+        extra = `客人留下了${item(gift).name}`;
+      }
+    }
+    this.toast(`${p.name} 上了${match.name} · ${gold}金${extra ? " · " + extra : ""}`);
+  }
+
+  private shop(p: Actor): void {
+    const stock = shopStock(this.save.day);
+    const ev = todayEvent(this.save.day);
+    const row = stock[Math.floor(this.rand() * Math.min(3, stock.length))];
+    const price = Math.max(1, Math.floor(row.price * (1 - ev.shop)));
+    if (this.save.gold < price) {
+      this.toast(`想买${item(row.id).name}，还差金`);
+      return;
+    }
+    this.save.gold -= price;
+    addToBag(this.save.bag, row.id);
+    this.toast(`${p.name} 买下${item(row.id).name}`);
+  }
+
+  private askFortune(p: Actor): void {
+    if (this.save.fortuneId) {
+      const f = this.fortune();
+      this.toast(f ? `${f.title}：${f.life}` : "今日已问过");
+      return;
+    }
+    if (!this.asked.includes(p.side)) this.asked.push(p.side);
+    p.askedFortune = true;
+    const online = new Set([...this.players.values()].map((x) => x.side));
+    const needBoth = online.size === 2;
+    if (needBoth && this.asked.length < 2) {
+      this.toast(`${p.name} 先把签筒握上了，等另一只手`);
+      return;
+    }
+    const f = rollFortune(this.rand);
+    this.save.fortuneId = f.id;
+    this.save.bond += 1;
+    this.toast(`今日${f.title} · ${f.life}`);
+  }
+
+  forge(p: Actor): void {
+    if (countOf(this.save.bag, "ore") < 2 || countOf(this.save.bag, "wood") < 1) {
+      this.toast("打造需要粗矿×2、青木×1");
+      return;
+    }
+    takeFromBag(this.save.bag, "ore", 2);
+    takeFromBag(this.save.bag, "wood", 1);
+    const pref = pickWeighted(
+      FORGE_PREFIX.map((x) => ({ ...x, w: x.w + this.skills(p).forge + (this.fortune()?.mine ?? 0) })),
+      this.rand,
+    );
+    this.skills(p).forge += 1;
+    if (pref.pair) {
+      addToBag(this.save.bag, p.side === "left" ? "twin_left" : "twin_right");
+      this.toast(`${p.name} 打出并肩之刃的一半`);
+      return;
+    }
+    addToBag(this.save.bag, pref.id === "spirit" || pref.atk >= 2 ? "iron_blade" : "wood_blade");
+    this.toast(`${p.name} 打出「${pref.name}」刃`);
+  }
+}
+
+function zoneName(z: Zone): string {
+  if (z === "mine") return "矿里";
+  if (z === "kitchen") return "厨房";
+  return "山谷";
+}

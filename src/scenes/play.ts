@@ -1,0 +1,194 @@
+import type { GameContext } from "../game/types";
+import { connectRoom } from "../net/client";
+import type { WorldSnap } from "../sim/net";
+import { consume, mountStick } from "../ui/stick";
+import { TILE } from "../world/maps";
+import { el } from "../ui/dom";
+
+const CELL_FILL: Record<string, string> = {
+  "#": "#2a1c16",
+  T: "#243228",
+  ".": "#3a4a34",
+  ",": "#6a5a40",
+  "~": "#2a4454",
+  D: "#4a6a6a",
+  P: "#5a4030",
+  F: "#2f5a38",
+  O: "#8a6a28",
+  C: "#5a3224",
+  N: "#5a3224",
+  A: "#c45c26",
+  I: "#c9a06a",
+  E: "#4a3a4a",
+  S: "#6a4a28",
+  G: "#d4a24a",
+  B: "#e6d0a6",
+  Y: "#8a6a3c",
+  "1": "#c45c3e",
+  "2": "#e6c36a",
+  "3": "#d4b46a",
+  "4": "#5a8f62",
+  "5": "#8aa4b5",
+  "6": "#d4a24a",
+  L: "#c9a06a",
+  W: "#f4e7d2",
+  X: "#3a2020",
+  Q: "#e7d3b4",
+  U: "#8a3a16",
+  o: "#7d8490",
+  e: "#3a3344",
+  Z: "#7ec8d6",
+};
+
+export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
+  const scene = el("section", "scene play-scene");
+  const canvas = document.createElement("canvas");
+  const hud = el("div", "live-hud");
+  scene.append(canvas, hud);
+  root.append(scene);
+  const stick = mountStick(scene, ctx.myName || "我");
+  const room = ctx.roomCode || "HOME";
+  let snap: WorldSnap | null = null;
+  let cam = { x: 0, y: 0 };
+
+  const net = connectRoom(
+    room,
+    ctx.myName || ctx.save.leftName || "我",
+    ctx.prefer,
+    (next) => {
+      snap = next;
+      ctx.roomCode = next.room;
+    },
+    (text) => {
+      hud.querySelector(".err")?.remove();
+      const e = el("div", "err", text);
+      hud.append(e);
+    },
+  );
+
+  const paint = () => {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = scene.clientWidth;
+    const h = scene.clientHeight;
+    if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+    }
+    const g = canvas.getContext("2d");
+    if (!g || !snap) return;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const bg = snap.zone === "mine" ? "#120e14" : snap.zone === "kitchen" ? "#1a120e" : "#141810";
+    g.fillStyle = bg;
+    g.fillRect(0, 0, w, h);
+
+    const me = snap.actors.find((a) => a.id === snap!.you) ?? snap.actors[0];
+    if (me) {
+      cam.x += (me.x - cam.x) * 0.12;
+      cam.y += (me.y - cam.y) * 0.12;
+    }
+    const ox = w / 2 - cam.x;
+    const oy = h / 2 - cam.y - 20;
+    const rows = snap.tiles;
+    for (let y = 0; y < rows.length; y++) {
+      for (let x = 0; x < rows[y].length; x++) {
+        const ch = rows[y][x];
+        g.fillStyle = CELL_FILL[ch] ?? (snap.zone === "mine" ? "#2a2430" : "#3d4a36");
+        g.fillRect(ox + x * TILE, oy + y * TILE, TILE - 1, TILE - 1);
+      }
+    }
+    for (const e of snap.enemies) {
+      g.fillStyle = e.hue;
+      g.beginPath();
+      g.arc(ox + e.x, oy + e.y, 11, 0, Math.PI * 2);
+      g.fill();
+      g.fillStyle = "#f4e7d2";
+      g.fillRect(ox + e.x - 12, oy + e.y - 18, 24 * (e.hp / e.maxHp), 3);
+    }
+    for (const a of snap.actors) {
+      g.fillStyle = a.side === "left" ? "#c45c26" : "#3f6d5c";
+      g.beginPath();
+      g.arc(ox + a.x, oy + a.y, 12, 0, Math.PI * 2);
+      g.fill();
+      if (a.fishing === "bite") {
+        g.strokeStyle = "#f4e7d2";
+        g.strokeRect(ox + a.x - 16, oy + a.y - 16, 32, 32);
+      }
+      g.fillStyle = "#f4e7d2";
+      g.font = "12px 'Noto Serif SC', serif";
+      g.textAlign = "center";
+      g.fillText(a.name, ox + a.x, oy + a.y - 18);
+      if (a.held) g.fillText(a.held.split(":")[0], ox + a.x, oy + a.y + 22);
+    }
+  };
+
+  const paintHud = () => {
+    if (!snap) return;
+    const partner = snap.partner;
+    const place = snap.zone === "mine" ? `矿 ${snap.floor}层 · ${snap.encounter}` : snap.zone === "kitchen" ? "厨房" : "山谷";
+    hud.innerHTML = `
+      <div class="live-top">
+        <div>
+          <b>${place}</b>
+          <span>房间 ${snap.room}</span>
+        </div>
+        <div class="live-meta">金 ${snap.gold} · 默契 ${snap.bond}</div>
+      </div>
+      <div class="partner ${partner?.online ? "on" : ""}">${
+        partner?.online ? `${partner.name} 在${placeOf(partner.zone)}` : "等另一部手机进来"
+      }</div>
+      ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
+      <div class="prompt">${snap.prompt}</div>
+      <div class="toasts">${snap.toasts.map((t) => `<p>${t}</p>`).join("")}</div>
+      ${
+        snap.orders.length
+          ? `<div class="tickets">${snap.orders
+              .map(
+                (o) =>
+                  `<div class="ticket"><b>${o.recipe}</b><small>${o.name}</small><div class="bar"><i style="width:${Math.min(100, o.left * 2.4)}%"></i></div></div>`,
+              )
+              .join("")}</div>`
+          : ""
+      }
+      <button class="bag-toggle" type="button" id="bag-btn">袋</button>
+      <div class="bag-panel hidden" id="bag">${snap.bag.map((s) => `<span>${s.name}×${s.n}</span>`).join("") || "空"}</div>
+    `;
+    hud.querySelector("#bag-btn")?.addEventListener("click", () => {
+      hud.querySelector("#bag")?.classList.toggle("hidden");
+    });
+  };
+
+  let lastHud = "";
+  const loop = () => {
+    net.send({
+      t: "input",
+      x: stick.input.x,
+      y: stick.input.y,
+      action: consume(stick.input, "action"),
+      held: stick.input.held,
+      ping: consume(stick.input, "ping"),
+    });
+    paint();
+    const key = snap ? JSON.stringify([snap.toasts, snap.prompt, snap.gold, snap.partner, snap.fortune, snap.bag, snap.orders]) : "";
+    if (key !== lastHud) {
+      lastHud = key;
+      paintHud();
+    }
+    raf = requestAnimationFrame(loop);
+  };
+  let raf = requestAnimationFrame(loop);
+
+  return () => {
+    cancelAnimationFrame(raf);
+    net.close();
+    stick.destroy();
+    scene.remove();
+  };
+}
+
+function placeOf(z: string): string {
+  if (z === "mine") return "矿里";
+  if (z === "kitchen") return "厨房";
+  return "山谷";
+}
