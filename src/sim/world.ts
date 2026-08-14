@@ -112,6 +112,9 @@ export class World {
   depleted: { zone: Zone; x: number; y: number; ch: string }[] = [];
   howled = false;
   seenBiome = new Set<string>();
+  scout = 0;
+  combo = 0;
+  comboT = 0;
 
   constructor(public room: string) {
     const home = this.valley.find("A")[0] ?? { x: 8, y: 8 };
@@ -223,6 +226,8 @@ export class World {
     this.tickFires(dt);
     this.tickWild(dt);
     this.rotFood(false, dt);
+    this.comboT = Math.max(0, this.comboT - dt);
+    if (this.comboT <= 0) this.combo = 0;
     this.toasts = this.toasts.filter((t) => {
       t.t -= dt;
       return t.t > 0;
@@ -276,6 +281,7 @@ export class World {
       dusk: this.clock > 0.5 && !this.isNight(),
       lit: you ? this.isLit(you) : true,
       rush: this.rushed,
+      combo: this.combo,
       revealed: full && you ? this.revealedList(you.side, zone) : [],
       visible: you ? this.visibleList(you) : [],
       fires: full ? this.fireKeys(zone) : [],
@@ -325,6 +331,7 @@ export class World {
       fishPull: p.fish?.pull ?? 0,
       hunger: Math.round(p.hunger),
       torch: p.torch > 0 || p.held.split(":")[0] === "torch",
+      ping: p.ping,
     };
   }
 
@@ -359,7 +366,13 @@ export class World {
 
   private near(a: Actor, b: Actor | undefined): boolean {
     if (!b || a.zone !== b.zone) return false;
-    return Math.hypot(a.x - b.x, a.y - b.y) < 90;
+    const r = a.zone === "kitchen" && this.rushed ? 150 : 90;
+    return Math.hypot(a.x - b.x, a.y - b.y) < r;
+  }
+
+  private canPass(p: Actor): boolean {
+    const o = this.other(p);
+    return !!o && this.near(p, o) && !!p.held && !o.held;
   }
 
   private isSplit(): boolean {
@@ -481,11 +494,14 @@ export class World {
       if (cell === "tree") return "砍";
       if (cell === "rock") return "砸";
       if (cell === "fire") {
-        if (countOf(this.save.bag, "flint") && countOf(this.save.bag, "wood") && countOf(this.save.bag, "herb") && this.fires.has(`${f.x},${f.y}`))
+        const lit = this.fires.has(`${f.x},${f.y}`);
+        if (lit && this.canCookAtFire(p)) return "烤";
+        if (countOf(this.save.bag, "flint") && countOf(this.save.bag, "wood") && countOf(this.save.bag, "herb") && lit)
           return "搓火把";
-        return "添火";
+        return lit ? "火还旺" : "添火";
       }
       if (cell === "relic") return "翻残骸";
+      if (cell === "camp") return this.near(p, this.other(p)) ? "并肩搜旧营" : "搜旧营";
       if (cell === "hole") return "钻洞";
       if (cell === "nest") return "挥";
       if (this.idleFace(cell) && eatValue(p.held)) return "吃";
@@ -515,7 +531,7 @@ export class World {
     const f = this.facingTile(p);
     const cell = map.cell(f.x, f.y);
     const ch = map.rows[f.y]?.[f.x];
-    if (this.idleFace(cell) && this.tryEat(p)) return;
+    if (this.idleFace(cell) && !this.canPass(p) && this.tryEat(p)) return;
 
     if (p.zone === "valley") {
       if (cell === "dock") return this.cast(p);
@@ -559,12 +575,15 @@ export class World {
       if (cell === "tree") return this.chopTree(p, f.x, f.y);
       if (cell === "rock") return this.crackRock(p, f.x, f.y);
       if (cell === "fire") {
+        if (this.cookAtFire(p, f.x, f.y)) return;
         if (!this.fires.has(`${f.x},${f.y}`)) return this.stoke(p, f.x, f.y);
         if (this.tryTorch(p, f.x, f.y)) return;
         return this.stoke(p, f.x, f.y);
       }
       if (cell === "relic") return this.relic(p, f.x, f.y);
+      if (cell === "camp") return this.lootCamp(p, f.x, f.y);
       if (cell === "hole") return this.hole(p);
+      if (this.tryGive(p)) return;
       return this.swing(p);
     }
   }
@@ -1095,7 +1114,17 @@ export class World {
       addToBag(this.save.bag, gift);
       extra = `客人留下了${item(gift).name}`;
     }
-    this.toast(`${p.name} 上了${match.name} · ${gold}金${extra ? " · " + extra : ""}`);
+    if (this.comboT > 0) this.combo += 1;
+    else this.combo = 1;
+    this.comboT = 9;
+    const streak = this.combo > 1 ? this.combo : 0;
+    this.save.gold += streak;
+    const pay = gold + streak;
+    this.toast(
+      streak
+        ? `连上了×${this.combo} · ${p.name} 上了${match.name} · ${pay}金${extra ? " · " + extra : ""}`
+        : `${p.name} 上了${match.name} · ${pay}金${extra ? " · " + extra : ""}`,
+    );
   }
 
   private shop(p: Actor): void {
@@ -1431,18 +1460,23 @@ export class World {
       const map = this.mapFor(p.zone);
       const t = toTile(p.x, p.y);
       const r = this.visionRadius(p);
+      let fresh = 0;
       for (let y = t.y - r; y <= t.y + r; y++) {
         for (let x = t.x - r; x <= t.x + r; x++) {
           if (x < 0 || y < 0 || x >= map.w || y >= map.h) continue;
           if (Math.hypot(x - t.x, y - t.y) > r) continue;
           const key = `${p.zone}:${x},${y}`;
-          this.explored[p.side].add(key);
+          if (!this.explored[p.side].has(key)) {
+            this.explored[p.side].add(key);
+            if (p.zone === "wild") fresh += 1;
+          }
           if (share) {
             const o = pair.find((q) => q.id !== p.id);
             if (o) this.explored[o.side].add(key);
           }
         }
       }
+      if (fresh) this.scoutFind(p, fresh);
     }
   }
 
@@ -1571,6 +1605,51 @@ export class World {
     this.relics.add(key);
     this.giveLoot(p, "chest", this.power(p).luck + 4, this.near(p, this.other(p)));
     this.toast(`${p.name} 在残骸旁蹲了下来`);
+  }
+
+  private canCookAtFire(p: Actor): boolean {
+    const held = parseHeld(p.held);
+    if (!held.id || held.id === "torch") return false;
+    const need = item(held.id).cook;
+    if (need !== "cook" && need !== "both") return false;
+    return held.state !== "cooked" && held.state !== "prepped" && held.state !== "ready";
+  }
+
+  private cookAtFire(p: Actor, x: number, y: number): boolean {
+    if (!this.fires.has(`${x},${y}`) || !this.canCookAtFire(p)) return false;
+    const held = parseHeld(p.held);
+    p.held = writeHeld(held.id, "cooked", held.fresh);
+    this.toast(`${p.name} 烤好了${item(held.id).name}`);
+    return true;
+  }
+
+  private scoutFind(p: Actor, n: number): void {
+    this.scout += n;
+    if (this.scout < 16) return;
+    this.scout = 0;
+    if (this.rand() > 0.42) return;
+    const pick =
+      this.rand() < 0.4 ? "herb" : this.rand() < 0.55 ? "flint" : this.rand() < 0.5 ? "tomato_seed" : "greens_seed";
+    addToBag(this.save.bag, pick);
+    this.toast(`${p.name} 脚下绊到 · ${item(pick).name}`);
+  }
+
+  private lootCamp(p: Actor, x: number, y: number): void {
+    const key = `J:${x},${y}`;
+    if (this.relics.has(key)) {
+      this.toast("旧营被翻过了");
+      return;
+    }
+    this.relics.add(key);
+    const pair = this.near(p, this.other(p));
+    this.giveLoot(p, "chest", this.power(p).luck + (pair ? 6 : 2), pair);
+    if (pair) {
+      const ring = p.side === "left" ? "ring_left" : "ring_right";
+      this.keepGear(p, makeGear(ring, 2, this.power(p).luck, this.rand, true));
+      this.toast("旧营还留着两个人的东西");
+      return;
+    }
+    this.toast(`${p.name} 在旧营里翻出一点存货`);
   }
 
   private hole(p: Actor): void {

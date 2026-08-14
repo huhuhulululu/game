@@ -36,6 +36,7 @@ const FILL: Record<string, string> = {
   b: "#5a5248",
   n: "#3a2018",
   s: "#6a6a38",
+  J: "#6a4a32",
   L: "#c9a06a",
   W: "#f4e7d2",
   X: "#3a2020",
@@ -129,6 +130,17 @@ export function drawCell(
     g.fillStyle = "rgba(200,220,230,0.35)";
     g.fillRect(px + 6, py + 8, TILE - 14, TILE - 16);
   }
+  if (ch === "J") {
+    g.fillStyle = "#5a3a28";
+    g.beginPath();
+    g.moveTo(cx, cy - 8);
+    g.lineTo(cx - 10, cy + 8);
+    g.lineTo(cx + 10, cy + 8);
+    g.closePath();
+    g.fill();
+    g.fillStyle = "rgba(232,140,60,0.28)";
+    g.fillRect(cx - 3, cy + 4, 6, 3);
+  }
   if (ch === "U") {
     g.fillStyle = "#c45c26";
     g.fillRect(px + 8, py + 18, TILE - 18, 6);
@@ -174,6 +186,15 @@ export function drawActor(g: CanvasRenderingContext2D, a: WorldSnap["actors"][0]
     g.beginPath();
     g.arc(x, y, 46, 0, Math.PI * 2);
     g.fill();
+  }
+  if (a.ping > 0) {
+    const r = 16 + (1.6 - Math.min(1.6, a.ping)) * 26;
+    g.strokeStyle = `rgba(244,231,210,${Math.min(0.55, a.ping * 0.38)})`;
+    g.lineWidth = 2;
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.stroke();
+    g.lineWidth = 1;
   }
   g.fillStyle = color;
   g.beginPath();

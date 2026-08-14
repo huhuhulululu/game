@@ -115,7 +115,8 @@ export type Cell =
   | "rock"
   | "nest"
   | "savanna"
-  | "ice";
+  | "ice"
+  | "camp";
 
 const VALLEY_KEY: Record<string, Cell> = {
   "#": "wall",
@@ -177,6 +178,7 @@ const WILD_KEY: Record<string, Cell> = {
   b: "rock",
   n: "nest",
   s: "savanna",
+  J: "camp",
 };
 
 const MINE_KEY: Record<string, Cell> = {
@@ -240,6 +242,7 @@ export function buildMap(rows: string[], kind: "valley" | "kitchen" | "mine" | "
     "nest",
     "savanna",
     "ice",
+    "camp",
   ]);
   return {
     rows,

@@ -84,8 +84,23 @@ export function generateWild(seed: number): string[] {
   sprinkle((c) => c === "m" || c === "T" || c === "t", "n", 5);
   sprinkle((c) => c === "." || c === "s" || c === "m", "K", 3);
   sprinkle((c) => c === "." || c === "s" || c === "^", "R", 4);
-  sprinkle((c) => c === "." || c === "m" || c === "s", "H", 2);
+  sprinkle((c) => c === "." || c === "s", "J", 2);
   sprinkle((c) => c === "m" || c === "." || c === "s", "e", 7);
+
+  const holes: { x: number; y: number }[] = [];
+  let guard = 80;
+  while (holes.length < 2 && guard-- > 0) {
+    const x = 3 + Math.floor(rand() * (w - 6));
+    const y = 3 + Math.floor(rand() * (h - 8));
+    if ((g[y][x] === "." || g[y][x] === "s" || g[y][x] === "m") && holes.every((h0) => Math.hypot(h0.x - x, h0.y - y) > 14)) {
+      g[y][x] = "H";
+      holes.push({ x, y });
+    }
+  }
+
+  for (let x = 3; x < w - 3; x++) {
+    if (g[h - 4][x] === "~" && g[h - 5][x] === "m" && rand() < 0.15) g[h - 5][x] = "D";
+  }
 
   g[h - 5][roadX] = "L";
   g[h - 4][roadX] = "D";

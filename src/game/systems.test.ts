@@ -106,6 +106,7 @@ describe("living systems", () => {
     assert.ok(all.includes("m"));
     assert.ok(all.includes("s"));
     assert.ok(all.includes("^"));
+    assert.ok(all.includes("J"));
   });
 
   it("walking the wild fills fog; partners share what they see when near", () => {
@@ -269,5 +270,132 @@ describe("living systems", () => {
     ageBag(warm, sleepSpoil("夏", false));
     ageBag(cold, sleepSpoil("夏", true));
     assert.ok((cold[0]?.fresh ?? 0) > (warm[0]?.fresh ?? 0));
+  });
+
+  it("cooked food restores more than raw", () => {
+    const raw = eatValue("meat:raw:100");
+    const cooked = eatValue("meat:cooked:100");
+    assert.ok(raw && cooked);
+    assert.ok(cooked.hunger > raw.hunger);
+    assert.ok(cooked.hp >= raw.hp);
+  });
+
+  it("lit campfire cooks raw meat in the hand", () => {
+    const w = new World("FIRE");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.wildMap = buildMap(generateWild(11), "wild");
+    const fire = w.wildMap.find("K")[0];
+    assert.ok(fire);
+    w.fires.set(`${fire.x},${fire.y}`, 40);
+    const stand = tileCenter(fire.x, fire.y + 1);
+    p.zone = "wild";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 0;
+    p.held = "meat:raw:100";
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.ok(p.held.includes(":cooked"));
+    assert.ok(w.toasts.some((t) => t.text.includes("烤")));
+  });
+
+  it("old camp can be searched once", () => {
+    const w = new World("CAMP");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.wildMap = buildMap(generateWild(11), "wild");
+    const camp = w.wildMap.find("J")[0];
+    assert.ok(camp);
+    const stand = tileCenter(camp.x, camp.y + 1);
+    p.zone = "wild";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 0;
+    const before = w.save.bag.reduce((n, s) => n + s.n, 0) + w.save.gear.length;
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    const after = w.save.bag.reduce((n, s) => n + s.n, 0) + w.save.gear.length;
+    assert.ok(after >= before);
+    assert.ok(w.relics.has(`J:${camp.x},${camp.y}`));
+    w.setInput("a", { x: 0, y: 0, action: false, held: false, ping: false });
+    p.cool = 0;
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.ok(w.toasts.some((t) => t.text.includes("翻过")));
+  });
+
+  it("walking the wild can trip over forage", () => {
+    const w = new World("SCOUT");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.rand = () => 0.01;
+    w.wildMap = buildMap(generateWild(5), "wild");
+    const leave = w.wildMap.find("L")[0];
+    const c = tileCenter(leave.x, leave.y - 1);
+    p.zone = "wild";
+    p.x = c.x;
+    p.y = c.y;
+    w.tick(0.05);
+    assert.ok(w.save.bag.some((s) => ["herb", "flint", "tomato_seed", "greens_seed"].includes(s.id)));
+    assert.ok(w.toasts.some((t) => t.text.includes("脚下绊到")));
+  });
+
+  it("kitchen rush lets you pass from farther away, and facing a partner does not eat the dish", () => {
+    const w = new World("PASS");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    w.rushed = true;
+    a.zone = "kitchen";
+    b.zone = "kitchen";
+    const floor = tileCenter(4, 5);
+    a.x = floor.x;
+    a.y = floor.y;
+    b.x = floor.x + 120;
+    b.y = floor.y;
+    a.facing = 1;
+    a.held = "dish:herb-tea";
+    b.held = "";
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(a.held, "");
+    assert.equal(b.held, "dish:herb-tea");
+  });
+
+  it("serving twice quickly starts a combo", () => {
+    const w = new World("COMBO");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    const win = w.kitchenMap.find("W")[0];
+    const stand = tileCenter(win.x - 1, win.y);
+    p.zone = "kitchen";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 1;
+    w.orders = [
+      { customer: "painter", recipe: "herb-tea", t: 30 },
+      { customer: "painter", recipe: "herb-tea", t: 30 },
+    ];
+    p.held = "dish:herb-tea";
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(w.combo, 1);
+    w.setInput("a", { x: 0, y: 0, action: false, held: false, ping: false });
+    p.cool = 0;
+    p.held = "dish:herb-tea";
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(w.combo, 2);
+    assert.ok(w.toasts.some((t) => t.text.includes("连上了")));
+  });
+
+  it("shouting puts a ping pulse on the actor snap", () => {
+    const w = new World("PING");
+    w.addPlayer("a", "阿左", "left");
+    w.setInput("a", { x: 0, y: 0, action: false, held: false, ping: true });
+    const snap = w.snapshot("a");
+    assert.ok((snap.actors[0]?.ping ?? 0) > 0);
+    assert.ok(w.toasts.some((t) => t.text.includes("喊")));
   });
 });

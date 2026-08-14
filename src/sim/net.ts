@@ -25,6 +25,7 @@ export interface ActorSnap {
   fishPull: number;
   hunger: number;
   torch: boolean;
+  ping: number;
 }
 
 export interface EnemySnap {
@@ -69,6 +70,7 @@ export interface WorldSnap {
   dusk: boolean;
   lit: boolean;
   rush: boolean;
+  combo: number;
   revealed: number[];
   visible: number[];
   fires: number[];
