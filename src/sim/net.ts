@@ -21,6 +21,8 @@ export interface ActorSnap {
   held: string;
   heldName: string;
   fishing: string;
+  fishMark: number;
+  fishPull: number;
   hunger: number;
   torch: boolean;
 }
@@ -32,6 +34,7 @@ export interface EnemySnap {
   maxHp: number;
   hue: string;
   name: string;
+  flash: number;
 }
 
 export interface OrderSnap {
@@ -84,6 +87,7 @@ export interface WorldSnap {
   toasts: string[];
   prompt: string;
   skills: { fish: number; cook: number; fight: number; forge: number };
+  album: { fish: number; fishMax: number; cook: number; cookMax: number; map: number };
 }
 
 export type ClientMsg =

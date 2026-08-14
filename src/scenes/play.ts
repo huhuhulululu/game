@@ -138,14 +138,28 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const ty = Math.floor(e.y / TILE);
         if (!fogVis.has(ty * mw + tx)) continue;
       }
-      g.fillStyle = e.hue;
+      g.fillStyle = e.flash > 0 ? "#f4e7d2" : e.hue;
       g.beginPath();
       g.arc(ox + e.x, oy + e.y, 11, 0, Math.PI * 2);
       g.fill();
       g.fillStyle = "#f4e7d2";
       g.fillRect(ox + e.x - 12, oy + e.y - 18, 24 * (e.hp / e.maxHp), 3);
     }
-    for (const a of snap.actors) drawActor(g, a, ox, oy);
+    for (const a of snap.actors) {
+      drawActor(g, a, ox, oy);
+      if (a.fishing === "fight") {
+        const x = ox + a.x;
+        const y = oy + a.y + 36;
+        g.fillStyle = "rgba(16,11,8,0.7)";
+        g.fillRect(x - 28, y, 56, 7);
+        g.fillStyle = "#3f6d5c";
+        g.fillRect(x - 28 + 56 * 0.38, y, 56 * 0.34, 7);
+        g.fillStyle = "#f4e7d2";
+        g.fillRect(x - 28 + 56 * a.fishMark - 1, y - 1, 3, 9);
+        g.fillStyle = "#c9a06a";
+        g.fillRect(x - 28, y + 9, 56 * Math.max(0, Math.min(1, a.fishPull)), 3);
+      }
+    }
     if (snap.weather.id === "rain" || snap.weather.id === "storm") {
       g.strokeStyle = "rgba(200,220,230,0.35)";
       for (let i = 0; i < 40; i++) {
@@ -286,9 +300,10 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       <div class="bag-panel ${open === "bag" ? "" : "hidden"}" id="bag">${
         snap.bag.map((s) => `<button type="button" data-take="${s.id}">${s.name}×${s.n}</button>`).join("") || "空"
       }${snap.gear.length ? `<span>${snap.gear.join(" · ")}</span>` : ""}</div>
-      <div class="bag-panel ${open === "book" ? "" : "hidden"}" id="book">${
-        snap.cookbook.map((n) => `<span>${n}</span>`).join("") || "还没写出第一道"
-      }</div>
+      <div class="bag-panel ${open === "book" ? "" : "hidden"}" id="book">
+        <p class="album">鱼 ${snap.album.fish}/${snap.album.fishMax} · 菜 ${snap.album.cook}/${snap.album.cookMax} · 图 ${snap.album.map}%</p>
+        ${snap.cookbook.map((n) => `<span>${n}</span>`).join("") || "还没写出第一道"}
+      </div>
       <div class="bag-panel map-panel ${open === "map" ? "" : "hidden"}" id="map">
         ${
           snap.zone === "wild"
@@ -348,6 +363,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           snap.hunger,
           snap.fires.length,
           snap.ice.length,
+          snap.album,
+          snap.actors.map((a) => [a.fishing, a.fishPull]),
         ])
       : "";
     if (key !== lastHud) {

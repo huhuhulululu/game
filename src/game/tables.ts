@@ -8,6 +8,7 @@ export interface FishDef {
   pair?: boolean;
   trash?: boolean;
   treasure?: boolean;
+  wild?: boolean;
 }
 
 export const FISH: FishDef[] = [
@@ -16,6 +17,8 @@ export const FISH: FishDef[] = [
   { id: "catfish", name: "鲶", skill: 5, w: 10, minW: 160, maxW: 240 },
   { id: "eel", name: "鳗", skill: 7, w: 6, minW: 165, maxW: 212 },
   { id: "silver", name: "银鳞", skill: 8, w: 3, minW: 90, maxW: 160, pair: true },
+  { id: "perch", name: "鲈", skill: 3, w: 12, minW: 70, maxW: 130, wild: true },
+  { id: "loach", name: "鳅", skill: 1, w: 14, minW: 20, maxW: 48, wild: true },
   { id: "boot", name: "旧靴", skill: 0, w: 8, minW: 10, maxW: 20, trash: true },
   { id: "box", name: "水底匣", skill: 3, w: 5, minW: 20, maxW: 40, treasure: true },
 ];

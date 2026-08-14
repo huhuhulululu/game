@@ -246,6 +246,13 @@ button {
   max-width: min(92vw, 280px);
 }
 
+.album {
+  width: 100%;
+  margin: 0 0 8px;
+  color: var(--gold-soft);
+  letter-spacing: 0.08em;
+}
+
 .map-panel p {
   margin: 0 0 8px;
   color: var(--gold-soft);

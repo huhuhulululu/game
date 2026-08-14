@@ -17,7 +17,7 @@ import { CUSTOMERS, ENCOUNTERS, FISH, MONSTERS } from "../game/tables";
 import { rollWeather, weatherById } from "../game/weather";
 import type { SaveData, Skills, Zone } from "../game/types";
 import { KITCHEN, TILE, VALLEY, buildMap, mineTemplate, replaceTile, tileCenter, toTile, type GridMap } from "../world/maps";
-import { biomeName, generateWild, packFog, tileKey } from "../world/wild";
+import { biomeName, generateWild, packFog, tileKey, WILD_H, WILD_W } from "../world/wild";
 import type { ActorSnap, InputState, WorldSnap } from "./net";
 
 const DIRS = [
@@ -38,7 +38,7 @@ interface Actor {
   facing: number;
   held: string;
   cool: number;
-  fish: { phase: "off" | "wait" | "bite"; t: number; window: number } | null;
+  fish: { phase: "off" | "wait" | "bite" | "fight"; t: number; window: number; mark: number; pull: number; dir: number } | null;
   chop: { t: number; id: string; key: string } | null;
   input: InputState;
   askedFortune: boolean;
@@ -60,6 +60,9 @@ interface Enemy {
   name: string;
   kind: string;
   zone: Zone;
+  vx: number;
+  vy: number;
+  flash: number;
 }
 
 interface Order {
@@ -107,6 +110,8 @@ export class World {
   rand = mulberry(Date.now() % 1e9);
   asked: ("left" | "right")[] = [];
   depleted: { zone: Zone; x: number; y: number; ch: string }[] = [];
+  howled = false;
+  seenBiome = new Set<string>();
 
   constructor(public room: string) {
     const home = this.valley.find("A")[0] ?? { x: 8, y: 8 };
@@ -183,6 +188,7 @@ export class World {
     this.enemies = this.enemies.filter((e) => e.zone === "wild");
     this.orders = [];
     this.fires.clear();
+    this.howled = false;
     this.respawnDepleted();
     this.rotFood(true);
     this.save.weather = rollWeather(this.rand, this.save.weather).id;
@@ -287,7 +293,7 @@ export class World {
         .map((p) => this.actorSnap(p)),
       enemies: this.enemies
         .filter((e) => e.zone === zone)
-        .map((e) => ({ x: e.x, y: e.y, hp: e.hp, maxHp: e.maxHp, hue: e.hue, name: e.name })),
+        .map((e) => ({ x: e.x, y: e.y, hp: e.hp, maxHp: e.maxHp, hue: e.hue, name: e.name, flash: e.flash })),
       orders: this.orders.map((o) => ({
         name: CUSTOMERS.find((c) => c.id === o.customer)?.name ?? "客人",
         recipe: potById(o.recipe).name,
@@ -296,6 +302,7 @@ export class World {
       toasts: this.toasts.map((t) => t.text),
       prompt: you ? this.prompt(you) : "",
       skills,
+      album: this.albumOf(you),
     };
   }
 
@@ -314,8 +321,23 @@ export class World {
       held: p.held,
       heldName: heldLabel(p.held),
       fishing: p.fish?.phase ?? "off",
+      fishMark: p.fish?.mark ?? 0,
+      fishPull: p.fish?.pull ?? 0,
       hunger: Math.round(p.hunger),
       torch: p.torch > 0 || p.held.split(":")[0] === "torch",
+    };
+  }
+
+  private albumOf(you?: Actor) {
+    const fishMax = FISH.filter((f) => !f.trash && !f.treasure).length;
+    const cookMax = POT_RECIPES.filter((r) => r.id !== "wet-goop").length;
+    const map = you && you.zone === "wild" ? Math.round((this.revealedList(you.side, "wild").length / (WILD_W * WILD_H)) * 100) : Math.round((this.explored[you?.side ?? "left"].size / Math.max(1, WILD_W * WILD_H)) * 100);
+    return {
+      fish: this.save.fishAlbum.length,
+      fishMax,
+      cook: this.save.cookbook.filter((id) => id !== "wet-goop").length,
+      cookMax,
+      map: Math.min(100, map),
     };
   }
 
@@ -363,7 +385,7 @@ export class World {
   }
 
   private move(p: Actor, dt: number): void {
-    if (p.fish?.phase === "wait" || p.fish?.phase === "bite") return;
+    if (p.fish?.phase === "wait" || p.fish?.phase === "bite" || p.fish?.phase === "fight") return;
     if (p.chop) return;
     const ix = p.input.x;
     const iy = p.input.y;
@@ -408,8 +430,9 @@ export class World {
   }
 
   private prompt(p: Actor): string {
-    if (p.fish?.phase === "wait") return "水面还没动";
+    if (p.fish?.phase === "wait") return this.pairFishing() ? "两人同钓 · 水面还没动" : "水面还没动";
     if (p.fish?.phase === "bite") return "起竿";
+    if (p.fish?.phase === "fight") return "稳住 · 绿的时候按";
     const map = this.mapFor(p.zone);
     const f = this.facingTile(p);
     const cell = map.cell(f.x, f.y);
@@ -475,7 +498,16 @@ export class World {
     if (p.cool > 0) return;
     p.cool = 0.18;
     if (p.fish?.phase === "bite") {
-      this.hook(p);
+      p.fish.phase = "fight";
+      p.fish.t = 6.2;
+      p.fish.mark = 0.2;
+      p.fish.pull = 0.22;
+      p.fish.dir = 1;
+      this.toast("咬住了——绿的时候按");
+      return;
+    }
+    if (p.fish?.phase === "fight") {
+      this.yank(p);
       return;
     }
     if (p.fish?.phase === "wait") return;
@@ -550,7 +582,7 @@ export class World {
   private cast(p: Actor): void {
     const skill = this.skills(p).fish;
     const window = 0.55 + skill * 0.04 + ((this.fortune()?.fish ?? 0) + weatherById(this.save.weather).fish) / 200;
-    p.fish = { phase: "wait", t: 1.1 + this.rand() * 2.2, window };
+    p.fish = { phase: "wait", t: 1.1 + this.rand() * 2.2, window, mark: 0, pull: 0, dir: 1 };
   }
 
   private tickFish(p: Actor, dt: number): void {
@@ -562,6 +594,35 @@ export class World {
     } else if (p.fish.phase === "bite" && p.fish.t <= 0) {
       p.fish = null;
       this.toast("走了");
+    } else if (p.fish.phase === "fight") {
+      p.fish.mark += p.fish.dir * dt * (1.15 + this.skills(p).fish * 0.02);
+      if (p.fish.mark > 1) {
+        p.fish.mark = 1;
+        p.fish.dir = -1;
+      }
+      if (p.fish.mark < 0) {
+        p.fish.mark = 0;
+        p.fish.dir = 1;
+      }
+      p.fish.pull = Math.max(0, p.fish.pull - dt * 0.08);
+      if (p.fish.t <= 0 || p.fish.pull <= 0) {
+        p.fish = null;
+        this.toast("跑了");
+      }
+    }
+  }
+
+  private yank(p: Actor): void {
+    if (!p.fish || p.fish.phase !== "fight") return;
+    const good = p.fish.mark > 0.38 && p.fish.mark < 0.72;
+    p.fish.pull += good ? 0.3 : -0.16;
+    if (p.fish.pull >= 1) {
+      this.hook(p);
+      return;
+    }
+    if (p.fish.pull <= 0) {
+      p.fish = null;
+      this.toast("线松了");
     }
   }
 
@@ -569,9 +630,10 @@ export class World {
     const skill = this.skills(p);
     const tilt = this.fortune()?.fish ?? 0;
     const pair = this.pairFishing();
-    const pool = FISH.filter((f) => skill.fish >= f.skill && (!f.pair || pair)).map((f) => ({
+    const wild = p.zone === "wild";
+    const pool = FISH.filter((f) => skill.fish >= f.skill && (!f.pair || pair) && (!f.wild || wild)).map((f) => ({
       ...f,
-      w: f.w + (f.pair && pair ? 10 : 0) + (tilt > 0 && !f.trash ? 6 : 0),
+      w: f.w + (f.pair && pair ? 10 : 0) + (tilt > 0 && !f.trash ? 6 : 0) + (f.wild && wild ? 14 : 0) + (!f.wild && wild && !f.pair ? -6 : 0),
     }));
     const hit = pickWeighted(pool, this.rand);
     p.fish = null;
@@ -589,7 +651,10 @@ export class World {
     const caught = rollCatch(hit.id, this.rand, this.save.fishBest[hit.id]);
     addToBag(this.save.bag, caught.bagId);
     this.save.fishTotal += 1;
-    if (!this.save.fishAlbum.includes(hit.id)) this.save.fishAlbum.push(hit.id);
+    if (!this.save.fishAlbum.includes(hit.id)) {
+      this.save.fishAlbum.push(hit.id);
+      this.toast(`写入鱼册：${hit.name}`);
+    }
     if (caught.record) this.save.fishBest[hit.id] = caught.weight;
     const rec = caught.record ? " · 新纪录" : "";
     this.toast(`${p.name} 钓上${gradeName(caught.grade)}${caught.name} ${caught.weight}${rec}`);
@@ -722,6 +787,9 @@ export class World {
         name: def.name,
         kind,
         zone: "mine",
+        vx: 0,
+        vy: 0,
+        flash: 0,
       });
     });
     if (ev === "vein") this.toast("这一层矿脉很响");
@@ -765,7 +833,11 @@ export class World {
       if (along > 4 && dist < reach + 10) {
         const crit = pairNear && chance(0.18 + (this.fortune()?.pair ?? 0) / 100, this.rand);
         e.hp -= pow.atk + (crit ? 4 : 0);
+        e.vx = d.x * 90;
+        e.vy = d.y * 90;
+        e.flash = 0.12;
         hit = true;
+        if (crit) this.toast("并肩一击");
       }
     }
     if (!hit) return;
@@ -791,8 +863,13 @@ export class World {
       const dx = t.x - e.x;
       const dy = t.y - e.y;
       const m = Math.hypot(dx, dy) || 1;
-      e.x += (dx / m) * e.speed * dt;
-      e.y += (dy / m) * e.speed * dt;
+      e.flash = Math.max(0, e.flash - dt);
+      e.vx *= 0.82;
+      e.vy *= 0.82;
+      const nx = e.x + (dx / m) * e.speed * dt + e.vx * dt;
+      const ny = e.y + (dy / m) * e.speed * dt + e.vy * dt;
+      if (this.free("mine", nx, e.y)) e.x = nx;
+      if (this.free("mine", e.x, ny)) e.y = ny;
       if (m < 18 && t.cool < 0.05) {
         t.hp -= e.atk * dt * 0.7;
         if (t.hp <= 0) {
@@ -1314,8 +1391,37 @@ export class World {
   }
 
   private tickClock(dt: number): void {
+    const wasNight = this.isNight();
     this.clock += dt / 200;
     if (this.clock >= 1) this.clock -= 1;
+    if (wasNight && !this.isNight()) this.howled = false;
+    this.tickHowl();
+    this.tickBiome();
+  }
+
+  private tickHowl(): void {
+    if (!this.isNight() || this.howled) return;
+    const explorers = [...this.players.values()].filter((p) => p.zone === "wild");
+    if (!explorers.length || this.clock < nightAfter(seasonOf(this.save.day)) + 0.08) return;
+    this.howled = true;
+    const t = explorers[0];
+    const tile = toTile(t.x, t.y);
+    const sx = Math.max(2, Math.min(WILD_W - 3, tile.x));
+    const sy = Math.max(2, Math.min(WILD_H - 3, tile.y));
+    this.spawnWild("shadow", sx + 1, sy);
+    this.spawnWild("silk", sx - 1, sy + 1);
+    this.toast("林子里有东西跟来了——靠近火");
+  }
+
+  private tickBiome(): void {
+    for (const p of this.players.values()) {
+      if (p.zone !== "wild") continue;
+      const b = this.biomeAt(p);
+      const key = `${p.side}:${b}`;
+      if (this.seenBiome.has(key) || !b) continue;
+      this.seenBiome.add(key);
+      this.toast(`${p.name} 走进了${b}`);
+    }
   }
 
   private tickFog(): void {
@@ -1379,9 +1485,12 @@ export class World {
       const dx = t.x - e.x;
       const dy = t.y - e.y;
       const m = Math.hypot(dx, dy) || 1;
+      e.flash = Math.max(0, e.flash - dt);
+      e.vx *= 0.82;
+      e.vy *= 0.82;
       const step = e.speed * dt * (this.isNight() ? 1.15 : 0.75);
-      const nx = e.x + (dx / m) * step;
-      const ny = e.y + (dy / m) * step;
+      const nx = e.x + (dx / m) * step + e.vx * dt;
+      const ny = e.y + (dy / m) * step + e.vy * dt;
       if (this.free("wild", nx, e.y)) e.x = nx;
       if (this.free("wild", e.x, ny)) e.y = ny;
       if (m < 18) {
@@ -1410,6 +1519,9 @@ export class World {
       name: def.name,
       kind,
       zone: "wild",
+      vx: 0,
+      vy: 0,
+      flash: 0,
     });
   }
 

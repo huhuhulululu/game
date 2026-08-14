@@ -225,6 +225,36 @@ describe("living systems", () => {
     assert.equal(merged.bag[0].n, 2);
   });
 
+  it("hooking a bite starts a fight; yanking in the green lands the fish", () => {
+    const w = new World("FISH");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.x = tileCenter(6, 10).x;
+    p.y = tileCenter(6, 10).y;
+    p.facing = 2;
+    p.fish = { phase: "bite", t: 1, window: 1, mark: 0.5, pull: 0.2, dir: 1 };
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(p.fish?.phase, "fight");
+    w.setInput("a", { x: 0, y: 0, action: false, held: false, ping: false });
+    p.cool = 0;
+    p.fish.mark = 0.5;
+    p.fish.pull = 0.8;
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(p.fish, null);
+    assert.ok(w.save.leftSkills.fish >= 2);
+  });
+
+  it("album counts fish species and recipes", () => {
+    const w = new World("ALB");
+    w.addPlayer("a", "阿左", "left");
+    w.save.fishAlbum = ["crucian", "perch"];
+    const snap = w.snapshot("a");
+    assert.equal(snap.album.fish, 2);
+    assert.ok(snap.album.fishMax >= 6);
+    assert.ok(snap.album.cookMax >= 8);
+  });
+
   it("perishable food ages and becomes mush, icebox slows it", () => {
     assert.equal(isPerishable("fish"), true);
     assert.equal(isPerishable("wood"), false);
