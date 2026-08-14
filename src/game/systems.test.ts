@@ -67,6 +67,8 @@ describe("living systems", () => {
     assert.equal(stew.id, "meaty-stew");
     const balls = matchPot(["morsel", "wheat", "herb", "tomato"], () => 0);
     assert.equal(balls.id, "meatballs");
+    const ham = matchPot(["meat", "meat", "osmanthus", "herb"], () => 0);
+    assert.equal(ham.id, "osmanthus-meat");
     const goop = matchPot(["wood", "wood", "wood", "wood"], () => 0);
     assert.equal(goop.id, "wet-goop");
     const tags = sumTags(["fish_heavy", "wheat"]);

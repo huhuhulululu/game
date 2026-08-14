@@ -65,6 +65,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   let fogSeen = new Set<number>();
   let fogVis = new Set<number>();
   let persistAt = 0;
+  let lastToast = "";
 
   const net = connectRoom(
     room,
@@ -75,6 +76,17 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       ctx.roomCode = next.room;
       fogSeen = new Set(next.revealed);
       fogVis = new Set(next.visible);
+      const top = next.toasts[0] ?? "";
+      if (top && top !== lastToast) {
+        lastToast = top;
+        if (top.includes("钓") || top.includes("水")) ctx.audio.tone("water");
+        else if (top.includes("砍") || top.includes("砸") || top.includes("挖")) ctx.audio.tone("chop");
+        else if (top.includes("咬") || top.includes("倒")) ctx.audio.tone("hit");
+        else if (top.includes("上了") || top.includes("出锅") || top.includes("写入")) ctx.audio.tone("serve");
+        else if (top.includes("糊") || top.includes("堂口")) ctx.audio.tone("sizzle");
+        else if (top.includes("火")) ctx.audio.tone("soft");
+        else ctx.audio.tone("drop");
+      }
       if (Date.now() - persistAt > 4000) {
         persistAt = Date.now();
         ctx.save.gold = next.gold;
@@ -210,6 +222,17 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       g.fillStyle = snap.lit ? "rgba(8,6,12,0.28)" : "rgba(4,2,8,0.62)";
       g.fillRect(0, 0, w, h);
     }
+    const cx = w - 68;
+    const cy = 22;
+    g.strokeStyle = "rgba(201,160,106,0.45)";
+    g.lineWidth = 2;
+    g.beginPath();
+    g.arc(cx, cy, 10, 0, Math.PI * 2);
+    g.stroke();
+    g.strokeStyle = snap.night ? "#8a6a9a" : "#c9a06a";
+    g.beginPath();
+    g.arc(cx, cy, 10, -Math.PI / 2, -Math.PI / 2 + snap.clock * Math.PI * 2);
+    g.stroke();
   };
 
   const paintAtlas = () => {

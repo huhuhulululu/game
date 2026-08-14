@@ -111,6 +111,7 @@ export function shopStock(day: number): { id: string; price: number }[] {
     { id: "wheat_seed", price: 10 },
     { id: "egg", price: 6 },
     { id: "tea", price: 10 },
+    { id: "flint", price: 6 },
     { id: "wood_blade", price: 24 },
   ];
   if (day >= 2) base.push({ id: "lucky_bell", price: 40 });
