@@ -390,6 +390,49 @@ describe("living systems", () => {
     assert.ok(w.toasts.some((t) => t.text.includes("连上了")));
   });
 
+  it("taking a torch from the bag lights the holder", () => {
+    const w = new World("TORCH");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    addToBag(w.save.bag, "torch");
+    w.clock = 0.9;
+    p.zone = "valley";
+    w.takeItem("torch", "a");
+    w.tick(0.05);
+    const snap = w.snapshot("a");
+    assert.equal(snap.night, true);
+    assert.equal(snap.lit, true);
+    assert.ok(p.held.startsWith("torch"));
+  });
+
+  it("two people fishing the same water count as pair fishing, including the wild shore", () => {
+    const w = new World("PAIR");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    w.wildMap = buildMap(generateWild(3), "wild");
+    const dock = w.wildMap.find("D")[0];
+    assert.ok(dock);
+    const stand = tileCenter(dock.x - 1, dock.y);
+    a.zone = "wild";
+    b.zone = "wild";
+    a.x = stand.x;
+    a.y = stand.y - 8;
+    b.x = stand.x;
+    b.y = stand.y + 8;
+    a.facing = 1;
+    b.facing = 1;
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    w.setInput("b", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.ok(a.fish);
+    assert.ok(b.fish);
+    const snap = w.snapshot("a");
+    assert.ok(snap.prompt.includes("两人同钓"));
+  });
+
   it("shouting puts a ping pulse on the actor snap", () => {
     const w = new World("PING");
     w.addPlayer("a", "阿左", "left");

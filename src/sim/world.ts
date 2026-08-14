@@ -382,7 +382,12 @@ export class World {
 
   private pairFishing(): boolean {
     const ps = [...this.players.values()];
-    return ps.length === 2 && ps.every((p) => p.zone === "valley" && p.fish);
+    if (ps.length !== 2 || !ps[0].fish || !ps[1].fish) return false;
+    return ps[0].zone === ps[1].zone && (ps[0].zone === "valley" || ps[0].zone === "wild");
+  }
+
+  private holdingTorch(p: Actor): boolean {
+    return p.torch > 0 || parseHeld(p.held).id === "torch";
   }
 
   private mapFor(zone: Zone): GridMap {
@@ -918,6 +923,7 @@ export class World {
     const fresh = takeFresh(this.save.bag, id);
     if (fresh === null) return;
     p.held = writeHeld(id, item(id).cook === "none" ? "ready" : "raw", fresh);
+    if (id === "torch") p.torch = Math.max(p.torch, 70);
   }
 
   private cut(p: Actor, x: number, y: number): void {
@@ -1328,7 +1334,7 @@ export class World {
   }
 
   private tryTorch(p: Actor, x: number, y: number): boolean {
-    if (p.held === "torch" || p.torch > 0) {
+    if (this.holdingTorch(p)) {
       this.stoke(p, x, y);
       return true;
     }
@@ -1404,7 +1410,7 @@ export class World {
 
   private isLit(p: Actor, hop = false): boolean {
     if (p.zone === "kitchen" || p.zone === "mine") return true;
-    if (p.torch > 0 || p.held === "torch" || p.held.startsWith("tea") || p.held.includes("lantern")) return true;
+    if (this.holdingTorch(p) || p.held.startsWith("tea") || p.held.includes("lantern")) return true;
     const map = this.mapFor(p.zone);
     const t = toTile(p.x, p.y);
     for (let y = t.y - 2; y <= t.y + 2; y++) {
