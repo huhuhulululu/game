@@ -4,52 +4,8 @@ import type { WorldSnap } from "../sim/net";
 import { consume, mountStick } from "../ui/stick";
 import { TILE } from "../world/maps";
 import { compass } from "../world/wild";
+import { cellFill, drawActor, drawCell, drawPlot, plotIndex, shade } from "./draw";
 import { el } from "../ui/dom";
-
-const CELL_FILL: Record<string, string> = {
-  "#": "#2a1c16",
-  T: "#243228",
-  t: "#2a4a30",
-  ".": "#3a4a34",
-  ",": "#6a5a40",
-  "~": "#2a4454",
-  D: "#4a6a6a",
-  P: "#5a4030",
-  F: "#2f5a38",
-  O: "#8a6a28",
-  C: "#5a3224",
-  N: "#5a3224",
-  A: "#c45c26",
-  I: "#c9a06a",
-  E: "#4a3a4a",
-  S: "#6a4a28",
-  G: "#d4a24a",
-  B: "#e6d0a6",
-  Y: "#8a6a3c",
-  "1": "#c45c3e",
-  "2": "#e6c36a",
-  "3": "#d4b46a",
-  "4": "#5a8f62",
-  "5": "#8aa4b5",
-  "6": "#d4a24a",
-  m: "#2a3a28",
-  K: "#d47a3c",
-  R: "#8a7a6a",
-  H: "#1a1010",
-  V: "#c9a06a",
-  "^": "#4a4038",
-  b: "#5a5248",
-  n: "#3a2018",
-  s: "#6a6a38",
-  L: "#c9a06a",
-  W: "#f4e7d2",
-  X: "#3a2020",
-  Q: "#e7d3b4",
-  U: "#8a3a16",
-  o: "#7d8490",
-  e: "#3a3344",
-  Z: "#7ec8d6",
-};
 
 export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   const scene = el("section", "scene play-scene");
@@ -92,7 +48,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         ctx.save.gold = next.gold;
         ctx.save.bond = next.bond;
         ctx.save.day = next.day;
-        ctx.save.bag = next.bag.map((s) => ({ id: s.id, n: s.n }));
+        ctx.save.bag = next.bag.map((s) => ({ id: s.id, n: s.n, fresh: s.fresh }));
         ctx.persist();
       }
     },
@@ -138,19 +94,27 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const oy = h / 2 - cam.y - 20;
     const rows = snap.tiles;
     const mw = rows[0]?.length ?? 1;
+    const now = Date.now();
     for (let y = 0; y < rows.length; y++) {
       for (let x = 0; x < rows[y].length; x++) {
         const ch = rows[y][x];
         const key = y * mw + x;
-        let fill = CELL_FILL[ch] ?? (snap.zone === "mine" ? "#2a2430" : "#3d4a36");
+        let fill = cellFill(ch, snap.zone);
+        let hidden = false;
         if (snap.zone === "wild") {
           const seen = fogSeen.has(key);
           const vis = fogVis.has(key);
-          if (!seen) fill = "#050403";
-          else if (!vis) fill = shade(fill, 0.42);
+          if (!seen) {
+            fill = "#050403";
+            hidden = true;
+          } else if (!vis) fill = shade(fill, 0.42);
         }
-        g.fillStyle = fill;
-        g.fillRect(ox + x * TILE, oy + y * TILE, TILE - 1, TILE - 1);
+        drawCell(g, hidden ? "#" : ch, ox + x * TILE, oy + y * TILE, fill, now);
+        if (!hidden && ch === "P") {
+          const i = plotIndex(rows, x, y);
+          const plot = snap.plots[i];
+          if (plot) drawPlot(g, ox + x * TILE, oy + y * TILE, plot.stage, plot.seed);
+        }
       }
     }
     if (snap.zone === "wild") {
@@ -181,24 +145,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       g.fillStyle = "#f4e7d2";
       g.fillRect(ox + e.x - 12, oy + e.y - 18, 24 * (e.hp / e.maxHp), 3);
     }
-    for (const a of snap.actors) {
-      g.fillStyle = a.side === "left" ? "#c45c26" : "#3f6d5c";
-      g.beginPath();
-      g.arc(ox + a.x, oy + a.y, 12, 0, Math.PI * 2);
-      g.fill();
-      if (a.fishing === "bite") {
-        g.strokeStyle = "#f4e7d2";
-        g.strokeRect(ox + a.x - 16, oy + a.y - 16, 32, 32);
-      }
-      g.fillStyle = "#f4e7d2";
-      g.font = "12px 'Noto Serif SC', serif";
-      g.textAlign = "center";
-      g.fillText(a.name, ox + a.x, oy + a.y - 18);
-      g.fillStyle = "#c45c26";
-      g.fillRect(ox + a.x - 12, oy + a.y + 14, 24 * Math.max(0, a.hp / a.maxHp), 3);
-      g.fillStyle = "#f4e7d2";
-      if (a.heldName) g.fillText(a.heldName, ox + a.x, oy + a.y + 26);
-    }
+    for (const a of snap.actors) drawActor(g, a, ox, oy);
     if (snap.weather.id === "rain" || snap.weather.id === "storm") {
       g.strokeStyle = "rgba(200,220,230,0.35)";
       for (let i = 0; i < 40; i++) {
@@ -212,6 +159,18 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     }
     if (snap.weather.id === "fog") {
       g.fillStyle = "rgba(210,210,200,0.12)";
+      g.fillRect(0, 0, w, h);
+    }
+    if (snap.season === "冬" && snap.zone !== "kitchen" && snap.zone !== "mine") {
+      g.fillStyle = "rgba(230,230,235,0.55)";
+      for (let i = 0; i < 28; i++) {
+        const x = (i * 53 + now / 12) % w;
+        const y = (i * 71 + now / 9) % h;
+        g.fillRect(x, y, 2, 2);
+      }
+    }
+    if (snap.weather.id === "storm" && Math.sin(now / 180) > 0.97) {
+      g.fillStyle = "rgba(240,240,255,0.18)";
       g.fillRect(0, 0, w, h);
     }
     if (snap.dusk) {
@@ -253,7 +212,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const key = y * mw + x;
         if (!fogSeen.has(key)) continue;
         const ch = rows[y][x];
-        let fill = CELL_FILL[ch] ?? "#3d4a36";
+        let fill = cellFill(ch, "wild");
         if (!fogVis.has(key)) fill = shade(fill, 0.5);
         if (snap.fires.includes(key)) fill = "#e08a4f";
         g.fillStyle = fill;
@@ -308,6 +267,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       <div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>
       ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
       ${snap.pot.length || snap.potReady ? `<div class="fortune-chip">锅：${snap.potReady || snap.pot.join("、") || "空"}</div>` : ""}
+      ${snap.ice.length ? `<div class="fortune-chip">冰柜 ${snap.ice.map((s) => s.name + "×" + s.n).join("、")}</div>` : ""}
       <div class="prompt">${snap.prompt}</div>
       <div class="toasts">${snap.toasts.map((t) => `<p>${t}</p>`).join("")}</div>
       ${
@@ -387,6 +347,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           snap.hp,
           snap.hunger,
           snap.fires.length,
+          snap.ice.length,
         ])
       : "";
     if (key !== lastHud) {
@@ -412,12 +373,4 @@ function placeOf(z: string): string {
   if (z === "kitchen") return "厨房";
   if (z === "wild") return "荒野";
   return "山谷";
-}
-
-function shade(hex: string, amt: number): string {
-  const n = parseInt(hex.slice(1), 16);
-  const r = Math.floor(((n >> 16) & 255) * amt);
-  const g = Math.floor(((n >> 8) & 255) * amt);
-  const b = Math.floor((n & 255) * amt);
-  return `rgb(${r},${g},${b})`;
 }

@@ -1,7 +1,8 @@
 import { craftGear, makeGear, type GearInst } from "../game/affix";
-import { addToBag, countOf, takeFromBag } from "../game/bag";
+import { addToBag, countOf, takeFresh, takeFromBag } from "../game/bag";
 import { maxHp, shopStock, todayEvent } from "../game/content";
 import { eatValue, heldLabel } from "../game/eat";
+import { ageBag, freshWord, parseHeld, sleepSpoil, spoilRate, writeHeld } from "../game/spoil";
 import { gradeName, rollCatch } from "../game/fishQuality";
 import { matchPot, potById, POT_RECIPES } from "../game/food";
 import { fortuneById, rollFortune, type Fortune } from "../game/fortune";
@@ -91,8 +92,10 @@ export class World {
   growAcc = 0;
   weatherAcc = 0;
   pot: string[] = [];
+  potFresh: number[] = [];
   potCook = 0;
   potReady: string | null = null;
+  ice: import("../game/types").Stack[] = [];
   wildMap: GridMap | null = null;
   clock = 0.22;
   explored = { left: new Set<string>(), right: new Set<string>() };
@@ -181,6 +184,7 @@ export class World {
     this.orders = [];
     this.fires.clear();
     this.respawnDepleted();
+    this.rotFood(true);
     this.save.weather = rollWeather(this.rand, this.save.weather).id;
     this.clock = 0.18;
     this.dirty = true;
@@ -212,6 +216,7 @@ export class World {
     this.tickDark(dt);
     this.tickFires(dt);
     this.tickWild(dt);
+    this.rotFood(false, dt);
     this.toasts = this.toasts.filter((t) => {
       t.t -= dt;
       return t.t > 0;
@@ -234,7 +239,14 @@ export class World {
       fortune: fortune ? { title: fortune.title, life: fortune.life, tilt: fortune.tilt } : null,
       weather: { id: weatherById(this.save.weather).id, name: weatherById(this.save.weather).name },
       waitingFortune: this.asked,
-      bag: this.save.bag.map((s) => ({ ...s, name: item(s.id).name })),
+      bag: this.save.bag.map((s) => ({
+        ...s,
+        name: `${item(s.id).name}${s.fresh !== undefined && s.fresh < 70 ? "·" + freshWord(s.fresh) : ""}`,
+      })),
+      ice: this.ice.map((s) => ({
+        ...s,
+        name: `${item(s.id).name}${s.fresh !== undefined && s.fresh < 70 ? "·" + freshWord(s.fresh) : ""}`,
+      })),
       gear: this.save.gear.map((g) => g.name),
       cookbook: this.save.cookbook.map((id) => potById(id).name),
       pot: this.pot.map((id) => item(id.split(":")[0]).name),
@@ -303,6 +315,7 @@ export class World {
       heldName: heldLabel(p.held),
       fishing: p.fish?.phase ?? "off",
       hunger: Math.round(p.hunger),
+      torch: p.torch > 0 || p.held.split(":")[0] === "torch",
     };
   }
 
@@ -433,6 +446,8 @@ export class World {
         return this.pot.length ? `入锅 · ${this.pot.length}/4` : "入锅";
       }
       if (cell === "window") return this.rushed ? "上菜！堂口在催" : "上菜";
+      if (cell === "ice") return p.held && !p.held.startsWith("dish:") ? "入冰" : this.ice.length ? "取冰" : "冰柜空着";
+      if (this.near(p, this.other(p)) && p.held && this.other(p) && !this.other(p)!.held) return "递给对方";
       if (this.idleFace(cell) && eatValue(p.held)) return "吃";
       if (cell === "trash") return "丢掉";
     }
@@ -498,6 +513,7 @@ export class World {
       if (cell === "stove") return this.stove(p, f.x, f.y);
       if (cell === "plate") return this.potAct(p);
       if (cell === "window") return this.serve(p);
+      if (cell === "ice") return this.iceAct(p);
       if (cell === "trash") {
         p.held = "";
         return;
@@ -796,15 +812,16 @@ export class World {
       this.toast(`没有${item(id).name}`);
       return;
     }
-    takeFromBag(this.save.bag, found);
-    p.held = item(found).cook === "none" ? `${found}:ready` : `${found}:raw`;
+    const fresh = takeFresh(this.save.bag, found) ?? 100;
+    p.held = writeHeld(found, item(found).cook === "none" ? "ready" : "raw", fresh);
   }
 
   takeItem(id: string, playerId: string): void {
     const p = this.players.get(playerId);
     if (!p || p.held) return;
-    if (!takeFromBag(this.save.bag, id)) return;
-    p.held = item(id).cook === "none" ? `${id}:ready` : `${id}:raw`;
+    const fresh = takeFresh(this.save.bag, id);
+    if (fresh === null) return;
+    p.held = writeHeld(id, item(id).cook === "none" ? "ready" : "raw", fresh);
   }
 
   private cut(p: Actor, x: number, y: number): void {
@@ -816,14 +833,14 @@ export class World {
       this.stations.delete(key);
       return;
     }
-    if (!p.held.endsWith(":raw")) return;
-    const id = p.held.split(":")[0];
-    const need = item(id).cook;
+    const held = parseHeld(p.held);
+    if (held.state !== "raw") return;
+    const need = item(held.id).cook;
     if (need !== "chop" && need !== "both") {
       this.toast("这个不用切");
       return;
     }
-    p.chop = { t: Math.max(0.45, 1.15 - this.skills(p).cook * 0.03), id, key };
+    p.chop = { t: Math.max(0.45, 1.15 - this.skills(p).cook * 0.03), id: writeHeld(held.id, "prepped", held.fresh), key };
     p.held = "";
     this.stations.set(key, { key, item: "", t: 0, need: 1, ready: false });
   }
@@ -833,8 +850,7 @@ export class World {
     if (!p.input.held) return;
     p.chop.t -= dt;
     if (p.chop.t <= 0) {
-      const id = p.chop.id;
-      const next = `${id}:prepped`;
+      const next = p.chop.id.includes(":") ? p.chop.id : `${p.chop.id}:prepped`;
       this.stations.set(p.chop.key, { key: p.chop.key, item: next, t: 0, need: 0, ready: true });
       p.chop = null;
       this.skills(p).cook += 1;
@@ -852,15 +868,21 @@ export class World {
     }
     if (st && !st.ready) return;
     if (!p.held) return;
-    const [id, state] = p.held.split(":");
-    const need = item(id).cook;
-    const ok = need === "cook" && state === "raw" || need === "both" && state === "prepped";
+    const held = parseHeld(p.held);
+    const need = item(held.id).cook;
+    const ok = (need === "cook" && held.state === "raw") || (need === "both" && held.state === "prepped");
     if (!ok) {
       this.toast("现在还不能下锅");
       return;
     }
     p.held = "";
-    this.stations.set(key, { key, item: `${id}:cooked`, t: 0, need: Math.max(0.8, 2 - this.skills(p).cook * 0.04), ready: false });
+    this.stations.set(key, {
+      key,
+      item: writeHeld(held.id, "cooked", held.fresh),
+      t: 0,
+      need: Math.max(0.8, 2 - this.skills(p).cook * 0.04),
+      ready: false,
+    });
   }
 
   private tickKitchen(dt: number): void {
@@ -916,15 +938,21 @@ export class World {
         this.toast("四格满了，像饥荒的锅");
         return;
       }
-      const [id, state] = p.held.split(":");
-      const ready = !state || state === "prepped" || state === "cooked" || state === "ready" || item(id).cook === "none";
-      if (!ready && item(id).cook && item(id).cook !== "none") {
+      const held = parseHeld(p.held);
+      const ready =
+        !held.state ||
+        held.state === "prepped" ||
+        held.state === "cooked" ||
+        held.state === "ready" ||
+        item(held.id).cook === "none";
+      if (!ready && item(held.id).cook && item(held.id).cook !== "none") {
         this.toast("还没处理好");
         return;
       }
-      this.pot.push(id);
+      this.pot.push(held.id);
+      this.potFresh.push(held.fresh);
       p.held = "";
-      this.toast(`入锅 ${item(id).name} · ${this.pot.length}/4`);
+      this.toast(`入锅 ${item(held.id).name} · ${this.pot.length}/4`);
       if (this.pot.length === 4) this.startPot(p);
       return;
     }
@@ -940,9 +968,12 @@ export class World {
     if (this.potCook <= 0) return;
     this.potCook -= dt;
     if (this.potCook > 0) return;
-    const recipe = matchPot(this.pot, this.rand);
+    const avg = this.potFresh.length ? this.potFresh.reduce((a, b) => a + b, 0) / this.potFresh.length : 100;
+    const recipe = matchPot(this.pot, this.rand, avg);
     this.pot = [];
+    this.potFresh = [];
     this.potReady = recipe.id;
+    if (avg < 40 && recipe.id !== "wet-goop") this.toast("菜有点蔫，好在还认得");
     if (!this.save.cookbook.includes(recipe.id)) {
       this.save.cookbook.push(recipe.id);
       this.save.knownRecipes = this.save.cookbook;
@@ -1144,11 +1175,50 @@ export class World {
     const v = eatValue(p.held);
     if (!v) return false;
     if (p.held.startsWith("dish:") && this.orders.length && p.zone === "kitchen") return false;
-    p.hp = Math.min(maxHp(this.fighter(p).level), p.hp + v.hp);
-    p.hunger = Math.min(100, p.hunger + v.hunger);
-    this.toast(`${p.name} 吃了${heldLabel(p.held)}`);
+    const fresh = parseHeld(p.held).fresh;
+    const mul = fresh >= 40 ? 1 : 0.45;
+    p.hp = Math.min(maxHp(this.fighter(p).level), p.hp + v.hp * mul);
+    p.hunger = Math.min(100, p.hunger + v.hunger * mul);
+    this.toast(`${p.name} 吃了${heldLabel(p.held)}${fresh < 40 ? "（蔫了）" : ""}`);
     p.held = "";
     return true;
+  }
+
+  private iceAct(p: Actor): void {
+    if (p.held && !p.held.startsWith("dish:")) {
+      const held = parseHeld(p.held);
+      addToBag(this.ice, held.id, 1, held.fresh);
+      p.held = "";
+      this.toast(`${p.name} 把${item(held.id).name}放进冰柜`);
+      return;
+    }
+    if (p.held) return;
+    const row = this.ice[0];
+    if (!row) {
+      this.toast("冰柜空着");
+      return;
+    }
+    const fresh = takeFresh(this.ice, row.id) ?? 100;
+    p.held = writeHeld(row.id, item(row.id).cook === "none" ? "ready" : "raw", fresh);
+    this.toast(`${p.name} 从冰柜取出${item(row.id).name}`);
+  }
+
+  private rotFood(sleeping: boolean, dt = 0): void {
+    const sea = seasonOf(this.save.day);
+    const bagAmt = sleeping ? sleepSpoil(sea, false) : spoilRate(sea, false) * dt;
+    const iceAmt = sleeping ? sleepSpoil(sea, true) : spoilRate(sea, true) * dt;
+    const notes = [...ageBag(this.save.bag, bagAmt), ...ageBag(this.ice, iceAmt)];
+    if (notes[0]) this.toast(notes[0]);
+    for (const p of this.players.values()) {
+      if (!p.held || p.held.startsWith("dish:") || p.held.split(":")[0] === "torch") continue;
+      const held = parseHeld(p.held);
+      if (!held.id) continue;
+      const next = held.fresh - (sleeping ? sleepSpoil(sea, false) : spoilRate(sea, false) * dt);
+      if (next <= 0) {
+        p.held = writeHeld("mush", "ready", 100);
+        this.toast(`${p.name} 手里的东西坏了`);
+      } else p.held = writeHeld(held.id, held.state || "raw", next);
+    }
   }
 
   private tryTorch(p: Actor, x: number, y: number): boolean {

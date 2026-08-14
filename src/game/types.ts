@@ -32,6 +32,7 @@ export interface ItemDef {
 export interface Stack {
   id: string;
   n: number;
+  fresh?: number;
 }
 
 export interface EquipIds {

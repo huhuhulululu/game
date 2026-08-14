@@ -65,6 +65,7 @@
 - **做饭**：饥荒锅。四种食材、标签加总（肉/鱼/菜/蛋/甜/填料）、优先级最高的菜胜出，对不上就是「一锅糊涂」。菜单靠自己煮出来，像 DST 的 Cookbook。[Crock Pot](https://dontstarve.wiki.gg/wiki/Crock_Pot) / [Food Value](https://dontstarve.wiki.gg/wiki/Food_Value)。
 - **鱼品质**：饥荒联机版海鱼重量 `rand*(max-min)+min`，过了区间 70% 算沉重。[Weight](https://dontstarve.wiki.gg/wiki/Weight)。沉重的鱼在锅里的鱼值和肉值更高。
 - **探险**：饥荒地图先是黑的，走近才填上；夜里没火会挨咬（查理只在地面，矿里有灯）；地上有路、残骸、篝火、洞、林沼石丘。[Map/DST](https://dontstarve.wiki.gg/wiki/Map/DST)。两人走近，当前看见的格子会写进对方的图。春夏秋冬每三天一转，冬天夜来得早、火烧得快。燧石+木+草能搓火把。
+- **腐坏**：鱼、肉、菜会蔫、会坏，坏了变成「一锅糊涂」。夏天坏得快，冬天慢。厨房冰柜能把腐坏压到很慢，像饥荒的 Ice Box。蔫了的食材进锅，标签会打折。
 - **堂口**：客人堆到两单以上，厨房才进入 Overcooked 式催菜：传菜、对单、炉子会糊。平时仍是饥荒那口锅。山谷和荒野不借用 Overcooked。
 
 ## 明确不做

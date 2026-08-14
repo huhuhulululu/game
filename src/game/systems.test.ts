@@ -10,6 +10,7 @@ import { LOOT_TABLES } from "./lootTables";
 import { pickWeighted } from "./rng";
 import { eatValue } from "./eat";
 import { seasonOf } from "./season";
+import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
 import { World } from "../sim/world";
 import { buildMap, tileCenter, VALLEY } from "../world/maps";
@@ -222,5 +223,21 @@ describe("living systems", () => {
     assert.deepEqual(merged.revealed, [1, 2, 3]);
     assert.deepEqual(merged.visible, [2]);
     assert.equal(merged.bag[0].n, 2);
+  });
+
+  it("perishable food ages and becomes mush, icebox slows it", () => {
+    assert.equal(isPerishable("fish"), true);
+    assert.equal(isPerishable("wood"), false);
+    assert.ok(freshMul(80) > freshMul(20));
+    const bag = [{ id: "fish", n: 2, fresh: 10 }];
+    const notes = ageBag(bag, 20);
+    assert.ok(notes[0]?.includes("糊涂"));
+    assert.equal(countOf(bag, "fish"), 0);
+    assert.equal(countOf(bag, "mush"), 2);
+    const warm = [{ id: "fish", n: 1, fresh: 80 }];
+    const cold = [{ id: "fish", n: 1, fresh: 80 }];
+    ageBag(warm, sleepSpoil("夏", false));
+    ageBag(cold, sleepSpoil("夏", true));
+    assert.ok((cold[0]?.fresh ?? 0) > (warm[0]?.fresh ?? 0));
   });
 });
