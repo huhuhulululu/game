@@ -3,14 +3,10 @@ import { WebSocketServer, type WebSocket } from "ws";
 import { createServer as createVite } from "vite";
 import type { ClientMsg } from "../src/sim/net";
 import { World } from "../src/sim/world";
+import { makeRoomCode, resolveHelloRoom, roomIsFull } from "./join";
 
 const PORT = Number(process.env.PORT ?? 5173);
 const rooms = new Map<string, { world: World; clients: Map<WebSocket, string>; idle: number }>();
-
-function code(): string {
-  const chars = "ABCDEFGHJKLMNPQRTUVWXY23456789";
-  return Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-}
 
 function roomOf(id: string) {
   let rec = rooms.get(id);
@@ -54,10 +50,15 @@ wss.on("connection", (ws) => {
       return;
     }
     if (msg.t === "hello") {
-      const room = (msg.room || code()).toUpperCase();
+      const resolved = resolveHelloRoom(msg.room, rooms, makeRoomCode);
+      if ("err" in resolved) {
+        ws.send(JSON.stringify({ t: "err", text: resolved.err }));
+        return;
+      }
+      const room = resolved.room;
       const rec = roomOf(room);
       const name = msg.name || "过路人";
-      const taken = rec.world.reclaim(name, msg.prefer);
+      const taken = rec.world.reclaim(name, msg.prefer) ?? rec.world.occupyAway(name, msg.prefer);
       if (taken) {
         for (const [oldWs, id] of rec.clients) {
           if (id !== taken) continue;
@@ -65,7 +66,7 @@ wss.on("connection", (ws) => {
           try {
             oldWs.close();
           } catch {
-            /* seat stolen by reconnect */
+            /* seat taken by reconnect */
           }
         }
         rec.clients.set(ws, taken);
@@ -78,7 +79,7 @@ wss.on("connection", (ws) => {
         broadcast(rec, true);
         return;
       }
-      if (rec.world.players.size >= 2 || rec.clients.size >= 2) {
+      if (roomIsFull(rec.world.present().length)) {
         ws.send(JSON.stringify({ t: "err", text: "这间山谷已经有两个人了" }));
         return;
       }

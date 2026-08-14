@@ -5,6 +5,7 @@ import { RECIPES } from "./content";
 import { gradeOf, rollCatch } from "./fishQuality";
 import { matchPot, sumTags } from "./food";
 import { FORTUNES, rollFortune } from "./fortune";
+import { item } from "./items";
 import { rollLootTable } from "./loot";
 import { LOOT_TABLES } from "./lootTables";
 import { pickWeighted } from "./rng";
@@ -12,10 +13,25 @@ import { eatValue } from "./eat";
 import { seasonOf } from "./season";
 import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
+import { resolveHelloRoom, roomIsFull } from "../../server/join";
 import { World } from "../sim/world";
 import { buildMap, mineTemplate, tileCenter, VALLEY } from "../world/maps";
 import { generateWild } from "../world/wild";
 import type { WorldSnap } from "../sim/net";
+
+function tap(w: World, id: string): void {
+  w.setInput(id, { x: 0, y: 0, action: true, held: false, ping: false });
+  w.setInput(id, { x: 0, y: 0, action: false, held: false, ping: false });
+  const p = w.players.get(id);
+  if (p) p.cool = 0;
+}
+
+function standFacing(p: { x: number; y: number; facing: number }, tile: { x: number; y: number }): void {
+  const c = tileCenter(tile.x, tile.y + 1);
+  p.x = c.x;
+  p.y = c.y;
+  p.facing = 0;
+}
 
 describe("living systems", () => {
   it("bag stacks and spends", () => {
@@ -218,6 +234,7 @@ describe("living systems", () => {
       visible: [2],
       bag: [{ id: "wood", n: 2, name: "青木" }],
       cookbook: ["山草茶"],
+      board: [],
     } as unknown as WorldSnap;
     const merged = mergeSnap(full, lite);
     assert.deepEqual(merged.tiles, VALLEY);
@@ -364,28 +381,34 @@ describe("living systems", () => {
     assert.equal(b.held, "dish:herb-tea");
   });
 
-  it("serving twice quickly starts a combo", () => {
+  it("board tickets served in order make a combo; extras do not break it", () => {
     const w = new World("COMBO");
     w.addPlayer("a", "阿左", "left");
     const p = w.players.get("a");
     assert.ok(p);
+    w.boardOn = true;
+    w.boardTickets = ["herb-tea", "mushroom-soup"];
+    const inn = w.valley.find("I")[0];
+    standFacing(p, inn);
+    tap(w, "a");
+    assert.deepEqual(
+      w.orders.filter((o) => o.board).map((o) => o.recipe),
+      ["herb-tea", "mushroom-soup"],
+    );
     const win = w.kitchenMap.find("W")[0];
     const stand = tileCenter(win.x - 1, win.y);
-    p.zone = "kitchen";
     p.x = stand.x;
     p.y = stand.y;
     p.facing = 1;
-    w.orders = [
-      { customer: "painter", recipe: "herb-tea", t: 30 },
-      { customer: "painter", recipe: "herb-tea", t: 30 },
-    ];
     p.held = "dish:herb-tea";
-    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    tap(w, "a");
     assert.equal(w.combo, 1);
-    w.setInput("a", { x: 0, y: 0, action: false, held: false, ping: false });
-    p.cool = 0;
-    p.held = "dish:herb-tea";
-    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    p.held = "dish:meatballs";
+    w.orders.push({ customer: "wander", recipe: "meatballs", t: 30 });
+    tap(w, "a");
+    assert.equal(w.combo, 1);
+    p.held = "dish:mushroom-soup";
+    tap(w, "a");
     assert.equal(w.combo, 2);
     assert.ok(w.toasts.some((t) => t.text.includes("连上了")));
   });
@@ -622,5 +645,306 @@ describe("living systems", () => {
     const snap = w.snapshot("a");
     assert.ok((snap.actors[0]?.ping ?? 0) > 0);
     assert.ok(w.toasts.some((t) => t.text.includes("喊")));
+  });
+
+  it("reclaim only takes away seats and never steals a live one", () => {
+    const w = new World("SEAT");
+    w.addPlayer("a", "我", "left");
+    w.addPlayer("b", "我", "right");
+    assert.equal(w.reclaim("我", "left"), null);
+    assert.equal(w.reclaim("我", "right"), null);
+    w.markAway("a");
+    assert.equal(w.reclaim("我", "left"), "a");
+    assert.equal(w.present().length, 1);
+    assert.equal(roomIsFull(w.present().length), false);
+    w.markBack("a");
+    assert.equal(roomIsFull(w.present().length), true);
+  });
+
+  it("a four-letter code for a missing room does not create a world", () => {
+    const known = new Map<string, true>();
+    const miss = resolveHelloRoom("7K3P", known, () => "XXXX");
+    assert.deepEqual(miss, { err: "没有这间山谷" });
+    const host = resolveHelloRoom("", known, () => "AB12");
+    assert.deepEqual(host, { room: "AB12", create: true });
+    known.set("AB12", true);
+    const join = resolveHelloRoom("ab12", known, () => "NOPE");
+    assert.deepEqual(join, { room: "AB12", create: false });
+  });
+
+  it("village plots stay lit at night; Charlie only bites the wild", () => {
+    const w = new World("LIT");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    const plot = w.valley.find("P")[0];
+    const c = tileCenter(plot.x, plot.y);
+    p.x = c.x;
+    p.y = c.y;
+    w.clock = 0.9;
+    p.hp = 20;
+    w.tick(3);
+    assert.equal(w.snapshot("a").lit, true);
+    assert.equal(p.hp, 20);
+    w.wildMap = buildMap(generateWild(11), "wild");
+    const leave = w.wildMap.find("L")[0];
+    const stand = tileCenter(leave.x, leave.y - 1);
+    p.zone = "wild";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.torch = 0;
+    p.held = "";
+    w.fires.clear();
+    w.howled = true;
+    w.tick(3);
+    assert.ok(p.hp < 20);
+  });
+
+  it("markAway then markBack keeps the torch in hand", () => {
+    const w = new World("HAND");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.held = "torch:ready:100";
+    p.torch = 40;
+    w.markAway("a");
+    w.markBack("a");
+    assert.equal(p.held, "torch:ready:100");
+    assert.equal(p.torch, 40);
+  });
+
+  it("pair fishing needs near or the same water; opposite docks do not count", () => {
+    const w = new World("DOCKS");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    const docks = w.valley.find("D");
+    assert.ok(docks.length >= 2);
+    const left = tileCenter(docks[0].x - 1, docks[0].y);
+    const right = tileCenter(docks[1].x - 1, docks[1].y);
+    a.x = left.x;
+    a.y = left.y;
+    a.facing = 1;
+    b.x = right.x;
+    b.y = right.y;
+    b.facing = 1;
+    tap(w, "a");
+    tap(w, "b");
+    assert.ok(a.fish);
+    assert.ok(b.fish);
+    assert.ok(!w.snapshot("a").prompt.includes("两人同钓"));
+  });
+
+  it("pair_near loot is fatter than solo, and an away partner does not count", () => {
+    const solo = rollLootTable(LOOT_TABLES.twin, { rand: () => 0.01, luck: 0, weather: "clear", pairNear: false });
+    const pair = rollLootTable(LOOT_TABLES.twin, { rand: () => 0.01, luck: 0, weather: "clear", pairNear: true });
+    assert.ok(!solo.some((s) => s.id.startsWith("twin")));
+    assert.ok(pair.some((s) => s.id.startsWith("twin")));
+    const vein = (away: boolean) => {
+      const w = new World("VEIN2");
+      w.addPlayer("a", "阿左", "left");
+      w.addPlayer("b", "阿右", "right");
+      const a = w.players.get("a");
+      const b = w.players.get("b");
+      assert.ok(a && b);
+      w.rand = () => 0.5;
+      w.mineMap = buildMap(mineTemplate(1, 1), "mine");
+      w.encounter = "vein";
+      const ore = w.mineMap.find("o")[0];
+      standFacing(a, ore);
+      b.zone = "mine";
+      b.x = a.x + 8;
+      b.y = a.y;
+      a.zone = "mine";
+      if (away) w.markAway("b");
+      tap(w, "a");
+      return countOf(w.save.bag, "ore");
+    };
+    assert.ok(vein(false) > vein(true));
+    const camp = new World("CAMP2");
+    camp.addPlayer("a", "阿左", "left");
+    camp.addPlayer("b", "阿右", "right");
+    const ca = camp.players.get("a");
+    const cb = camp.players.get("b");
+    assert.ok(ca && cb);
+    camp.wildMap = buildMap(generateWild(11), "wild");
+    const old = camp.wildMap.find("J")[0];
+    standFacing(ca, old);
+    cb.zone = "wild";
+    ca.zone = "wild";
+    cb.x = ca.x + 8;
+    cb.y = ca.y;
+    camp.markAway("b");
+    tap(camp, "a");
+    assert.ok(camp.toasts.some((t) => t.text.includes("翻出一点存货")));
+    assert.ok(!camp.toasts.some((t) => t.text.includes("两个人的东西")));
+  });
+
+  it("sleep ages bag fish to about 38 and keeps icebox fish over 70", () => {
+    const w = new World("ROT");
+    w.addPlayer("a", "阿左", "left");
+    w.save.day = 3;
+    addToBag(w.save.bag, "fish", 1, 80);
+    addToBag(w.ice, "fish", 1, 80);
+    w.sleep();
+    assert.equal(w.save.bag.find((s) => s.id === "fish")?.fresh, 38);
+    assert.ok((w.ice.find((s) => s.id === "fish")?.fresh ?? 0) > 70);
+    assert.equal(80 - sleepSpoil("夏", false), 38);
+  });
+
+  it("campfire cooking keeps the held freshness", () => {
+    const w = new World("FRESH");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.wildMap = buildMap(generateWild(11), "wild");
+    const fire = w.wildMap.find("K")[0];
+    w.fires.set(`${fire.x},${fire.y}`, 40);
+    standFacing(p, fire);
+    p.zone = "wild";
+    p.held = "meat:raw:80";
+    tap(w, "a");
+    assert.equal(p.held, "meat:cooked:80");
+  });
+
+  it("solo forge makes a wood blade with no pairId; misses make no gear", () => {
+    const w = new World("FORGE1");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    addToBag(w.save.bag, "ore", 2);
+    addToBag(w.save.bag, "wood", 1);
+    const anvil = w.valley.find("Y")[0];
+    standFacing(p, anvil);
+    tap(w, "a");
+    assert.ok(p.fish?.forge);
+    p.fish.mark = 0.5;
+    tap(w, "a");
+    tap(w, "a");
+    tap(w, "a");
+    assert.equal(w.save.gear.length, 1);
+    assert.equal(w.save.gear[0].base, "wood_blade");
+    assert.equal(item(w.save.gear[0].base).pairId, undefined);
+    assert.equal(w.save.gear[0].pairId, undefined);
+    assert.equal(w.save.leftSkills.forge, 2);
+    const miss = new World("FORGE0");
+    miss.addPlayer("a", "阿左", "left");
+    const m = miss.players.get("a");
+    assert.ok(m);
+    addToBag(miss.save.bag, "ore", 2);
+    addToBag(miss.save.bag, "wood", 1);
+    standFacing(m, miss.valley.find("Y")[0]);
+    tap(miss, "a");
+    m.fish!.mark = 0.1;
+    tap(miss, "a");
+    tap(miss, "a");
+    tap(miss, "a");
+    assert.equal(miss.save.gear.length, 0);
+    assert.equal(miss.save.leftSkills.forge, 1);
+    assert.equal(countOf(miss.save.bag, "ore"), 1);
+  });
+
+  it("two people hitting the green at the anvil make a pair; away falls back to solo", () => {
+    const pair = new World("FORGE2");
+    pair.addPlayer("a", "阿左", "left");
+    pair.addPlayer("b", "阿右", "right");
+    const a = pair.players.get("a");
+    const b = pair.players.get("b");
+    assert.ok(a && b);
+    addToBag(pair.save.bag, "ore", 2);
+    addToBag(pair.save.bag, "wood", 1);
+    const anvil = pair.valley.find("Y")[0];
+    standFacing(a, anvil);
+    standFacing(b, anvil);
+    b.x = a.x + 12;
+    tap(pair, "a");
+    a.fish!.mark = 0.5;
+    tap(pair, "a");
+    tap(pair, "b");
+    tap(pair, "a");
+    assert.ok(pair.toasts.some((t) => t.text.includes("两个人对着砧")));
+    assert.ok(pair.save.gear[0]?.quality === "pair" || pair.save.gear[0]?.base === "iron_blade" || pair.save.gear[0]?.pairId);
+    const solo = new World("FORGE3");
+    solo.addPlayer("a", "阿左", "left");
+    solo.addPlayer("b", "阿右", "right");
+    const sa = solo.players.get("a");
+    const sb = solo.players.get("b");
+    assert.ok(sa && sb);
+    addToBag(solo.save.bag, "ore", 2);
+    addToBag(solo.save.bag, "wood", 1);
+    standFacing(sa, solo.valley.find("Y")[0]);
+    standFacing(sb, solo.valley.find("Y")[0]);
+    sb.x = sa.x + 12;
+    tap(solo, "a");
+    solo.markAway("b");
+    sa.fish!.mark = 0.5;
+    tap(solo, "a");
+    tap(solo, "a");
+    tap(solo, "a");
+    assert.equal(solo.save.gear[0]?.base, "wood_blade");
+    assert.equal(solo.save.gear[0]?.pairId, undefined);
+    assert.ok(!solo.toasts.some((t) => t.text.includes("两个人对着砧")));
+  });
+
+  it("dawn board stays hidden until both reveal; kitchen already has those orders", () => {
+    const w = new World("BOARD");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    const bed = w.valley.find("A")[0];
+    standFacing(a, bed);
+    standFacing(b, bed);
+    b.x = a.x + 12;
+    tap(w, "a");
+    tap(w, "b");
+    assert.equal(w.snapshot("a").board.length, 0);
+    assert.ok(w.boardTickets.length >= 1 && w.boardTickets.length <= 2);
+    assert.ok(!w.boardTickets.includes("wet-goop"));
+    const board = w.valley.find("B")[0];
+    standFacing(a, board);
+    standFacing(b, board);
+    b.x = a.x + 12;
+    tap(w, "a");
+    assert.equal(w.snapshot("a").board.length, 0);
+    tap(w, "b");
+    const sa = w.snapshot("a");
+    const sb = w.snapshot("b");
+    assert.ok(sa.board.length >= 1 && sa.board.length <= 2);
+    assert.deepEqual(sa.board, sb.board);
+    w.boardTickets = ["herb-tea", "mushroom-soup"];
+    const inn = w.valley.find("I")[0];
+    standFacing(a, inn);
+    tap(w, "a");
+    assert.deepEqual(
+      w.orders.filter((o) => o.board).map((o) => o.recipe),
+      ["herb-tea", "mushroom-soup"],
+    );
+  });
+
+  it("serving board tickets out of order during rush clears combo", () => {
+    const w = new World("BOARD2");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.boardOn = true;
+    w.boardTickets = ["herb-tea", "mushroom-soup"];
+    w.rushed = true;
+    w.orders = [
+      { customer: "wander", recipe: "herb-tea", t: 30, board: true },
+      { customer: "wander", recipe: "mushroom-soup", t: 30, board: true },
+    ];
+    const win = w.kitchenMap.find("W")[0];
+    const stand = tileCenter(win.x - 1, win.y);
+    p.zone = "kitchen";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 1;
+    p.held = "dish:mushroom-soup";
+    tap(w, "a");
+    assert.equal(w.combo, 0);
   });
 });

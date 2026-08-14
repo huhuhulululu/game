@@ -14,7 +14,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   scene.append(canvas, hud);
   root.append(scene);
   const stick = mountStick(scene, ctx.myName || "我");
-  const room = ctx.roomCode || "HOME";
+  const room = ctx.roomCode;
   let snap: WorldSnap | null = null;
   let cam = { x: 0, y: 0 };
   let open: "" | "bag" | "book" | "map" = "";
@@ -285,6 +285,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       </div>
       <div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>
       ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
+      ${snap.board.length ? `<div class="fortune-chip">今晚 ${snap.board.join("、")}</div>` : ""}
       ${snap.pot.length || snap.potReady ? `<div class="fortune-chip">锅：${snap.potReady || snap.pot.join("、") || "空"}</div>` : ""}
       ${snap.ice.length ? `<div class="fortune-chip">冰柜 ${snap.ice.map((s) => s.name + "×" + s.n).join("、")}</div>` : ""}
       <div class="prompt">${snap.prompt}</div>
@@ -370,6 +371,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           snap.ice.length,
           snap.album,
           snap.combo,
+          snap.board,
           snap.actors.map((a) => [a.fishing, a.fishPull, a.ping]),
         ])
       : "";

@@ -90,6 +90,7 @@ export interface WorldSnap {
   prompt: string;
   skills: { fish: number; cook: number; fight: number; forge: number };
   album: { fish: number; fishMax: number; cook: number; cookMax: number; map: number };
+  board: string[];
 }
 
 export type ClientMsg =

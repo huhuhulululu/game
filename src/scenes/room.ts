@@ -1,11 +1,6 @@
 import type { GameContext } from "../game/types";
 import { el } from "../ui/dom";
 
-function makeCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRTUVWXY23456789";
-  return Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-}
-
 export function mountRoom(root: HTMLElement, ctx: GameContext): () => void {
   const scene = el("section", "scene setup scene-enter");
   const existing = ctx.roomCode;
@@ -13,7 +8,7 @@ export function mountRoom(root: HTMLElement, ctx: GameContext): () => void {
     <div class="kicker">两部 iPhone</div>
     <h2 style="letter-spacing:.16em;margin:10px 0 0">进同一座山谷</h2>
     <p class="hint" style="text-align:center;margin:18px 12px 0;line-height:1.8;letter-spacing:.06em">
-      一个人开间，把房间码念给另一个人。<br/>各看各的屏幕，想去河边或矿里都可以。
+      一个人开间，进谷后把屏幕上的四位房间码念给另一个人。<br/>各看各的屏幕，想去河边或矿里都可以。
     </p>
     <div class="setup-grid" style="max-width:640px">
       <label class="field wide">
@@ -38,10 +33,8 @@ export function mountRoom(root: HTMLElement, ctx: GameContext): () => void {
   const room = () => (scene.querySelector("#room") as HTMLInputElement).value.trim().toUpperCase();
   const prefer = () => ((scene.querySelector("#side") as HTMLInputElement).value.includes("松") ? "right" : "left") as "left" | "right";
   scene.querySelector("#create")?.addEventListener("click", () => {
-    const code = makeCode();
-    (scene.querySelector("#room") as HTMLInputElement).value = code;
     ctx.myName = name();
-    ctx.roomCode = code;
+    ctx.roomCode = "";
     ctx.prefer = prefer();
     ctx.save.innName = ctx.save.innName || "并肩山谷";
     ctx.persist();
@@ -49,8 +42,10 @@ export function mountRoom(root: HTMLElement, ctx: GameContext): () => void {
     ctx.goto("play");
   });
   scene.querySelector("#join")?.addEventListener("click", () => {
+    const code = room();
+    if (!code) return;
     ctx.myName = name();
-    ctx.roomCode = room() || makeCode();
+    ctx.roomCode = code;
     ctx.prefer = prefer();
     ctx.persist();
     ctx.audio.tone("ok");
