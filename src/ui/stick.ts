@@ -63,6 +63,7 @@ export function mountStick(root: HTMLElement, name: string): { input: InputState
   const keys = new Set<string>();
   const onKey = (e: KeyboardEvent) => {
     if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) e.preventDefault();
+    const fresh = e.type === "keydown" && !keys.has(e.key);
     if (e.type === "keydown") keys.add(e.key);
     else keys.delete(e.key);
     input.x = (keys.has("d") || keys.has("ArrowRight") ? 1 : 0) - (keys.has("a") || keys.has("ArrowLeft") ? 1 : 0);
@@ -70,7 +71,7 @@ export function mountStick(root: HTMLElement, name: string): { input: InputState
     const act = keys.has(" ") || keys.has("j") || keys.has("J");
     if (e.type === "keydown" && act) input.action = true;
     input.held = act;
-    if (e.type === "keydown" && (e.key === "h" || e.key === "H")) input.ping = true;
+    if (fresh && (e.key === "h" || e.key === "H")) input.ping = true;
   };
   window.addEventListener("keydown", onKey);
   window.addEventListener("keyup", onKey);

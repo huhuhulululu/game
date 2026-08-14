@@ -62,6 +62,9 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   let snap: WorldSnap | null = null;
   let cam = { x: 0, y: 0 };
   let open: "" | "bag" | "book" | "map" = "";
+  let fogSeen = new Set<number>();
+  let fogVis = new Set<number>();
+  let persistAt = 0;
 
   const net = connectRoom(
     room,
@@ -70,6 +73,16 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     (next) => {
       snap = next;
       ctx.roomCode = next.room;
+      fogSeen = new Set(next.revealed);
+      fogVis = new Set(next.visible);
+      if (Date.now() - persistAt > 4000) {
+        persistAt = Date.now();
+        ctx.save.gold = next.gold;
+        ctx.save.bond = next.bond;
+        ctx.save.day = next.day;
+        ctx.save.bag = next.bag.map((s) => ({ id: s.id, n: s.n }));
+        ctx.persist();
+      }
     },
     (text) => {
       hud.querySelector(".err")?.remove();
@@ -119,8 +132,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const key = y * mw + x;
         let fill = CELL_FILL[ch] ?? (snap.zone === "mine" ? "#2a2430" : "#3d4a36");
         if (snap.zone === "wild") {
-          const seen = snap.revealed.includes(key);
-          const vis = snap.visible.includes(key);
+          const seen = fogSeen.has(key);
+          const vis = fogVis.has(key);
           if (!seen) fill = "#050403";
           else if (!vis) fill = shade(fill, 0.42);
         }
@@ -147,7 +160,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       if (snap.zone === "wild") {
         const tx = Math.floor(e.x / TILE);
         const ty = Math.floor(e.y / TILE);
-        if (!snap.visible.includes(ty * mw + tx)) continue;
+        if (!fogVis.has(ty * mw + tx)) continue;
       }
       g.fillStyle = e.hue;
       g.beginPath();
@@ -169,7 +182,10 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       g.font = "12px 'Noto Serif SC', serif";
       g.textAlign = "center";
       g.fillText(a.name, ox + a.x, oy + a.y - 18);
-      if (a.held) g.fillText(a.held.split(":")[0], ox + a.x, oy + a.y + 22);
+      g.fillStyle = "#c45c26";
+      g.fillRect(ox + a.x - 12, oy + a.y + 14, 24 * Math.max(0, a.hp / a.maxHp), 3);
+      g.fillStyle = "#f4e7d2";
+      if (a.heldName) g.fillText(a.heldName, ox + a.x, oy + a.y + 26);
     }
     if (snap.weather.id === "rain" || snap.weather.id === "storm") {
       g.strokeStyle = "rgba(200,220,230,0.35)";
@@ -212,10 +228,10 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     for (let y = 0; y < mh; y++) {
       for (let x = 0; x < mw; x++) {
         const key = y * mw + x;
-        if (!snap.revealed.includes(key)) continue;
+        if (!fogSeen.has(key)) continue;
         const ch = rows[y][x];
         let fill = CELL_FILL[ch] ?? "#3d4a36";
-        if (!snap.visible.includes(key)) fill = shade(fill, 0.5);
+        if (!fogVis.has(key)) fill = shade(fill, 0.5);
         if (snap.fires.includes(key)) fill = "#e08a4f";
         g.fillStyle = fill;
         g.fillRect(x * cell, y * cell, cell, cell);
@@ -239,6 +255,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     if (!snap) return;
     const partner = snap.partner;
     const phase = snap.night ? "夜" : snap.dusk ? "黄昏" : "昼";
+    const vitals = `血 ${snap.hp}/${snap.maxHp} · 饿 ${snap.hunger}`;
     const place =
       snap.zone === "mine"
         ? `矿 ${snap.floor}层 · ${snap.encounter}`
@@ -262,7 +279,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           <b>${place}</b>
           <span>房间 ${snap.room}</span>
         </div>
-        <div class="live-meta">${phase} · ${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
+        <div class="live-meta">${snap.season} · ${phase} · ${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
+        <div class="live-meta">${vitals}${snap.lit || !snap.night ? "" : " · 暗"}</div>
       </div>
       <div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>
       ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
@@ -342,6 +360,9 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           snap.revealed.length,
           snap.visible.length,
           snap.biome,
+          snap.season,
+          snap.hp,
+          snap.hunger,
           snap.fires.length,
         ])
       : "";

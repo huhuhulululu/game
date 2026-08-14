@@ -8,9 +8,13 @@ import { FORTUNES, rollFortune } from "./fortune";
 import { rollLootTable } from "./loot";
 import { LOOT_TABLES } from "./lootTables";
 import { pickWeighted } from "./rng";
+import { eatValue } from "./eat";
+import { seasonOf } from "./season";
+import { mergeSnap } from "../net/client";
 import { World } from "../sim/world";
-import { buildMap, tileCenter } from "../world/maps";
+import { buildMap, tileCenter, VALLEY } from "../world/maps";
 import { generateWild } from "../world/wild";
+import type { WorldSnap } from "../sim/net";
 
 describe("living systems", () => {
   it("bag stacks and spends", () => {
@@ -124,5 +128,97 @@ describe("living systems", () => {
     assert.ok(sa.visible.length > 0);
     assert.equal(sa.zone, "wild");
     assert.ok(sa.revealed.length === sb.revealed.length);
+  });
+
+  it("seasons turn every three days and winter nights come earlier", () => {
+    assert.equal(seasonOf(0), "春");
+    assert.equal(seasonOf(3), "夏");
+    assert.equal(seasonOf(6), "秋");
+    assert.equal(seasonOf(9), "冬");
+    const w = new World("SEA");
+    w.addPlayer("a", "阿左", "left");
+    w.save.day = 9;
+    w.clock = 0.55;
+    w.tick(0.05);
+    const snap = w.snapshot("a");
+    assert.equal(snap.season, "冬");
+    assert.equal(snap.night, true);
+  });
+
+  it("mine stays lit at night so Charlie only bites the surface", () => {
+    const w = new World("MINE");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.zone = "mine";
+    w.clock = 0.9;
+    w.tick(0.05);
+    const snap = w.snapshot("a");
+    assert.equal(snap.night, true);
+    assert.equal(snap.lit, true);
+  });
+
+  it("eating held food restores hunger and hp", () => {
+    const tea = eatValue("tea:ready");
+    assert.ok(tea && tea.hp > 0 && tea.hunger > 0);
+    const w = new World("EAT");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.held = "tea:ready";
+    p.hp = 8;
+    p.hunger = 12;
+    p.x = tileCenter(20, 4).x;
+    p.y = tileCenter(20, 4).y;
+    p.facing = 1;
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(p.held, "");
+    assert.ok(p.hp > 8);
+    assert.ok(p.hunger > 12);
+  });
+
+  it("leaving the wild drops you at the east gate", () => {
+    const w = new World("GATE");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.wildMap = buildMap(generateWild(3), "wild");
+    const leave = w.wildMap.find("L")[0];
+    const stand = tileCenter(leave.x, leave.y - 1);
+    p.zone = "wild";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 2;
+    w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
+    assert.equal(p.zone, "valley");
+    const gate = w.valley.find("V")[0];
+    const g = tileCenter(gate.x, gate.y);
+    assert.ok(Math.hypot(p.x - g.x, p.y - g.y) < 80);
+  });
+
+  it("lite snaps keep the last full map", () => {
+    const full = {
+      full: true,
+      tiles: VALLEY,
+      revealed: [1, 2, 3],
+      fires: [9],
+      visible: [1],
+      bag: [{ id: "wood", n: 1, name: "青木" }],
+      cookbook: ["山草茶"],
+    } as unknown as WorldSnap;
+    const lite = {
+      full: false,
+      tiles: [],
+      revealed: [],
+      fires: [],
+      visible: [2],
+      bag: [{ id: "wood", n: 2, name: "青木" }],
+      cookbook: ["山草茶"],
+    } as unknown as WorldSnap;
+    const merged = mergeSnap(full, lite);
+    assert.deepEqual(merged.tiles, VALLEY);
+    assert.deepEqual(merged.revealed, [1, 2, 3]);
+    assert.deepEqual(merged.visible, [2]);
+    assert.equal(merged.bag[0].n, 2);
   });
 });

@@ -5,7 +5,7 @@ import type { ClientMsg } from "../src/sim/net";
 import { World } from "../src/sim/world";
 
 const PORT = Number(process.env.PORT ?? 5173);
-const rooms = new Map<string, { world: World; clients: Map<WebSocket, string> }>();
+const rooms = new Map<string, { world: World; clients: Map<WebSocket, string>; idle: number }>();
 
 function code(): string {
   const chars = "ABCDEFGHJKLMNPQRTUVWXY23456789";
@@ -15,16 +15,18 @@ function code(): string {
 function roomOf(id: string) {
   let rec = rooms.get(id);
   if (!rec) {
-    rec = { world: new World(id), clients: new Map() };
+    rec = { world: new World(id), clients: new Map(), idle: 0 };
     rooms.set(id, rec);
   }
+  rec.idle = 0;
   return rec;
 }
 
-function broadcast(rec: { world: World; clients: Map<WebSocket, string> }) {
+function broadcast(rec: { world: World; clients: Map<WebSocket, string> }, full: boolean) {
+  if (full) rec.world.dirty = false;
   for (const [ws, id] of rec.clients) {
     if (ws.readyState !== ws.OPEN) continue;
-    ws.send(JSON.stringify({ t: "snap", snap: rec.world.snapshot(id) }));
+    ws.send(JSON.stringify({ t: "snap", snap: rec.world.snapshot(id, full) }));
   }
 }
 
@@ -62,8 +64,9 @@ wss.on("connection", (ws) => {
       const side = rec.world.addPlayer(id, msg.name || "过路人", msg.prefer);
       rec.clients.set(ws, id);
       joined = { room, id };
+      rec.world.dirty = true;
       ws.send(JSON.stringify({ t: "joined", side, room }));
-      broadcast(rec);
+      broadcast(rec, true);
       return;
     }
     if (!joined) return;
@@ -79,15 +82,22 @@ wss.on("connection", (ws) => {
     if (!rec) return;
     rec.world.removePlayer(joined.id);
     rec.clients.delete(ws);
-    if (rec.clients.size === 0) rooms.delete(joined.room);
-    else broadcast(rec);
+    if (rec.clients.size === 0) rec.idle = Date.now();
+    else broadcast(rec, true);
   });
 });
 
+let tickN = 0;
 setInterval(() => {
-  for (const rec of rooms.values()) {
+  tickN += 1;
+  for (const [id, rec] of rooms) {
+    if (rec.clients.size === 0) {
+      if (rec.idle && Date.now() - rec.idle > 10 * 60 * 1000) rooms.delete(id);
+      continue;
+    }
     rec.world.tick(0.05);
-    broadcast(rec);
+    const full = rec.world.dirty || tickN % 4 === 0;
+    broadcast(rec, full);
   }
 }, 50);
 

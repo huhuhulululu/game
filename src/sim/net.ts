@@ -19,7 +19,9 @@ export interface ActorSnap {
   maxHp: number;
   facing: number;
   held: string;
+  heldName: string;
   fishing: string;
+  hunger: number;
 }
 
 export interface EnemySnap {
@@ -68,6 +70,12 @@ export interface WorldSnap {
   youAt: { x: number; y: number };
   partnerAt: { x: number; y: number; zone: Zone } | null;
   biome: string;
+  season: string;
+  hp: number;
+  maxHp: number;
+  hunger: number;
+  mapRev: number;
+  full: boolean;
   actors: ActorSnap[];
   enemies: EnemySnap[];
   orders: OrderSnap[];

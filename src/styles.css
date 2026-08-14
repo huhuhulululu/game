@@ -146,6 +146,12 @@ button {
   margin-bottom: 4px;
 }
 
+.live-meta {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--gold-soft);
+}
+
 .partner {
   margin-top: 8px;
   color: var(--mist);

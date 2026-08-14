@@ -23,6 +23,8 @@ export const ITEMS: Record<string, ItemDef> = {
   greens_seed: { id: "greens_seed", name: "青菜种", kind: "seed", rarity: "common", hue: "#5a8f62", desc: "不用天天浇。它听得见你们的脚步。", growInto: "greens" },
   wheat_seed: { id: "wheat_seed", name: "麦种", kind: "seed", rarity: "common", hue: "#d4b46a", desc: "长满一垄，夜里就有面。", growInto: "wheat" },
   tea: { id: "tea", name: "热茶", kind: "consumable", rarity: "common", hue: "#d8b07a", desc: "喝一口，血色会回来。" },
+  flint: { id: "flint", name: "燧石", kind: "mat", rarity: "common", hue: "#8a8074", desc: "砸石头会蹦出来。和木、草能搓出火把。" },
+  torch: { id: "torch", name: "火把", kind: "consumable", rarity: "common", hue: "#e08a4f", desc: "握在手里，夜里就有一小圈光。" },
   wood_blade: { id: "wood_blade", name: "木折刀", kind: "equip", rarity: "common", hue: "#a9844f", desc: "开山第一夜够用。", slot: "weapon", atk: 2 },
   iron_blade: { id: "iron_blade", name: "铁脊", kind: "equip", rarity: "rare", hue: "#9aa3ad", desc: "矿道里敲出来的。", slot: "weapon", atk: 5 },
   twin_left: { id: "twin_left", name: "并肩·左刃", kind: "equip", rarity: "pair", hue: "#c45c26", desc: "只有右刃也在时，才会热起来。", slot: "weapon", atk: 4, pairId: "twin_right", bond: 2 },
