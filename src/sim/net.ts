@@ -57,6 +57,11 @@ export interface WorldSnap {
   tiles: string[];
   floor: number;
   encounter: string;
+  clock: number;
+  night: boolean;
+  lit: boolean;
+  rush: boolean;
+  revealed: number[];
   actors: ActorSnap[];
   enemies: EnemySnap[];
   orders: OrderSnap[];

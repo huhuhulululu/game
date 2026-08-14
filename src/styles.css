@@ -196,6 +196,14 @@ button {
   top: 48px;
 }
 
+.map-toggle {
+  top: 96px;
+}
+
+.tickets.rush .ticket {
+  box-shadow: 0 0 0 1px #c45c26;
+}
+
 .bag-panel button {
   pointer-events: auto;
   border: 1px solid rgba(201, 160, 106, 0.25);

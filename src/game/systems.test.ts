@@ -9,6 +9,7 @@ import { rollLootTable } from "./loot";
 import { LOOT_TABLES } from "./lootTables";
 import { pickWeighted } from "./rng";
 import { World } from "../sim/world";
+import { generateWild } from "../world/wild";
 
 describe("living systems", () => {
   it("bag stacks and spends", () => {
@@ -84,5 +85,13 @@ describe("living systems", () => {
       pairNear: false,
     });
     assert.ok(Array.isArray(out));
+  });
+
+  it("wild map is a black-start island with an exit and set pieces", () => {
+    const rows = generateWild(99);
+    assert.ok(rows.length > 10);
+    assert.ok(rows.some((r) => r.includes("L")));
+    assert.ok(rows.some((r) => r.includes("K")));
+    assert.ok(rows.some((r) => r.includes("R")));
   });
 });

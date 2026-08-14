@@ -165,6 +165,7 @@ export function startingBag(): { id: string; n: number }[] {
     { id: "egg", n: 2 },
     { id: "tomato_seed", n: 2 },
     { id: "tea", n: 1 },
+    { id: "wood", n: 4 },
     { id: "wood_blade", n: 2 },
   ];
 }

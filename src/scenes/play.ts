@@ -30,6 +30,12 @@ const CELL_FILL: Record<string, string> = {
   "4": "#5a8f62",
   "5": "#8aa4b5",
   "6": "#d4a24a",
+  m: "#2a3a28",
+  K: "#d47a3c",
+  R: "#8a7a6a",
+  H: "#1a1010",
+  V: "#c9a06a",
+  "^": "#4a4038",
   L: "#c9a06a",
   W: "#f4e7d2",
   X: "#3a2020",
@@ -104,6 +110,10 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       for (let x = 0; x < rows[y].length; x++) {
         const ch = rows[y][x];
         g.fillStyle = CELL_FILL[ch] ?? (snap.zone === "mine" ? "#2a2430" : "#3d4a36");
+        if (snap.zone === "wild") {
+          const seen = snap.revealed.includes(y * rows[0].length + x);
+          if (!seen) g.fillStyle = "#050403";
+        }
         g.fillRect(ox + x * TILE, oy + y * TILE, TILE - 1, TILE - 1);
       }
     }
@@ -145,19 +155,32 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       g.fillStyle = "rgba(210,210,200,0.12)";
       g.fillRect(0, 0, w, h);
     }
+    if (snap.night) {
+      g.fillStyle = snap.lit ? "rgba(8,6,12,0.28)" : "rgba(4,2,8,0.62)";
+      g.fillRect(0, 0, w, h);
+    }
   };
 
   const paintHud = () => {
     if (!snap) return;
     const partner = snap.partner;
-    const place = snap.zone === "mine" ? `矿 ${snap.floor}层 · ${snap.encounter}` : snap.zone === "kitchen" ? "厨房" : "山谷";
+    const place =
+      snap.zone === "mine"
+        ? `矿 ${snap.floor}层 · ${snap.encounter}`
+        : snap.zone === "kitchen"
+          ? snap.rush
+            ? "厨房 · 堂口热"
+            : "厨房"
+          : snap.zone === "wild"
+            ? "荒野"
+            : "山谷";
     hud.innerHTML = `
       <div class="live-top">
         <div>
           <b>${place}</b>
           <span>房间 ${snap.room}</span>
         </div>
-        <div class="live-meta">${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
+        <div class="live-meta">${snap.night ? "夜" : "昼"} · ${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
       </div>
       <div class="partner ${partner?.online ? "on" : ""}">${
         partner?.online ? `${partner.name} 在${placeOf(partner.zone)}` : "等另一部手机进来"
@@ -168,7 +191,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       <div class="toasts">${snap.toasts.map((t) => `<p>${t}</p>`).join("")}</div>
       ${
         snap.orders.length
-          ? `<div class="tickets">${snap.orders
+          ? `<div class="tickets ${snap.rush ? "rush" : ""}">${snap.orders
               .map(
                 (o) =>
                   `<div class="ticket"><b>${o.recipe}</b><small>${o.name}</small><div class="bar"><i style="width:${Math.min(100, o.left * 2.4)}%"></i></div></div>`,
@@ -178,16 +201,25 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       }
       <button class="bag-toggle" type="button" id="bag-btn">袋</button>
       <button class="bag-toggle book-toggle" type="button" id="book-btn">菜单</button>
+      <button class="bag-toggle map-toggle" type="button" id="map-btn">图</button>
       <div class="bag-panel hidden" id="bag">${
         snap.bag.map((s) => `<button type="button" data-take="${s.id}">${s.name}×${s.n}</button>`).join("") || "空"
       }${snap.gear.length ? `<span>${snap.gear.join(" · ")}</span>` : ""}</div>
       <div class="bag-panel hidden" id="book">${snap.cookbook.map((n) => `<span>${n}</span>`).join("") || "还没写出第一道"}</div>
+      <div class="bag-panel hidden" id="map">${
+        snap.zone === "wild"
+          ? `已照亮 ${snap.revealed.length} 格 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}`
+          : "出谷之后，地图才会一点点亮起来。"
+      }</div>
     `;
     hud.querySelector("#bag-btn")?.addEventListener("click", () => {
       hud.querySelector("#bag")?.classList.toggle("hidden");
     });
     hud.querySelector("#book-btn")?.addEventListener("click", () => {
       hud.querySelector("#book")?.classList.toggle("hidden");
+    });
+    hud.querySelector("#map-btn")?.addEventListener("click", () => {
+      hud.querySelector("#map")?.classList.toggle("hidden");
     });
     hud.querySelectorAll("[data-take]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -209,7 +241,22 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     });
     paint();
     const key = snap
-      ? JSON.stringify([snap.toasts, snap.prompt, snap.gold, snap.partner, snap.fortune, snap.bag, snap.orders, snap.weather, snap.pot, snap.cookbook])
+      ? JSON.stringify([
+          snap.toasts,
+          snap.prompt,
+          snap.gold,
+          snap.partner,
+          snap.fortune,
+          snap.bag,
+          snap.orders,
+          snap.weather,
+          snap.pot,
+          snap.cookbook,
+          snap.night,
+          snap.lit,
+          snap.rush,
+          snap.revealed.length,
+        ])
       : "";
     if (key !== lastHud) {
       lastHud = key;
@@ -230,5 +277,6 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
 function placeOf(z: string): string {
   if (z === "mine") return "矿里";
   if (z === "kitchen") return "厨房";
+  if (z === "wild") return "荒野";
   return "山谷";
 }

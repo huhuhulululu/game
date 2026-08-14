@@ -16,7 +16,7 @@ export const VALLEY = [
   "#................................#",
   "#......SS....GG....BB....YY......#",
   "#......S.................Y.....O.#",
-  "#................................#",
+  "#..............................V.#",
   "##################################",
 ];
 
@@ -104,6 +104,12 @@ export type Cell =
   | "chest"
   | "leave"
   | "forge"
+  | "marsh"
+  | "fire"
+  | "relic"
+  | "hole"
+  | "hill"
+  | "gate"
   | "spawn";
 
 const VALLEY_KEY: Record<string, Cell> = {
@@ -126,6 +132,7 @@ const VALLEY_KEY: Record<string, Cell> = {
   B: "board",
   L: "leave",
   Y: "forge",
+  V: "gate",
 };
 
 const KITCHEN_KEY: Record<string, Cell> = {
@@ -143,6 +150,23 @@ const KITCHEN_KEY: Record<string, Cell> = {
   "5": "pantry",
   "6": "pantry",
   L: "leave",
+};
+
+const WILD_KEY: Record<string, Cell> = {
+  "#": "wall",
+  T: "wall",
+  "^": "hill",
+  ".": "grass",
+  ",": "path",
+  "~": "water",
+  D: "dock",
+  F: "bush",
+  m: "marsh",
+  K: "fire",
+  R: "relic",
+  H: "hole",
+  L: "leave",
+  e: "spawn",
 };
 
 const MINE_KEY: Record<string, Cell> = {
@@ -174,8 +198,8 @@ const PANTRY_AT: Record<string, string> = {
   "6": "osmanthus",
 };
 
-export function buildMap(rows: string[], kind: "valley" | "kitchen" | "mine"): GridMap {
-  const key = kind === "valley" ? VALLEY_KEY : kind === "kitchen" ? KITCHEN_KEY : MINE_KEY;
+export function buildMap(rows: string[], kind: "valley" | "kitchen" | "mine" | "wild"): GridMap {
+  const key = kind === "valley" ? VALLEY_KEY : kind === "kitchen" ? KITCHEN_KEY : kind === "wild" ? WILD_KEY : MINE_KEY;
   const w = rows[0].length;
   const h = rows.length;
   const walkable = new Set<Cell>([
@@ -195,6 +219,12 @@ export function buildMap(rows: string[], kind: "valley" | "kitchen" | "mine"): G
     "chest",
     "leave",
     "forge",
+    "marsh",
+    "fire",
+    "relic",
+    "hole",
+    "hill",
+    "gate",
   ]);
   return {
     rows,
@@ -204,7 +234,12 @@ export function buildMap(rows: string[], kind: "valley" | "kitchen" | "mine"): G
       if (x < 0 || y < 0 || x >= w || y >= h) return "wall";
       return key[rows[y][x]] ?? "wall";
     },
-    walk: (x, y) => walkable.has(key[rows[y]?.[x]] ?? "wall") || rows[y]?.[x] === "A" || rows[y]?.[x] === "I" || rows[y]?.[x] === "E",
+    walk: (x, y) =>
+      walkable.has(key[rows[y]?.[x]] ?? "wall") ||
+      rows[y]?.[x] === "A" ||
+      rows[y]?.[x] === "I" ||
+      rows[y]?.[x] === "E" ||
+      rows[y]?.[x] === "V",
     find: (ch) => {
       const out: { x: number; y: number }[] = [];
       for (let y = 0; y < h; y++) {

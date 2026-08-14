@@ -7,7 +7,7 @@ export interface Skills {
   forge: number;
 }
 
-export type Zone = "valley" | "mine" | "kitchen";
+export type Zone = "valley" | "mine" | "kitchen" | "wild";
 
 export type Rarity = "common" | "rare" | "epic" | "pair";
 
