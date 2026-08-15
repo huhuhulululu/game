@@ -339,7 +339,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const hg = Math.max(0, Math.min(100, snap.hunger));
     const place =
       snap.zone === "mine"
-        ? `矿 ${snap.floor}层 · ${snap.encounter}`
+        ? `矿 ${snap.floor}层 · ${mineWord(snap.encounter)}`
         : snap.zone === "kitchen"
           ? snap.rush
             ? `厨房 · 堂口热${snap.combo > 1 ? " · 连×" + snap.combo : ""}`
@@ -427,7 +427,9 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           snap.zone === "wild"
             ? `已照亮 ${snap.revealed.length} 处 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}`
             : snap.zone === "mine"
-              ? `矿 ${snap.floor}层。柿色是你，松色是她。`
+              ? partner?.online
+                ? `矿 ${snap.floor}层。柿色是你，松色是她。出口在西。`
+                : `矿 ${snap.floor}层。出口在西。`
               : "柿色是你，松色是她。出谷之后，荒野才会一点点亮起来。"
         }</p>
         <canvas id="atlas"></canvas>
@@ -525,4 +527,14 @@ function placeOf(z: string): string {
   if (z === "kitchen") return "厨房";
   if (z === "wild") return "荒野";
   return "山谷";
+}
+
+function mineWord(encounter: string): string {
+  if (encounter === "empty") return "空";
+  if (encounter === "pack") return "一群";
+  if (encounter === "ambush") return "伏击";
+  if (encounter === "elite") return "精英";
+  if (encounter === "vein") return "矿脉";
+  if (encounter === "shrine") return "神龛";
+  return encounter;
 }

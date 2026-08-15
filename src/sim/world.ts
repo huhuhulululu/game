@@ -637,6 +637,7 @@ export class World {
       if (cell === "plate") {
         if (this.potReady) return `取 · ${potById(this.potReady).name}`;
         if (this.potCook > 0) return "锅还在响";
+        if (this.holdingForgeMat(p)) return "拿去工坊";
         if (this.needsPrep(p)) return item(parseHeld(p.held).id).cook === "cook" ? "先下炉" : "先切";
         if (this.pot.length >= 2) return `开煮 · ${this.pot.length}样`;
         return this.pot.length ? `入锅 · ${this.pot.length}/4` : "入锅";
@@ -948,9 +949,10 @@ export class World {
     p.zone = "mine";
     p.x = c.x;
     p.y = c.y;
+    p.facing = 2;
     this.dirty = true;
     const o = this.other(p);
-    this.toast(o?.zone === "mine" ? "矿道里两个人的脚步" : `${p.name} 进了矿`);
+    this.toast(o?.zone === "mine" ? "矿道里两个人的脚步。出口在西。" : `${p.name} 进了矿。出口在西。`);
   }
 
   private enterKitchen(p: Actor): void {
@@ -980,12 +982,19 @@ export class World {
       p.x = c.x + (from === "wild" ? -TILE : TILE);
       p.y = c.y;
       if (from === "wild") p.facing = 3;
+      if (from === "mine") p.facing = 2;
     } else {
       p.x = this.arrive.x;
       p.y = this.arrive.y;
     }
     this.dirty = true;
-    this.toast(from === "wild" ? `${p.name} 回到山谷。客栈在西边。` : `${p.name} 回到山谷`);
+    this.toast(
+      from === "wild"
+        ? `${p.name} 回到山谷。客栈在西边。`
+        : from === "mine"
+          ? `${p.name} 回到山谷。工坊在东南。`
+          : `${p.name} 回到山谷`,
+    );
   }
 
   private downFloor(first = false): void {
@@ -997,6 +1006,13 @@ export class World {
     }
     this.mineMap = buildMap(mineTemplate(this.save.day * 13 + this.mineFloor, this.mineFloor), "mine");
     this.bumpMap();
+    const mouth = this.mineMap.find("L")[0] ?? { x: 2, y: 2 };
+    const stand = tileCenter(mouth.x + 1, mouth.y);
+    for (const miner of this.present().filter((a) => a.zone === "mine")) {
+      miner.x = stand.x;
+      miner.y = stand.y;
+      miner.facing = 2;
+    }
     this.enemies = this.enemies.filter((e) => e.zone !== "mine");
     const ev = pickWeighted(
       ENCOUNTERS.map((e) => ({ ...e, w: e.w + (this.fortune()?.mine ?? 0) })),
@@ -1038,6 +1054,7 @@ export class World {
     }
     if (ev === "ambush") this.toast("伏击");
     if (ev === "empty") this.toast("空荡荡的一层");
+    if (!first) this.toast("出口在西。");
   }
 
   private dig(p: Actor, x: number, y: number): void {
@@ -1050,6 +1067,7 @@ export class World {
     } else {
       this.toast(`${p.name} 挖了一处矿`);
     }
+    this.fillHand(p, countOf(this.save.bag, "ore") ? "ore" : countOf(this.save.bag, "gem") ? "gem" : "");
     if (this.mineMap) {
       this.mineMap = replaceTile(this.mineMap, "mine", x, y, ".");
       this.bumpMap();
@@ -1099,6 +1117,8 @@ export class World {
       const drops = this.giveLoot(p, e.kind, pow.luck, pairNear);
       if (chance(0.35, this.rand)) addToBag(this.save.bag, chance(0.25, this.rand) ? "meat" : "morsel");
       this.toast(drops[0] ? `${e.name} 掉了${drops[0]}` : `${p.name} 打倒了${e.name}`);
+      const food = ["meat", "morsel", "mushroom"].find((id) => countOf(this.save.bag, id) > 0);
+      if (food) this.fillHand(p, food);
     }
   }
 
@@ -1259,6 +1279,10 @@ export class World {
       return;
     }
     if (p.held && !p.held.startsWith("dish:") && !p.held.startsWith("plate:")) {
+      if (this.holdingForgeMat(p)) {
+        this.toast("拿去工坊");
+        return;
+      }
       if (this.pot.length >= 4) {
         this.toast("四格满了，像饥荒的锅");
         return;
@@ -1545,11 +1569,13 @@ export class World {
       this.yankForge(p);
       return;
     }
-    if (countOf(this.save.bag, "ore") < 2 || countOf(this.save.bag, "wood") < 1) {
+    const heldOre = parseHeld(p.held).id === "ore" ? 1 : 0;
+    if (countOf(this.save.bag, "ore") + heldOre < 2 || countOf(this.save.bag, "wood") < 1) {
       this.toast("打造需要粗矿×2、青木×1");
       return;
     }
-    takeFromBag(this.save.bag, "ore", 2);
+    if (heldOre) p.held = "";
+    takeFromBag(this.save.bag, "ore", 2 - heldOre);
     takeFromBag(this.save.bag, "wood", 1);
     this.forgeJob = { starter: p.id, hits: 0, good: {} };
     p.fish = { phase: "fight", t: 4, window: 1, mark: 0.2, pull: 1, dir: 1, forge: true };
@@ -1698,6 +1724,19 @@ export class World {
       }
     }
     return names;
+  }
+
+  private fillHand(p: Actor, id: string): void {
+    if (p.held || !id) return;
+    const fresh = takeFresh(this.save.bag, id);
+    if (fresh === null) return;
+    const need = item(id).cook;
+    p.held = writeHeld(id, !need || need === "none" ? "ready" : "raw", fresh);
+  }
+
+  private holdingForgeMat(p: Actor): boolean {
+    const id = parseHeld(p.held).id;
+    return id === "ore" || id === "wood" || id === "flint" || id === "gem" || id === "wood_blade" || id === "iron_blade";
   }
 
   private revealedList(side: "left" | "right", zone: Zone): number[] {
@@ -1986,8 +2025,15 @@ export class World {
     if (!wasNight && this.isNight()) {
       const out = this.present().some((a) => a.zone === "wild");
       const fishing = this.present().some((a) => !!a.fish);
+      const inMine = this.present().some((a) => a.zone === "mine");
       this.toast(
-        out ? "天黑了。别停在黑里，靠近火。" : fishing ? "天黑了。收竿，客栈门还亮着。" : "天黑了。客栈门还亮着。",
+        out
+          ? "天黑了。别停在黑里，靠近火。"
+          : fishing
+            ? "天黑了。收竿，客栈门还亮着。"
+            : inMine
+              ? "天黑了。矿里有灯。"
+              : "天黑了。客栈门还亮着。",
       );
     }
     if (wasNight && !this.isNight()) {

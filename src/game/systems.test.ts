@@ -15,7 +15,7 @@ import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
 import { resolveHelloRoom, roomIsFull } from "../../server/join";
 import { World } from "../sim/world";
-import { buildMap, mineTemplate, tileCenter, VALLEY } from "../world/maps";
+import { buildMap, mineTemplate, TILE, tileCenter, VALLEY } from "../world/maps";
 import { createAudio } from "./audio";
 import { tickFeel } from "./feel";
 import { generateWild } from "../world/wild";
@@ -523,9 +523,10 @@ describe("living systems", () => {
     p.x = stand.x;
     p.y = stand.y;
     p.facing = 0;
-    const before = countOf(w.save.bag, "ore");
+    const before = countOf(w.save.bag, "ore") + (p.held.startsWith("ore") ? 1 : 0);
     w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
-    assert.ok(countOf(w.save.bag, "ore") > before);
+    const after = countOf(w.save.bag, "ore") + (p.held.startsWith("ore") ? 1 : 0);
+    assert.ok(after > before);
     assert.ok(w.toasts.some((t) => t.text.includes("矿脉")));
   });
 
@@ -1287,5 +1288,88 @@ describe("living systems", () => {
     w.clock = nightAfter(seasonOf(w.save.day)) - 0.01;
     w.tick(3);
     assert.ok(w.toasts.some((t) => t.text.includes("天黑") && t.text.includes("收竿")));
+  });
+
+  it("the mine keeps a west exit, and a new floor does not drop you in a wall", () => {
+    const w = new World("MINE3");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    const door = w.valley.find("E")[0];
+    assert.ok(door);
+    standFacing(p, door);
+    tap(w, "a");
+    assert.equal(p.zone, "mine");
+    assert.ok(w.toasts.some((t) => t.text.includes("进了矿") && t.text.includes("出口")));
+    p.facing = 3;
+    assert.ok(w.snapshot("a").prompt.includes("出矿"));
+    w.mineFloor = 1;
+    w.mineMap = buildMap(
+      ["################", "#L.............#", "#..............#", "#..............#", "#......Z.......#", "#..............#", "#..............#", "#..............#", "################"],
+      "mine",
+    );
+    const stairs = w.mineMap.find("Z")[0];
+    assert.ok(stairs);
+    standFacing(p, stairs);
+    tap(w, "a");
+    assert.ok(w.mineFloor >= 2);
+    const t = { x: Math.floor(p.x / TILE), y: Math.floor(p.y / TILE) };
+    assert.equal(w.mineMap?.walk(t.x, t.y), true);
+    assert.ok(w.toasts.some((t0) => t0.text.includes("出口")));
+    p.facing = 3;
+    assert.ok(w.snapshot("a").prompt.includes("出矿"));
+  });
+
+  it("dug ore goes in the hand, the forge counts it, and the pot sends it to the workshop", () => {
+    const w = new World("ORE2");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.mineMap = buildMap(mineTemplate(1, 1), "mine");
+    w.encounter = "pack";
+    w.rand = () => 0.01;
+    const ore = w.mineMap.find("o")[0];
+    assert.ok(ore);
+    standFacing(p, ore);
+    p.zone = "mine";
+    tap(w, "a");
+    assert.ok(p.held.startsWith("ore"));
+    p.zone = "valley";
+    addToBag(w.save.bag, "ore", 1);
+    addToBag(w.save.bag, "wood", 1);
+    const anvil = w.valley.find("Y")[0];
+    assert.ok(anvil);
+    standFacing(p, anvil);
+    tap(w, "a");
+    assert.ok(w.forgeJob);
+    assert.equal(p.held, "");
+    p.held = "ore:ready:100";
+    p.zone = "kitchen";
+    p.fish = null;
+    w.forgeJob = null;
+    const pot = w.kitchenMap.find("Q")[0];
+    assert.ok(pot);
+    standFacing(p, pot);
+    assert.ok(w.snapshot("a").prompt.includes("工坊"));
+    tap(w, "a");
+    assert.equal(w.pot.length, 0);
+    assert.ok(w.toasts.some((t) => t.text.includes("工坊")));
+  });
+
+  it("night in the mine says the lamps are on, not to find a fire", () => {
+    const w = new World("LAMP");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.zone = "mine";
+    w.mineMap = buildMap(mineTemplate(1, 1), "mine");
+    w.clock = nightAfter(seasonOf(w.save.day)) - 0.01;
+    p.hp = 20;
+    w.tick(3);
+    const snap = w.snapshot("a");
+    assert.equal(snap.night, true);
+    assert.equal(snap.lit, true);
+    assert.equal(p.hp, 20);
+    assert.ok(w.toasts.some((t) => t.text.includes("天黑") && t.text.includes("灯")));
   });
 });
