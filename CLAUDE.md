@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-`/asset-spec` for the valley — one painted dusk bed or magenta-key. Do not recrop sticker PNGs. See `docs/asset-audit.md` and `docs/adoption-plan.md`.
+`/dev-story production/epics/p1-look/story-001-valley-painted-bed.md` — implement the valley bed from `design/assets/specs/valley-assets.md`. Path D: the spec is the law (no TR registry yet). Do not recrop FAIL PNGs. `/team-polish` waits until the bed exists.
 
 ## Coding Standards
 

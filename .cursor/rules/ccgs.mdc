@@ -13,5 +13,5 @@ Read `CLAUDE.md` first. Then `.claude/docs/technical-preferences.md`, `docs/adop
 - `production/review-mode.txt` is `lean`. Do not stop for a director gate on every file.
 - `production/stage.txt` is `Production`. Look is the open gap. TypeScript in `src/` is reference only.
 - Engine pin is done (Godot 4.4.1). Art bible: `design/art/art-bible.md`. Asset audit: `docs/asset-audit.md`.
-- Next command: `/asset-spec` for the valley painted bed or magenta-key. Do not recrop sticker PNGs.
+- Asset spec: `design/assets/specs/valley-assets.md`. Next: `/dev-story production/epics/p1-look/story-001-valley-painted-bed.md`. Do not recrop FAIL PNGs.
 - Unity / Unreal specialist agents are not in this tree. Use the Godot specialist set.

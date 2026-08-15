@@ -22,7 +22,7 @@ Do **not** overwrite `godot/`, `server/`, `src/`, `docs/WORLD.md`, or `docs/CHAR
 | Look | **Open gap.** CHARTER **P1 now** = look polish + two-phone play. Sticker crops from the cover failed three times. Next look path is one painted dusk bed or magenta-key — not restamping cut trees. |
 | Systems | Ported. TypeScript in `src/` is **reference only**. Do not add look there. Vite canvas is `/legacy`. |
 | Studio stage heuristic | 41 TS files in `src/` plus a playable Godot client → **Production**. Not Concept. Not Systems Design. Not Polish (look is unfinished; Polish is an explicit `/gate-check` only). |
-| `design/gdd/` | Missing. Design already lives in WORLD / CHARTER / ART. |
+| `design/gdd/` | `game-concept.md` migrated. Art bible + valley asset spec exist. |
 | ADRs / stories / sprint yaml | Missing. Do not invent a second design spine. |
 | Engine pin | `/setup-engine godot 4.4` done 2026-08-15. `VERSION.md` is 4.4.1. Do not upgrade to 4.6. |
 
@@ -184,4 +184,4 @@ Already written from the audit. Do not `/gate-check` backward to Concept.
 
 ## Re-run
 
-The three commands are done. Next studio command: **`/asset-spec`** for the valley (one painted dusk bed or magenta-key). Do not recrop sticker PNGs. Do not `/brainstorm`. A dated `/adopt` report may be added later; this file stays the Path D map.
+The three commands plus `/asset-spec` are done. Spec: `design/assets/specs/valley-assets.md`. Next: **`/dev-story production/epics/p1-look/story-001-valley-painted-bed.md`**. Do not recrop sticker PNGs. Do not `/brainstorm`. `/team-polish` is after the bed exists. A dated `/adopt` report may be added later; this file stays the Path D map.
