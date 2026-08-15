@@ -150,14 +150,28 @@ func _paint(zone: String, rows: PackedStringArray) -> void:
 			_bit(zone, rows[y][x], x, y)
 
 
+func _wall(zone: String, x: int, y: int) -> void:
+	var tex := _tex("tex-wood.png") if zone == "kitchen" else _tex("tex-stone.png")
+	if tex == null:
+		return
+	var s := Sprite2D.new()
+	s.texture = tex
+	s.centered = false
+	s.region_enabled = true
+	var tw := maxi(1, tex.get_width() - int(TILE) - 1)
+	var th := maxi(1, tex.get_height() - int(TILE) - 1)
+	s.region_rect = Rect2((x * 19 + y * 7) % tw, (y * 13 + x * 5) % th, TILE + 1, TILE + 1)
+	s.position = Vector2(x * TILE, y * TILE)
+	s.texture_filter = TEXTURE_FILTER_LINEAR
+	s.z_index = 2
+	s.material = Look.dusk_mat(0.04)
+	s.modulate = Color(0.62, 0.42, 0.26) if zone == "kitchen" else Color(0.40, 0.36, 0.32)
+	add_child(s)
+
+
 func _bit(zone: String, ch: String, x: int, y: int) -> void:
 	if ch == "#":
-		var wall := ColorRect.new()
-		wall.position = Vector2(x * TILE, y * TILE)
-		wall.size = Vector2(TILE + 1, TILE + 1)
-		wall.color = Color(0.32, 0.22, 0.14, 0.9) if zone == "kitchen" else Color(0.20, 0.18, 0.16, 0.94)
-		wall.z_index = 2
-		add_child(wall)
+		_wall(zone, x, y)
 		return
 	if zone == "kitchen":
 		if ch == "C":

@@ -16,7 +16,16 @@ test("Godot 4 project is the playable client", () => {
   assert.match(charter, /引擎已定为 Godot 4/);
   assert.match(charter, /不再等网页打磨/);
   assert.match(charter, /不用 Unity/);
+  assert.match(charter, /开间/);
+  assert.match(charter, /进谷/);
+  assert.match(charter, /钓矿厨出谷砧摊田卦睡/);
+  assert.match(charter, /双人规则/);
+  assert.match(charter, /薄声音/);
+  assert.match(charter, /P0 网页一晚在 Godot 上成立/);
+  assert.match(charter, /观感打磨 \+ 两机实玩/);
+  assert.match(charter, /然后才 iOS/);
   assert.doesNotMatch(charter, /Capacitor/);
+  assert.doesNotMatch(charter, /正在迁/);
 });
 
 test("Godot HTML5 export is what phones open", () => {
@@ -79,6 +88,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const floorPaint = readFileSync("tools/paint_valley_sit.py", "utf8");
   assert.match(floorPaint, /308\.0 \+ fx \* 82\.0/);
   assert.match(floorPaint, /0\.16, 0\.42, 0\.52/);
+  assert.match(floorPaint, /short wet lip|thin wet lip/);
   assert.doesNotMatch(floorPaint, /g \/ np\.maximum\(g\.max/);
   assert.ok(existsSync("godot/assets/art/floor-valley.png"));
   assert.doesNotMatch(valley, /_tile\(/);
@@ -130,9 +140,13 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(look, /const MOSS/);
   const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
   assert.match(zone, /ch == "#"/);
+  assert.match(zone, /func _wall/);
+  assert.match(zone, /tex-wood\.png/);
+  assert.match(zone, /tex-stone\.png/);
   assert.match(zone, /show_fog/);
   assert.match(zone, /ch == "F"/);
   assert.match(zone, /ch == "J"/);
+  assert.doesNotMatch(zone, /ColorRect\.new\(\)[\s\S]{0,80}ch == "#"/);
   const net = readFileSync("godot/scripts/net.gd", "utf8");
   assert.match(net, /revealed/);
   const world = readFileSync("src/sim/world.ts", "utf8");

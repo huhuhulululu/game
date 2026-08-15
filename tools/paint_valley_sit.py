@@ -343,16 +343,14 @@ def paint_floor() -> Image.Image:
     creek_y = creek_center(wx)
     creek_d = np.abs(wy - creek_y)
     creek_half = 12.0 + 8.0 * n2 + 4.0 * n
-    # Opaque dusk water. No grass multiply — that turned the creek into a stain.
-    water_m = np.clip(1.0 - (creek_d - creek_half * 0.12) / (creek_half + 5.0), 0, 1) ** 0.48
+    # Opaque dusk water. A short wet lip, not an orange smear or a black stroke.
+    water_m = np.clip(1.0 - (creek_d - creek_half * 0.10) / (creek_half + 2.8), 0, 1) ** 1.08
     water_m *= span
-    depth = np.clip(1.0 - creek_d / np.maximum(creek_half + 2.0, 1.0), 0, 1)
-    bank_m = np.clip(1.0 - np.abs(creek_d - (creek_half + 1.5)) / 6.5, 0, 1) ** 1.05
-    bank_m *= (1.0 - np.clip(water_m, 0, 1) * 0.82) * span * (1.0 - path_m * 0.92)
-    bank_c = np.clip(d * np.array([0.86, 0.62, 0.40], dtype=np.float32) * (0.58 + 0.16 * n[..., None]), 0, 1)
-    rgb = rgb * (1.0 - bank_m * 0.90)[..., None] + bank_c * (bank_m * 0.90)[..., None]
-    north_lip = np.clip(1.0 - np.abs(wy - (creek_y - creek_half * 0.70)) / 3.0, 0, 1) * span
-    rgb = rgb * (1.0 - north_lip * 0.28)[..., None]
+    depth = np.clip(1.0 - creek_d / np.maximum(creek_half + 1.4, 1.0), 0, 1)
+    bank_m = np.clip(1.0 - np.abs(creek_d - (creek_half + 0.8)) / 3.4, 0, 1) ** 1.22
+    bank_m *= (1.0 - np.clip(water_m, 0, 1) * 0.86) * span * (1.0 - path_m * 0.92)
+    bank_c = np.clip(d * np.array([0.56, 0.46, 0.32], dtype=np.float32) * (0.78 + 0.16 * n[..., None]), 0, 1)
+    rgb = rgb * (1.0 - bank_m * 0.88)[..., None] + bank_c * (bank_m * 0.88)[..., None]
     flow = np.sin((wx * 0.072 + n2 * 1.4) * np.pi)
     cross = np.sin((wx * 0.038 - wy * 0.09 + n * 0.9) * np.pi)
     ripple = 0.93 + 0.07 * flow
@@ -364,7 +362,7 @@ def paint_floor() -> Image.Image:
     wet = body * (0.42 + 0.58 * depth)[..., None] + deep * (0.48 * (1.0 - depth))[..., None]
     wet = np.clip(wet * ripple[..., None] * shade[..., None], 0, 1)
     wet = np.clip(wet + gloss * spec[..., None], 0, 1)
-    cover = np.clip(water_m * 1.04, 0, 0.99)
+    cover = np.clip(water_m * 1.06, 0, 0.97)
     rgb = rgb * (1.0 - cover)[..., None] + wet * cover[..., None]
 
     ax = np.clip(xx / float(pad), 0, 1) * np.clip((w - 1 - xx) / float(pad), 0, 1)
