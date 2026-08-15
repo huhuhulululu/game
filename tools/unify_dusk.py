@@ -78,6 +78,16 @@ def eat_sky(im: Image.Image, tol: float = 28.0) -> Image.Image:
     return Image.fromarray(np.dstack([rgb.astype(np.uint8), alpha]), "RGBA")
 
 
+def eat_gold_sky(im: Image.Image, lum_min: float = 118.0) -> Image.Image:
+    # Cover dusk sky stays in the leaf gaps and reads as a box. Windows are not trees.
+    buf = np.asarray(im.convert("RGBA"), dtype=np.float32)
+    r, g, b, a = buf[:, :, 0], buf[:, :, 1], buf[:, :, 2], buf[:, :, 3]
+    lum = 0.30 * r + 0.50 * g + 0.20 * b
+    sky = (lum > lum_min) & (r > 132.0) & (r + 12.0 >= g) & (r > b + 6.0)
+    buf[:, :, 3] = np.where(sky, 0.0, a)
+    return Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
+
+
 def fade_edges(im: Image.Image, pad: float = 0.14) -> Image.Image:
     buf = np.asarray(im.convert("RGBA"), dtype=np.float32)
     h, w = buf.shape[:2]
@@ -177,7 +187,12 @@ def sit_cover_grove() -> None:
     # Trees, lamp, shore from the same cover. Does not touch the cover.
     cover = Image.open(ART / "cover-valley.png").convert("RGBA")
     look = _look()
-    willow = trim_alpha(look.soften_sit(fade_edges(eat_sky(cover.crop(WILLOW_BOX), 16.0), 0.08), 0.12))
+    willow = trim_alpha(
+        look.soften_sit(
+            fade_edges(eat_gold_sky(eat_sky(cover.crop(WILLOW_BOX), 16.0), 112.0), 0.08),
+            0.12,
+        )
+    )
     willow.save(ART / "prop-cover-tree.png")
     print("wrote prop-cover-tree.png from cover willow", willow.size)
     # Ridge canopy is gold-lit. Do not flood-eat the sky or the crown goes with it.
