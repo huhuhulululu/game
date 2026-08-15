@@ -119,3 +119,27 @@ export function blitPatch(
   g.drawImage(s, sx, sy, tw, th, x, y, w, h);
   return true;
 }
+
+/** Paint a tile from a wrapping texture using world pixels so neighbors meet. */
+export function blitWrap(
+  g: CanvasRenderingContext2D,
+  name: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): boolean {
+  const s = sheets.get(name);
+  if (!s) return false;
+  const tw = s.width;
+  const th = s.height;
+  const sx = ((x % tw) + tw) % tw;
+  const sy = ((y % th) + th) % th;
+  const w1 = Math.min(w, tw - sx);
+  const h1 = Math.min(h, th - sy);
+  g.drawImage(s, sx, sy, w1, h1, x, y, w1, h1);
+  if (w1 < w) g.drawImage(s, 0, sy, w - w1, h1, x + w1, y, w - w1, h1);
+  if (h1 < h) g.drawImage(s, sx, 0, w1, h - h1, x, y + h1, w1, h - h1);
+  if (w1 < w && h1 < h) g.drawImage(s, 0, 0, w - w1, h - h1, x + w1, y + h1, w - w1, h - h1);
+  return true;
+}

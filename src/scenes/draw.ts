@@ -1,6 +1,6 @@
 import type { ActorSnap, EnemySnap } from "../sim/net";
 import { TILE } from "../world/maps";
-import { blitFit, blitPatch } from "./art";
+import { blitFit, blitWrap } from "./art";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -142,7 +142,7 @@ function tuft(g: Ctx, x: number, y: number, s: number, c: string): void {
 
 function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number): void {
   if (zone === "kitchen") {
-    if (blitPatch(g, "wood", x, y, TILE, TILE, x, y)) return;
+    if (blitWrap(g, "wood", x, y, TILE, TILE)) return;
     px(g, x, y, TILE, TILE, "#6e4a32");
     g.strokeStyle = "#5a3c28";
     g.lineWidth = 2;
@@ -155,7 +155,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
     return;
   }
   if (zone === "mine") {
-    if (blitPatch(g, "stone", x, y, TILE, TILE, x, y)) return;
+    if (blitWrap(g, "stone", x, y, TILE, TILE)) return;
     px(g, x, y, TILE, TILE, "#2a2624");
     oval(g, x + 12, y + 20, 8, 5, "#1c1a18");
     oval(g, x + 26, y + 10, 6, 4, "#3a3632");
@@ -163,7 +163,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
   }
   if (zone === "wild") {
     if (ch === "m") {
-      if (blitPatch(g, "marsh", x, y, TILE, TILE, x, y)) return;
+      if (blitWrap(g, "marsh", x, y, TILE, TILE)) return;
       px(g, x, y, TILE, TILE, "#24382c");
       oval(g, x + 18, y + 20, 12, 6, "#1a2e24");
       if (Math.sin(now / 640 + x) > 0.2) oval(g, x + 14, y + 16, 7, 3, "#3a6a58");
@@ -175,19 +175,19 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
       tuft(g, x + 18, y + 8, 18, "#7a7a38");
       return;
     }
-    if (blitPatch(g, "grass", x, y, TILE, TILE, x, y)) return;
+    if (blitWrap(g, "grass", x, y, TILE, TILE)) return;
     px(g, x, y, TILE, TILE, "#2e3a28");
     tuft(g, x + 8, y + 14, 12, "#3a4a30");
     return;
   }
   if (ch === ",") {
-    if (blitPatch(g, "path", x, y, TILE, TILE, x, y)) return;
+    if (blitWrap(g, "path", x, y, TILE, TILE)) return;
     px(g, x, y, TILE, TILE, "#8a7a58");
     oval(g, x + 18, y + 18, 14, 6, "#7a6a48");
     oval(g, x + 10, y + 10, 4, 3, "#6a5a38");
     return;
   }
-  if (blitPatch(g, "grass", x, y, TILE, TILE, x, y)) return;
+  if (blitWrap(g, "grass", x, y, TILE, TILE)) return;
   px(g, x, y, TILE, TILE, "#3f6d45");
   const n = hash(x, y);
   tuft(g, x + 4 + (n % 10), y + 12 + (n % 8), 14, "#2f5a38");
@@ -216,19 +216,21 @@ function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
 }
 
 function water(g: Ctx, x: number, y: number, now: number): void {
-  if (!blitPatch(g, "water", x, y, TILE, TILE, x, y)) {
+  if (!blitWrap(g, "water", x, y, TILE, TILE)) {
     px(g, x, y, TILE, TILE, "#1a5470");
     px(g, x, y + 16, TILE, 20, "#143e54");
   }
-  g.strokeStyle = "rgba(180,220,230,0.45)";
-  g.lineWidth = 1.6;
-  g.lineCap = "round";
-  const t = now / 420;
-  for (let i = 0; i < 3; i++) {
-    const yy = y + 8 + i * 9;
+  g.strokeStyle = "rgba(210,230,230,0.28)";
+  g.lineWidth = 1.4;
+  g.lineCap = "butt";
+  const t = now / 520;
+  for (let i = 0; i < 2; i++) {
+    const base = y + 10 + i * 12;
+    const y0 = base + Math.sin(t + x * 0.06 + i) * 1.6;
+    const y1 = base + Math.sin(t + (x + TILE) * 0.06 + i) * 1.6;
     g.beginPath();
-    g.moveTo(x + 2, yy + Math.sin(t + x * 0.05 + i) * 2);
-    g.quadraticCurveTo(x + 18, yy - 3 + Math.sin(t + i) * 2, x + TILE - 2, yy + Math.sin(t + 1.2 + i) * 2);
+    g.moveTo(x, y0);
+    g.lineTo(x + TILE, y1);
     g.stroke();
   }
 }
@@ -293,18 +295,10 @@ function lanternDoor(g: Ctx, x: number, y: number, now: number): void {
 }
 
 function plotSoil(g: Ctx, x: number, y: number): void {
-  if (blitPatch(g, "path", x, y, TILE, TILE, x + 11, y + 7)) {
-    g.globalAlpha = 0.38;
-    oval(g, x + 18, y + 12, 14, 3, "#3a2414");
-    oval(g, x + 18, y + 22, 14, 3, "#3a2414");
-    oval(g, x + 18, y + 30, 13, 2, "#2a1810");
-    g.globalAlpha = 1;
-    return;
-  }
-  px(g, x, y, TILE, TILE, "#6b4a28");
-  oval(g, x + 18, y + 12, 14, 3, "#5a3a1c");
-  oval(g, x + 18, y + 22, 14, 3, "#5a3a1c");
-  oval(g, x + 18, y + 30, 13, 2, "#4a3018");
+  if (!blitWrap(g, "path", x, y, TILE, TILE)) px(g, x, y, TILE, TILE, "#6b4a28");
+  px(g, x, y + 10, TILE, 3, "rgba(42,24,16,0.42)");
+  px(g, x, y + 20, TILE, 3, "rgba(42,24,16,0.38)");
+  px(g, x, y + 30, TILE, 2, "rgba(32,18,12,0.4)");
 }
 
 function bush(g: Ctx, x: number, y: number, gold: boolean): void {
@@ -461,7 +455,7 @@ function trash(g: Ctx, x: number, y: number): void {
 
 function wall(g: Ctx, x: number, y: number, zone: string): void {
   if (zone === "mine") {
-    if (!blitPatch(g, "stone", x, y, TILE, TILE, x, y)) {
+    if (!blitWrap(g, "stone", x, y, TILE, TILE)) {
       px(g, x, y, TILE, TILE, "#1a1614");
       oval(g, x + 12, y + 16, 8, 6, "#2a2420");
     }
@@ -469,11 +463,11 @@ function wall(g: Ctx, x: number, y: number, zone: string): void {
     return;
   }
   if (zone === "kitchen") {
-    if (blitPatch(g, "wood", x, y, TILE, TILE, x + 3, y + 5)) return;
+    if (blitWrap(g, "wood", x, y, TILE, TILE)) return;
     px(g, x, y, TILE, TILE, "#4a3224");
     return;
   }
-  if (!blitPatch(g, "grass", x, y, TILE, TILE, x, y)) px(g, x, y, TILE, TILE, "#2a4a28");
+  if (!blitWrap(g, "grass", x, y, TILE, TILE)) px(g, x, y, TILE, TILE, "#2a4a28");
   oval(g, x + 18, y + 10, 12, 7, "#1e3a24");
   px(g, x + 16, y + 20, 6, 12, "#5a3a22");
 }
@@ -539,10 +533,14 @@ export function drawPlot(g: Ctx, px0: number, py0: number, stage: number, seed?:
     return;
   }
   if (stage === 2) {
+    px(g, px0 + 11, py0 + 20, 2, 8, "#5a3a22");
+    px(g, px0 + 23, py0 + 22, 2, 8, "#5a3a22");
     oval(g, px0 + 12, py0 + 16, 5, 8, green);
     oval(g, px0 + 24, py0 + 18, 5, 8, green);
     return;
   }
+  px(g, px0 + 11, py0 + 20, 2, 10, "#5a3a22");
+  px(g, px0 + 23, py0 + 22, 2, 10, "#5a3a22");
   oval(g, px0 + 12, py0 + 14, 6, 10, green);
   oval(g, px0 + 24, py0 + 16, 6, 10, green);
   oval(g, px0 + 12, py0 + 8, 4, 4, name.includes("柿") ? "#c45c26" : "#e8c070");
