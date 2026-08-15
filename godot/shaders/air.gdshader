@@ -4,7 +4,7 @@ render_mode unshaded, blend_mix;
 // One thin dusk veil. Grain and vignette only. Not a second style.
 uniform float grain : hint_range(0.0, 0.12) = 0.036;
 uniform float vig : hint_range(0.0, 0.5) = 0.22;
-uniform vec4 dusk : source_color = vec4(0.42, 0.22, 0.10, 1.0);
+uniform vec4 dusk : source_color = vec4(0.32, 0.20, 0.12, 1.0);
 
 void fragment() {
 	vec2 uv = UV;

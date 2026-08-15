@@ -55,7 +55,7 @@ static func air_mat() -> ShaderMaterial:
 	m.shader = load("res://shaders/air.gdshader") as Shader
 	m.set_shader_parameter("grain", 0.036)
 	m.set_shader_parameter("vig", 0.22)
-	m.set_shader_parameter("dusk", Color(0.42, 0.22, 0.10, 1.0))
+	m.set_shader_parameter("dusk", Color(0.32, 0.20, 0.12, 1.0))
 	return m
 
 

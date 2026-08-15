@@ -324,7 +324,7 @@ def paint_floor() -> Image.Image:
     d = tile_tex(ground, h, w, 40, 30)
     g_lum = np.maximum(g.mean(axis=2, keepdims=True), 0.05)
     meadow = np.clip(g * (0.46 / g_lum), 0, 1)
-    meadow = np.clip(meadow * np.array([1.36, 0.74, 0.40], dtype=np.float32) * (0.88 + 0.14 * n[..., None]), 0, 1)
+    meadow = np.clip(meadow * np.array([1.24, 0.86, 0.50], dtype=np.float32) * (0.88 + 0.14 * n[..., None]), 0, 1)
     rgb = np.clip(meadow * 0.90 + d * np.array([0.92, 0.86, 0.58], dtype=np.float32) * 0.10, 0, 1)
 
     yy, xx = np.indices((h, w))
@@ -364,8 +364,8 @@ def paint_floor() -> Image.Image:
     wet = np.clip(wet + gloss * spec[..., None], 0, 1)
     cover = np.clip(water_m * 1.06, 0, 0.97)
     rgb = rgb * (1.0 - cover)[..., None] + wet * cover[..., None]
-    # Cover dusk. Geometry already set. Do not move the path or creek.
-    rgb = np.clip(rgb * np.array([1.12, 0.82, 0.52], dtype=np.float32) + np.array([0.06, 0.02, 0.00], dtype=np.float32), 0, 1)
+    # Cover dusk: olive gold, not rust, not day green. Do not move the path or creek.
+    rgb = np.clip(rgb * np.array([1.08, 0.88, 0.66], dtype=np.float32) + np.array([0.04, 0.03, 0.03], dtype=np.float32), 0, 1)
 
     ax = np.clip(xx / float(pad), 0, 1) * np.clip((w - 1 - xx) / float(pad), 0, 1)
     ay = np.clip(yy / float(pad), 0, 1) * np.clip((h - 1 - yy) / float(pad), 0, 1)

@@ -255,9 +255,8 @@ func _on_snap(s: Dictionary) -> void:
 	_hud_place.text = _place(zone, bool(s.get("rush", false)), int(s.get("floor", 0)), str(s.get("biome", "")))
 	_hud_room.text = "房间 %s" % str(s.get("room", Net.room))
 	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
-	var weather: Dictionary = s.get("weather", {}) if typeof(s.get("weather", {})) == TYPE_DICTIONARY else {}
-	# No soul meter. Hunger is 饿.
-	_hud_ink.text = "日 %s · %s · %s · 金 %s · 饿 %s" % [_ink_n(s.get("day", 0)), str(s.get("season", "春")), phase, _ink_n(s.get("gold", 0)), _ink_n(s.get("hunger", 0))]
+	# Hunger stays in the sim. The plaque never shows a soul or hunger number.
+	_hud_ink.text = "日 %s · %s · %s · 金 %s" % [_ink_n(s.get("day", 0)), str(s.get("season", "春")), phase, _ink_n(s.get("gold", 0))]
 	var prompt := str(s.get("prompt", ""))
 	_prompt.text = prompt
 	if prompt == "起竿" or prompt.find("太暗") >= 0 or prompt.find("咬") >= 0 or prompt.find("还早") >= 0:

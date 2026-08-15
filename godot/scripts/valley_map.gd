@@ -99,7 +99,7 @@ func _paint() -> void:
 	if sheet:
 		bed.scale = Vector2((sz.x + pad * 2.0) / float(sheet.get_width()), (sz.y + pad * 2.0) / float(sheet.get_height()))
 	bed.z_index = -2
-	bed.modulate = Color(1.12, 0.68, 0.42)
+	bed.modulate = Color(1.04, 0.86, 0.58)
 	add_child(bed)
 	var ground := Sprite2D.new()
 	ground.texture = sheet
