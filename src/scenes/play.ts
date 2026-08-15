@@ -34,6 +34,7 @@ import {
 } from "./draw";
 import { el } from "../ui/dom";
 import { loadArt } from "./art";
+import { emptyFeel, tickFeel } from "../game/feel";
 
 export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   loadArt();
@@ -52,6 +53,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   let persistAt = 0;
   let lastToast = "";
   const gait = new Map<string, { x: number; y: number; heat: number }>();
+  let feel = emptyFeel();
 
   const net = connectRoom(
     room,
@@ -393,6 +395,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       <button class="bag-toggle" type="button" id="bag-btn">袋</button>
       <button class="bag-toggle book-toggle" type="button" id="book-btn">鉴</button>
       <button class="bag-toggle map-toggle" type="button" id="map-btn">图</button>
+      <button class="bag-toggle mute-toggle" type="button" id="mute-btn">${ctx.audio.muted ? "静" : "声"}</button>
       <div class="sheet ${open === "bag" ? "" : "hidden"}" id="bag">
         <header>袋</header>
         <div class="sheet-grid">
@@ -434,6 +437,12 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     hud.querySelector("#bag-btn")?.addEventListener("click", () => toggle("bag"));
     hud.querySelector("#book-btn")?.addEventListener("click", () => toggle("book"));
     hud.querySelector("#map-btn")?.addEventListener("click", () => toggle("map"));
+    hud.querySelector("#mute-btn")?.addEventListener("click", () => {
+      ctx.save.muted = !ctx.save.muted;
+      ctx.audio.setMuted(ctx.save.muted);
+      ctx.persist();
+      paintHud();
+    });
     hud.querySelectorAll("[data-take]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = (btn as HTMLElement).dataset.take;
@@ -454,6 +463,11 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       ping: consume(stick.input, "ping"),
     });
     paint();
+    if (snap) {
+      const heard = tickFeel(feel, snap, performance.now());
+      feel = heard.next;
+      if (!ctx.audio.muted) for (const s of heard.sounds) ctx.audio.tone(s);
+    }
     const key = snap
       ? JSON.stringify([
           snap.toasts,
@@ -482,6 +496,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           snap.combo,
           snap.board,
           snap.actors.map((a) => [a.fishing, a.fishPull, a.ping]),
+          ctx.audio.muted,
         ])
       : "";
     if (key !== lastHud) {

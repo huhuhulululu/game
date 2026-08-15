@@ -16,6 +16,8 @@ import { mergeSnap } from "../net/client";
 import { resolveHelloRoom, roomIsFull } from "../../server/join";
 import { World } from "../sim/world";
 import { buildMap, mineTemplate, tileCenter, VALLEY } from "../world/maps";
+import { createAudio } from "./audio";
+import { tickFeel } from "./feel";
 import { generateWild } from "../world/wild";
 import type { WorldSnap } from "../sim/net";
 
@@ -1069,5 +1071,39 @@ describe("living systems", () => {
     assert.equal(miss.save.gold, 28);
     assert.equal(miss.stall?.goods[0]?.id, "osmanthus");
     assert.ok(miss.toasts.some((t) => t.text.includes("定金没了")));
+  });
+
+  it("lays a thin night of sounds and keeps mute from changing the world", () => {
+    const w = new World("FEEL");
+    w.addPlayer("a", "暖", "left");
+    const snap = w.snapshot("a");
+    const first = tickFeel(null, snap, 0);
+    assert.equal(first.sounds.includes("door"), false);
+    const kitchen = { ...snap, zone: "kitchen" as const };
+    const entered = tickFeel(first.next, kitchen, 80);
+    assert.ok(entered.sounds.includes("door"));
+    const me = snap.actors.find((a) => a.id === "a")!;
+    const walked = {
+      ...snap,
+      youAt: { x: me.x + 10, y: me.y },
+      actors: snap.actors.map((a) => (a.id === "a" ? { ...a, x: a.x + 10 } : a)),
+    };
+    const step = tickFeel(first.next, walked, 400);
+    assert.ok(step.sounds.includes("step"));
+    const fight = {
+      ...snap,
+      actors: snap.actors.map((a) => (a.id === "a" ? { ...a, fishing: "fight", fishMark: 0.5 } : a)),
+    };
+    const ding = tickFeel(first.next, fight, 20);
+    assert.ok(ding.sounds.includes("green"));
+    const still = tickFeel(ding.next, fight, 40);
+    assert.equal(still.sounds.includes("green"), false);
+    const quiet = createAudio();
+    quiet.setMuted(true);
+    assert.equal(quiet.muted, true);
+    quiet.tone("step");
+    quiet.tone("green");
+    quiet.tone("door");
+    assert.equal(w.players.get("a")!.zone, "valley");
   });
 });

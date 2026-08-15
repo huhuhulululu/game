@@ -124,7 +124,7 @@ export interface GameContext {
   audio: {
     muted: boolean;
     setMuted: (v: boolean) => void;
-    tone: (kind: "tap" | "chop" | "sizzle" | "serve" | "ok" | "soft" | "water" | "hit" | "drop" | "level") => void;
+    tone: (kind: import("./audio").ToneKind) => void;
     unlock: () => void;
   };
 }

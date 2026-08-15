@@ -1,9 +1,29 @@
+export type ToneKind =
+  | "tap"
+  | "chop"
+  | "sizzle"
+  | "serve"
+  | "ok"
+  | "soft"
+  | "water"
+  | "hit"
+  | "drop"
+  | "level"
+  | "step"
+  | "shore"
+  | "fire"
+  | "door"
+  | "green";
+
 export function createAudio() {
   let ctx: AudioContext | null = null;
   let muted = false;
   let drone: { stop: () => void } | null = null;
 
+  const alive = () => typeof AudioContext !== "undefined";
+
   const ensure = () => {
+    if (!alive()) return null;
     if (!ctx) ctx = new AudioContext();
     if (ctx.state === "suspended") void ctx.resume();
     return ctx;
@@ -12,6 +32,7 @@ export function createAudio() {
   const beep = (freq: number, dur: number, type: OscillatorType, gain = 0.04) => {
     if (muted) return;
     const ac = ensure();
+    if (!ac) return;
     const o = ac.createOscillator();
     const g = ac.createGain();
     o.type = type;
@@ -24,9 +45,8 @@ export function createAudio() {
     o.stop(ac.currentTime + dur);
   };
 
-  const tone = (
-    kind: "tap" | "chop" | "sizzle" | "serve" | "ok" | "soft" | "water" | "hit" | "drop" | "level",
-  ) => {
+  const tone = (kind: ToneKind) => {
+    if (muted) return;
     if (kind === "tap") beep(520, 0.06, "triangle", 0.03);
     if (kind === "chop") beep(180, 0.08, "square", 0.035);
     if (kind === "sizzle") beep(240, 0.16, "sawtooth", 0.02);
@@ -43,11 +63,23 @@ export function createAudio() {
       beep(523, 0.1, "sine", 0.04);
       setTimeout(() => beep(784, 0.16, "sine", 0.04), 90);
     }
+    if (kind === "step") beep(96, 0.045, "sine", 0.016);
+    if (kind === "shore") {
+      beep(260, 0.2, "sine", 0.012);
+      setTimeout(() => beep(190, 0.16, "sine", 0.01), 70);
+    }
+    if (kind === "fire") beep(72, 0.09, "sawtooth", 0.01);
+    if (kind === "door") {
+      beep(170, 0.12, "triangle", 0.02);
+      setTimeout(() => beep(128, 0.14, "sine", 0.016), 90);
+    }
+    if (kind === "green") beep(698, 0.07, "sine", 0.022);
   };
 
   const startDrone = () => {
     if (muted || drone) return;
     const ac = ensure();
+    if (!ac) return;
     const master = ac.createGain();
     master.gain.value = 0.016;
     master.connect(ac.destination);

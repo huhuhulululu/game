@@ -316,6 +316,10 @@ button {
   top: 96px;
 }
 
+.mute-toggle {
+  top: 144px;
+}
+
 .tickets.rush .ticket {
   box-shadow: 0 0 0 1px #c45c26;
 }
