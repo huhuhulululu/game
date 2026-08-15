@@ -33,7 +33,7 @@ import {
   viewScale,
 } from "./draw";
 import { el } from "../ui/dom";
-import { itemMark, markSvg } from "../ui/marks";
+import { itemMark, slipHtml } from "../ui/marks";
 import { loadArt } from "./art";
 import { emptyFeel, tickFeel } from "../game/feel";
 
@@ -395,42 +395,40 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       <button class="bag-toggle map-toggle" type="button" id="map-btn">图</button>
       <button class="bag-toggle mute-toggle" type="button" id="mute-btn">${ctx.audio.muted ? "静" : "声"}</button>
       <div class="sheet ${open === "bag" ? "" : "hidden"}" id="bag">
-        <header>袋</header>
-        <div class="sheet-grid">
-          ${
-            snap.bag
-              .map(
-                (s) =>
-                  `<button type="button" class="sheet-cell" data-take="${s.id}">${markSvg(itemMark(s.id))}<b>${s.name}</b><span>×${s.n}</span></button>`,
-              )
-              .join("") || `<div class="sheet-empty">空</div>`
-          }
+        <div class="sheet-face">
+          <header>袋</header>
+          <div class="slip-list">
+            ${
+              snap.bag.map((s) => slipHtml(itemMark(s.id), s.name, `×${s.n}`, s.id)).join("") ||
+              `<div class="sheet-empty">空</div>`
+            }
+          </div>
+          ${snap.gear.length ? `<footer>${snap.gear.join(" · ")}</footer>` : ""}
         </div>
-        ${snap.gear.length ? `<footer>${snap.gear.join(" · ")}</footer>` : ""}
       </div>
       <div class="sheet ${open === "book" ? "" : "hidden"}" id="book">
-        <header>图鉴</header>
-        <div class="sheet-grid stats">
-          <div class="sheet-cell">${markSvg("fish")}<b>鱼</b><span>${snap.album.fish}/${snap.album.fishMax}</span></div>
-          <div class="sheet-cell">${markSvg("cook")}<b>菜</b><span>${snap.album.cook}/${snap.album.cookMax}</span></div>
-          <div class="sheet-cell">${markSvg("map")}<b>图</b><span>${snap.album.map}%</span></div>
-        </div>
-        <div class="sheet-grid">
-          ${snap.cookbook.map((n) => `<div class="sheet-cell">${markSvg("cook")}<b>${n}</b></div>`).join("") || `<div class="sheet-empty">还没写出第一道</div>`}
+        <div class="sheet-face">
+          <header>图鉴</header>
+          <p class="slip-ink">鱼 ${snap.album.fish}/${snap.album.fishMax} · 菜 ${snap.album.cook}/${snap.album.cookMax} · 图 ${snap.album.map}%</p>
+          <div class="slip-list">
+            ${snap.cookbook.map((n) => slipHtml("cook", n)).join("") || `<div class="sheet-empty">还没写出第一道</div>`}
+          </div>
         </div>
       </div>
       <div class="sheet ${open === "map" ? "" : "hidden"}" id="map">
-        <header>图</header>
-        <p>${
-          snap.zone === "wild"
-            ? `已照亮 ${snap.revealed.length} 处 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}`
-            : snap.zone === "mine"
-              ? partner?.online
-                ? `矿 ${snap.floor}层。柿色是你，松色是她。出口在西。`
-                : `矿 ${snap.floor}层。出口在西。`
-              : "柿色是你，松色是她。出谷之后，荒野才会一点点亮起来。"
-        }</p>
-        <canvas id="atlas"></canvas>
+        <div class="sheet-face">
+          <header>图</header>
+          <p>${
+            snap.zone === "wild"
+              ? `已照亮 ${snap.revealed.length} 处 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}`
+              : snap.zone === "mine"
+                ? partner?.online
+                  ? `矿 ${snap.floor}层。柿色是你，松色是她。出口在西。`
+                  : `矿 ${snap.floor}层。出口在西。`
+                : "柿色是你，松色是她。出谷之后，荒野才会一点点亮起来。"
+          }</p>
+          <div class="atlas-wrap"><canvas id="atlas"></canvas></div>
+        </div>
       </div>
     `;
     const toggle = (id: "bag" | "book" | "map") => {

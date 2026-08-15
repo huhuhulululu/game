@@ -39,3 +39,9 @@ const PATHS: Record<MarkKind, string> = {
 export function markSvg(kind: MarkKind): string {
   return `<svg class="mark" viewBox="0 0 24 24" aria-hidden="true">${PATHS[kind]}</svg>`;
 }
+
+export function slipHtml(kind: MarkKind, title: string, note?: string, take?: string): string {
+  const inner = `${markSvg(kind)}<b>${title}</b>${note ? `<span>${note}</span>` : ""}`;
+  if (take) return `<button type="button" class="slip" data-take="${take}">${inner}</button>`;
+  return `<div class="slip">${inner}</div>`;
+}

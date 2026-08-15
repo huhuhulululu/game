@@ -347,11 +347,8 @@ button {
 }
 
 .bag-panel button,
-.sheet-cell {
+.slip {
   pointer-events: auto;
-  border: 0;
-  padding: 4px 8px;
-  color: var(--gold-soft);
 }
 
 .bag-panel {
@@ -395,53 +392,81 @@ button {
     inset 0 0 0 2px #2a1810,
     inset 0 0 0 4px #7a5230,
     0 16px 40px rgba(8, 6, 4, 0.45);
-  padding: 12px 14px 16px;
+  padding: 14px 16px 16px;
+}
+
+.sheet#map {
+  width: min(92vw, 440px);
+}
+
+.sheet-face {
+  min-height: 120px;
+  background-color: #e7d3b4;
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 21px,
+      rgba(90, 58, 34, 0.07) 21px 22px
+    ),
+    linear-gradient(180deg, rgba(244, 231, 210, 0.4), transparent 24%);
+  box-shadow:
+    inset 0 0 0 1px #8a6238,
+    inset 0 12px 20px rgba(42, 24, 16, 0.08);
+  padding: 12px 14px 14px;
+  color: var(--ink);
 }
 
 .sheet header {
   letter-spacing: 0.2em;
-  color: var(--gold);
+  color: #5a3a22;
   font-size: 13px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-.sheet-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+.slip-ink {
+  margin: 0 0 8px;
+  color: #5a3a22;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
-.sheet-grid.stats {
-  margin-bottom: 12px;
-}
-
-.sheet-cell {
+.slip-list {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  min-height: 64px;
-  padding: 8px;
-  background: rgba(244, 231, 210, 0.08);
+}
+
+.slip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 2px;
+  background: none;
   border: 0;
+  border-bottom: 1px dashed rgba(42, 24, 16, 0.22);
+  color: var(--ink);
   text-align: left;
-  box-shadow: inset 0 0 0 1px rgba(42, 24, 16, 0.5);
 }
 
-.sheet-cell b {
-  color: var(--paper);
-  letter-spacing: 0.06em;
-  font-size: 13px;
+.slip:last-child {
+  border-bottom: 0;
 }
 
-.sheet-cell span {
-  color: var(--gold-soft);
+.slip b {
+  flex: 1;
+  letter-spacing: 0.04em;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.slip span {
+  color: #7a5b3a;
   font-size: 12px;
 }
 
 .sheet-empty {
-  grid-column: 1 / -1;
-  color: var(--mist);
+  color: #7a5b3a;
   padding: 18px 8px;
   text-align: center;
 }
@@ -456,19 +481,25 @@ button {
 .sheet footer,
 .sheet p {
   margin: 10px 0 0;
-  color: var(--gold-soft);
+  color: #5a3a22;
   font-size: 13px;
   line-height: 1.5;
+}
+
+.atlas-wrap {
+  margin-top: 8px;
+  min-height: 160px;
+  background: #d8c09a;
+  box-shadow: inset 0 0 0 1px #5a3a22;
 }
 
 .sheet canvas {
   display: block;
   width: 100%;
-  margin-top: 8px;
   image-rendering: auto;
-  border: 1px solid rgba(201, 160, 106, 0.25);
-  border-radius: 8px;
-  background: #c9a06a;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .map-panel {

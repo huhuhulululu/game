@@ -26,7 +26,7 @@ import {
   viewScale,
 } from "./draw";
 import type { ActorSnap } from "../sim/net";
-import { itemMark, markSvg } from "../ui/marks";
+import { itemMark, markSvg, slipHtml } from "../ui/marks";
 
 function mockCtx() {
   const fills: string[] = [];
@@ -92,6 +92,11 @@ describe("look", () => {
     const svg = markSvg(itemMark("herb"));
     assert.ok(svg.includes("<path"));
     assert.ok(!svg.includes("rect"));
+    const slip = slipHtml("leaf", "山草", "×3", "herb");
+    assert.ok(slip.includes('class="slip"'));
+    assert.ok(slip.includes("data-take=\"herb\""));
+    assert.ok(!slip.includes("sheet-cell"));
+    assert.ok(!slip.includes("sheet-grid"));
   });
 
   it("still paints trees, water, fire, plots, ore and houses as named things", () => {
