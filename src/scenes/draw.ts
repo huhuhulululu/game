@@ -1136,7 +1136,7 @@ function organicPath(g: Ctx, x: number, y: number, w: number, h: number, seed: n
   }
   for (let i = 1; i <= down; i++) {
     const py = (i / down) * h;
-    g.lineTo(x + w + wander(seed + 4, py) * amp * 0.35, y + py + wander(seed + 5, py) * amp * 0.25);
+    g.lineTo(x + w + wander(seed + 4, py) * amp * 0.7, y + py + wander(seed + 5, py) * amp * 0.25);
   }
   for (let i = 1; i <= across; i++) {
     const px = (1 - i / across) * w;
@@ -1144,7 +1144,7 @@ function organicPath(g: Ctx, x: number, y: number, w: number, h: number, seed: n
   }
   for (let i = 1; i <= down; i++) {
     const py = (1 - i / down) * h;
-    g.lineTo(x + wander(seed + 8, py) * amp * 0.35, y + py + wander(seed + 9, py) * amp * 0.25);
+    g.lineTo(x + wander(seed + 8, py) * amp * 0.7, y + py + wander(seed + 9, py) * amp * 0.25);
   }
   g.closePath();
 }
@@ -1179,6 +1179,21 @@ function nibbleGrass(g: Ctx, x: number, y: number, w: number, seed: number, dir:
   }
 }
 
+function nibbleGrassV(g: Ctx, x: number, y: number, h: number, seed: number, dir: number): void {
+  for (let i = -8; i <= h + 8; i += 14) {
+    const cy = y + i + wander(seed, i) * 9;
+    const cx = x + wander(seed + 2, i) * 6 * dir;
+    g.save();
+    g.beginPath();
+    g.ellipse(cx, cy, 10, 16, wander(seed, i + 3) * 0.4, 0, Math.PI * 2);
+    g.clip();
+    if (!blitWrap(g, "grass", cx - 12, cy - 20, 24, 40)) {
+      oval(g, cx, cy, 9, 16, "#3f6d45");
+    }
+    g.restore();
+  }
+}
+
 export function drawPool(g: Ctx, c: FieldCluster): boolean {
   const x = c.x * TILE;
   const y = c.y * TILE;
@@ -1208,6 +1223,8 @@ export function drawLane(g: Ctx, c: FieldCluster): boolean {
   g.restore();
   nibbleGrass(g, x - 2, y, w + 4, seed, -1);
   nibbleGrass(g, x - 2, y + h, w + 4, seed + 5, 1);
+  nibbleGrassV(g, x, y - 2, h + 4, seed + 7, -1);
+  nibbleGrassV(g, x + w, y - 2, h + 4, seed + 8, 1);
   return ok;
 }
 
@@ -1239,6 +1256,8 @@ export function drawField(g: Ctx, c: FieldCluster): void {
   g.restore();
   nibbleGrass(g, x, y + 2, w, seed, -1);
   nibbleGrass(g, x, y + h - 2, w, seed + 6, 1);
+  nibbleGrassV(g, x + 2, y, h, seed + 8, -1);
+  nibbleGrassV(g, x + w - 2, y, h, seed + 9, 1);
 }
 
 function wet(look: string): boolean {
