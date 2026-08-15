@@ -48,6 +48,7 @@ var last_log := ""
 var tiles_cache: Array = []
 var tiles_zone := ""
 var play_seen: Dictionary = {}
+var room_shown := false
 
 
 func _ready() -> void:
@@ -72,15 +73,21 @@ func _process(_dt: float) -> void:
 	if phase == "boot" and frames == 4:
 		_click(Vector2(640, 360))
 		phase = "room"
-	elif phase == "room" and frames == 8:
+	elif phase == "room":
 		var open := _find_button(app, "开一间")
+		if open == null and not room_shown and app and app.has_method("show_room"):
+			# Headless has no pointer. App still owns the swap into Play.
+			app.call("show_room")
+			room_shown = true
+			print("SHOW_ROOM")
+		open = _find_button(app, "开一间")
 		if open:
 			open.emit_signal("pressed")
 			print("CLICK 开一间")
-		else:
+			phase = "wait_play"
+		elif frames > 40:
 			printerr("NO_OPEN_BUTTON")
 			get_tree().quit(2)
-		phase = "wait_play"
 	elif phase == "wait_play":
 		play = _find_play()
 		if play and Net.last_snap.size() > 0:
@@ -211,7 +218,8 @@ func _drive_play() -> void:
 				cut = Vector2i(1, 3)
 			var drive6 := _drive(cut, 3)
 			move = drive6["move"]
-			if _prompt() == "出厨房" or _prompt() == "吃":
+			# 吃 is the idle floor prompt while holding food. Keep walking to C.
+			if _prompt() == "出厨房":
 				move = _seek(_center(2, 3))
 			elif bool(drive6["here"]) or _prompt() == "切" or _prompt() == "切着":
 				move = _nudge(int(drive6["facing"])) if _prompt() != "切" and _prompt() != "切着" else Vector2.ZERO
