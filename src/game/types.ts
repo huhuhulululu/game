@@ -124,6 +124,7 @@ export interface GameContext {
   audio: {
     muted: boolean;
     setMuted: (v: boolean) => void;
+    setAmbient: (kind: import("./feel").AmbientKind) => void;
     tone: (kind: import("./audio").ToneKind) => void;
     unlock: () => void;
   };

@@ -18,7 +18,7 @@ import { resolveHelloRoom, roomIsFull, takeRoom } from "../../server/join";
 import { World } from "../sim/world";
 import { buildMap, mineTemplate, TILE, tileCenter, VALLEY } from "../world/maps";
 import { createAudio } from "./audio";
-import { tickFeel } from "./feel";
+import { pickAmbient, tickFeel } from "./feel";
 import { generateWild } from "../world/wild";
 import type { WorldSnap } from "../sim/net";
 
@@ -1150,7 +1150,44 @@ describe("living systems", () => {
     quiet.tone("ready");
     quiet.tone("dark");
     quiet.tone("bite");
+    quiet.setAmbient("night");
+    assert.equal(quiet.ambient, "night");
     assert.equal(w.players.get("a")!.zone, "valley");
+  });
+
+  it("picks a thin ambient bed by place, and mute does not change the world", () => {
+    const w = new World("AIR");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    const plot = w.valley.find("P")[0];
+    const dock = w.valley.find("D")[0];
+    assert.ok(plot && dock);
+    p.x = tileCenter(plot.x, plot.y).x;
+    p.y = tileCenter(plot.x, plot.y).y;
+    assert.equal(pickAmbient(w.snapshot("a")), "day");
+    p.x = tileCenter(dock.x, dock.y).x;
+    p.y = tileCenter(dock.x, dock.y).y;
+    assert.equal(pickAmbient(w.snapshot("a")), "water");
+    p.x = tileCenter(plot.x, plot.y).x;
+    p.y = tileCenter(plot.x, plot.y).y;
+    w.clock = nightAfter(seasonOf(w.save.day)) + 0.01;
+    assert.equal(w.snapshot("a").night, true);
+    assert.equal(pickAmbient(w.snapshot("a")), "night");
+    p.zone = "kitchen";
+    assert.equal(pickAmbient(w.snapshot("a")), "inn");
+    const air = createAudio();
+    air.setAmbient("day");
+    assert.equal(air.ambient, "day");
+    air.setAmbient("water");
+    assert.equal(air.ambient, "water");
+    air.setMuted(true);
+    air.setAmbient("inn");
+    assert.equal(air.muted, true);
+    assert.equal(air.ambient, "inn");
+    air.setMuted(false);
+    assert.equal(air.ambient, "inn");
+    assert.equal(p.zone, "kitchen");
   });
 
   it("a solo night points at the river and the inn, and does not skip the day at the cabin", () => {

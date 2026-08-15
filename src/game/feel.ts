@@ -3,6 +3,8 @@ import type { ActorSnap, WorldSnap } from "../sim/net";
 
 export type FeelSound = "step" | "shore" | "fire" | "door" | "green" | "night" | "ready" | "bite";
 
+export type AmbientKind = "day" | "water" | "night" | "inn" | "";
+
 export type FeelState = {
   zone: string;
   x: number;
@@ -71,6 +73,19 @@ function nearFire(snap: WorldSnap, tx: number, ty: number): boolean {
 
 function inGreenWindow(mark: number): boolean {
   return mark >= GREEN_LO && mark <= GREEN_HI;
+}
+
+export function pickAmbient(snap: WorldSnap): AmbientKind {
+  if (snap.zone === "kitchen") return "inn";
+  const me = meOf(snap);
+  const x = me?.x ?? snap.youAt.x;
+  const y = me?.y ?? snap.youAt.y;
+  const tx = Math.floor(x / TILE);
+  const ty = Math.floor(y / TILE);
+  if (snap.tiles.length && nearWater(snap.tiles, tx, ty)) return "water";
+  if (snap.night && snap.zone !== "mine") return "night";
+  if (snap.zone === "valley" || snap.zone === "wild" || snap.zone === "mine") return "day";
+  return "";
 }
 
 export function tickFeel(prev: FeelState | null, snap: WorldSnap, now: number): { next: FeelState; sounds: FeelSound[] } {

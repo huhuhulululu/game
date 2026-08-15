@@ -35,7 +35,7 @@ import {
 import { el } from "../ui/dom";
 import { itemMark, slipHtml } from "../ui/marks";
 import { loadArt } from "./art";
-import { emptyFeel, tickFeel } from "../game/feel";
+import { emptyFeel, pickAmbient, tickFeel } from "../game/feel";
 
 export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   loadArt();
@@ -468,6 +468,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       const heard = tickFeel(feel, snap, performance.now());
       feel = heard.next;
       if (!ctx.audio.muted) for (const s of heard.sounds) ctx.audio.tone(s);
+      ctx.audio.setAmbient(pickAmbient(snap));
     }
     const key = snap
       ? JSON.stringify([
@@ -512,6 +513,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
 
   return () => {
     cancelAnimationFrame(raf);
+    ctx.audio.setAmbient("");
     net.close();
     stick.destroy();
     scene.remove();
