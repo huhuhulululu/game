@@ -1,14 +1,15 @@
 # Session state
 
 - Task: `/team-polish` the packed valley bed (PR #2)
-- Status: Polish implemented — enter camera must be one painting + people + HUD
+- Status: Bed corridor is landscape-only — wait for Brainbird's real-device enter frame
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `valley_logic.gd`, `play.gd`, `actor_view.gd`, `look.gd`, `tools/paint_valley_bed.py`, `bed-valley.png`
-- Next: wait for Brainbird. `/story-done` only after they confirm the enter frame is one painting + people + HUD
+- Files: `tools/paint_valley_bed.py`, `tools/ref/valley-path-fill.png`, `bed-valley.png`, `valley_logic.gd`, `play.gd`, `actor_view.gd`, `look.gd`
+- Next: wait for Brainbird. `/story-done` only after they confirm the enter frame is one clean dusk landscape + live coats + HUD
 
 ## Session Extract — /team-polish 2026-08-15
 
 - Area: painted valley bed
-- Dirt sources: hung crops (mounds/pillar), valley atlas (mosaic block), bed plate + title crop, tiny foot shadow
+- Dirt sources: hung crops, valley atlas, title crop, then cover pair left in the 302-crop and enlarged; person-shaped fill made ghosts + a brown pillar
+- This knife: one landscape corridor; hard path/grass replace; title still cropped at 302
 - FAIL stickers: not restored
-- Next: headless enter shot, then story-done if the frame is only bed + coats + HUD
+- Next: headless enter shot for the agent; story-done only after Brainbird's next sentence

@@ -35,7 +35,7 @@
 
 ## Implementation Notes
 
-From ADR-0001 / ADR-0003: packed scene graph; `tools/paint_valley_bed.py` writes only the bed; same-y 1:1 path clone under baked people; crop title at y=302. Delete sticker `valley_map.gd`. Headless uses `ValleyWorld`. `/team-polish`: no hung crops on the bed, hide valley atlas, stronger foot stain.
+From ADR-0001 / ADR-0003: packed scene graph; `tools/paint_valley_bed.py` writes only the bed; crop title at y=302; lift the cover pair with one landscape corridor (path/grass plate), not a person-shaped clone. Delete sticker `valley_map.gd`. Headless uses `ValleyWorld`. `/team-polish`: no hung crops, hide valley atlas, no giant cover pair on the bed.
 
 ## Out of Scope
 
@@ -59,7 +59,7 @@ From ADR-0001 / ADR-0003: packed scene graph; `tools/paint_valley_bed.py` writes
 
 **Story Type**: Visual/Feel
 **Required evidence**: `production/qa/evidence/packed-bed-evidence.md` + `godot/project.test.ts`
-**Status**: [x] polish pass — enter shot must be one painting + people + HUD
+**Status**: [x] polish pass — enter shot must be one clean dusk landscape + live coats + HUD; story-done waits on Brainbird
 
 ## Dependencies
 

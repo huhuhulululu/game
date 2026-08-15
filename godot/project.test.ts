@@ -232,6 +232,9 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(bedPaint, /bed-valley/);
   assert.match(bedPaint, /CROP_Y0 = 302/);
   assert.match(bedPaint, /PATH_LO, PATH_HI/);
+  assert.match(bedPaint, /valley-path-fill/);
+  assert.match(bedPaint, /CORRIDOR_X0, CORRIDOR_X1/);
+  assert.ok(existsSync("tools/ref/valley-path-fill.png"));
   assert.doesNotMatch(bedPaint, /save\(.*cover-valley/);
   assert.doesNotMatch(bedPaint, /resize\(\(x1 - x0/);
   assert.doesNotMatch(valley, /floor-valley|ground-valley|_bend\(/);
