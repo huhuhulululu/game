@@ -7,7 +7,7 @@ export function mountRoom(root: HTMLElement, ctx: GameContext): () => void {
   const pine = ctx.prefer === "right";
   scene.innerHTML = `
     <div class="cover-sky" aria-hidden="true">
-      <img class="cover-grass" src="/art/tex-grass.png?v=look8" alt="" />
+      <img class="cover-grass" src="/art/tex-grass.png?v=look9" alt="" />
       <i class="star" style="left:12%;top:18%"></i>
       <i class="star" style="left:28%;top:10%"></i>
       <i class="star" style="left:46%;top:22%"></i>
@@ -15,10 +15,10 @@ export function mountRoom(root: HTMLElement, ctx: GameContext): () => void {
       <i class="star" style="left:78%;top:16%"></i>
       <i class="star" style="left:88%;top:28%"></i>
       <div class="moon"></div>
-      <img class="cover-tree l" src="/art/prop-pine.png?v=look8" alt="" />
-      <img class="cover-tree r" src="/art/prop-tree-tall.png?v=look8" alt="" />
-      <img class="cover-cabin" src="/art/prop-cabin.png?v=look8" alt="" />
-      <img class="cover-inn" src="/art/prop-inn.png?v=look8" alt="" />
+      <img class="cover-tree l" src="/art/prop-pine.png?v=look9" alt="" />
+      <img class="cover-tree r" src="/art/prop-tree-tall.png?v=look9" alt="" />
+      <img class="cover-cabin" src="/art/prop-cabin.png?v=look9" alt="" />
+      <img class="cover-inn" src="/art/prop-inn.png?v=look9" alt="" />
     </div>
     <div class="cover-panel">
       <div class="cover-plank">

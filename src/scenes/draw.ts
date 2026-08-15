@@ -517,10 +517,10 @@ function lurk(g: Ctx, x: number, y: number, now: number): void {
 
 function stove(g: Ctx, x: number, y: number, now: number, near?: Near): void {
   if (near?.s === "U") return;
-  oval(g, x + 18, y + 32, 12, 4, "rgba(20,16,10,0.28)");
-  if (blitFit(g, "stove", x - 12, y - 36, 60, 72)) {
+  oval(g, x + 18, y + 34, 16, 5, "rgba(20,16,10,0.3)");
+  if (blitFit(g, "stove", x - 22, y - 58, 80, 100)) {
     const f = 0.5 + Math.sin(now / 80) * 0.4;
-    oval(g, x + 18, y + 18, 5, 3.4 * f, "rgba(232,160,48,0.5)");
+    oval(g, x + 18, y + 10, 6, 4 * f, "rgba(232,160,48,0.48)");
     return;
   }
   px(g, x + 6, y + 12, 24, 20, "#6a4030");
@@ -532,8 +532,8 @@ function stove(g: Ctx, x: number, y: number, now: number, near?: Near): void {
 }
 
 function plate(g: Ctx, x: number, y: number): void {
-  oval(g, x + 18, y + 32, 13, 4, "rgba(20,16,10,0.26)");
-  if (blitFit(g, "pot", x - 14, y - 28, 64, 68)) return;
+  oval(g, x + 18, y + 34, 16, 5, "rgba(20,16,10,0.28)");
+  if (blitFit(g, "pot", x - 22, y - 48, 80, 90)) return;
   oval(g, x + 18, y + 24, 14, 6, "#3a4048");
   oval(g, x + 18, y + 20, 13, 8, "#6a7080");
   oval(g, x + 18, y + 18, 9, 5, "#c8d0d4");
@@ -542,8 +542,8 @@ function plate(g: Ctx, x: number, y: number): void {
 }
 
 function icebox(g: Ctx, x: number, y: number): void {
-  oval(g, x + 18, y + 32, 11, 4, "rgba(20,16,10,0.26)");
-  if (blitFit(g, "icebox", x - 10, y - 28, 56, 68)) return;
+  oval(g, x + 18, y + 34, 14, 5, "rgba(20,16,10,0.28)");
+  if (blitFit(g, "icebox", x - 18, y - 46, 72, 88)) return;
   px(g, x + 8, y + 6, 20, 26, "#5a3a22");
   px(g, x + 10, y + 8, 16, 12, "#7aa0b8");
   px(g, x + 10, y + 22, 16, 8, "#3a5870");
@@ -570,8 +570,8 @@ function cut(g: Ctx, x: number, y: number): void {
 }
 
 function pass(g: Ctx, x: number, y: number): void {
-  oval(g, x + 18, y + 32, 14, 4, "rgba(20,16,10,0.26)");
-  if (blitFit(g, "pass", x - 16, y - 32, 68, 70)) return;
+  oval(g, x + 18, y + 34, 18, 5, "rgba(20,16,10,0.28)");
+  if (blitFit(g, "pass", x - 28, y - 52, 92, 96)) return;
   px(g, x + 2, y + 8, 32, 22, "#6a4a30");
   px(g, x + 6, y + 12, 24, 14, "#e8d8b8");
   px(g, x + 8, y + 4, 20, 8, "#5a3a22");
@@ -597,8 +597,12 @@ function wall(g: Ctx, x: number, y: number, zone: string): void {
     return;
   }
   if (zone === "kitchen") {
-    if (blitWrap(g, "wood", x, y, TILE, TILE)) return;
-    px(g, x, y, TILE, TILE, "#4a3224");
+    if (blitWrap(g, "wood", x, y, TILE, TILE)) {
+      g.fillStyle = "rgba(18, 10, 6, 0.42)";
+      g.fillRect(x, y, TILE, TILE);
+      return;
+    }
+    px(g, x, y, TILE, TILE, "#3a2418");
     return;
   }
   /* Valley walls sit under the meadow. A bush per cell is the map frame. */
@@ -846,28 +850,22 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
     g.lineWidth = 1;
   }
   const busy = a.busy ?? "";
-  const bob = busy || !moving ? 0.12 : Math.sin(now / 240) * 0.45;
+  const bob = busy || !moving ? 0.08 : Math.sin(now / 280) * 0.28;
   oval(g, x, y + 8, 11, 3.4, "rgba(20,16,10,0.3)");
   g.save();
   g.translate(x, y + bob);
   if (a.facing === 3 && busy !== "sit") g.scale(-1, 1);
   let drew = false;
-  const box = busy === "sit" ? ([-24, -52, 48, 54] as const) : busy === "fish" ? ([-28, -70, 58, 70] as const) : ([-23, -70, 46, 70] as const);
-  const period = 260;
+  const box =
+    busy === "sit"
+      ? ([-24, -58, 48, 60] as const)
+      : busy === "fish"
+        ? ([-28, -70, 58, 70] as const)
+        : ([-23, -70, 46, 70] as const);
   if (moving && !busy) {
     const pair = walkPair(warm, a.facing);
-    const slot = Math.floor(now / period) % 2;
-    const fade = (now % period) / period;
-    const aName = pair[slot];
-    const bName = pair[1 - slot];
-    if (blitStand(g, aName, box[0], box[1], box[2], box[3])) {
-      drew = true;
-      if (fade > 0.64) {
-        g.globalAlpha = (fade - 0.64) / 0.36;
-        blitStand(g, bName, box[0], box[1], box[2], box[3]);
-        g.globalAlpha = 1;
-      }
-    }
+    const slot = Math.floor(now / 280) % 2;
+    if (blitStand(g, pair[slot], box[0], box[1], box[2], box[3])) drew = true;
   }
   if (!drew) {
     for (const sheet of actorSheets(warm, a.facing, moving, now, busy)) {
@@ -893,7 +891,7 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
       g.strokeRect(x - 18, y - 24, 36, 36);
     }
     const nw = Math.min(52, a.name.length * 8 + 10);
-    const nameY = busy === "sit" ? y - 58 : y - 78;
+    const nameY = busy === "sit" ? y - 66 : y - 78;
     px(g, x - nw / 2, nameY, nw, 11, "rgba(40,28,16,0.78)");
     g.fillStyle = "#f4e8d0";
     g.font = `10px ${FACE}`;
@@ -1098,45 +1096,66 @@ export function houseClusters(rows: string[], zone: string): HouseCluster[] {
   return out;
 }
 
+const HOUSE_AR: Record<string, number> = { cabin: 640 / 543, inn: 640 / 485 };
+
+export function housePaintBox(c: HouseCluster): { x: number; y: number; w: number; h: number } {
+  const boxX = c.x * TILE - 18;
+  const boxY = c.y * TILE - 56;
+  const boxW = c.w * TILE + 36;
+  const boxH = c.h * TILE + 72;
+  const ar = HOUSE_AR[c.kind] ?? 1;
+  let w = boxW;
+  let h = w / ar;
+  if (h > boxH) {
+    h = boxH;
+    w = h * ar;
+  }
+  return { x: boxX + (boxW - w) / 2, y: boxY + boxH - h, w, h };
+}
+
+/** Door on the painted south face — not the map tile on the cabin's right. */
+export function doorPaint(c: HouseCluster): { x: number; y: number; w: number; h: number } {
+  const b = housePaintBox(c);
+  if (c.kind === "inn") return { x: b.x + b.w * 0.17, y: b.y + b.h * 0.5, w: b.w * 0.15, h: b.h * 0.34 };
+  return { x: b.x + b.w * 0.24, y: b.y + b.h * 0.48, w: b.w * 0.17, h: b.h * 0.32 };
+}
+
 export function chimneyMouth(c: HouseCluster): { x: number; y: number } {
-  const x = c.x * TILE;
-  const y = c.y * TILE;
-  const w = c.w * TILE;
-  if (c.kind === "inn") return { x: x + w * 0.22, y: y - 18 };
-  return { x: x + w * 0.8, y: y - 20 };
+  const b = housePaintBox(c);
+  if (c.kind === "inn") return { x: b.x + b.w * 0.6, y: b.y + b.h * 0.08 };
+  return { x: b.x + b.w * 0.71, y: b.y + b.h * 0.1 };
 }
 
 function drawSmoke(g: Ctx, x: number, y: number, now: number): void {
-  for (let i = 0; i < 7; i++) {
-    const t = (now / 540 + i * 0.14) % 1;
-    const sx = x + Math.sin(now / 280 + i * 1.2) * (1.2 + t * 7);
-    const sy = y - t * 38;
-    oval(g, sx, sy, 1.6 + t * 9, 1.4 + t * 8, `rgba(232,224,214,${0.58 * (1 - t)})`);
+  for (let i = 0; i < 5; i++) {
+    const t = (now / 680 + i * 0.18) % 1;
+    const rise = t * t;
+    const sx = x + Math.sin(now / 360 + i * 0.9) * (0.3 + rise * 3.4);
+    const sy = y - 1 - t * 26;
+    oval(g, sx, sy, 1 + t * 4.2, 1.1 + t * 5, `rgba(232,224,214,${0.5 * (1 - t) * (1 - t)})`);
   }
 }
 
-function drawDoor(g: Ctx, dx: number, dy: number, open: boolean, now: number): void {
-  if (open) {
-    if (!blitFit(g, "doorOpen", dx - 10, dy - 28, 56, 64)) {
-      px(g, dx + 9, dy + 6, 18, 28, "#1a1008");
-      px(g, dx + 26, dy + 8, 9, 26, "#5a3a22");
-      px(g, dx + 27, dy + 10, 2, 22, "#3a2414");
-    }
-    const glow = 0.28 + Math.sin(now / 220) * 0.08;
-    g.save();
-    g.globalAlpha = glow;
-    g.fillStyle = "#ffc46e";
-    g.beginPath();
-    g.moveTo(dx + 12, dy + 28);
-    g.lineTo(dx + 24, dy + 28);
-    g.lineTo(dx + 34, dy + 40);
-    g.lineTo(dx + 2, dy + 40);
-    g.closePath();
-    g.fill();
-    g.restore();
-    return;
+function drawDoor(g: Ctx, door: { x: number; y: number; w: number; h: number }, open: boolean, now: number): void {
+  const { x, y, w, h } = door;
+  if (!open) return;
+  if (!blitFit(g, "doorOpen", x - 1, y - 2, w + 2, h + 4)) {
+    px(g, x + 2, y + 4, w - 4, h - 8, "#1a1008");
+    px(g, x + w * 0.62, y + 6, w * 0.3, h - 12, "#5a3a22");
+    px(g, x + w * 0.68, y + 8, 2, h - 16, "#3a2414");
   }
-  px(g, dx + 17, dy + 12, 2, 18, `rgba(255,196,110,${0.16 + Math.sin(now / 260) * 0.06})`);
+  const glow = 0.24 + Math.sin(now / 220) * 0.07;
+  g.save();
+  g.globalAlpha = glow;
+  g.fillStyle = "#ffc46e";
+  g.beginPath();
+  g.moveTo(x + w * 0.22, y + h * 0.84);
+  g.lineTo(x + w * 0.78, y + h * 0.84);
+  g.lineTo(x + w * 1.2, y + h * 1.22);
+  g.lineTo(x - w * 0.2, y + h * 1.22);
+  g.closePath();
+  g.fill();
+  g.restore();
 }
 
 export function doorIsOpen(c: HouseCluster, people: { x: number; y: number; zone?: string }[], zone: string): boolean {
@@ -1184,7 +1203,7 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number, open = fa
   if (c.kind === "cabin" || c.kind === "inn") {
     const mouth = chimneyMouth(c);
     drawSmoke(g, mouth.x, mouth.y, now);
-    drawDoor(g, c.doorX * TILE, c.doorY * TILE, open, now);
+    drawDoor(g, doorPaint(c), open, now);
   }
 }
 

@@ -536,7 +536,7 @@ button {
 .boot-valley {
   position: absolute;
   inset: auto 0 0;
-  height: 46%;
+  height: 52%;
   pointer-events: none;
   overflow: hidden;
 }
@@ -624,6 +624,42 @@ button {
   50% {
     transform: rotate(3deg);
   }
+}
+
+.boot-sign {
+  position: relative;
+  z-index: 2;
+  margin-top: 8px;
+  padding: 18px 28px 16px;
+  text-align: center;
+  background-color: #3a2418;
+  background-image:
+    linear-gradient(180deg, rgba(244, 231, 210, 0.1), transparent 22%, rgba(12, 8, 6, 0.3)),
+    url("/art/tex-wood.png?v=look9");
+  background-size: auto, 240px;
+  box-shadow:
+    inset 0 0 0 2px #2a1810,
+    inset 0 0 0 5px #8a6238,
+    inset 0 0 0 7px #c9a06a,
+    0 14px 26px rgba(8, 6, 4, 0.46);
+}
+
+.boot-sign::before,
+.boot-sign::after {
+  content: "";
+  position: absolute;
+  top: -20px;
+  width: 3px;
+  height: 22px;
+  background: linear-gradient(#8a6a40, #5a3a22);
+}
+
+.boot-sign::before {
+  left: 18%;
+}
+
+.boot-sign::after {
+  right: 18%;
 }
 
 .brand {
@@ -1122,7 +1158,7 @@ button {
 .cover-sky {
   position: relative;
   flex: 1;
-  min-height: 38%;
+  min-height: 48%;
   overflow: hidden;
   background:
     radial-gradient(ellipse at 72% 18%, rgba(243, 230, 200, 0.18), transparent 22%),
@@ -1191,17 +1227,39 @@ button {
 }
 
 .cover-plank {
+  position: relative;
   width: min(92vw, 420px);
-  margin-top: -28px;
-  padding: 22px 22px 20px;
-  background:
-    linear-gradient(180deg, rgba(90, 58, 34, 0.35), transparent 18%),
-    #3a2418;
+  margin-top: -36px;
+  padding: 26px 22px 20px;
+  background-color: #3a2418;
+  background-image:
+    linear-gradient(180deg, rgba(244, 231, 210, 0.1), transparent 20%, rgba(12, 8, 6, 0.32)),
+    url("/art/tex-wood.png?v=look9");
+  background-size: auto, 280px;
   box-shadow:
-    inset 0 1px 0 rgba(232, 200, 150, 0.18),
-    inset 0 0 0 2px rgba(26, 16, 10, 0.45),
-    0 16px 28px rgba(8, 6, 4, 0.4);
-  border-radius: 4px 4px 10px 10px;
+    inset 0 0 0 2px #2a1810,
+    inset 0 0 0 5px #8a6238,
+    inset 0 0 0 7px #c9a06a,
+    0 18px 28px rgba(8, 6, 4, 0.48);
+  border-radius: 2px;
+}
+
+.cover-plank::before,
+.cover-plank::after {
+  content: "";
+  position: absolute;
+  top: -22px;
+  width: 3px;
+  height: 28px;
+  background: linear-gradient(#8a6a40, #5a3a22);
+}
+
+.cover-plank::before {
+  left: 20%;
+}
+
+.cover-plank::after {
+  right: 20%;
 }
 
 .cover-title {
@@ -1235,9 +1293,9 @@ button {
 }
 
 .cover-name input {
-  background: rgba(20, 12, 8, 0.28);
+  background: transparent;
   border: 0;
-  border-bottom: 1px solid rgba(201, 160, 106, 0.35);
+  border-bottom: 1px solid rgba(201, 160, 106, 0.4);
   padding: 10px 8px;
   outline: none;
   font-size: 22px;
@@ -1296,9 +1354,10 @@ button {
 }
 
 .code-row input {
-  background: rgba(244, 231, 210, 0.06);
-  border: 1px solid rgba(201, 160, 106, 0.35);
-  padding: 12px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(201, 160, 106, 0.4);
+  padding: 12px 4px;
   text-align: center;
   letter-spacing: 0.28em;
   text-transform: uppercase;

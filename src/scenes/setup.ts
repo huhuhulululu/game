@@ -5,8 +5,8 @@ export function mountSetup(root: HTMLElement, ctx: GameContext): () => void {
   const scene = el("section", "scene setup scene-enter");
   scene.innerHTML = `
     <div class="cover-sky setup-sky" aria-hidden="true">
-      <img class="cover-grass" src="/art/tex-grass.png?v=look8" alt="" />
-      <img class="cover-cabin" src="/art/prop-cabin.png?v=look8" alt="" />
+      <img class="cover-grass" src="/art/tex-grass.png?v=look9" alt="" />
+      <img class="cover-cabin" src="/art/prop-cabin.png?v=look9" alt="" />
     </div>
     <div class="cover-plank setup-plank">
     <div class="kicker">先把名字写下</div>

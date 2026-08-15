@@ -1,6 +1,6 @@
 type Sheet = HTMLCanvasElement;
 
-const ART_REV = "look8";
+const ART_REV = "look9";
 
 const SRC: Record<string, { src: string }> = {
   tree: { src: "/art/prop-tree.png" },

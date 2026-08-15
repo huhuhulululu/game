@@ -7,6 +7,7 @@ import {
   chimneyMouth,
   dockSheet,
   doorIsOpen,
+  doorPaint,
   drawActor,
   drawAtlas,
   drawCell,
@@ -272,6 +273,12 @@ describe("look", () => {
     const inn = houseClusters(VALLEY, "valley").find((h) => h.kind === "inn");
     assert.ok(inn);
     assert.notEqual(chimneyMouth(cabin).x, chimneyMouth(inn).x);
+    const painted = doorPaint(cabin);
+    assert.ok(painted.x + painted.w / 2 < cabin.doorX * 36, "cabin door sits on the south face, left of map tile A");
+    const innBox = doorPaint(inn);
+    assert.ok(innBox.x + innBox.w / 2 < inn.x * 36 + (inn.w * 36) / 2, "inn door is on the left of the facade");
+    assert.ok(chimneyMouth(cabin).x > cabin.x * 36 + cabin.w * 18, "cabin smoke leaves the right-hand pipe");
+    assert.ok(chimneyMouth(inn).x > inn.x * 36 + inn.w * 18, "inn smoke leaves the right-hand chimney");
   });
 
   it("pot and pass still have a constructed fallback", () => {
