@@ -6,6 +6,7 @@ extends Object
 const INK := Color(0.24, 0.15, 0.09)
 const GOLD := Color(0.78, 0.58, 0.32)
 const PAPER := Color(0.93, 0.86, 0.74)
+const MOSS := Color(0.25, 0.43, 0.36)
 const DUSK := Color(1.0, 1.0, 1.0)
 const HAZE := Color(0.78, 0.62, 0.46)
 const BODY := 62.0

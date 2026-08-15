@@ -68,6 +68,14 @@ func _paint(zone: String, rows: PackedStringArray) -> void:
 
 
 func _bit(zone: String, ch: String, x: int, y: int) -> void:
+	if ch == "#":
+		var wall := ColorRect.new()
+		wall.position = Vector2(x * TILE, y * TILE)
+		wall.size = Vector2(TILE + 1, TILE + 1)
+		wall.color = Color(0.32, 0.22, 0.14, 0.9) if zone == "kitchen" else Color(0.20, 0.18, 0.16, 0.94)
+		wall.z_index = 2
+		add_child(wall)
+		return
 	if zone == "kitchen":
 		if ch == "C":
 			_prop(_tex("prop-cut.png"), x - 0.15, y - 0.35, 42, 48, 6)

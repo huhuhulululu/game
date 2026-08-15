@@ -28,6 +28,13 @@ var _tiles: Array = []
 var _zone := "valley"
 var _you_held := ""
 var _cam_locked := false
+var _bag_sig := ""
+var _toast_sig := ""
+var _order_sig := ""
+var _fish_hud: Panel
+var _fish_ok: ColorRect
+var _fish_mark: ColorRect
+var _fish_pull: ColorRect
 
 
 func _ready() -> void:
@@ -119,6 +126,27 @@ func _hud() -> void:
 	pad.add_theme_stylebox_override("panel", Look.plaque_box())
 	pad.gui_input.connect(_on_pad)
 	layer.add_child(pad)
+	_fish_hud = Panel.new()
+	_fish_hud.position = Vector2(360, 568)
+	_fish_hud.size = Vector2(560, 44)
+	_fish_hud.visible = false
+	_fish_hud.add_theme_stylebox_override("panel", Look.paper_box())
+	layer.add_child(_fish_hud)
+	_fish_ok = ColorRect.new()
+	_fish_ok.position = Vector2(16 + 528 * 0.38, 10)
+	_fish_ok.size = Vector2(528 * 0.34, 16)
+	_fish_ok.color = Look.MOSS
+	_fish_hud.add_child(_fish_ok)
+	_fish_mark = ColorRect.new()
+	_fish_mark.position = Vector2(16, 8)
+	_fish_mark.size = Vector2(4, 20)
+	_fish_mark.color = Look.INK
+	_fish_hud.add_child(_fish_mark)
+	_fish_pull = ColorRect.new()
+	_fish_pull.position = Vector2(16, 30)
+	_fish_pull.size = Vector2(2, 6)
+	_fish_pull.color = Look.GOLD
+	_fish_hud.add_child(_fish_pull)
 
 
 func _on_pad(e: InputEvent) -> void:
@@ -184,8 +212,15 @@ func _on_snap(s: Dictionary) -> void:
 	_hud_room.text = "房间 %s" % str(s.get("room", Net.room))
 	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
 	var weather: Dictionary = s.get("weather", {}) if typeof(s.get("weather", {})) == TYPE_DICTIONARY else {}
-	_hud_ink.text = "%s · %s · %s · 金 %s" % [str(s.get("season", "春")), phase, str(weather.get("name", "")), str(s.get("gold", 0))]
-	_prompt.text = str(s.get("prompt", ""))
+	_hud_ink.text = "%s · %s · %s · 金 %s" % [str(s.get("season", "春")), phase, str(weather.get("name", "")), _ink_n(s.get("gold", 0))]
+	var prompt := str(s.get("prompt", ""))
+	_prompt.text = prompt
+	if prompt == "起竿":
+		_prompt.add_theme_color_override("font_color", Color(0.55, 0.22, 0.14))
+	elif prompt.find("绿") >= 0:
+		_prompt.add_theme_color_override("font_color", Look.MOSS)
+	else:
+		_prompt.add_theme_color_override("font_color", Look.INK)
 	var you_held := _you_held_name(s)
 	_you_held = _you_held_id(s)
 	_hud_held.text = "手里 · %s" % you_held if you_held != "" else "手里空着"
@@ -200,9 +235,12 @@ func _on_snap(s: Dictionary) -> void:
 	_paint_toasts(s.get("toasts", []))
 	_paint_bag(s.get("bag", []))
 	_paint_orders(s.get("orders", []))
+	_paint_fish(s)
 	var rows: Array = s.get("tiles", [])
 	if rows.size() > 0:
 		_tiles = rows
+	if zone != _zone:
+		_cam_locked = false
 	_show_zone(zone, _tiles)
 	var you: Dictionary = s.get("youAt", {})
 	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.85, 1.85)
@@ -309,7 +347,34 @@ func _paint_foes(raws: Array) -> void:
 		n.modulate = Color(1, 1, 1, 1) if float(e.get("flash", 0)) <= 0.0 else Color(1.2, 0.8, 0.7)
 
 
+func _ink_n(v: Variant) -> String:
+	return str(int(round(float(v))))
+
+
+func _paint_fish(s: Dictionary) -> void:
+	if _fish_hud == null:
+		return
+	var me := _me(s)
+	var fight := str(me.get("fishing", "off")) == "fight"
+	_fish_hud.visible = fight
+	if not fight:
+		return
+	var mark := clampf(float(me.get("fishMark", 0)), 0.0, 1.0)
+	var pull := clampf(float(me.get("fishPull", 0)), 0.0, 1.0)
+	var green := mark > 0.38 and mark < 0.72
+	_fish_ok.color = Color(0.38, 0.62, 0.48, 1.0) if green else Look.MOSS
+	_fish_mark.position.x = 16 + 528.0 * mark - 2.0
+	_fish_pull.size.x = max(2.0, 528.0 * pull)
+
+
 func _paint_toasts(raws: Array) -> void:
+	var lines: PackedStringArray = []
+	for raw in raws:
+		lines.append(str(raw))
+	var sig := "|".join(lines)
+	if sig == _toast_sig:
+		return
+	_toast_sig = sig
 	for child in _toasts.get_children():
 		child.queue_free()
 	var n := 0
@@ -330,6 +395,16 @@ func _paint_toasts(raws: Array) -> void:
 
 
 func _paint_bag(raws: Array) -> void:
+	var bits: PackedStringArray = []
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		bits.append("%s:%s" % [str(row.get("id", "")), _ink_n(row.get("n", 1))])
+	var sig := "|".join(bits)
+	if sig == _bag_sig:
+		return
+	_bag_sig = sig
 	for child in _bag.get_children():
 		child.queue_free()
 	for raw in raws:
@@ -337,7 +412,7 @@ func _paint_bag(raws: Array) -> void:
 			continue
 		var row: Dictionary = raw
 		var id := str(row.get("id", ""))
-		var label := "%s×%s" % [str(row.get("name", id)), str(row.get("n", 1))]
+		var label := "%s×%s" % [str(row.get("name", id)), _ink_n(row.get("n", 1))]
 		var b := Look.wood_button(label, 108)
 		b.custom_minimum_size = Vector2(108, 36)
 		b.add_theme_font_size_override("font_size", 14)
@@ -346,6 +421,16 @@ func _paint_bag(raws: Array) -> void:
 
 
 func _paint_orders(raws: Array) -> void:
+	var bits: PackedStringArray = []
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var o: Dictionary = raw
+		bits.append("%s:%s" % [str(o.get("recipe", "")), str(o.get("name", ""))])
+	var sig := "|".join(bits)
+	if sig == _order_sig:
+		return
+	_order_sig = sig
 	for child in _orders.get_children():
 		child.queue_free()
 	for raw in raws:

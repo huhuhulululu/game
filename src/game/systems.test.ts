@@ -1458,6 +1458,42 @@ describe("living systems", () => {
     assert.ok(w.toasts.some((t) => t.text.includes("糊涂") && t.text.includes(" · ")));
   });
 
+  it("empty 做 speaks, a tap finishes a cut, and the bag says when the hand is full", () => {
+    const w = new World("SAY1");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    tap(w, "a");
+    assert.ok(w.toasts.some((t) => t.text.includes("面向")));
+    p.zone = "kitchen";
+    const cut = w.kitchenMap.find("C")[0];
+    assert.ok(cut);
+    standFacing(p, cut);
+    tap(w, "a");
+    assert.ok(w.toasts.some((t) => t.text.includes("没有能切")));
+    p.held = "fish:raw:100";
+    tap(w, "a");
+    assert.ok(p.chop);
+    assert.ok(w.snapshot("a").prompt.includes("切着"));
+    w.setInput("a", { x: 0, y: 0, action: false, held: false, ping: false });
+    w.tick(1.2);
+    assert.equal(p.chop, null);
+    const board = [...w.stations.values()].find((s) => s.ready);
+    assert.ok(board);
+    assert.ok(String(board.item).includes("prepped"));
+    p.held = "";
+    w.takeItem("herb", "a");
+    assert.ok(p.held.startsWith("herb"));
+    w.takeItem("wheat", "a");
+    assert.ok(w.toasts.some((t) => t.text.includes("满了")));
+    const pot = w.kitchenMap.find("Q")[0];
+    assert.ok(pot);
+    standFacing(p, pot);
+    p.held = "";
+    tap(w, "a");
+    assert.ok(w.toasts.some((t) => t.text.includes("放进锅")));
+  });
+
   it("a solo wild night says the dark bites, and Charlie does not bite the valley gate", () => {
     const w = new World("GATE2");
     w.addPlayer("a", "暖", "left");

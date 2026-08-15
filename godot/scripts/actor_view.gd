@@ -20,6 +20,7 @@ var _name_card: Panel
 var _bar_bg: Panel
 var _bar_ok: ColorRect
 var _bar_mark: ColorRect
+var _bar_pull: ColorRect
 
 
 func _ready() -> void:
@@ -60,7 +61,7 @@ func _bars() -> void:
 	_bar_ok = ColorRect.new()
 	_bar_ok.size = Vector2(64 * 0.34, 6)
 	_bar_ok.position = Vector2(-32 + 64 * 0.38, 13)
-	_bar_ok.color = Color(0.42, 0.36, 0.22, 0.9)
+	_bar_ok.color = Look.MOSS
 	_bar_ok.visible = false
 	add_child(_bar_ok)
 	_bar_mark = ColorRect.new()
@@ -69,6 +70,12 @@ func _bars() -> void:
 	_bar_mark.color = Look.INK
 	_bar_mark.visible = false
 	add_child(_bar_mark)
+	_bar_pull = ColorRect.new()
+	_bar_pull.size = Vector2(2, 3)
+	_bar_pull.position = Vector2(-32, 22)
+	_bar_pull.color = Look.GOLD
+	_bar_pull.visible = false
+	add_child(_bar_pull)
 
 
 func apply(data: Dictionary, now: float) -> void:
@@ -150,5 +157,10 @@ func _apply() -> void:
 		_bar_bg.visible = fight
 		_bar_ok.visible = fight
 		_bar_mark.visible = fight
+		_bar_pull.visible = fight
 		if fight:
-			_bar_mark.position.x = -32 + 64.0 * clampf(fish_mark, 0.0, 1.0) - 1.0
+			var mark := clampf(fish_mark, 0.0, 1.0)
+			var green := mark > 0.38 and mark < 0.72
+			_bar_ok.color = Color(0.38, 0.62, 0.48, 1.0) if green else Look.MOSS
+			_bar_mark.position.x = -32 + 64.0 * mark - 1.0
+			_bar_pull.size.x = 64.0 * clampf(fish_pull, 0.0, 1.0)

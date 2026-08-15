@@ -601,6 +601,7 @@ export class World {
   }
 
   private prompt(p: Actor): string {
+    if (p.chop) return "切着";
     if (p.fish?.phase === "wait") return this.pairFishing() ? "两人同钓 · 水面还没动" : "水面还没动";
     if (p.fish?.phase === "bite") return "起竿";
     if (p.fish?.phase === "fight" && p.fish.forge) {
@@ -733,6 +734,8 @@ export class World {
       if (cell === "gacha") return this.askFortune(p);
       if (cell === "board") return this.revealBoard(p);
       if (this.tryGive(p)) return;
+      this.toast("先面向要做的事");
+      return;
     }
     if (p.zone === "mine") {
       if (cell === "leave") return this.leaveToValley(p);
@@ -750,10 +753,16 @@ export class World {
       if (cell === "window") return this.serve(p);
       if (cell === "ice") return this.iceAct(p);
       if (cell === "trash") {
+        if (!p.held) {
+          this.toast("手里是空的");
+          return;
+        }
         p.held = "";
+        this.toast("丢掉了");
         return;
       }
-      this.tryGive(p);
+      if (this.tryGive(p)) return;
+      this.toast("先面向案板、锅或堂口");
     }
     if (p.zone === "wild") {
       if (cell === "leave") return this.leaveToValley(p);
@@ -1173,7 +1182,11 @@ export class World {
   }
 
   private pantry(p: Actor, id: string | null): void {
-    if (!id || p.held) return;
+    if (!id) return;
+    if (p.held) {
+      this.toast("手里满了");
+      return;
+    }
     const choices = id === "fish" ? ["rare_fish_heavy", "fish_heavy", "rare_fish", "fish_thick", "fish"] : [id];
     const found = choices.find((x) => countOf(this.save.bag, x) > 0);
     if (!found) {
@@ -1186,9 +1199,16 @@ export class World {
 
   takeItem(id: string, playerId: string): void {
     const p = this.players.get(playerId);
-    if (!p || p.held) return;
+    if (!p) return;
+    if (p.held) {
+      this.toast("手里满了");
+      return;
+    }
     const fresh = takeFresh(this.save.bag, id);
-    if (fresh === null) return;
+    if (fresh === null) {
+      this.toast("袋子里没有");
+      return;
+    }
     p.held = writeHeld(id, item(id).cook === "none" ? "ready" : "raw", fresh);
     if (id === "torch") p.torch = Math.max(p.torch, 70);
   }
@@ -1206,7 +1226,14 @@ export class World {
       return;
     }
     const held = parseHeld(p.held);
-    if (held.state !== "raw") return;
+    if (!held.id) {
+      this.toast("手里没有能切的");
+      return;
+    }
+    if (held.state !== "raw") {
+      this.toast(held.state === "prepped" ? "已经切过了" : "这个不用切");
+      return;
+    }
     const need = item(held.id).cook;
     if (need !== "chop" && need !== "both") {
       this.toast("这个不用切");
@@ -1215,11 +1242,11 @@ export class World {
     p.chop = { t: Math.max(0.45, 1.15 - this.skills(p).cook * 0.03), id: writeHeld(held.id, "prepped", held.fresh), key };
     p.held = "";
     this.stations.set(key, { key, item: "", t: 0, need: 1, ready: false });
+    this.toast("切着");
   }
 
   private tickChop(p: Actor, dt: number): void {
     if (!p.chop) return;
-    if (!p.input.held) return;
     p.chop.t -= dt;
     if (p.chop.t <= 0) {
       const next = p.chop.id.includes(":") ? p.chop.id : `${p.chop.id}:prepped`;
@@ -1245,7 +1272,10 @@ export class World {
       this.toast("炉还在烧");
       return;
     }
-    if (!p.held) return;
+    if (!p.held) {
+      this.toast("炉上要放下能烧的");
+      return;
+    }
     const held = parseHeld(p.held);
     const need = item(held.id).cook;
     const ok = (need === "cook" && held.state === "raw") || (need === "both" && held.state === "prepped");
@@ -1344,6 +1374,7 @@ export class World {
       return;
     }
     if (!p.held && this.pot.length >= 2) this.startPot(p);
+    else if (!p.held) this.toast("先把处理好的放进锅");
   }
 
   private startPot(p: Actor): void {
