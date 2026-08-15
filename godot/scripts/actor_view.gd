@@ -24,8 +24,9 @@ var _bar_mark: ColorRect
 
 func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_LINEAR
-	_shadow = Look.contact(40)
-	_shadow.position = Vector2(0, 6)
+	_shadow = Look.contact(52)
+	_shadow.position = Vector2(0, 10)
+	_shadow.modulate = Color(1, 1, 1, 0.95)
 	add_child(_shadow)
 	_sprite = Sprite2D.new()
 	_sprite.centered = true
@@ -37,12 +38,12 @@ func _ready() -> void:
 	layer.layer = 8
 	add_child(layer)
 	_name_card = Panel.new()
-	_name_card.size = Vector2(44, 26)
+	_name_card.size = Vector2(72, 34)
 	_name_card.add_theme_stylebox_override("panel", Look.name_box())
 	layer.add_child(_name_card)
-	_name = Look.ink_label("", 18, Look.INK)
-	_name.position = Vector2(4, 2)
-	_name.size = Vector2(36, 22)
+	_name = Look.ink_label("", 22, Look.INK)
+	_name.position = Vector2(10, 4)
+	_name.size = Vector2(52, 26)
 	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_name_card.add_child(_name)
 	_bars()
@@ -94,7 +95,7 @@ func _place_name() -> void:
 	if _name_card == null:
 		return
 	var p := get_global_transform_with_canvas().origin
-	_name_card.position = Vector2(p.x - 28, p.y - 70)
+	_name_card.position = Vector2(p.x - 36, p.y - 82)
 	_name_card.visible = _name.text != ""
 
 

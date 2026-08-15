@@ -41,24 +41,25 @@ func _tex(name: String) -> Texture2D:
 
 func _paint() -> void:
 	var sz := size_px()
-	var bed := Polygon2D.new()
-	bed.color = Color(0.36, 0.22, 0.11)
-	bed.polygon = PackedVector2Array([
-		Vector2(-900, -900),
-		Vector2(sz.x + 900, -900),
-		Vector2(sz.x + 900, sz.y + 900),
-		Vector2(-900, sz.y + 900),
-	])
+	var pad := 420.0
+	var sheet := _tex("ground-valley.png")
+	var bed := Sprite2D.new()
+	bed.texture = sheet
+	bed.centered = false
+	bed.position = Vector2(-pad, -pad)
+	bed.texture_filter = TEXTURE_FILTER_LINEAR
+	if sheet:
+		bed.scale = Vector2((sz.x + pad * 2.0) / float(sheet.get_width()), (sz.y + pad * 2.0) / float(sheet.get_height()))
 	bed.z_index = -2
+	bed.modulate = Color(0.90, 0.80, 0.64)
 	add_child(bed)
 	var ground := Sprite2D.new()
-	ground.texture = _tex("ground-valley.png")
+	ground.texture = sheet
 	ground.centered = false
 	ground.position = Vector2(-80, -80)
 	ground.texture_filter = TEXTURE_FILTER_LINEAR
-	var tex := ground.texture
-	if tex:
-		ground.scale = Vector2((sz.x + 160.0) / float(tex.get_width()), (sz.y + 160.0) / float(tex.get_height()))
+	if sheet:
+		ground.scale = Vector2((sz.x + 160.0) / float(sheet.get_width()), (sz.y + 160.0) / float(sheet.get_height()))
 	ground.z_index = 0
 	ground.material = Look.dusk_mat(0.0)
 	add_child(ground)

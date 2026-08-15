@@ -27,6 +27,7 @@ var _last_pos: Dictionary = {}
 var _tiles: Array = []
 var _zone := "valley"
 var _you_held := ""
+var _cam_locked := false
 
 
 func _ready() -> void:
@@ -41,7 +42,8 @@ func _ready() -> void:
 	_world.add_child(_zone_map)
 	_cam = Camera2D.new()
 	_cam.zoom = Vector2(1.85, 1.85)
-	_cam.position_smoothing_enabled = true
+	_cam.position = _valley.size_px() * 0.5
+	_cam.position_smoothing_enabled = false
 	_cam.position_smoothing_speed = 6
 	add_child(_cam)
 	_cam.make_current()
@@ -205,12 +207,18 @@ func _on_snap(s: Dictionary) -> void:
 	var you: Dictionary = s.get("youAt", {})
 	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.85, 1.85)
 	if you.size() > 0:
-		_cam.position = _clamp_cam(Vector2(float(you.get("x", 0)), float(you.get("y", 0))))
-	# One notch of dusk. Let the painting keep its own light. Never purple night.
+		var target := _clamp_cam(Vector2(float(you.get("x", 0)), float(you.get("y", 0))))
+		if not _cam_locked:
+			_cam.position_smoothing_enabled = false
+			_cam.position = target
+			_cam.reset_smoothing()
+			_cam.position_smoothing_enabled = true
+			_cam_locked = true
+		else:
+			_cam.position = target
+	# Painting keeps its own dusk. Never purple night.
 	if bool(s.get("night", false)) and zone != "kitchen" and zone != "mine":
 		_world.modulate = Color(0.78, 0.68, 0.52)
-	elif bool(s.get("dusk", false)):
-		_world.modulate = Color(1.0, 1.0, 0.97)
 	else:
 		_world.modulate = Color(1.0, 1.0, 1.0)
 	_paint_people(s)

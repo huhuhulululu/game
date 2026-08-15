@@ -152,6 +152,17 @@ def cut_prop(im: Image.Image, tol: float = 36.0) -> Image.Image:
     return spr
 
 
+def trim_empty_feet(im: Image.Image, keep: int = 14) -> Image.Image:
+    """Drop transparent pad under the feet so sit fade and contact hit wood."""
+    buf = np.asarray(im.convert("RGBA"))
+    row = buf[:, :, 3].max(axis=1)
+    ys = np.where(row > 10)[0]
+    if len(ys) == 0:
+        return im.convert("RGBA")
+    y1 = min(im.size[1], int(ys.max()) + keep)
+    return Image.fromarray(buf[:y1], "RGBA")
+
+
 def soften_sit(im: Image.Image, fade: float = 0.30) -> Image.Image:
     """Fade the feet and kill ink rings. Do not grade dusk again."""
     buf = np.asarray(im.convert("RGBA"), dtype=np.float32) / 255.0
@@ -180,7 +191,7 @@ def soften_sit(im: Image.Image, fade: float = 0.30) -> Image.Image:
 
 
 def finish_sit_props() -> None:
-    for name, fade in (
+    for name, _fade in (
         ("prop-cabin.png", 0.28),
         ("prop-stall.png", 0.26),
         ("prop-dock.png", 0.34),
@@ -190,7 +201,7 @@ def finish_sit_props() -> None:
     ):
         p = ART / name
         if p.exists():
-            save(soften_sit(Image.open(p), fade), name)
+            save(trim_empty_feet(Image.open(p), 14), name)
 
 
 def finish_anvil_altar() -> None:

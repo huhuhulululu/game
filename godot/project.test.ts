@@ -40,12 +40,15 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(look, /multiply\.ttf/);
   assert.match(look, /tex-plaque/);
   assert.match(look, /contact\(/);
+  assert.match(look, /sit_frac/);
   assert.match(look, /name_box/);
+  assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
   assert.doesNotMatch(look, /SystemFont/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
   assert.match(play, /_clamp_cam/);
+  assert.match(play, /_cam_locked/);
   assert.match(play, /%s×%s/);
-  assert.match(play, /1\.0, 1\.0, 0\.97/);
+  assert.match(play, /1\.0, 1\.0, 1\.0/);
   assert.ok(existsSync("godot/fonts/multiply.ttf"));
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /CanvasLayer/);
@@ -70,6 +73,9 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const sync = readFileSync("godot/tools/sync_art.sh", "utf8");
   assert.match(sync, /keeping godot\/assets\/art/);
   assert.doesNotMatch(sync, /cp -a/);
+  const paint = readFileSync("tools/paint_look.py", "utf8");
+  assert.match(paint, /trim_empty_feet/);
+  assert.match(paint, /def finish_sit_props/);
 });
 
 test("Godot client plays fish, mine and kitchen from the same snap", () => {

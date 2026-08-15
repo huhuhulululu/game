@@ -4,8 +4,8 @@ uniform vec4 dusk : source_color = vec4(1.02, 0.97, 0.90, 1.0);
 uniform vec4 haze : source_color = vec4(0.78, 0.62, 0.46, 1.0);
 uniform float fog : hint_range(0.0, 1.0) = 0.03;
 uniform float edge : hint_range(0.0, 0.3) = 0.10;
-uniform float feet : hint_range(0.0, 0.5) = 0.18;
-uniform float grade : hint_range(0.0, 1.0) = 0.22;
+uniform float feet : hint_range(0.0, 0.5) = 0.16;
+uniform float grade : hint_range(0.0, 1.0) = 0.0;
 
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);

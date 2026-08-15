@@ -6,7 +6,7 @@ extends Object
 const INK := Color(0.24, 0.15, 0.09)
 const GOLD := Color(0.78, 0.58, 0.32)
 const PAPER := Color(0.93, 0.86, 0.74)
-const DUSK := Color(1.02, 0.97, 0.90)
+const DUSK := Color(1.0, 1.0, 1.0)
 const HAZE := Color(0.78, 0.62, 0.46)
 
 
@@ -24,9 +24,9 @@ static func dusk_mat(fog := 0.08) -> ShaderMaterial:
 	m.set_shader_parameter("dusk", DUSK)
 	m.set_shader_parameter("haze", HAZE)
 	m.set_shader_parameter("fog", fog)
-	m.set_shader_parameter("edge", 0.11)
-	m.set_shader_parameter("feet", 0.20)
-	m.set_shader_parameter("grade", 0.08)
+	m.set_shader_parameter("edge", 0.10)
+	m.set_shader_parameter("feet", 0.16)
+	m.set_shader_parameter("grade", 0.0)
 	return m
 
 
@@ -44,16 +44,17 @@ static func plaque_box() -> StyleBoxTexture:
 	return s
 
 
-static func name_box() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = PAPER
-	s.border_color = Color(0.42, 0.28, 0.16, 0.85)
-	s.set_border_width_all(1)
-	s.set_corner_radius_all(4)
-	s.content_margin_left = 6
-	s.content_margin_right = 6
-	s.content_margin_top = 2
-	s.content_margin_bottom = 2
+static func name_box() -> StyleBoxTexture:
+	var s := StyleBoxTexture.new()
+	s.texture = load("res://assets/art/tex-plaque.png") as Texture2D
+	s.texture_margin_left = 10
+	s.texture_margin_top = 8
+	s.texture_margin_right = 10
+	s.texture_margin_bottom = 8
+	s.content_margin_left = 8
+	s.content_margin_top = 3
+	s.content_margin_right = 8
+	s.content_margin_bottom = 3
 	return s
 
 
@@ -115,9 +116,9 @@ static func shadow_tex() -> Texture2D:
 	var img := Image.create(96, 40, false, Image.FORMAT_RGBA8)
 	for y in 40:
 		for x in 96:
-			var d := Vector2((x - 48) / 46.0, (y - 20) / 14.0).length()
+			var d := Vector2((x - 48) / 46.0, (y - 20) / 18.0).length()
 			var a := clampf(1.0 - d, 0.0, 1.0)
-			img.set_pixel(x, y, Color(0.08, 0.05, 0.03, a * a * 0.88))
+			img.set_pixel(x, y, Color(0.04, 0.02, 0.01, a * a * 1.0))
 	return ImageTexture.create_from_image(img)
 
 
@@ -125,10 +126,27 @@ static func contact(width: float) -> Sprite2D:
 	var s := Sprite2D.new()
 	s.texture = shadow_tex()
 	s.centered = true
-	s.scale = Vector2(width / 72.0, (width * 0.42) / 40.0)
+	s.scale = Vector2(width / 72.0, (width * 0.22) / 40.0)
 	s.z_index = 0
 	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	return s
+
+
+static func sit_frac(tex: Texture2D) -> float:
+	if tex == null:
+		return 0.86
+	var img := tex.get_image()
+	if img == null:
+		return 0.86
+	var h := img.get_height()
+	var w := img.get_width()
+	for y in range(h - 1, -1, -1):
+		var x := 0
+		while x < w:
+			if img.get_pixel(x, y).a > 0.22:
+				return clampf((float(y) + 1.0) / float(h), 0.58, 0.97)
+			x += 6
+	return 0.86
 
 
 static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.03) -> Node2D:
@@ -136,9 +154,18 @@ static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.0
 	n.position = pos
 	n.z_index = z
 	n.y_sort_enabled = false
-	var sh := contact(size.x * 0.98)
-	sh.position = Vector2(size.x * 0.50, size.y * 0.90)
-	n.add_child(sh)
+	var feet := sit_frac(tex)
+	var sit_y := size.y * feet + 7.0
+	var stain := contact(size.x * 1.28)
+	stain.scale.y = (size.x * 0.26) / 40.0
+	stain.position = Vector2(size.x * 0.50, sit_y)
+	stain.modulate = Color(1, 1, 1, 0.92)
+	n.add_child(stain)
+	var core := contact(size.x * 0.78)
+	core.scale.y = (size.x * 0.12) / 40.0
+	core.position = Vector2(size.x * 0.50, sit_y - 2.0)
+	core.modulate = Color(1, 1, 1, 1.0)
+	n.add_child(core)
 	var s := Sprite2D.new()
 	s.texture = tex
 	s.centered = false

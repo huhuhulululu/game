@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tighten only anvil, altar, and ground. Do not rerun the full paint pipeline."""
+"""Trim empty pad under sit props. Do not rerun the full paint pipeline."""
 
 from __future__ import annotations
 
