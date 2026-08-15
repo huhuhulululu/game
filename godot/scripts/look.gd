@@ -91,17 +91,19 @@ static func paper_box() -> StyleBoxTexture:
 
 
 static func slip_box() -> StyleBoxTexture:
-	# Mini plaque. Keep the 14px wood rim so chips are not beige form pills.
+	# Valley wood + old paper. Tile so chips are not stretched beige forms.
 	var s := StyleBoxTexture.new()
-	s.texture = load("res://assets/art/tex-plaque.png") as Texture2D
-	s.texture_margin_left = 14
-	s.texture_margin_top = 14
-	s.texture_margin_right = 14
-	s.texture_margin_bottom = 14
-	s.content_margin_left = 12
-	s.content_margin_top = 8
-	s.content_margin_right = 12
-	s.content_margin_bottom = 8
+	s.texture = load("res://assets/art/tex-slip.png") as Texture2D
+	s.texture_margin_left = 16
+	s.texture_margin_top = 13
+	s.texture_margin_right = 16
+	s.texture_margin_bottom = 13
+	s.content_margin_left = 18
+	s.content_margin_top = 10
+	s.content_margin_right = 18
+	s.content_margin_bottom = 10
+	s.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	s.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
 	return s
 
 
@@ -134,7 +136,7 @@ static func wood_button(text: String, wide := 220) -> Button:
 static func chip_button(text: String, wide := 128) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(wide, 48)
+	b.custom_minimum_size = Vector2(wide, 54)
 	b.focus_mode = Control.FOCUS_NONE
 	b.add_theme_font_override("font", cjk())
 	b.add_theme_font_size_override("font_size", 16)

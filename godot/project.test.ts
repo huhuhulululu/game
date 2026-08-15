@@ -56,6 +56,17 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(look, /name_box/);
   assert.match(look, /func slip_box/);
   assert.match(look, /func chip_button/);
+  assert.match(look, /tex-slip/);
+  assert.match(look, /AXIS_STRETCH_MODE_TILE_FIT/);
+  assert.doesNotMatch(look, /func slip_box\(\)[\s\S]{0,400}tex-plaque/);
+  assert.ok(existsSync("godot/assets/art/tex-slip.png"));
+  const paintSlip = readFileSync("tools/paint_hud_slip.py", "utf8");
+  assert.match(paintSlip, /tex-wood/);
+  assert.match(paintSlip, /tex-paper/);
+  assert.match(paintSlip, /tex-slip/);
+  assert.match(paintSlip, /HUD slip only/);
+  assert.doesNotMatch(paintSlip, /floor-valley|cover-valley|ground-valley/);
+  assert.doesNotMatch(paintSlip, /Wilson|Don't Starve|Dont Starve/i);
   assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
   assert.doesNotMatch(look, /SystemFont/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
@@ -131,6 +142,8 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(play, /chip_button/);
   assert.match(play, /slip_box/);
   assert.match(play, /_prompt_bar/);
+  assert.match(play, /580, 64/);
+  assert.doesNotMatch(play, /StyleBoxFlat/);
   assert.doesNotMatch(play, /wood_button\(label/);
   assert.match(play, /_ink_n/);
   assert.match(play, /_paint_fish/);
