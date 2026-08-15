@@ -336,6 +336,9 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(coverLoop, /PLAY_FISH_MARK/);
   assert.match(coverLoop, /_note_play/);
   assert.ok(existsSync("godot/scripts/headless_play_evening.gd"));
+  assert.ok(existsSync("godot/scenes/play_evening.tscn"));
+  const playEveningScene = readFileSync("godot/scenes/play_evening.tscn", "utf8");
+  assert.match(playEveningScene, /headless_play_evening\.gd/);
   const playEvening = readFileSync("godot/scripts/headless_play_evening.gd", "utf8");
   assert.match(playEvening, /scenes\/play\.tscn/);
   assert.match(playEvening, /_on_snap/);

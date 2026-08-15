@@ -1,9 +1,9 @@
-extends SceneTree
+extends Node
 
 ## Play.tscn eats the snap. Zone swap and fish mark must move here, not only a posed look shot.
 
 const YOU := "p1"
-const FAIL := PackedStringArray([
+const FAIL := [
 	"prop-cover-tree",
 	"prop-cover-tree-b",
 	"prop-cover-lamp",
@@ -11,14 +11,14 @@ const FAIL := PackedStringArray([
 	"prop-cover-verge",
 	"prop-hut",
 	"prop-lodge",
-])
-const MINE_ROWS: PackedStringArray = [
+]
+const MINE_ROWS := [
 	"#########",
 	"#L...o..#",
 	"#.......#",
 	"#########",
 ]
-const KITCHEN_ROWS: PackedStringArray = [
+const KITCHEN_ROWS := [
 	"################",
 	"#12345....Q...X#",
 	"#..............#",
@@ -28,31 +28,38 @@ const KITCHEN_ROWS: PackedStringArray = [
 
 
 var play: Node2D
+var started := false
 
 
-func _initialize() -> void:
+func _ready() -> void:
 	play = preload("res://scenes/play.tscn").instantiate() as Node2D
-	root.add_child(play)
-	await process_frame
-	await process_frame
-	if play == null or play.get("_valley") == null or play.get("_zone_map") == null or play.get("_fish_hud") == null:
-		printerr("PLAY_READY_FAIL")
-		quit(2)
+	add_child(play)
+
+
+func _process(_dt: float) -> void:
+	if started:
 		return
+	if play == null or play.get("_valley") == null or play.get("_zone_map") == null or play.get("_fish_hud") == null:
+		return
+	started = true
+	_run()
+
+
+func _run() -> void:
 	if not await _assert_valley():
-		quit(1)
+		get_tree().quit(1)
 		return
 	if not await _assert_mine():
-		quit(1)
+		get_tree().quit(1)
 		return
 	if not await _assert_kitchen():
-		quit(1)
+		get_tree().quit(1)
 		return
 	if not await _assert_fish():
-		quit(1)
+		get_tree().quit(1)
 		return
 	print("PLAY_EVENING_OK")
-	quit(0)
+	get_tree().quit(0)
 
 
 func _actor(extra: Dictionary) -> Dictionary:
@@ -116,8 +123,8 @@ func _snap(zone: String, extra: Dictionary) -> Dictionary:
 
 func _feed(s: Dictionary) -> void:
 	play.call("_on_snap", s)
-	await process_frame
-	await process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
 
 
 func _no_fail(n: Node) -> bool:
@@ -126,7 +133,7 @@ func _no_fail(n: Node) -> bool:
 		if tex:
 			var path := str(tex.resource_path)
 			for bad in FAIL:
-				if path.find(bad) >= 0:
+				if path.find(str(bad)) >= 0:
 					printerr("FAIL_PROP ", path)
 					return false
 	for child in n.get_children():
@@ -233,7 +240,7 @@ func _mark_x(mark: float) -> float:
 
 func _assert_fish() -> bool:
 	var mark := 0.55
-	await _feed(_snap("valley", {
+	var fish := _snap("valley", {
 		"actors": [_actor({
 			"x": 290.0,
 			"y": 342.0,
@@ -244,20 +251,10 @@ func _assert_fish() -> bool:
 		})],
 		"youAt": {"x": 290.0, "y": 342.0},
 		"prompt": "稳住",
-	}))
+	})
+	await _feed(fish)
 	# Second feed after ActorView._ready so the 钓 pose sticks on the Play body.
-	await _feed(_snap("valley", {
-		"actors": [_actor({
-			"x": 290.0,
-			"y": 342.0,
-			"busy": "fish",
-			"fishing": "fight",
-			"fishMark": mark,
-			"fishPull": 0.4,
-		})],
-		"youAt": {"x": 290.0, "y": 342.0},
-		"prompt": "稳住",
-	}))
+	await _feed(fish)
 	var valley: Node2D = play.get("_valley")
 	var hud: CanvasItem = play.get("_fish_hud")
 	var needle: ColorRect = play.get("_fish_mark")
