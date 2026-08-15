@@ -12,10 +12,13 @@ func _initialize() -> void:
 	_shot("cover")
 	boot.queue_free()
 	await process_frame
+	var dusk := Node2D.new()
+	dusk.modulate = Look.VALLEY_DUSK
+	root.add_child(dusk)
 	var valley := ValleyMap.new()
-	root.add_child(valley)
+	dusk.add_child(valley)
 	var you := ActorView.new()
-	root.add_child(you)
+	dusk.add_child(you)
 	you.apply({"x": 290, "y": 342, "name": "暖", "side": "left", "facing": 2}, 0.0)
 	var cam := Camera2D.new()
 	root.add_child(cam)
@@ -67,7 +70,7 @@ func _initialize() -> void:
 	you.set_moving(true)
 	you.apply({"x": 320, "y": 342, "name": "暖", "side": "left", "facing": 1}, 0.42)
 	var pine := ActorView.new()
-	root.add_child(pine)
+	dusk.add_child(pine)
 	pine.apply({"x": 350, "y": 342, "name": "松", "side": "right", "facing": 2}, 0.0)
 	await process_frame
 	await process_frame

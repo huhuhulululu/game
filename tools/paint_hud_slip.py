@@ -27,13 +27,13 @@ def _warm_wood(im: Image.Image, target: tuple[float, float, float]) -> Image.Ima
 
 
 def _wood_plank(size: tuple[int, int], horizontal: bool) -> Image.Image:
-    src = Image.open(ART / "tex-wood.png").convert("RGB")
-    # Lantern sits in the upper-left. Use a lower-right board.
-    crop = src.crop((448, 520, 448 + 280, 520 + 160))
+    # Same timber as the cover cabin, not a second UI wood.
+    src = Image.open(ART / "prop-cabin.png").convert("RGB")
+    crop = src.crop((40, 220, 40 + 280, 220 + 160))
     if horizontal:
         crop = crop.rotate(90, expand=True)
     plank = crop.resize(size, Image.Resampling.LANCZOS)
-    return _warm_wood(plank, (102.0, 70.0, 44.0))
+    return _warm_wood(plank, (96.0, 64.0, 40.0))
 
 
 def _paper_sheet(size: tuple[int, int]) -> Image.Image:

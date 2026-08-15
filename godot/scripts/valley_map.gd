@@ -99,7 +99,7 @@ func _paint() -> void:
 	if sheet:
 		bed.scale = Vector2((sz.x + pad * 2.0) / float(sheet.get_width()), (sz.y + pad * 2.0) / float(sheet.get_height()))
 	bed.z_index = -2
-	bed.modulate = Color(0.94, 0.86, 0.70)
+	bed.modulate = Color(1.02, 0.76, 0.50)
 	add_child(bed)
 	var ground := Sprite2D.new()
 	ground.texture = sheet
@@ -145,13 +145,13 @@ func _land() -> void:
 
 
 func _houses() -> void:
-	_prop("prop-hut.png", 5.05, 5.55, 140, 100, 8, 0.03, 0.93)
-	_prop("prop-lodge.png", 16.95, 5.40, 156, 108, 8, 0.03, 0.93)
+	_prop("prop-hut.png", 4.55, 4.72, 176, 132, 8, 0.03, 0.93)
+	_prop("prop-lodge.png", 16.20, 3.85, 220, 168, 8, 0.03, 0.93)
 	_prop("prop-mine.png", 8.4, 3.05, 84, 70, 6, 0.12, 0.94)
 
 
 func _ridge() -> void:
-	var kinds: Array[String] = ["prop-tree.png", "prop-tree-wide.png", "prop-tree-tall.png", "prop-pine.png"]
+	var kinds: Array[String] = ["prop-tree.png", "prop-tree-wide.png", "prop-tree-tall.png", "prop-tree-gold.png"]
 	# Crowns sit in the spawn frame, behind the cottages — not a fringe above y=0.
 	var north: Array[Vector2] = [
 		Vector2(1.4, 3.55), Vector2(4.8, 3.35), Vector2(8.6, 3.50),

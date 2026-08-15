@@ -313,8 +313,10 @@ func _on_snap(s: Dictionary) -> void:
 	var lit := bool(s.get("lit", true))
 	if night and zone != "kitchen" and zone != "mine":
 		_world.modulate = Color(0.46, 0.38, 0.28) if zone == "wild" and not lit else Color(0.78, 0.68, 0.52)
-	else:
+	elif zone == "kitchen" or zone == "mine":
 		_world.modulate = Color(1.0, 1.0, 1.0)
+	else:
+		_world.modulate = Look.VALLEY_DUSK
 	_paint_people(s)
 	_paint_foes(s.get("enemies", []))
 	if _ear:

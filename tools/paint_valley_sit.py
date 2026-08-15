@@ -379,12 +379,8 @@ def main() -> None:
     if "--land" in __import__("sys").argv:
         save(paint_floor(), "floor-valley.png")
         return
-    save(paint_house("hut"), "prop-hut.png")
-    save(paint_house("lodge"), "prop-lodge.png")
-    save(paint_verge(), "prop-verge.png")
-    if "--sit" in __import__("sys").argv:
-        for name in ("prop-stall.png", "prop-altar.png", "prop-board.png", "prop-anvil.png"):
-            plant_sit(name)
+    # Play roofs are the cover buildings. unify_dusk.py sits them. Do not paint red cottages.
+    print("paint_valley_sit: use --land for the floor. Roofs are unify_dusk.")
 
 
 if __name__ == "__main__":
