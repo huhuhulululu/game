@@ -158,4 +158,36 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(rest, /FORGE_OK/);
   assert.match(rest, /STALL_OK/);
   assert.doesNotMatch(rest, /Wilson|Don't Starve|Dont Starve/i);
+  assert.ok(existsSync("godot/scripts/headless_village_loop.gd"));
+  const village = readFileSync("godot/scripts/headless_village_loop.gd", "utf8");
+  assert.match(village, /FIELD_OK/);
+  assert.match(village, /FORTUNE_OK/);
+  assert.match(village, /BOARD_OK/);
+  assert.match(village, /DAY_REST_NO/);
+  assert.match(village, /SLEEP_OK/);
+  assert.match(village, /HARVEST_OK/);
+  assert.match(village, /show_crops/);
+  assert.doesNotMatch(village, /Wilson|Don't Starve|Dont Starve/i);
+  assert.doesNotMatch(village, /waitingFortune|另一部手机/);
+});
+
+test("Godot village shows crops, fortune and the dawn board from the same snap", () => {
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_paint_signs/);
+  assert.match(play, /_paint_crops/);
+  assert.match(play, /show_crops/);
+  assert.match(play, /今晚/);
+  assert.match(play, /fortune/);
+  assert.match(play, /熟了/);
+  assert.doesNotMatch(play, /waitingFortune/);
+  assert.doesNotMatch(play, /另一部手机|必须两/);
+  const valley = readFileSync("godot/scripts/valley_map.gd", "utf8");
+  assert.match(valley, /show_crops/);
+  assert.match(valley, /prop-tuft|prop-bush/);
+  assert.doesNotMatch(valley, /prop-cabin|prop-inn/);
+  const world = readFileSync("src/sim/world.ts", "utf8");
+  assert.match(world, /没有种。田不用浇/);
+  assert.match(world, /也得对着铺/);
+  assert.match(world, /还早。天黑再歇/);
+  assert.match(world, /一个人能问|问今日/);
 });

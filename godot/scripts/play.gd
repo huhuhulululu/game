@@ -38,6 +38,9 @@ var _fish_pull: ColorRect
 var _atlas: TextureRect
 var _visible: Dictionary = {}
 var _map_w := 0
+var _hud_sign: Label
+var _sign_card: Panel
+var _plot_sig := ""
 
 
 func _ready() -> void:
@@ -90,6 +93,17 @@ func _hud() -> void:
 	_hud_pot.position = Vector2(16, 90)
 	_hud_pot.size = Vector2(288, 22)
 	card.add_child(_hud_pot)
+	_sign_card = Panel.new()
+	_sign_card.position = Vector2(352, 16)
+	_sign_card.size = Vector2(400, 88)
+	_sign_card.visible = false
+	_sign_card.add_theme_stylebox_override("panel", Look.plaque_box())
+	layer.add_child(_sign_card)
+	_hud_sign = Look.ink_label("", 14, Look.GOLD)
+	_hud_sign.position = Vector2(12, 8)
+	_hud_sign.size = Vector2(376, 72)
+	_hud_sign.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_sign_card.add_child(_hud_sign)
 	_bag = HBoxContainer.new()
 	_bag.position = Vector2(16, 152)
 	_bag.add_theme_constant_override("separation", 8)
@@ -220,15 +234,18 @@ func _on_snap(s: Dictionary) -> void:
 	_hud_room.text = "房间 %s" % str(s.get("room", Net.room))
 	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
 	var weather: Dictionary = s.get("weather", {}) if typeof(s.get("weather", {})) == TYPE_DICTIONARY else {}
-	_hud_ink.text = "%s · %s · %s · 金 %s · 饿 %s" % [str(s.get("season", "春")), phase, str(weather.get("name", "")), _ink_n(s.get("gold", 0)), _ink_n(s.get("hunger", 0))]
+	_hud_ink.text = "日 %s · %s · %s · %s · 金 %s · 饿 %s" % [_ink_n(s.get("day", 0)), str(s.get("season", "春")), phase, str(weather.get("name", "")), _ink_n(s.get("gold", 0)), _ink_n(s.get("hunger", 0))]
 	var prompt := str(s.get("prompt", ""))
 	_prompt.text = prompt
-	if prompt == "起竿" or prompt.find("太暗") >= 0 or prompt.find("咬") >= 0:
+	if prompt == "起竿" or prompt.find("太暗") >= 0 or prompt.find("咬") >= 0 or prompt.find("还早") >= 0:
 		_prompt.add_theme_color_override("font_color", Color(0.55, 0.22, 0.14))
-	elif prompt.find("绿") >= 0:
+	elif prompt.find("绿") >= 0 or prompt.find("熟了") >= 0:
 		_prompt.add_theme_color_override("font_color", Look.MOSS)
+	elif prompt.find("歇") >= 0:
+		_prompt.add_theme_color_override("font_color", Look.GOLD)
 	else:
 		_prompt.add_theme_color_override("font_color", Look.INK)
+	_paint_signs(s)
 	var you_held := _you_held_name(s)
 	_you_held = _you_held_id(s)
 	_hud_held.text = "手里 · %s" % you_held if you_held != "" else "手里空着"
@@ -252,6 +269,7 @@ func _on_snap(s: Dictionary) -> void:
 		if rows.size() == 0:
 			_tiles = []
 	_show_zone(zone, _tiles)
+	_paint_crops(s)
 	if _zone_map.visible:
 		_zone_map.show_fog(s.get("revealed", []), s.get("visible", []), s.get("fires", []))
 	_remember_vis(s)
@@ -277,6 +295,46 @@ func _on_snap(s: Dictionary) -> void:
 		_world.modulate = Color(1.0, 1.0, 1.0)
 	_paint_people(s)
 	_paint_foes(s.get("enemies", []))
+
+
+func _paint_signs(s: Dictionary) -> void:
+	if _hud_sign == null or _sign_card == null:
+		return
+	var bits: PackedStringArray = []
+	var fortune: Variant = s.get("fortune", {})
+	if typeof(fortune) == TYPE_DICTIONARY:
+		var row: Dictionary = fortune
+		var title := str(row.get("title", ""))
+		var life := str(row.get("life", ""))
+		if title != "":
+			bits.append("%s · %s" % [title, life])
+	var board: Array = s.get("board", [])
+	if board.size() > 0:
+		var names: PackedStringArray = []
+		for raw in board:
+			names.append(str(raw))
+		bits.append("今晚 %s" % "、".join(names))
+	_hud_sign.text = "\n".join(bits)
+	_sign_card.visible = bits.size() > 0
+
+
+func _paint_crops(s: Dictionary) -> void:
+	if _valley == null:
+		return
+	if _zone != "valley":
+		return
+	var plots: Array = s.get("plots", [])
+	var bits: PackedStringArray = []
+	for raw in plots:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		bits.append("%s:%s" % [str(row.get("seed", "")), _ink_n(row.get("stage", 0))])
+	var sig := "|".join(bits)
+	if sig == _plot_sig:
+		return
+	_plot_sig = sig
+	_valley.show_crops(plots)
 
 
 func _you_held_name(s: Dictionary) -> String:

@@ -1920,6 +1920,37 @@ describe("living systems", () => {
     assert.equal(pair.save.day, 1);
   });
 
+  it("a bare plot, a cabin wall, and a day bed all speak", () => {
+    const field = new World("SAY3");
+    field.addPlayer("a", "暖", "left");
+    const farmer = field.players.get("a");
+    assert.ok(farmer);
+    for (const id of ["tomato_seed", "greens_seed", "wheat_seed"] as const) {
+      while (countOf(field.save.bag, id)) takeFromBag(field.save.bag, id);
+    }
+    farmer.held = "";
+    standFacing(farmer, field.valley.find("P")[0]);
+    tap(field, "a");
+    assert.ok(field.toasts.some((t) => t.text.includes("没有种") && t.text.includes("不用浇")));
+
+    const wall = new World("SAY4");
+    wall.addPlayer("a", "暖", "left");
+    const guest = wall.players.get("a");
+    assert.ok(guest);
+    const cabin = wall.valley.find("C")[0];
+    assert.ok(cabin);
+    standFacing(guest, cabin);
+    assert.ok(wall.snapshot("a").prompt.includes("还早"));
+    tap(wall, "a");
+    assert.equal(wall.save.day, 0);
+    assert.ok(wall.toasts.some((t) => t.text.includes("还早")));
+    wall.clock = nightAfter(seasonOf(wall.save.day)) + 0.01;
+    assert.ok(wall.snapshot("a").prompt.includes("对着铺"));
+    tap(wall, "a");
+    assert.equal(wall.save.day, 0);
+    assert.ok(wall.toasts.some((t) => t.text.includes("也得对着铺")));
+  });
+
   it("two phones share a room without a third body, a stolen pair, or a waiting HUD", () => {
     const seats = new World("SEATS2");
     seats.addPlayer("a", "阿左", "left");

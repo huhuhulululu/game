@@ -631,6 +631,7 @@ export class World {
         if (this.present().length === 2 && this.readySleep.has(p.id)) return "等她也躺下";
         return "歇一夜（田会自己长）";
       }
+      if (cell === "cabin") return this.isNight() ? "对着铺才能歇" : "还早。天黑再歇。";
       if (ch === "V" || cell === "gate") return this.isNight() ? "出谷 · 夜里没火会咬人" : "出谷 · 荒野";
       if (cell === "shop") return this.shopPrompt();
       if (cell === "forge") return this.forgeJob ? "锻 · 绿的时候按" : "打造 · 矿×2 木×1";
@@ -728,6 +729,10 @@ export class World {
       if (ch === "E") return this.enterMine(p);
       if (ch === "I") return this.enterKitchen(p);
       if (ch === "A") return this.sleep(p.id);
+      if (cell === "cabin") {
+        this.toast(this.isNight() ? "也得对着铺" : "还早。天黑再歇。");
+        return;
+      }
       if (ch === "V" || cell === "gate") return this.enterWild(p);
       if (cell === "shop") return this.shopAct(p);
       if (cell === "forge") return this.forgeAct(p);
@@ -915,7 +920,10 @@ export class World {
   private plot(p: Actor, x: number, y: number): void {
     const plots = this.valley.find("P");
     const i = plots.findIndex((t) => t.x === x && t.y === y);
-    if (i < 0) return;
+    if (i < 0) {
+      this.toast("先面向田");
+      return;
+    }
     const plot = this.save.plots[i] ?? (this.save.plots[i] = { stage: 0 });
     if (plot.seed && plot.stage >= 3) {
       const grow = item(plot.seed).growInto;
