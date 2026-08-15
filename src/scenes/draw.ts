@@ -200,24 +200,8 @@ export function drawMeadow(g: Ctx, x: number, y: number, w: number, h: number): 
 
 function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number, skipGrass = false, skipPath = false): void {
   if (zone === "kitchen") {
-    if (blitWrap(g, "wood", x, y, TILE, TILE)) {
-      g.strokeStyle = "rgba(50,30,18,0.22)";
-      g.lineWidth = 1;
-      g.beginPath();
-      g.moveTo(x, y + 12);
-      g.lineTo(x + TILE, y + 12);
-      g.stroke();
-      return;
-    }
+    if (blitWrapZoom(g, "wood", x, y, TILE, TILE, 1.85)) return;
     px(g, x, y, TILE, TILE, "#6e4a32");
-    g.strokeStyle = "#5a3c28";
-    g.lineWidth = 2;
-    g.beginPath();
-    g.moveTo(x, y + 12);
-    g.lineTo(x + TILE, y + 12);
-    g.moveTo(x, y + 24);
-    g.lineTo(x + TILE, y + 24);
-    g.stroke();
     return;
   }
   if (zone === "mine") {
@@ -645,7 +629,14 @@ function hole(g: Ctx, x: number, y: number): void {
 }
 
 function leave(g: Ctx, x: number, y: number, zone: string): void {
-  px(g, x + 8, y + 8, 20, 20, zone === "kitchen" ? "#8a6a40" : "#c9a06a");
+  if (zone === "kitchen") {
+    oval(g, x + 18, y + 32, 10, 4, "rgba(20,16,10,0.26)");
+    px(g, x + 7, y + 2, 22, 30, "#4a3220");
+    px(g, x + 10, y + 6, 16, 24, "#1a1008");
+    oval(g, x + 22, y + 18, 1.5, 1.5, "#c9a06a");
+    return;
+  }
+  px(g, x + 8, y + 8, 20, 20, "#c9a06a");
   px(g, x + 12, y + 12, 12, 12, "#2a2018");
   px(g, x + 16, y + 16, 4, 8, "#f4e7d2");
 }
@@ -1116,8 +1107,8 @@ export function housePaintBox(c: HouseCluster): { x: number; y: number; w: numbe
 /** Door on the painted south face — not the map tile on the cabin's right. */
 export function doorPaint(c: HouseCluster): { x: number; y: number; w: number; h: number } {
   const b = housePaintBox(c);
-  if (c.kind === "inn") return { x: b.x + b.w * 0.17, y: b.y + b.h * 0.5, w: b.w * 0.15, h: b.h * 0.34 };
-  return { x: b.x + b.w * 0.24, y: b.y + b.h * 0.48, w: b.w * 0.17, h: b.h * 0.32 };
+  if (c.kind === "inn") return { x: b.x + b.w * 0.16, y: b.y + b.h * 0.52, w: b.w * 0.14, h: b.h * 0.32 };
+  return { x: b.x + b.w * 0.22, y: b.y + b.h * 0.5, w: b.w * 0.14, h: b.h * 0.3 };
 }
 
 export function chimneyMouth(c: HouseCluster): { x: number; y: number } {
@@ -1139,20 +1130,25 @@ function drawSmoke(g: Ctx, x: number, y: number, now: number): void {
 function drawDoor(g: Ctx, door: { x: number; y: number; w: number; h: number }, open: boolean, now: number): void {
   const { x, y, w, h } = door;
   if (!open) return;
-  if (!blitFit(g, "doorOpen", x - 1, y - 2, w + 2, h + 4)) {
-    px(g, x + 2, y + 4, w - 4, h - 8, "#1a1008");
-    px(g, x + w * 0.62, y + 6, w * 0.3, h - 12, "#5a3a22");
-    px(g, x + w * 0.68, y + 8, 2, h - 16, "#3a2414");
-  }
-  const glow = 0.24 + Math.sin(now / 220) * 0.07;
+  const ix = x + w * 0.14;
+  const iy = y + h * 0.1;
+  const iw = w * 0.72;
+  const ih = h * 0.78;
+  px(g, ix, iy, iw, ih, "#1a100c");
   g.save();
-  g.globalAlpha = glow;
+  const pulse = 0.2 + Math.sin(now / 220) * 0.05;
+  const grd = g.createRadialGradient(ix + iw * 0.5, iy + ih * 0.7, 2, ix + iw * 0.5, iy + ih * 0.55, iw * 0.7);
+  grd.addColorStop(0, `rgba(255,180,80,${0.45 + pulse})`);
+  grd.addColorStop(1, "rgba(255,180,80,0)");
+  g.fillStyle = grd;
+  g.fillRect(ix, iy, iw, ih);
+  g.globalAlpha = 0.18 + pulse;
   g.fillStyle = "#ffc46e";
   g.beginPath();
-  g.moveTo(x + w * 0.22, y + h * 0.84);
-  g.lineTo(x + w * 0.78, y + h * 0.84);
-  g.lineTo(x + w * 1.2, y + h * 1.22);
-  g.lineTo(x - w * 0.2, y + h * 1.22);
+  g.moveTo(ix + iw * 0.15, iy + ih);
+  g.lineTo(ix + iw * 0.85, iy + ih);
+  g.lineTo(ix + iw * 1.15, iy + ih + 10);
+  g.lineTo(ix - iw * 0.15, iy + ih + 10);
   g.closePath();
   g.fill();
   g.restore();
@@ -1162,7 +1158,7 @@ export function doorIsOpen(c: HouseCluster, people: { x: number; y: number; zone
   if (zone !== "valley" && zone !== "wild") return false;
   const dx = c.doorX * TILE + 18;
   const dy = c.doorY * TILE + 18;
-  return people.some((a) => (a.zone ?? zone) === zone && Math.hypot(a.x - dx, a.y - dy) < 52);
+  return people.some((a) => (a.zone ?? zone) === zone && Math.hypot(a.x - dx, a.y - dy) < 40);
 }
 
 export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number, open = false): void {
