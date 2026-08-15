@@ -81,7 +81,7 @@ export const FORTUNES: Fortune[] = [
     id: "joke",
     title: "口彩",
     life: "今日忌争谁洗碗。宜争谁先把灯点上。",
-    tilt: "什么都不保证。只保证签是给你们两个人的。",
+    tilt: "什么都不保证。签是给今晚的。",
     fish: 6,
     mine: 6,
     cook: 6,

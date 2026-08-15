@@ -1,5 +1,4 @@
 import type { GearInst } from "./affix";
-import { addToBag } from "./bag";
 import { maxHp, todayEvent, todayGuest, xpToNext } from "./content";
 import { item } from "./items";
 import type { FighterSave, SaveData } from "./types";
@@ -44,15 +43,10 @@ export function grantXp(f: FighterSave, amount: number): boolean {
 export function growPlots(save: SaveData, extra: boolean): string[] {
   const notes: string[] = [];
   for (const plot of save.plots) {
-    if (!plot.seed) continue;
-    plot.stage += extra ? 2 : 1;
+    if (!plot.seed || plot.stage >= 3) continue;
+    plot.stage = Math.min(3, plot.stage + (extra ? 2 : 1));
     const def = item(plot.seed);
-    if (plot.stage >= 3 && def.growInto) {
-      addToBag(save.bag, def.growInto, extra ? 2 : 1);
-      notes.push(`${item(def.growInto).name}熟了`);
-      plot.seed = undefined;
-      plot.stage = 0;
-    }
+    if (plot.stage >= 3 && def.growInto) notes.push(`${item(def.growInto).name}熟了`);
   }
   return notes;
 }

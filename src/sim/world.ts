@@ -262,7 +262,7 @@ export class World {
 
   sleep(fromId?: string): void {
     const online = this.present();
-    if (fromId && online.length < 2 && !this.isNight()) {
+    if (fromId && !this.isNight()) {
       this.toast("还早。天黑再歇。");
       return;
     }
@@ -313,7 +313,8 @@ export class World {
     this.growAcc += dt;
     if (this.growAcc > 80) {
       this.growAcc = 0;
-      growPlots(this.save, this.isSplit() || weatherById(this.save.weather).grow > 0 || growBonus(seasonOf(this.save.day)));
+      const notes = growPlots(this.save, this.isSplit() || weatherById(this.save.weather).grow > 0 || growBonus(seasonOf(this.save.day)));
+      if (notes[0]) this.toast(notes[0]);
     }
     for (const p of this.present()) {
       p.cool = Math.max(0, p.cool - dt);
@@ -620,9 +621,9 @@ export class World {
       if (ch === "E") return "进矿";
       if (ch === "I") return "进厨房";
       if (ch === "A") {
+        if (!this.isNight()) return "还早。天黑再歇。";
         if (this.present().length === 2 && this.readySleep.size === 1 && !this.readySleep.has(p.id)) return "也躺下，一起歇一夜";
         if (this.present().length === 2 && this.readySleep.has(p.id)) return "等她也躺下";
-        if (this.present().length < 2 && !this.isNight()) return "还早。天黑再歇。";
         return "歇一夜（田会自己长）";
       }
       if (ch === "V" || cell === "gate") return this.isNight() ? "出谷 · 夜里没火会咬人" : "出谷 · 荒野";
@@ -908,24 +909,29 @@ export class World {
         addToBag(this.save.bag, odd);
         extra = ` · 异株${item(odd).name}`;
       }
-      this.toast(`收了${grow ? item(grow).name : "一垄"}${extra}`);
       plot.seed = undefined;
       plot.stage = 0;
+      if (grow) this.fillHand(p, grow);
+      const held = !!grow && parseHeld(p.held).id === grow;
+      this.toast(`收了${grow ? item(grow).name : "一垄"}${extra}${held ? "。进手里了。" : grow ? "。在袋子里。" : ""}`);
       return;
     }
     if (plot.seed) {
-      this.toast(`还在长 · ${plot.stage}/3`);
+      this.toast(`还在长 · ${plot.stage}/3 · 不用浇`);
       return;
     }
-    const seed = ["tomato_seed", "greens_seed", "wheat_seed"].find((id) => countOf(this.save.bag, id) > 0);
+    const heldId = parseHeld(p.held).id;
+    const seeds = ["tomato_seed", "greens_seed", "wheat_seed"];
+    const seed = seeds.find((id) => id === heldId) ?? seeds.find((id) => countOf(this.save.bag, id) > 0);
     if (!seed) {
-      this.toast("袋子里没有种");
+      this.toast("没有种。田不用浇。");
       return;
     }
-    takeFromBag(this.save.bag, seed);
+    if (heldId === seed) p.held = "";
+    else takeFromBag(this.save.bag, seed);
     plot.seed = seed;
     plot.stage = 0;
-    this.toast(`${p.name} 种下${item(seed).name}`);
+    this.toast(`${p.name} 种下${item(seed).name}。不用浇。`);
   }
 
   private forage(p: Actor, id: string, pHit: number, x?: number, y?: number): void {
@@ -1704,7 +1710,7 @@ export class World {
       return;
     }
     this.boardOn = true;
-    this.toast(`看板：${this.boardTickets.map((id) => potById(id).name).join("、")}`);
+    this.toast(`今晚看板揭开了：${this.boardTickets.map((id) => potById(id).name).join("、")}`);
   }
 
   private seedBoardOrders(): void {
@@ -1906,10 +1912,10 @@ export class World {
     const plot = this.save.plots[i];
     if (plot?.seed && plot.stage >= 3) {
       const grow = item(plot.seed).growInto;
-      return `收 · ${grow ? item(grow).name : "一垄"}`;
+      return `熟了 · 收${grow ? item(grow).name : "一垄"}`;
     }
-    if (plot?.seed) return `${item(plot.seed).name} · ${plot.stage}/3`;
-    return "种";
+    if (plot?.seed) return `${item(plot.seed).name} · 还在长${plot.stage}/3 · 不用浇`;
+    return "种 · 不用浇";
   }
 
   private sprinkleVein(): void {

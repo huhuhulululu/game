@@ -10,6 +10,7 @@ import { rollLootTable } from "./loot";
 import { LOOT_TABLES } from "./lootTables";
 import { pickWeighted } from "./rng";
 import { eatValue } from "./eat";
+import { growPlots } from "./progress";
 import { nightAfter, seasonOf } from "./season";
 import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
@@ -483,6 +484,7 @@ describe("living systems", () => {
     b.y = stand.y;
     a.facing = 0;
     b.facing = 0;
+    w.clock = nightAfter(seasonOf(w.save.day)) + 0.01;
     const day = w.save.day;
     w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
     assert.equal(w.save.day, day);
@@ -504,7 +506,7 @@ describe("living systems", () => {
     p.y = stand.y;
     p.facing = 0;
     w.setInput("a", { x: 0, y: 0, action: true, held: false, ping: false });
-    assert.ok(countOf(w.save.bag, "tomato") >= 1);
+    assert.ok(countOf(w.save.bag, "tomato") + (p.held.startsWith("tomato") ? 1 : 0) >= 1);
     assert.ok(countOf(w.save.bag, "osmanthus") >= 1);
     assert.ok(w.toasts.some((t) => t.text.includes("异株")));
   });
@@ -914,6 +916,7 @@ describe("living systems", () => {
     standFacing(a, bed);
     standFacing(b, bed);
     b.x = a.x + 12;
+    w.clock = nightAfter(seasonOf(w.save.day)) + 0.01;
     tap(w, "a");
     tap(w, "b");
     assert.equal(w.snapshot("a").board.length, 0);
@@ -1445,5 +1448,84 @@ describe("living systems", () => {
     assert.ok(!w.toasts.some((t) => t.text.includes("两个人在摊前")));
     assert.equal(w.save.gear.length, 0);
     assert.ok(!w.save.gear.some((g) => item(g.base).pairId));
+  });
+
+  it("a solo village day can plant, ask, uncover the board, and only sleep at night", () => {
+    const field = new World("FIELD");
+    field.addPlayer("a", "暖", "left");
+    const farmer = field.players.get("a");
+    assert.ok(farmer);
+    const plot = field.valley.find("P")[0];
+    standFacing(farmer, plot);
+    assert.ok(field.snapshot("a").prompt.includes("不用浇"));
+    for (const id of ["tomato_seed", "greens_seed", "wheat_seed"] as const) {
+      while (countOf(field.save.bag, id)) takeFromBag(field.save.bag, id);
+    }
+    farmer.held = "tomato_seed:ready:100";
+    tap(field, "a");
+    assert.equal(field.save.plots[0]?.seed, "tomato_seed");
+    assert.equal(farmer.held, "");
+    assert.ok(field.toasts.some((t) => t.text.includes("种下") && t.text.includes("不用浇")));
+    assert.ok(field.snapshot("a").prompt.includes("还在长") && field.snapshot("a").prompt.includes("不用浇"));
+    growPlots(field.save, true);
+    const notes = growPlots(field.save, true);
+    assert.ok(notes.some((n) => n.includes("熟了")));
+    assert.equal(field.save.plots[0]?.stage, 3);
+    assert.equal(countOf(field.save.bag, "tomato"), 0);
+    assert.ok(field.snapshot("a").prompt.includes("熟了"));
+    tap(field, "a");
+    assert.ok(farmer.held.startsWith("tomato"));
+    assert.ok(field.toasts.some((t) => t.text.includes("收了") && t.text.includes("手里")));
+
+    const hall = new World("HALL");
+    hall.addPlayer("a", "暖", "left");
+    const seer = hall.players.get("a");
+    assert.ok(seer);
+    standFacing(seer, hall.valley.find("G")[0]);
+    tap(hall, "a");
+    assert.ok(hall.save.fortuneId);
+    assert.ok(hall.snapshot("a").fortune);
+    assert.ok(!hall.toasts.some((t) => t.text.includes("另一只手") || t.text.includes("两个人")));
+    assert.ok(!((hall.snapshot("a").fortune?.tilt ?? "") + (hall.snapshot("a").fortune?.life ?? "")).includes("两个人"));
+    standFacing(seer, hall.valley.find("B")[0]);
+    tap(hall, "a");
+    assert.equal(hall.boardOn, true);
+    assert.ok(hall.snapshot("a").board.length >= 1);
+    assert.ok(hall.toasts.some((t) => t.text.includes("揭开")));
+    assert.ok(!hall.toasts.some((t) => t.text.includes("另一只手")));
+
+    const bed = new World("BED2");
+    bed.addPlayer("a", "暖", "left");
+    const sleeper = bed.players.get("a");
+    assert.ok(sleeper);
+    standFacing(sleeper, bed.valley.find("A")[0]);
+    const day = bed.save.day;
+    tap(bed, "a");
+    assert.equal(bed.save.day, day);
+    assert.ok(bed.toasts.some((t) => t.text.includes("还早")));
+    bed.clock = nightAfter(seasonOf(bed.save.day)) + 0.01;
+    assert.ok(bed.snapshot("a").prompt.includes("歇一夜"));
+    tap(bed, "a");
+    assert.equal(bed.save.day, day + 1);
+
+    const pair = new World("BED3");
+    pair.addPlayer("a", "暖", "left");
+    pair.addPlayer("b", "阿右", "right");
+    const left = pair.players.get("a");
+    const right = pair.players.get("b");
+    assert.ok(left && right);
+    standFacing(left, pair.valley.find("A")[0]);
+    standFacing(right, pair.valley.find("A")[0]);
+    right.x = left.x + 12;
+    assert.ok(pair.snapshot("a").prompt.includes("还早"));
+    tap(pair, "a");
+    tap(pair, "b");
+    assert.equal(pair.save.day, 0);
+    pair.clock = nightAfter(seasonOf(pair.save.day)) + 0.01;
+    tap(pair, "a");
+    assert.equal(pair.save.day, 0);
+    assert.ok(pair.toasts.some((t) => t.text.includes("先躺下")));
+    tap(pair, "b");
+    assert.equal(pair.save.day, 1);
   });
 });
