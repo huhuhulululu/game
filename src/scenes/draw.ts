@@ -4,6 +4,9 @@ import { blitFit, blitWrap } from "./art";
 
 type Ctx = CanvasRenderingContext2D;
 
+export type Near = { n: string; s: string; e: string; w: string };
+export type DrawPart = "all" | "ground" | "prop";
+
 const FILL: Record<string, string> = {
   "#": "#2a1c16",
   T: "#1e2c22",
@@ -142,7 +145,15 @@ function tuft(g: Ctx, x: number, y: number, s: number, c: string): void {
 
 function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number): void {
   if (zone === "kitchen") {
-    if (blitWrap(g, "wood", x, y, TILE, TILE)) return;
+    if (blitWrap(g, "wood", x, y, TILE, TILE)) {
+      g.strokeStyle = "rgba(50,30,18,0.22)";
+      g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(x, y + 12);
+      g.lineTo(x + TILE, y + 12);
+      g.stroke();
+      return;
+    }
     px(g, x, y, TILE, TILE, "#6e4a32");
     g.strokeStyle = "#5a3c28";
     g.lineWidth = 2;
@@ -175,7 +186,10 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
       tuft(g, x + 18, y + 8, 18, "#7a7a38");
       return;
     }
-    if (blitWrap(g, "grass", x, y, TILE, TILE)) return;
+    if (blitWrap(g, "grass", x, y, TILE, TILE)) {
+      if (hash(x, y) > 860) tuft(g, x + 8, y + 16, 10, "#2a4a30");
+      return;
+    }
     px(g, x, y, TILE, TILE, "#2e3a28");
     tuft(g, x + 8, y + 14, 12, "#3a4a30");
     return;
@@ -187,7 +201,11 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
     oval(g, x + 10, y + 10, 4, 3, "#6a5a38");
     return;
   }
-  if (blitWrap(g, "grass", x, y, TILE, TILE)) return;
+  if (blitWrap(g, "grass", x, y, TILE, TILE)) {
+    const n = hash(x, y);
+    if (n > 880) oval(g, x + 6 + (n % 12), y + 16, 4, 2.2, "rgba(30,60,40,0.28)");
+    return;
+  }
   px(g, x, y, TILE, TILE, "#3f6d45");
   const n = hash(x, y);
   tuft(g, x + 4 + (n % 10), y + 12 + (n % 8), 14, "#2f5a38");
@@ -196,6 +214,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
 }
 
 function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
+  oval(g, x + 18, y + 32, 12, 4, "rgba(20,16,10,0.28)");
   if (blitFit(g, pine ? "pine" : "tree", x - 16, y - 52, 68, 92)) return;
   const sway = Math.sin(now / 860 + x * 0.03) * 1.4;
   oval(g, x + 18, y + 34, 12, 4, "rgba(20,16,10,0.28)");
@@ -220,19 +239,17 @@ function water(g: Ctx, x: number, y: number, now: number): void {
     px(g, x, y, TILE, TILE, "#1a5470");
     px(g, x, y + 16, TILE, 20, "#143e54");
   }
-  g.strokeStyle = "rgba(210,230,230,0.28)";
-  g.lineWidth = 1.4;
+  g.strokeStyle = "rgba(210,230,230,0.16)";
+  g.lineWidth = 1.2;
   g.lineCap = "butt";
-  const t = now / 520;
-  for (let i = 0; i < 2; i++) {
-    const base = y + 10 + i * 12;
-    const y0 = base + Math.sin(t + x * 0.06 + i) * 1.6;
-    const y1 = base + Math.sin(t + (x + TILE) * 0.06 + i) * 1.6;
-    g.beginPath();
-    g.moveTo(x, y0);
-    g.lineTo(x + TILE, y1);
-    g.stroke();
-  }
+  const t = now / 640;
+  const base = y + 16;
+  const y0 = base + Math.sin(t + x * 0.05) * 1.4;
+  const y1 = base + Math.sin(t + (x + TILE) * 0.05) * 1.4;
+  g.beginPath();
+  g.moveTo(x, y0);
+  g.lineTo(x + TILE, y1);
+  g.stroke();
 }
 
 function dock(g: Ctx, x: number, y: number): void {
@@ -314,7 +331,13 @@ function bush(g: Ctx, x: number, y: number, gold: boolean): void {
   oval(g, x + 18, y + 10, 5, 4, gold ? "#e6d0a6" : "#5a8a58");
 }
 
-function stall(g: Ctx, x: number, y: number): void {
+function stall(g: Ctx, x: number, y: number, near?: Near): void {
+  if (near && (near.w === "S" || near.n === "S")) {
+    oval(g, x + 18, y + 24, 7, 4, "#6a4a28");
+    oval(g, x + 18, y + 20, 5, 4, "#c45c26");
+    return;
+  }
+  oval(g, x + 18, y + 32, 14, 4, "rgba(20,16,10,0.22)");
   if (blitFit(g, "stall", x - 8, y - 28, 52, 68)) return;
   px(g, x + 2, y + 16, 32, 16, "#8a6a40");
   px(g, x + 4, y + 18, 28, 8, "#c4a060");
@@ -518,8 +541,8 @@ function chest(g: Ctx, x: number, y: number): void {
   px(g, x + 16, y + 18, 4, 4, "#d4a24a");
 }
 
-export function drawPlot(g: Ctx, px0: number, py0: number, stage: number, seed?: string): void {
-  plotSoil(g, px0, py0);
+export function drawPlot(g: Ctx, px0: number, py0: number, stage: number, seed?: string, soil = true): void {
+  if (soil) plotSoil(g, px0, py0);
   if (!seed && stage <= 0) return;
   const name = seed ?? "";
   const green = name.includes("柿") ? "#c45c26" : name.includes("姜") ? "#d4c060" : "#3f6d4a";
@@ -547,50 +570,16 @@ export function drawPlot(g: Ctx, px0: number, py0: number, stage: number, seed?:
   oval(g, px0 + 24, py0 + 10, 4, 4, name.includes("姜") ? "#e8d080" : "#d4a24a");
 }
 
-export function drawCell(
-  g: Ctx,
-  ch: string,
-  x: number,
-  y: number,
-  fill: string,
-  now: number,
-  zone = "valley",
-): void {
-  g.imageSmoothingEnabled = true;
-  const look = tileLook(ch, zone);
-  if (look === "water") {
-    water(g, x, y, now);
-    return;
-  }
-  if (look === "wall") {
-    wall(g, x, y, zone);
-    return;
-  }
-  if (look === "grass" || look === "path" || look === "marsh" || look === "savanna" || look === "floor" || look === "stone" || look === "ground") {
-    if (look === "ground") {
-      px(g, x, y, TILE, TILE, fill || "#3d4a36");
-      return;
-    }
-    ground(g, zone, ch, x, y, now);
-    if (fill && fill !== cellFill(ch, zone)) {
-      g.fillStyle = fill;
-      g.globalAlpha = 0.2;
-      g.fillRect(x, y, TILE, TILE);
-      g.globalAlpha = 1;
-    }
-    return;
-  }
-  ground(g, zone, look === "plot" ? "," : ".", x, y, now);
+function paintProp(g: Ctx, look: string, ch: string, x: number, y: number, now: number, zone: string, near?: Near): void {
   if (look === "tree") tree(g, x, y, ch === "t" || (zone === "wild" && ch === "T"), now);
   else if (look === "dock") dock(g, x, y);
   else if (look === "fire") fire(g, x, y, now);
   else if (look === "cabin") cabin(g, x, y);
   else if (look === "inn") inn(g, x, y, ch === "I");
   else if (look === "lantern") lanternDoor(g, x, y, now);
-  else if (look === "plot") plotSoil(g, x, y);
   else if (look === "bush") bush(g, x, y, false);
   else if (look === "osmanthus") bush(g, x, y, true);
-  else if (look === "stall") stall(g, x, y);
+  else if (look === "stall") stall(g, x, y, near);
   else if (look === "anvil") anvil(g, x, y);
   else if (look === "altar") altar(g, x, y);
   else if (look === "board") board(g, x, y);
@@ -614,6 +603,48 @@ export function drawCell(
   else if (look === "hole") hole(g, x, y);
   else if (look === "leave") leave(g, x, y, zone);
   else if (look === "chest") chest(g, x, y);
+}
+
+export function drawCell(
+  g: Ctx,
+  ch: string,
+  x: number,
+  y: number,
+  fill: string,
+  now: number,
+  zone = "valley",
+  near?: Near,
+  part: DrawPart = "all",
+): void {
+  g.imageSmoothingEnabled = true;
+  const look = tileLook(ch, zone);
+  const floor =
+    look === "grass" ||
+    look === "path" ||
+    look === "marsh" ||
+    look === "savanna" ||
+    look === "floor" ||
+    look === "stone" ||
+    look === "ground" ||
+    look === "water" ||
+    look === "wall";
+  if (part !== "prop") {
+    if (look === "water") water(g, x, y, now);
+    else if (look === "wall") wall(g, x, y, zone);
+    else if (look === "ground") px(g, x, y, TILE, TILE, fill || "#3d4a36");
+    else if (floor) {
+      ground(g, zone, ch, x, y, now);
+      if (fill && fill !== cellFill(ch, zone)) {
+        g.fillStyle = fill;
+        g.globalAlpha = 0.2;
+        g.fillRect(x, y, TILE, TILE);
+        g.globalAlpha = 1;
+      }
+    } else {
+      ground(g, zone, look === "plot" ? "," : ".", x, y, now);
+    }
+  }
+  if (part !== "ground" && !floor && look !== "plot") paintProp(g, look, ch, x, y, now, zone, near);
 }
 
 function heldChip(name: string): string {
@@ -662,9 +693,13 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0)
         : warm
           ? "warm"
           : "pineChar";
-  const bob = Math.sin((a.x + a.y) * 0.12) * 1.2;
+  const gait = (a.x + a.y) * 0.28;
+  const bob = Math.sin(gait) * 2.4;
+  const sway = Math.sin(gait) * 0.07;
+  oval(g, x, y + 7, 9, 3, "rgba(20,16,10,0.32)");
   g.save();
   g.translate(x, y + bob);
+  g.rotate(a.facing === 1 ? sway : a.facing === 3 ? -sway : sway * 0.35);
   if (a.facing === 3) g.scale(-1, 1);
   const drew = blitFit(g, painted, -16, -50, 32, 50);
   g.restore();
@@ -888,6 +923,7 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
+  oval(g, x + w / 2, y + h - 2, w * 0.4, 7, "rgba(20,16,10,0.28)");
   const boxW = w + 24;
   const boxH = h + 52;
   const painted =
@@ -928,6 +964,125 @@ export function drawGround(g: Ctx, ch: string, x: number, y: number, now: number
 
 export function isHouseLook(look: string): boolean {
   return look === "cabin" || look === "inn" || look === "lantern" || look === "mine-mouth";
+}
+
+export function isTallLook(look: string): boolean {
+  return (
+    look === "tree" ||
+    look === "bush" ||
+    look === "osmanthus" ||
+    look === "stall" ||
+    look === "fire" ||
+    look === "gate" ||
+    look === "board" ||
+    look === "altar" ||
+    look === "anvil" ||
+    look === "stove" ||
+    look === "icebox" ||
+    look === "pantry" ||
+    isHouseLook(look)
+  );
+}
+
+export interface FieldCluster {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export function plotClusters(rows: string[]): FieldCluster[] {
+  const seen = new Set<number>();
+  const mw = rows[0]?.length ?? 0;
+  const out: FieldCluster[] = [];
+  for (let y = 0; y < rows.length; y++) {
+    for (let x = 0; x < mw; x++) {
+      const key = y * mw + x;
+      if (rows[y][x] !== "P" || seen.has(key)) continue;
+      const stack = [[x, y]];
+      seen.add(key);
+      let minX = x;
+      let minY = y;
+      let maxX = x;
+      let maxY = y;
+      while (stack.length) {
+        const [cx, cy] = stack.pop()!;
+        minX = Math.min(minX, cx);
+        minY = Math.min(minY, cy);
+        maxX = Math.max(maxX, cx);
+        maxY = Math.max(maxY, cy);
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ]) {
+          const nx = cx + dx;
+          const ny = cy + dy;
+          const nk = ny * mw + nx;
+          if (rows[ny]?.[nx] === "P" && !seen.has(nk)) {
+            seen.add(nk);
+            stack.push([nx, ny]);
+          }
+        }
+      }
+      out.push({ x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 });
+    }
+  }
+  return out;
+}
+
+export function drawField(g: Ctx, c: FieldCluster): void {
+  const x = c.x * TILE;
+  const y = c.y * TILE;
+  const w = c.w * TILE;
+  const h = c.h * TILE;
+  g.save();
+  g.beginPath();
+  g.roundRect(x + 1, y + 2, w - 2, h - 4, 8);
+  g.clip();
+  for (let ty = 0; ty < c.h; ty++) {
+    for (let tx = 0; tx < c.w; tx++) plotSoil(g, x + tx * TILE, y + ty * TILE);
+  }
+  g.restore();
+  g.strokeStyle = "rgba(30,18,10,0.32)";
+  g.lineWidth = 2;
+  g.beginPath();
+  g.roundRect(x + 1, y + 2, w - 2, h - 4, 8);
+  g.stroke();
+}
+
+function wet(look: string): boolean {
+  return look === "water" || look === "dock";
+}
+
+export function drawFringe(g: Ctx, ch: string, near: Near, x: number, y: number, zone: string, now: number): void {
+  const look = tileLook(ch, zone);
+  const n = tileLook(near.n, zone);
+  const s = tileLook(near.s, zone);
+  const e = tileLook(near.e, zone);
+  const w = tileLook(near.w, zone);
+  if (wet(look)) {
+    const foam = (cx: number, cy: number) => oval(g, cx, cy, 7, 2.4, "rgba(220,220,210,0.16)");
+    if (!wet(n)) foam(x + 18, y + 3);
+    if (!wet(s)) foam(x + 18, y + 33);
+    if (!wet(e)) foam(x + 33, y + 18);
+    if (!wet(w)) foam(x + 3, y + 18);
+    void now;
+    return;
+  }
+  if (look === "path" || look === "plot") {
+    if (n === "grass") oval(g, x + 18, y + 2, 16, 4, "rgba(47,90,56,0.32)");
+    if (s === "grass") oval(g, x + 18, y + 34, 16, 4, "rgba(47,90,56,0.32)");
+    if (w === "grass") oval(g, x + 2, y + 18, 4, 14, "rgba(47,90,56,0.32)");
+    if (e === "grass") oval(g, x + 34, y + 18, 4, 14, "rgba(47,90,56,0.32)");
+  }
+  if (look === "grass" && (wet(n) || wet(s) || wet(e) || wet(w))) {
+    if (wet(s)) oval(g, x + 18, y + 32, 16, 5, "rgba(20,40,28,0.28)");
+    if (wet(n)) oval(g, x + 18, y + 4, 16, 5, "rgba(20,40,28,0.28)");
+    if (wet(e)) oval(g, x + 32, y + 18, 5, 14, "rgba(20,40,28,0.28)");
+    if (wet(w)) oval(g, x + 4, y + 18, 5, 14, "rgba(20,40,28,0.28)");
+  }
 }
 
 export function plotIndex(tiles: string[], tx: number, ty: number): number {

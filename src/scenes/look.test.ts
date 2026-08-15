@@ -2,7 +2,19 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { VALLEY } from "../world/maps";
 import { blit, blitFit, blitPatch, blitWrap } from "./art";
-import { cellFill, drawActor, drawCell, drawPlot, houseClusters, plotIndex, shade, tileLook, viewScale } from "./draw";
+import {
+  cellFill,
+  drawActor,
+  drawCell,
+  drawPlot,
+  houseClusters,
+  isTallLook,
+  plotClusters,
+  plotIndex,
+  shade,
+  tileLook,
+  viewScale,
+} from "./draw";
 import type { ActorSnap } from "../sim/net";
 
 function mockCtx() {
@@ -49,6 +61,9 @@ function mockCtx() {
     restore() {},
     translate() {},
     scale() {},
+    rotate() {},
+    clip() {},
+    roundRect() {},
     drawImage() {},
   };
   return ctx as typeof ctx & CanvasRenderingContext2D;
@@ -140,6 +155,17 @@ describe("look", () => {
     const g = mockCtx();
     drawCell(g, ".", 0, 0, "#3a4a34", 0, "valley");
     assert.ok(g.rects.some((r) => r[2] >= 36 && r[3] >= 2));
+  });
+
+  it("joins valley plots into one field", () => {
+    const fields = plotClusters(VALLEY);
+    assert.ok(fields.some((f) => f.w === 4 && f.h === 3));
+  });
+
+  it("marks trees and stalls tall so a person can walk behind them", () => {
+    assert.equal(isTallLook("tree"), true);
+    assert.equal(isTallLook("stall"), true);
+    assert.equal(isTallLook("grass"), false);
   });
 
   it("joins the valley cabin and inn into one roof each", () => {

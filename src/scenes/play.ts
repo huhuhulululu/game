@@ -9,6 +9,8 @@ import {
   drawActor,
   drawCell,
   drawEnemy,
+  drawField,
+  drawFringe,
   drawGround,
   drawHouseCluster,
   drawLamp,
@@ -17,6 +19,8 @@ import {
   drawSky,
   houseClusters,
   isHouseLook,
+  isTallLook,
+  plotClusters,
   plotIndex,
   shade,
   tileLook,
@@ -91,6 +95,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     }
     const g = canvas.getContext("2d");
     if (!g || !snap) return;
+    const world = snap;
     g.imageSmoothingEnabled = true;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawSky(g, w, h, snap.night, snap.dusk, snap.zone, snap.weather.id);
@@ -120,13 +125,17 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const x1 = Math.ceil((left + w / scale) / TILE) + 1;
     const y1 = Math.ceil((top + h / scale) / TILE) + 1;
     const lamps: { x: number; y: number; r: number; a: number }[] = [];
+    const sprites: { y: number; draw: () => void }[] = [];
     const padCh = snap.zone === "mine" ? "#" : snap.zone === "kitchen" ? "." : ".";
+    const at = (tx: number, ty: number) => (ty >= 0 && ty < mh && tx >= 0 && tx < mw ? rows[ty][tx] : padCh);
+    const crops: { x: number; y: number; i: number }[] = [];
     for (let y = y0; y <= y1; y++) {
       for (let x = x0; x <= x1; x++) {
         const inside = y >= 0 && y < mh && x >= 0 && x < mw;
         const ch = inside ? rows[y][x] : padCh;
         const px = x * TILE;
         const py = y * TILE;
+        const near = { n: at(x, y - 1), s: at(x, y + 1), e: at(x + 1, y), w: at(x - 1, y) };
         if (!inside) {
           drawGround(g, padCh, px, py, now, snap.zone);
           continue;
@@ -139,8 +148,11 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           else if (!fogVis.has(key)) dim = true;
         }
         const look = tileLook(ch, snap.zone);
-        if (isHouseLook(look)) drawGround(g, ".", px, py, now, snap.zone);
-        else drawCell(g, ch, px, py, cellFill(ch, snap.zone), now, snap.zone);
+        const tall = isTallLook(look);
+        const fill = cellFill(ch, snap.zone);
+        if (tall) drawCell(g, ch, px, py, fill, now, snap.zone, near, "ground");
+        else drawCell(g, ch, px, py, fill, now, snap.zone, near, "all");
+        if (!hidden) drawFringe(g, ch, near, px, py, snap.zone, now);
         if (hidden) {
           g.fillStyle = "rgba(6,10,16,0.78)";
           g.fillRect(px, py, TILE, TILE);
@@ -148,22 +160,38 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           g.fillStyle = "rgba(10,14,22,0.38)";
           g.fillRect(px, py, TILE, TILE);
         }
-        if (!hidden && ch === "P") {
-          const i = plotIndex(rows, x, y);
-          const plot = snap.plots[i];
-          if (plot) drawPlot(g, px, py, plot.stage, plot.seed);
-        }
+        if (!hidden && ch === "P") crops.push({ x: px, y: py, i: plotIndex(rows, x, y) });
         if (!hidden && (ch === "K" || ch === "A" || ch === "I")) {
           lamps.push({ x: px + TILE / 2, y: py + TILE / 2, r: ch === "K" ? 58 : 44, a: ch === "K" ? 0.4 : 0.28 });
         }
+        if (!hidden && tall && !isHouseLook(look)) {
+          sprites.push({
+            y: py + TILE,
+            draw: () => drawCell(g, ch, px, py, fill, now, world.zone, near, "prop"),
+          });
+        }
       }
+    }
+    for (const field of plotClusters(rows)) {
+      if (snap.zone === "wild") {
+        const key = field.y * mw + field.x;
+        if (!fogSeen.has(key)) continue;
+      }
+      drawField(g, field);
+    }
+    for (const crop of crops) {
+      const plot = snap.plots[crop.i];
+      if (plot) drawPlot(g, crop.x, crop.y, plot.stage, plot.seed, false);
     }
     for (const house of houseClusters(rows, snap.zone)) {
       if (snap.zone === "wild") {
         const key = house.y * mw + house.x;
         if (!fogSeen.has(key)) continue;
       }
-      drawHouseCluster(g, house, now);
+      sprites.push({
+        y: (house.y + house.h) * TILE,
+        draw: () => drawHouseCluster(g, house, now),
+      });
     }
     if (snap.zone === "wild") {
       for (const key of snap.fires) {
@@ -179,23 +207,29 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const ty = Math.floor(e.y / TILE);
         if (!fogVis.has(ty * mw + tx)) continue;
       }
-      drawEnemy(g, e, 0, 0, now);
+      sprites.push({ y: e.y, draw: () => drawEnemy(g, e, 0, 0, now) });
     }
     for (const a of snap.actors) {
-      drawActor(g, a, 0, 0, now);
-      if (a.fishing === "fight") {
-        const x = a.x;
-        const y = a.y + 28;
-        g.fillStyle = "rgba(40,28,16,0.82)";
-        g.fillRect(x - 30, y, 60, 10);
-        g.fillStyle = "#3f6d5c";
-        g.fillRect(x - 30 + 60 * 0.38, y + 1, 60 * 0.34, 8);
-        g.fillStyle = "#f4e7d2";
-        g.fillRect(x - 30 + 60 * a.fishMark - 1, y - 2, 3, 14);
-        g.fillStyle = "#c9a06a";
-        g.fillRect(x - 30, y + 12, 60 * Math.max(0, Math.min(1, a.fishPull)), 3);
-      }
+      sprites.push({
+        y: a.y,
+        draw: () => {
+          drawActor(g, a, 0, 0, now);
+          if (a.fishing !== "fight") return;
+          const x = a.x;
+          const y = a.y + 28;
+          g.fillStyle = "rgba(40,28,16,0.82)";
+          g.fillRect(x - 30, y, 60, 10);
+          g.fillStyle = "#3f6d5c";
+          g.fillRect(x - 30 + 60 * 0.38, y + 1, 60 * 0.34, 8);
+          g.fillStyle = "#f4e7d2";
+          g.fillRect(x - 30 + 60 * a.fishMark - 1, y - 2, 3, 14);
+          g.fillStyle = "#c9a06a";
+          g.fillRect(x - 30, y + 12, 60 * Math.max(0, Math.min(1, a.fishPull)), 3);
+        },
+      });
     }
+    sprites.sort((left, right) => left.y - right.y);
+    for (const sprite of sprites) sprite.draw();
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (snap.weather.id === "rain" || snap.weather.id === "storm") {
       g.strokeStyle = "rgba(200,220,230,0.28)";
@@ -342,7 +376,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           : ""
       }
       <button class="bag-toggle" type="button" id="bag-btn">袋</button>
-      <button class="bag-toggle book-toggle" type="button" id="book-btn">菜单</button>
+      <button class="bag-toggle book-toggle" type="button" id="book-btn">鉴</button>
       <button class="bag-toggle map-toggle" type="button" id="map-btn">图</button>
       <div class="sheet ${open === "bag" ? "" : "hidden"}" id="bag">
         <header>袋</header>
