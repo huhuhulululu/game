@@ -18,6 +18,8 @@ HUT_BOX = (60, 310, 260, 550)
 LODGE_BOX = (840, 190, 1180, 510)
 # Trees, lamp, shore. Same painting. No second brush.
 WILLOW_BOX = (0, 168, 90, 338)
+# Same left cover tree, taller, so the enter frame is not a smeared stamp.
+WILLOW_TALL = (0, 140, 100, 308)
 RIDGE_BOX = (1195, 105, 1280, 190)
 LAMP_BOX = (918, 298, 972, 372)
 SHORE_BOX = (1008, 548, 1148, 668)
@@ -246,6 +248,10 @@ def cut_house(im: Image.Image, tol: float = 38.0, sit: float = 0.36) -> Image.Im
     house = _fill_holes(_erode(_dilate(house | windows, 3), 3) | windows)
     house = (house | windows) & ~mountain & ~top_gold & (~gold | windows)
     house = _keep_big(house, min_px=max(60, (h * w) // 90))
+    # Leftover cover tree on the lodge crop is a second box. Keep the timber mass.
+    main = _keep_big(house & (np.arange(w)[None, :] > w * 0.10), min_px=max(80, (h * w) // 70))
+    if main.any():
+        house = main | (windows & house)
     pad = np.pad(lum, 2, mode="edge")
     contrast = np.zeros_like(lum)
     for dy in (-2, 0, 2):
@@ -283,12 +289,22 @@ def sit_cover_grove() -> None:
     # Trees, lamp, shore from the same cover. Does not touch the cover.
     cover = Image.open(ART / "cover-valley.png").convert("RGBA")
     look = _look()
-    raw = eat_gold_sky(eat_sky(cover.crop(WILLOW_BOX), 16.0), 100.0)
-    buf = np.asarray(raw, dtype=np.float32)
+    raw = eat_sky(cover.crop(WILLOW_TALL), 16.0)
+    buf = np.asarray(raw.convert("RGBA"), dtype=np.float32)
     r, g, b, a = buf[:, :, 0], buf[:, :, 1], buf[:, :, 2], buf[:, :, 3]
     lum = 0.30 * r + 0.50 * g + 0.20 * b
-    leaf = (a > 8) & (lum < 110) & ~((lum > 90) & (r > 136) & (r > b + 8))
-    buf[:, :, 3] = np.where(leaf, 255.0, 0.0)
+    gold = (lum > 100) & (r > 132) & (r + 12 >= g) & (r > b + 6)
+    h, w = lum.shape
+    sky = _flood(
+        [(x, 0) for x in range(w)] + [(0, 0), (w - 1, 0)],
+        h,
+        w,
+        gold | ((np.arange(h)[:, None] < 10) & (lum > 90)),
+    )
+    dark_leaf = (a > 8) & (lum < 108) & ~sky
+    # Keep dusk catching the leaves. Eat only the sky hung from the top.
+    rim = gold & _dilate(dark_leaf, 3) & ~sky
+    buf[:, :, 3] = np.where(dark_leaf | rim, 255.0, 0.0)
     willow = trim_alpha(kill_haze(Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA"), 40.0))
     willow.save(ART / "prop-cover-tree.png")
     print("wrote prop-cover-tree.png from cover willow", willow.size)

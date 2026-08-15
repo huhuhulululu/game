@@ -155,9 +155,9 @@ func _hang(name: String, gx: float, gy: float, w: float, h: float, z: int, fog :
 
 func _ridge() -> void:
 	# Cover trees in the enter frame: behind 暖, left of the lodge, on the creek.
-	_prop("prop-cover-tree.png", 6.35, 5.15, 176, 236, 7, 0.0, 0.94)
-	_prop("prop-cover-tree.png", 12.15, 3.55, 196, 252, 7, 0.0, 0.94)
-	_prop("prop-cover-tree.png", 10.55, 7.20, 168, 228, 9, 0.0, 0.94)
+	_prop("prop-cover-tree.png", 6.35, 5.15, 200, 268, 7, 0.0, 0.94)
+	_prop("prop-cover-tree.png", 12.15, 3.55, 220, 280, 7, 0.0, 0.94)
+	_prop("prop-cover-tree.png", 10.55, 7.20, 188, 252, 9, 0.0, 0.94)
 
 
 func _shore() -> void:
