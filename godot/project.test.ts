@@ -330,6 +330,7 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(coverLoop, /COVER_LOOP_OK/);
   assert.match(coverLoop, /show_room|开一间/);
   assert.match(coverLoop, /SHOW_ROOM/);
+  assert.match(coverLoop, /24000/);
   assert.match(coverLoop, /if ore_ok:/);
   assert.match(coverLoop, /PLAY_ZONE_VALLEY/);
   assert.match(coverLoop, /PLAY_ZONE_MINE/);

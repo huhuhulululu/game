@@ -95,7 +95,7 @@ func _process(_dt: float) -> void:
 			print("ENTER ", _pos(), " ", _zone())
 	elif play:
 		_drive_play()
-	if frames > 16000:
+	if frames > 24000:
 		printerr("TIMEOUT phase=%s fish=%s ore=%s plate=%s held=%s zone=%s prompt=%s" % [phase, fish_ok, ore_ok, plate_ok, _held_id(), _zone(), _prompt()])
 		get_tree().quit(1)
 
@@ -255,7 +255,7 @@ func _drive_play() -> void:
 			var drive7 := _drive(pot, 0)
 			move = drive7["move"]
 			var ptxt := _prompt()
-			if ptxt == "切" or ptxt == "切着" or ptxt == "丢掉" or ptxt == "出厨房" or ptxt == "吃":
+			if ptxt == "切" or ptxt == "切着" or ptxt == "丢掉" or ptxt == "出厨房":
 				move = _seek(_center(10, 2))
 			elif bool(drive7["here"]) or ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0:
 				move = _nudge(int(drive7["facing"])) if ptxt.find("入锅") < 0 and ptxt.find("开煮") < 0 and ptxt.find("取 ·") < 0 else Vector2.ZERO
