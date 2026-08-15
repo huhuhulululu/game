@@ -29,10 +29,13 @@
 - [x] No rectangular sticker box; no leftover dusk RGB in transparent pixels
 - [x] Logic ROWS + `show_crops` still work
 - [x] No 魂; no Don't Starve face; no second pack
+- [x] Play valley does not hung tuft/bush or show the tile atlas
+- [x] Bed crop sits below 「两部 iPhone」; no resized dirt plate
+- [x] Cover-coat feet have a path contact shadow
 
 ## Implementation Notes
 
-From ADR-0001 / ADR-0003: packed scene graph; `tools/paint_valley_bed.py` writes only the bed; hard-fill path under baked people; crop title off the play sheet. Delete sticker `valley_map.gd`. Headless uses `ValleyWorld`.
+From ADR-0001 / ADR-0003: packed scene graph; `tools/paint_valley_bed.py` writes only the bed; same-y 1:1 path clone under baked people; crop title at y=302. Delete sticker `valley_map.gd`. Headless uses `ValleyWorld`. `/team-polish`: no hung crops on the bed, hide valley atlas, stronger foot stain.
 
 ## Out of Scope
 
@@ -56,7 +59,7 @@ From ADR-0001 / ADR-0003: packed scene graph; `tools/paint_valley_bed.py` writes
 
 **Story Type**: Visual/Feel
 **Required evidence**: `production/qa/evidence/packed-bed-evidence.md` + `godot/project.test.ts`
-**Status**: [ ] creating this rebuild
+**Status**: [x] polish pass — enter shot must be one painting + people + HUD
 
 ## Dependencies
 

@@ -27,9 +27,9 @@ var _bar_pull: ColorRect
 
 func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_LINEAR
-	_shadow = Look.contact(Look.BODY * 0.45)
-	_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST, 2)
-	_shadow.modulate = Color(1, 1, 1, 0.95)
+	_shadow = Look.contact(Look.BODY * 0.82)
+	_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST * 0.35, 5)
+	_shadow.modulate = Color(1, 1, 1, 1.0)
 	add_child(_shadow)
 	_glow = Look.ping_glow(88)
 	_glow.visible = false
@@ -166,7 +166,7 @@ func _apply() -> void:
 			var grow := 0.85 + (1.0 - pulse) * 0.55
 			_glow.scale = Vector2(grow, grow * 0.72)
 	if _shadow:
-		_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST, 2)
+		_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST * 0.35, 5)
 		_shadow.modulate.a = 1.0
 	var fight := fishing == "fight"
 	if _bar_bg:

@@ -13,42 +13,88 @@ OUT = ROOT / "godot/assets/art/bed-valley.png"
 
 # World size (TILE 36 × 34×17).
 W, H = 1224, 612
+# Below 并肩山谷 and 「两部 iPhone · 同一座山」. Lodge roof stays in frame.
+CROP_Y0 = 302
+# Same-row dirt path, left of the pair. Never a resized plate.
+PATH_LO, PATH_HI = 220, 448
 
 
 def _people_mask(h: int, w: int) -> np.ndarray:
+    """Tight 暖 / 松 / 点灯进谷. Leave a path gap between the coats."""
     yy, xx = np.ogrid[:h, :w]
-    warm = ((xx - 528) / 95.0) ** 2 + ((yy - 530) / 200.0) ** 2 <= 1.0
-    pine = ((xx - 668) / 100.0) ** 2 + ((yy - 530) / 210.0) ** 2 <= 1.0
-    pair = (xx >= 460) & (xx <= 770) & (yy >= 370) & (yy <= 718)
-    return warm | pine | pair
+    warm = ((xx - 516) / 66.0) ** 2 + ((yy - 548) / 162.0) ** 2 <= 1.0
+    pine = ((xx - 672) / 68.0) ** 2 + ((yy - 550) / 164.0) ** 2 <= 1.0
+    bag = ((xx - 482) / 24.0) ** 2 + ((yy - 556) / 46.0) ** 2 <= 1.0
+    cta = ((xx - 640) / 96.0) ** 2 + ((yy - 692) / 13.0) ** 2 <= 1.0
+    return warm | pine | bag | cta
+
+
+def _dilate(mask: np.ndarray, radius: int = 2) -> np.ndarray:
+    img = Image.fromarray((mask.astype(np.uint8) * 255), "L")
+    img = img.filter(ImageFilter.MaxFilter(radius * 2 + 1))
+    return np.asarray(img) > 127
+
+
+def _safe_path(mask_row: np.ndarray, w: int) -> np.ndarray:
+    cols = [x for x in range(PATH_LO, min(PATH_HI, w)) if not mask_row[x]]
+    if len(cols) < 8:
+        cols = [x for x in range(180, min(PATH_HI, w)) if not mask_row[x]]
+    return np.asarray(cols, dtype=np.int32)
+
+
+def _runs(xs: np.ndarray) -> list[tuple[int, int]]:
+    out: list[tuple[int, int]] = []
+    start = int(xs[0])
+    prev = start
+    for raw in xs[1:]:
+        x = int(raw)
+        if x == prev + 1:
+            prev = x
+            continue
+        out.append((start, prev + 1))
+        start = x
+        prev = x
+    out.append((start, prev + 1))
+    return out
 
 
 def lift_cover(rgb: np.ndarray) -> np.ndarray:
-    """One dirt plate over baked 暖/松 and 点灯进谷. Do not tile scraps."""
+    """1:1 same-y path clone per coat. No nearest-column pillar, no resized plate."""
+    h, w = rgb.shape[:2]
+    core = _dilate(_people_mask(h, w), 2)
     out = rgb.copy()
-    mask = _people_mask(*rgb.shape[:2])
-    ys, xs = np.where(mask)
-    x0, x1 = int(xs.min()), int(xs.max()) + 1
-    y0, y1 = int(ys.min()), int(ys.max()) + 1
-    dirt = Image.fromarray(rgb[500:720, 190:450], "RGB").resize((x1 - x0, y1 - y0), Image.Resampling.LANCZOS)
-    plate = np.asarray(dirt)
-    local = mask[y0:y1, x0:x1]
-    hole = out[y0:y1, x0:x1]
-    hole[local] = plate[local]
-    out[y0:y1, x0:x1] = hole
-    ring = Image.fromarray((mask.astype(np.uint8) * 255), "L").filter(ImageFilter.GaussianBlur(8))
-    alpha = np.asarray(ring).astype(np.float32) / 255.0
-    edge = (alpha > 0.05) & (alpha < 0.88)
-    blur = np.asarray(Image.fromarray(out).filter(ImageFilter.GaussianBlur(3)))
-    t = np.clip((alpha - 0.05) / 0.83, 0, 1)[:, :, None]
-    mixed = (out.astype(np.float32) * (1.0 - t) + blur.astype(np.float32) * t).astype(np.uint8)
-    out = np.where(edge[:, :, None], mixed, out)
+    for y in range(h):
+        bad = np.flatnonzero(core[y])
+        if bad.size == 0:
+            continue
+        safe = _safe_path(core[y], w)
+        for x0, x1 in _runs(bad):
+            width = x1 - x0
+            src0 = x0 - width
+            src1 = x0
+            if src0 >= 0 and not np.any(core[y, src0:src1]):
+                out[y, x0:x1] = rgb[y, src0:src1]
+                continue
+            if safe.size >= width:
+                out[y, x0:x1] = rgb[y, safe[-width:]]
+            elif safe.size:
+                t = np.linspace(0, safe.size - 1, width)
+                out[y, x0:x1] = rgb[y, safe[np.round(t).astype(np.int32)]]
+    ring = np.asarray(
+        Image.fromarray((core.astype(np.uint8) * 255), "L").filter(ImageFilter.GaussianBlur(5))
+    ).astype(np.float32) / 255.0
+    edge = (ring > 0.04) & (ring < 0.92) & (~core)
+    if np.any(edge):
+        blur = np.asarray(Image.fromarray(out).filter(ImageFilter.GaussianBlur(2)))
+        t = np.clip((ring - 0.04) / 0.88, 0, 1)[:, :, None]
+        mixed = (out.astype(np.float32) * (1.0 - t) + blur.astype(np.float32) * t).astype(np.uint8)
+        out = np.where(edge[:, :, None], mixed, out)
     return out
 
 
 def compose(clean: np.ndarray) -> Image.Image:
-    """One continuous scale. Crop the title sky so play has valley, not 字."""
-    band = clean[218:720, 0:1280]
+    """One continuous scale. Crop title sky so play has valley, not 字."""
+    band = clean[CROP_Y0:720, 0:1280]
     bed = Image.fromarray(band, "RGB").resize((W, H), Image.Resampling.LANCZOS)
     return bed
 

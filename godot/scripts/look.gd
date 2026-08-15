@@ -38,7 +38,7 @@ static func dusk_mat(fog := 0.08) -> ShaderMaterial:
 static func person_mat() -> ShaderMaterial:
 	var m := dusk_mat(0.0)
 	m.set_shader_parameter("feet", 0.0)
-	m.set_shader_parameter("edge", 0.06)
+	m.set_shader_parameter("edge", 0.0)
 	m.set_shader_parameter("fog", 0.0)
 	return m
 

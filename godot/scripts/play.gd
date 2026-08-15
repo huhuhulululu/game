@@ -608,7 +608,7 @@ func _remember_vis(s: Dictionary) -> void:
 func _paint_atlas(s: Dictionary) -> void:
 	if _atlas == null:
 		return
-	if _tiles.is_empty():
+	if _tiles.is_empty() or _zone == "valley":
 		_atlas.visible = false
 		return
 	_atlas.visible = true

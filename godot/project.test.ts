@@ -160,7 +160,9 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(playSrc, /ValleyWorld/);
   assert.doesNotMatch(valley, /prop-cover-tree|prop-cover-lamp|prop-cover-shore|prop-cover-verge|prop-hut|prop-lodge/);
   assert.doesNotMatch(logic, /prop-cover-tree|prop-cover-lamp|prop-cover-shore|prop-cover-verge|prop-hut|prop-lodge/);
+  assert.doesNotMatch(logic, /Look\.hung/);
   assert.doesNotMatch(playSrc, /prop-cover-tree|prop-hut\.png|prop-lodge\.png/);
+  assert.match(playSrc, /_tiles\.is_empty\(\) or _zone == "valley"/);
   assert.doesNotMatch(valley, /prop-mine\.png/);
   assert.doesNotMatch(valley, /prop-stall\.png/);
   assert.doesNotMatch(valley, /prop-anvil\.png/);
@@ -228,7 +230,10 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const bedPaint = readFileSync("tools/paint_valley_bed.py", "utf8");
   assert.match(bedPaint, /Does not touch the cover/);
   assert.match(bedPaint, /bed-valley/);
+  assert.match(bedPaint, /CROP_Y0 = 302/);
+  assert.match(bedPaint, /PATH_LO, PATH_HI/);
   assert.doesNotMatch(bedPaint, /save\(.*cover-valley/);
+  assert.doesNotMatch(bedPaint, /resize\(\(x1 - x0/);
   assert.doesNotMatch(valley, /floor-valley|ground-valley|_bend\(/);
   assert.doesNotMatch(valley, /band-river|band-path|band-meadow/);
   const floorPaint = readFileSync("tools/paint_valley_sit.py", "utf8");
@@ -352,7 +357,11 @@ test("Godot village shows crops, fortune and the dawn board from the same snap",
   const valley = readFileSync("godot/scripts/valley_logic.gd", "utf8");
   assert.match(valley, /show_crops/);
   assert.match(valley, /prop-tuft|prop-bush/);
+  assert.doesNotMatch(valley, /Look\.hung/);
+  assert.doesNotMatch(valley, /add_child\(_crop_at/);
   assert.doesNotMatch(valley, /prop-cabin|prop-inn/);
+  assert.match(play, /_zone == "valley"/);
+  assert.match(play, /_atlas\.visible = false/);
   const world = readFileSync("src/sim/world.ts", "utf8");
   assert.match(world, /没有种。田不用浇/);
   assert.match(world, /也得对着铺/);
