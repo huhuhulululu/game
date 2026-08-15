@@ -70,7 +70,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.doesNotMatch(paintSlip, /Wilson|Don't Starve|Dont Starve/i);
   assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
   assert.match(look, /VALLEY_DUSK/);
-  assert.match(look, /1\.10, 0\.82, 0\.58/);
+  assert.match(look, /1\.14, 0\.78, 0\.52/);
   assert.doesNotMatch(look, /SystemFont/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
   assert.match(play, /_clamp_cam/);
@@ -107,6 +107,8 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const unify = readFileSync("tools/unify_dusk.py", "utf8");
   assert.match(unify, /prop-cabin/);
   assert.match(unify, /prop-inn/);
+  assert.match(unify, /quiet_scrub/);
+  assert.doesNotMatch(unify, /scrub_inn/);
   assert.match(unify, /prop-hut/);
   assert.match(unify, /prop-lodge/);
   assert.match(unify, /Does not touch the cover/);

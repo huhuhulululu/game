@@ -151,7 +151,7 @@ func _houses() -> void:
 
 
 func _ridge() -> void:
-	var kinds: Array[String] = ["prop-tree.png", "prop-tree-wide.png", "prop-tree-tall.png", "prop-tree-gold.png"]
+	var kinds: Array[String] = ["prop-tree.png", "prop-tree-wide.png"]
 	# Crowns sit in the spawn frame, behind the cottages — not a fringe above y=0.
 	var north: Array[Vector2] = [
 		Vector2(1.4, 3.55), Vector2(4.8, 3.35), Vector2(8.6, 3.50),
