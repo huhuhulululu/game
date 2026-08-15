@@ -112,91 +112,103 @@ function px(g: Ctx, x: number, y: number, w: number, h: number, c: string): void
   g.fillRect(Math.round(x), Math.round(y), Math.max(1, Math.round(w)), Math.max(1, Math.round(h)));
 }
 
+function hash(x: number, y: number): number {
+  let n = Math.imul(x, 374761393) + Math.imul(y, 668265263);
+  n = Math.imul(n ^ (n >>> 13), 1274126177);
+  return ((n ^ (n >>> 16)) >>> 0) % 1000;
+}
+
+function dither(g: Ctx, x: number, y: number, colors: string[], step = 2): void {
+  px(g, x, y, TILE, TILE, colors[0]);
+  for (let j = 0; j < TILE; j += step) {
+    for (let i = 0; i < TILE; i += step) {
+      px(g, x + i, y + j, step, step, colors[hash(x + i, y + j) % colors.length]);
+    }
+  }
+}
+
 function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number): void {
   if (zone === "kitchen") {
-    px(g, x, y, TILE - 1, TILE - 1, "#6e4a32");
-    px(g, x, y + 11, TILE - 1, 2, "#5a3c28");
-    px(g, x, y + 23, TILE - 1, 2, "#5a3c28");
-    const seam = ((Math.floor(x / TILE) + Math.floor(y / TILE)) % 2) * 12;
-    px(g, x + seam, y, 2, TILE - 1, "#7d5840");
+    dither(g, x, y, ["#6e4a32", "#7a5438", "#5a3c28", "#6e4a32", "#805c40"]);
+    px(g, x, y + 11, TILE, 2, "#5a3c28");
+    px(g, x, y + 23, TILE, 2, "#5a3c28");
     return;
   }
   if (zone === "mine") {
-    px(g, x, y, TILE - 1, TILE - 1, "#2a2624");
-    px(g, x + 3, y + 8, 7, 3, "#1c1a18");
-    px(g, x + 20, y + 22, 9, 3, "#3a3632");
-    px(g, x + 14, y + 4, 4, 2, "#4a4038");
+    dither(g, x, y, ["#2a2624", "#1c1a18", "#3a3632", "#2a2624", "#221e1c"]);
     return;
   }
   if (zone === "wild") {
     if (ch === "m") {
-      px(g, x, y, TILE - 1, TILE - 1, "#24382c");
-      px(g, x + 4, y + 10, 10, 4, "#1a2e24");
-      px(g, x + 18, y + 22, 8, 3, "#2a4838");
+      dither(g, x, y, ["#24382c", "#1a2e24", "#2a4838", "#1e3428", "#24382c"]);
       if (Math.sin(now / 640 + x) > 0.35) px(g, x + 12, y + 16, 5, 2, "#3a6a58");
       return;
     }
     if (ch === "s") {
-      px(g, x, y, TILE - 1, TILE - 1, "#6a6a30");
+      dither(g, x, y, ["#6a6a30", "#7a7a38", "#5a5a28", "#8a8a40"]);
       px(g, x + 6, y + 8, 3, 16, "#8a8a40");
       px(g, x + 16, y + 12, 3, 14, "#7a7a38");
       px(g, x + 26, y + 6, 3, 18, "#9a9a48");
       return;
     }
-    px(g, x, y, TILE - 1, TILE - 1, "#2e3a28");
-    px(g, x + 8, y + 7, 4, 3, "#3a4a30");
-    px(g, x + 20, y + 20, 5, 3, "#4a5a38");
+    dither(g, x, y, ["#2e3a28", "#3a4a30", "#243024", "#4a5a38", "#2e3a28"]);
     return;
   }
   if (ch === ",") {
-    px(g, x, y, TILE - 1, TILE - 1, "#8a7a58");
-    px(g, x + 4, y + 8, 10, 3, "#7a6a48");
-    px(g, x + 18, y + 20, 8, 3, "#9a8a68");
+    dither(g, x, y, ["#8a7a58", "#7a6a48", "#9a8a68", "#6a5a38", "#8a7a58"]);
     px(g, x + 10, y + 14, 4, 2, "#6a5a38");
     return;
   }
-  px(g, x, y, TILE - 1, TILE - 1, "#3f6d45");
-  px(g, x + 7, y + 6, 3, 4, "#2f5a38");
-  px(g, x + 22, y + 16, 4, 3, "#4a7d52");
-  px(g, x + 14, y + 26, 3, 3, "#5a8a58");
-  px(g, x + 4, y + 20, 2, 5, "#2a4a30");
+  dither(g, x, y, ["#3f6d45", "#2f5a38", "#4a7d52", "#3a5a3c", "#3f6d45", "#2a4a30"]);
+  const tuft = hash(x, y);
+  if (tuft < 180) px(g, x + (tuft % 28), y + 8 + (tuft % 18), 3, 5, "#2a4a30");
+  if (tuft > 820) px(g, x + 8 + (tuft % 16), y + 20, 2, 2, "#c45c26");
 }
 
 function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
   const sway = Math.sin(now / 860 + x * 0.03) * 1.4;
-  px(g, x + 15, y + 20, 6, 14, "#5a3a22");
-  px(g, x + 16, y + 20, 2, 14, "#3a2414");
+  px(g, x + 8, y + 30, 22, 5, "rgba(20,16,10,0.28)");
+  px(g, x + 15, y + 10, 7, 24, "#5a3a22");
+  px(g, x + 16, y + 10, 2, 24, "#3a2414");
+  px(g, x + 14, y + 18, 3, 3, "#4a2e18");
+  px(g, x + 19, y + 26, 3, 2, "#3a2414");
   px(g, x + 13, y + 32, 10, 3, "#4a2e18");
   if (pine) {
-    px(g, x + 7 + sway, y + 3, 22, 9, "#1e3a24");
-    px(g, x + 9 + sway, y + 9, 18, 8, "#2a4a30");
-    px(g, x + 11 + sway, y + 15, 14, 7, "#355a38");
-    px(g, x + 15 + sway, y + 5, 5, 3, "#4a7a50");
+    px(g, x + 6 + sway, y - 8, 24, 10, "#1e3a24");
+    px(g, x + 8 + sway, y - 2, 20, 10, "#2a4a30");
+    px(g, x + 10 + sway, y + 6, 16, 10, "#355a38");
+    px(g, x + 12 + sway, y + 14, 12, 8, "#2a4a28");
+    px(g, x + 16 + sway, y - 6, 5, 4, "#4a7a50");
     return;
   }
-  px(g, x + 3 + sway, y + 1, 30, 16, "#2a4a28");
-  px(g, x + 7 + sway, y + 8, 22, 12, "#3f6d4a");
-  px(g, x + 5 + sway, y + 14, 26, 8, "#2f5a38");
-  px(g, x + 12 + sway, y + 3, 8, 5, "#5a8a58");
+  const clumps = [
+    [0, -16, 18, 14, "#2a4a28"],
+    [14, -14, 20, 16, "#3f6d4a"],
+    [6, -8, 22, 14, "#2f5a38"],
+    [-2, -4, 16, 12, "#2a4a28"],
+    [18, -2, 16, 12, "#3f6d4a"],
+    [8, 4, 18, 10, "#2f5a38"],
+    [10, -18, 8, 6, "#5a8a58"],
+  ] as const;
+  for (const [cx, cy, w, h, c] of clumps) px(g, x + 8 + cx + sway, y + 8 + cy, w, h, c);
 }
 
 function water(g: Ctx, x: number, y: number, now: number): void {
-  px(g, x, y, TILE - 1, TILE - 1, "#1a5470");
-  px(g, x, y + 16, TILE - 1, 19, "#143e54");
-  const t = now / 360;
-  for (let i = 0; i < 3; i++) {
-    const yy = y + 5 + i * 9 + Math.sin(t + x * 0.07 + i * 1.1) * 2.2;
-    px(g, x + 2, yy, 15, 2, i % 2 ? "#3a8aaa" : "#8ed0de");
-    px(g, x + 19, yy + 2, 13, 2, "#2a6a84");
+  dither(g, x, y, ["#1a5470", "#143e54", "#1e5a78", "#123848", "#1a5470"]);
+  const t = now / 420;
+  for (let i = 0; i < 4; i++) {
+    const yy = y + 4 + i * 8 + Math.sin(t + x * 0.05 + i * 0.9) * 1.6;
+    px(g, x + (i % 2) * 6, yy, 18, 2, i % 2 ? "#2a6a84" : "#3a7a90");
   }
 }
 
 function dock(g: Ctx, x: number, y: number): void {
-  px(g, x, y + 10, TILE - 1, 20, "#6a4a28");
-  px(g, x + 2, y + 12, TILE - 5, 3, "#8a6a40");
-  px(g, x + 2, y + 20, TILE - 5, 3, "#8a6a40");
-  px(g, x + 6, y + 8, 4, 24, "#4a3018");
-  px(g, x + 26, y + 8, 4, 24, "#4a3018");
+  water(g, x, y, 0);
+  px(g, x, y + 12, TILE, 16, "#6a4a28");
+  px(g, x, y + 14, TILE, 3, "#8a6a40");
+  px(g, x, y + 22, TILE, 3, "#8a6a40");
+  px(g, x + 4, y + 10, 4, 20, "#4a3018");
+  px(g, x + 28, y + 10, 4, 20, "#4a3018");
 }
 
 function fire(g: Ctx, x: number, y: number, now: number): void {
@@ -242,10 +254,10 @@ function lanternDoor(g: Ctx, x: number, y: number, now: number): void {
 }
 
 function plotSoil(g: Ctx, x: number, y: number): void {
-  px(g, x, y, TILE - 1, TILE - 1, "#6b4a28");
-  px(g, x + 2, y + 8, TILE - 5, 4, "#5a3a1c");
-  px(g, x + 2, y + 18, TILE - 5, 4, "#5a3a1c");
-  px(g, x + 2, y + 28, TILE - 5, 3, "#4a3018");
+  dither(g, x, y, ["#6b4a28", "#5a3a1c", "#7a5a30", "#4a3018"]);
+  px(g, x + 2, y + 8, TILE - 4, 4, "#5a3a1c");
+  px(g, x + 2, y + 18, TILE - 4, 4, "#5a3a1c");
+  px(g, x + 2, y + 28, TILE - 4, 3, "#4a3018");
 }
 
 function bush(g: Ctx, x: number, y: number, gold: boolean): void {
@@ -368,21 +380,15 @@ function trash(g: Ctx, x: number, y: number): void {
 
 function wall(g: Ctx, x: number, y: number, zone: string): void {
   if (zone === "mine") {
-    px(g, x, y, TILE - 1, TILE - 1, "#1a1614");
-    px(g, x + 2, y + 4, 14, 8, "#2a2420");
-    px(g, x + 18, y + 16, 14, 8, "#12100e");
-    px(g, x + 8, y, 4, TILE - 1, "#4a3a2c");
+    dither(g, x, y, ["#1a1614", "#2a2420", "#12100e", "#1a1614"]);
+    px(g, x + 8, y, 4, TILE, "#4a3a2c");
     return;
   }
   if (zone === "kitchen") {
-    px(g, x, y, TILE - 1, TILE - 1, "#4a3224");
-    px(g, x + 4, y + 6, 10, 8, "#5a4030");
-    px(g, x + 20, y + 18, 10, 8, "#3a2418");
+    dither(g, x, y, ["#4a3224", "#5a4030", "#3a2418"]);
     return;
   }
-  px(g, x, y, TILE - 1, TILE - 1, "#2a4a28");
-  px(g, x + 4, y + 2, 28, 10, "#1e3a24");
-  px(g, x + 10, y + 12, 16, 8, "#3f6d4a");
+  dither(g, x, y, ["#2a4a28", "#1e3a24", "#3f6d4a", "#2a4a28"]);
   px(g, x + 16, y + 20, 6, 12, "#5a3a22");
 }
 
@@ -481,14 +487,14 @@ export function drawCell(
   }
   if (look === "grass" || look === "path" || look === "marsh" || look === "savanna" || look === "floor" || look === "stone" || look === "ground") {
     if (look === "ground") {
-      px(g, x, y, TILE - 1, TILE - 1, fill || "#3d4a36");
+      px(g, x, y, TILE, TILE, fill || "#3d4a36");
       return;
     }
     ground(g, zone, ch, x, y, now);
     if (fill && fill !== cellFill(ch, zone)) {
       g.fillStyle = fill;
       g.globalAlpha = 0.2;
-      g.fillRect(x, y, TILE - 1, TILE - 1);
+      g.fillRect(x, y, TILE, TILE);
       g.globalAlpha = 1;
     }
     return;
@@ -670,6 +676,126 @@ export function drawNightVignette(g: Ctx, w: number, h: number, lit: boolean): v
   grd.addColorStop(1, lit ? "rgba(8,10,22,0.42)" : "rgba(6,8,18,0.62)");
   g.fillStyle = grd;
   g.fillRect(0, 0, w, h);
+}
+
+export function viewScale(w: number, h: number): number {
+  const portrait = h >= w;
+  const tilesX = portrait ? 8.2 : 13;
+  const tilesY = portrait ? 11 : 8.5;
+  return Math.max(w / (tilesX * TILE), h / (tilesY * TILE));
+}
+
+export type HouseKind = "cabin" | "inn" | "mine";
+
+export interface HouseCluster {
+  kind: HouseKind;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  doorX: number;
+  doorY: number;
+}
+
+export function houseKind(ch: string, zone: string): HouseKind | "" {
+  if (zone === "kitchen") return "";
+  if (ch === "C" || ch === "A") return "cabin";
+  if (ch === "N" || ch === "I") return "inn";
+  if (ch === "E") return "mine";
+  return "";
+}
+
+export function houseClusters(rows: string[], zone: string): HouseCluster[] {
+  const seen = new Set<number>();
+  const mw = rows[0]?.length ?? 0;
+  const out: HouseCluster[] = [];
+  const kindAt = (x: number, y: number) => houseKind(rows[y]?.[x] ?? "", zone);
+  for (let y = 0; y < rows.length; y++) {
+    for (let x = 0; x < mw; x++) {
+      const kind = kindAt(x, y);
+      const key = y * mw + x;
+      if (!kind || seen.has(key)) continue;
+      const stack = [[x, y]];
+      seen.add(key);
+      let minX = x;
+      let minY = y;
+      let maxX = x;
+      let maxY = y;
+      let doorX = x;
+      let doorY = y;
+      while (stack.length) {
+        const [cx, cy] = stack.pop()!;
+        const ch = rows[cy][cx];
+        if (ch === "A" || ch === "I") {
+          doorX = cx;
+          doorY = cy;
+        }
+        minX = Math.min(minX, cx);
+        minY = Math.min(minY, cy);
+        maxX = Math.max(maxX, cx);
+        maxY = Math.max(maxY, cy);
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ]) {
+          const nx = cx + dx;
+          const ny = cy + dy;
+          const nk = ny * mw + nx;
+          if (kindAt(nx, ny) === kind && !seen.has(nk)) {
+            seen.add(nk);
+            stack.push([nx, ny]);
+          }
+        }
+      }
+      out.push({ kind, x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1, doorX, doorY });
+    }
+  }
+  return out;
+}
+
+export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
+  const x = c.x * TILE;
+  const y = c.y * TILE;
+  const w = c.w * TILE;
+  const h = c.h * TILE;
+  if (c.kind === "mine") {
+    px(g, x + 4, y + 8, w - 8, h - 8, "#1a1814");
+    px(g, x + 8, y + 16, w - 16, h - 20, "#0e0c0a");
+    px(g, x + 6, y + 6, w - 12, 8, "#5a4a38");
+    px(g, x + 8, y + 8, 6, h - 12, "#6a5a44");
+    px(g, x + w - 14, y + 8, 6, h - 12, "#6a5a44");
+    return;
+  }
+  const inn = c.kind === "inn";
+  px(g, x + 2, y + 18, w - 4, h - 14, "#c4a070");
+  px(g, x + 2, y + 18, w - 4, 4, "#8a6a48");
+  px(g, x - 2, y + 2, w + 4, 18, inn ? "#8a3a20" : "#c45c26");
+  px(g, x + 10, y - 6, w - 20, 12, inn ? "#6a2a14" : "#a44a20");
+  const dx = c.doorX * TILE;
+  const dy = c.doorY * TILE;
+  px(g, dx + 12, dy + 16, 12, 20, inn ? "#3f6d5c" : "#5a3a22");
+  px(g, dx + 16, dy + 24, 3, 3, "#e8c070");
+  const glow = 0.5 + Math.sin(now / 220) * 0.2;
+  for (let i = 0; i < c.w; i++) {
+    const wx = x + i * TILE + 8;
+    const wy = y + h - 22;
+    if (Math.abs(wx - dx) < 16) continue;
+    px(g, wx, wy, 8, 8, inn ? `rgba(255,224,138,${glow})` : "#6a8aaa");
+  }
+}
+
+export function drawGround(g: Ctx, ch: string, x: number, y: number, now: number, zone: string): void {
+  const look = tileLook(ch, zone);
+  if (look === "water") water(g, x, y, now);
+  else if (look === "wall") wall(g, x, y, zone);
+  else if (look === "plot") plotSoil(g, x, y);
+  else ground(g, zone, look === "path" ? "," : look === "marsh" ? "m" : look === "savanna" ? "s" : ".", x, y, now);
+}
+
+export function isHouseLook(look: string): boolean {
+  return look === "cabin" || look === "inn" || look === "lantern" || look === "mine-mouth";
 }
 
 export function plotIndex(tiles: string[], tx: number, ty: number): number {

@@ -9,12 +9,18 @@ import {
   drawActor,
   drawCell,
   drawEnemy,
+  drawGround,
+  drawHouseCluster,
   drawLamp,
   drawNightVignette,
   drawPlot,
   drawSky,
+  houseClusters,
+  isHouseLook,
   plotIndex,
   shade,
+  tileLook,
+  viewScale,
 } from "./draw";
 import { el } from "../ui/dom";
 
@@ -83,62 +89,85 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     }
     const g = canvas.getContext("2d");
     if (!g || !snap) return;
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.imageSmoothingEnabled = false;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawSky(g, w, h, snap.night, snap.dusk, snap.zone, snap.weather.id);
 
     const me = snap.actors.find((a) => a.id === snap!.you) ?? snap.actors[0];
     if (me) {
-      cam.x += (me.x - cam.x) * 0.12;
-      cam.y += (me.y - cam.y) * 0.12;
+      cam.x += (me.x - cam.x) * 0.14;
+      cam.y += (me.y - cam.y) * 0.14;
     }
-    const ox = w / 2 - cam.x;
-    const oy = h / 2 - cam.y - 20;
+    const scale = viewScale(w, h);
+    g.setTransform(
+      dpr * scale,
+      0,
+      0,
+      dpr * scale,
+      dpr * (w / 2 - cam.x * scale),
+      dpr * (h / 2 - cam.y * scale),
+    );
     const rows = snap.tiles;
     const mw = rows[0]?.length ?? 1;
+    const mh = rows.length;
     const now = Date.now();
+    const left = cam.x - w / (2 * scale);
+    const top = cam.y - h / (2 * scale);
+    const x0 = Math.floor(left / TILE) - 1;
+    const y0 = Math.floor(top / TILE) - 1;
+    const x1 = Math.ceil((left + w / scale) / TILE) + 1;
+    const y1 = Math.ceil((top + h / scale) / TILE) + 1;
     const lamps: { x: number; y: number; r: number; a: number }[] = [];
-    for (let y = 0; y < rows.length; y++) {
-      for (let x = 0; x < rows[y].length; x++) {
-        const ch = rows[y][x];
+    const padCh = snap.zone === "mine" ? "#" : snap.zone === "kitchen" ? "." : ".";
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        const inside = y >= 0 && y < mh && x >= 0 && x < mw;
+        const ch = inside ? rows[y][x] : padCh;
+        const px = x * TILE;
+        const py = y * TILE;
+        if (!inside) {
+          drawGround(g, padCh, px, py, now, snap.zone);
+          continue;
+        }
         const key = y * mw + x;
-        const fill = cellFill(ch, snap.zone);
         let hidden = false;
         let dim = false;
         if (snap.zone === "wild") {
-          const seen = fogSeen.has(key);
-          const vis = fogVis.has(key);
-          if (!seen) hidden = true;
-          else if (!vis) dim = true;
+          if (!fogSeen.has(key)) hidden = true;
+          else if (!fogVis.has(key)) dim = true;
         }
-        const px = ox + x * TILE;
-        const py = oy + y * TILE;
+        const look = tileLook(ch, snap.zone);
+        if (isHouseLook(look)) drawGround(g, ".", px, py, now, snap.zone);
+        else drawCell(g, ch, px, py, cellFill(ch, snap.zone), now, snap.zone);
         if (hidden) {
-          drawCell(g, ch, px, py, fill, now, snap.zone);
           g.fillStyle = "rgba(6,10,16,0.78)";
-          g.fillRect(px, py, TILE - 1, TILE - 1);
-        } else {
-          drawCell(g, ch, px, py, dim ? shade(fill, 0.55) : fill, now, snap.zone);
-          if (dim) {
-            g.fillStyle = "rgba(10,14,22,0.38)";
-            g.fillRect(px, py, TILE - 1, TILE - 1);
-          }
-          if (ch === "P") {
-            const i = plotIndex(rows, x, y);
-            const plot = snap.plots[i];
-            if (plot) drawPlot(g, px, py, plot.stage, plot.seed);
-          }
-          if (ch === "K" || ch === "A" || ch === "I") {
-            lamps.push({ x: px + TILE / 2, y: py + TILE / 2, r: ch === "K" ? 58 : 44, a: ch === "K" ? 0.4 : 0.28 });
-          }
+          g.fillRect(px, py, TILE, TILE);
+        } else if (dim) {
+          g.fillStyle = "rgba(10,14,22,0.38)";
+          g.fillRect(px, py, TILE, TILE);
+        }
+        if (!hidden && ch === "P") {
+          const i = plotIndex(rows, x, y);
+          const plot = snap.plots[i];
+          if (plot) drawPlot(g, px, py, plot.stage, plot.seed);
+        }
+        if (!hidden && (ch === "K" || ch === "A" || ch === "I")) {
+          lamps.push({ x: px + TILE / 2, y: py + TILE / 2, r: ch === "K" ? 58 : 44, a: ch === "K" ? 0.4 : 0.28 });
         }
       }
+    }
+    for (const house of houseClusters(rows, snap.zone)) {
+      if (snap.zone === "wild") {
+        const key = house.y * mw + house.x;
+        if (!fogSeen.has(key)) continue;
+      }
+      drawHouseCluster(g, house, now);
     }
     if (snap.zone === "wild") {
       for (const key of snap.fires) {
         const x = key % mw;
         const y = Math.floor(key / mw);
-        lamps.push({ x: ox + x * TILE + TILE / 2, y: oy + y * TILE + TILE / 2, r: 56, a: 0.4 });
+        lamps.push({ x: x * TILE + TILE / 2, y: y * TILE + TILE / 2, r: 56, a: 0.4 });
       }
     }
     for (const lamp of lamps) drawLamp(g, lamp.x, lamp.y, lamp.r, lamp.a);
@@ -148,13 +177,13 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const ty = Math.floor(e.y / TILE);
         if (!fogVis.has(ty * mw + tx)) continue;
       }
-      drawEnemy(g, e, ox, oy, now);
+      drawEnemy(g, e, 0, 0, now);
     }
     for (const a of snap.actors) {
-      drawActor(g, a, ox, oy, now);
+      drawActor(g, a, 0, 0, now);
       if (a.fishing === "fight") {
-        const x = ox + a.x;
-        const y = oy + a.y + 28;
+        const x = a.x;
+        const y = a.y + 28;
         g.fillStyle = "rgba(40,28,16,0.82)";
         g.fillRect(x - 30, y, 60, 10);
         g.fillStyle = "#3f6d5c";
@@ -165,6 +194,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         g.fillRect(x - 30, y + 12, 60 * Math.max(0, Math.min(1, a.fishPull)), 3);
       }
     }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (snap.weather.id === "rain" || snap.weather.id === "storm") {
       g.strokeStyle = "rgba(200,220,230,0.28)";
       g.lineWidth = 1;
@@ -291,12 +321,14 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         </div>
         <div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>
       </div>
-      ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
-      ${snap.board.length ? `<div class="fortune-chip">今晚 ${snap.board.join("、")}</div>` : ""}
-      ${snap.pot.length || snap.potReady ? `<div class="fortune-chip">锅：${snap.potReady || snap.pot.join("、") || "空"}</div>` : ""}
-      ${snap.ice.length ? `<div class="fortune-chip">冰柜 ${snap.ice.map((s) => s.name + "×" + s.n).join("、")}</div>` : ""}
+      <div class="hud-stack">
+        ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
+        ${snap.board.length ? `<div class="fortune-chip">今晚 ${snap.board.join("、")}</div>` : ""}
+        ${snap.pot.length || snap.potReady ? `<div class="fortune-chip">锅：${snap.potReady || snap.pot.join("、") || "空"}</div>` : ""}
+        ${snap.ice.length ? `<div class="fortune-chip">冰柜 ${snap.ice.map((s) => s.name + "×" + s.n).join("、")}</div>` : ""}
+        <div class="toasts">${snap.toasts.map((t) => `<p>${t}</p>`).join("")}</div>
+      </div>
       ${snap.prompt ? `<div class="prompt-toast">${snap.prompt}</div>` : ""}
-      <div class="toasts">${snap.toasts.map((t) => `<p>${t}</p>`).join("")}</div>
       ${
         snap.orders.length
           ? `<div class="tickets ${snap.rush ? "rush" : ""}">${snap.orders
@@ -310,14 +342,30 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       <button class="bag-toggle" type="button" id="bag-btn">袋</button>
       <button class="bag-toggle book-toggle" type="button" id="book-btn">菜单</button>
       <button class="bag-toggle map-toggle" type="button" id="map-btn">图</button>
-      <div class="bag-panel ${open === "bag" ? "" : "hidden"}" id="bag">${
-        snap.bag.map((s) => `<button type="button" data-take="${s.id}">${s.name}×${s.n}</button>`).join("") || "空"
-      }${snap.gear.length ? `<span>${snap.gear.join(" · ")}</span>` : ""}</div>
-      <div class="bag-panel ${open === "book" ? "" : "hidden"}" id="book">
-        <p class="album">鱼 ${snap.album.fish}/${snap.album.fishMax} · 菜 ${snap.album.cook}/${snap.album.cookMax} · 图 ${snap.album.map}%</p>
-        ${snap.cookbook.map((n) => `<span>${n}</span>`).join("") || "还没写出第一道"}
+      <div class="sheet ${open === "bag" ? "" : "hidden"}" id="bag">
+        <header>袋</header>
+        <div class="sheet-grid">
+          ${
+            snap.bag
+              .map((s) => `<button type="button" class="sheet-cell" data-take="${s.id}"><i class="ico item"></i><b>${s.name}</b><span>×${s.n}</span></button>`)
+              .join("") || `<div class="sheet-empty">空</div>`
+          }
+        </div>
+        ${snap.gear.length ? `<footer>${snap.gear.join(" · ")}</footer>` : ""}
       </div>
-      <div class="bag-panel map-panel ${open === "map" ? "" : "hidden"}" id="map">
+      <div class="sheet ${open === "book" ? "" : "hidden"}" id="book">
+        <header>图鉴</header>
+        <div class="sheet-grid stats">
+          <div class="sheet-cell"><i class="ico fish"></i><b>鱼</b><span>${snap.album.fish}/${snap.album.fishMax}</span></div>
+          <div class="sheet-cell"><i class="ico cook"></i><b>菜</b><span>${snap.album.cook}/${snap.album.cookMax}</span></div>
+          <div class="sheet-cell"><i class="ico map"></i><b>图</b><span>${snap.album.map}%</span></div>
+        </div>
+        <div class="sheet-grid">
+          ${snap.cookbook.map((n) => `<div class="sheet-cell"><i class="ico cook"></i><b>${n}</b></div>`).join("") || `<div class="sheet-empty">还没写出第一道</div>`}
+        </div>
+      </div>
+      <div class="sheet ${open === "map" ? "" : "hidden"}" id="map">
+        <header>图</header>
         ${
           snap.zone === "wild"
             ? `<p>已照亮 ${snap.revealed.length} 格 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}</p><canvas id="atlas"></canvas>`

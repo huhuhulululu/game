@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { VALLEY } from "../world/maps";
-import { cellFill, drawActor, drawCell, drawPlot, plotIndex, shade, tileLook } from "./draw";
+import { cellFill, drawActor, drawCell, drawPlot, houseClusters, plotIndex, shade, tileLook, viewScale } from "./draw";
 import type { ActorSnap } from "../sim/net";
 
 function mockCtx() {
@@ -40,6 +40,7 @@ function mockCtx() {
     measureText(t: string) {
       return { width: t.length * 8 };
     },
+    globalAlpha: 1,
   };
   return ctx as typeof ctx & CanvasRenderingContext2D;
 }
@@ -116,5 +117,25 @@ describe("look", () => {
     const g = mockCtx();
     drawPlot(g, 0, 0, 3, "柿子");
     assert.ok(g.rects.length >= 4);
+  });
+
+  it("fills a grass tile edge to edge so the grid line is gone", () => {
+    const g = mockCtx();
+    drawCell(g, ".", 0, 0, "#3a4a34", 0, "valley");
+    assert.ok(g.rects.some((r) => r[2] >= 36 && r[3] >= 2));
+  });
+
+  it("joins the valley cabin and inn into one roof each", () => {
+    const houses = houseClusters(VALLEY, "valley");
+    const cabin = houses.find((h) => h.kind === "cabin");
+    const inn = houses.find((h) => h.kind === "inn");
+    assert.ok(cabin && cabin.w === 4 && cabin.h === 3);
+    assert.ok(inn && inn.w === 4 && inn.h === 3);
+    assert.ok(houses.some((h) => h.kind === "mine" && h.w === 2 && h.h === 2));
+  });
+
+  it("zooms the camera so a wide window does not leave a dead strip", () => {
+    assert.ok(viewScale(1400, 800) > 1.6);
+    assert.ok(viewScale(390, 844) > 1.1);
   });
 });
