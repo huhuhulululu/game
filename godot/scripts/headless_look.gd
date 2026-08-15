@@ -16,7 +16,7 @@ func _initialize() -> void:
 	root.add_child(valley)
 	var you := ActorView.new()
 	root.add_child(you)
-	you.apply({"x": 300, "y": 500, "name": "暖", "side": "left", "facing": 2}, 0.0)
+	you.apply({"x": 290, "y": 342, "name": "暖", "side": "left", "facing": 2}, 0.0)
 	var cam := Camera2D.new()
 	root.add_child(cam)
 	cam.make_current()
@@ -24,7 +24,7 @@ func _initialize() -> void:
 	var vp := Vector2(1280, 720)
 	var half := vp / (2.0 * cam.zoom)
 	var sz: Vector2 = valley.size_px()
-	cam.position = Vector2(clampf(300.0, half.x, sz.x - half.x), clampf(500.0, half.y, sz.y - half.y))
+	cam.position = Vector2(clampf(290.0, half.x, sz.x - half.x), clampf(342.0, half.y, sz.y - half.y))
 	var hud := CanvasLayer.new()
 	hud.layer = 20
 	root.add_child(hud)
@@ -39,17 +39,18 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	await process_frame
+	_shot("enter")
 	_shot("play")
 	you.set_moving(true)
-	you.apply({"x": 300, "y": 500, "name": "暖", "side": "left", "facing": 2}, 0.21)
+	you.apply({"x": 290, "y": 342, "name": "暖", "side": "left", "facing": 2}, 0.21)
 	await process_frame
 	await process_frame
 	_shot("walk")
 	you.set_moving(true)
-	you.apply({"x": 330, "y": 500, "name": "暖", "side": "left", "facing": 1}, 0.42)
+	you.apply({"x": 320, "y": 342, "name": "暖", "side": "left", "facing": 1}, 0.42)
 	var pine := ActorView.new()
 	root.add_child(pine)
-	pine.apply({"x": 360, "y": 500, "name": "松", "side": "right", "facing": 2}, 0.0)
+	pine.apply({"x": 350, "y": 342, "name": "松", "side": "right", "facing": 2}, 0.0)
 	await process_frame
 	await process_frame
 	_shot("pair")
@@ -67,21 +68,29 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	_shot("altar")
-	cam.position = Vector2(6.4 * 36.0 + 32.0, 11.4 * 36.0 + 36.0)
+	cam.position = Vector2(6.4 * 36.0 + 32.0, 11.55 * 36.0 + 34.0)
 	await process_frame
 	await process_frame
 	_shot("stall")
-	cam.position = Vector2(4.2 * 36.0 + 84.0, 2.4 * 36.0 + 74.0)
+	cam.position = Vector2(17.2 * 36.0 + 26.0, 11.65 * 36.0 + 30.0)
+	await process_frame
+	await process_frame
+	_shot("board")
+	cam.position = Vector2(5.0 * 36.0 + 74.0, 4.55 * 36.0 + 54.0)
 	await process_frame
 	await process_frame
 	_shot("cabin")
 	you.set_moving(false)
-	you.apply({"x": 4.2 * 36.0 + 84.0, "y": 2.4 * 36.0 + 168.0, "name": "暖", "side": "left", "facing": 2}, 0.0)
-	pine.apply({"x": 4.2 * 36.0 + 118.0, "y": 2.4 * 36.0 + 168.0, "name": "松", "side": "right", "facing": 2}, 0.0)
-	cam.position = Vector2(4.2 * 36.0 + 100.0, 2.4 * 36.0 + 140.0)
+	you.apply({"x": 5.0 * 36.0 + 74.0, "y": 4.55 * 36.0 + 118.0, "name": "暖", "side": "left", "facing": 2}, 0.0)
+	pine.apply({"x": 5.0 * 36.0 + 108.0, "y": 4.55 * 36.0 + 118.0, "name": "松", "side": "right", "facing": 2}, 0.0)
+	cam.position = Vector2(5.0 * 36.0 + 90.0, 4.55 * 36.0 + 90.0)
 	await process_frame
 	await process_frame
 	_shot("cabin-pair")
+	cam.position = Vector2(16.9 * 36.0 + 84.0, 4.35 * 36.0 + 58.0)
+	await process_frame
+	await process_frame
+	_shot("lodge")
 	print("LOOK_BOOT_OK")
 	quit(0)
 

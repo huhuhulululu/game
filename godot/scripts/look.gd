@@ -41,6 +41,13 @@ static func person_mat() -> ShaderMaterial:
 	return m
 
 
+static func prop_mat(fog := 0.03) -> ShaderMaterial:
+	var m := dusk_mat(fog)
+	m.set_shader_parameter("feet", 0.0)
+	m.set_shader_parameter("edge", 0.08)
+	return m
+
+
 static func plaque_box() -> StyleBoxTexture:
 	var s := StyleBoxTexture.new()
 	s.texture = load("res://assets/art/tex-plaque.png") as Texture2D
@@ -160,21 +167,20 @@ static func sit_frac(tex: Texture2D) -> float:
 	return 0.86
 
 
-static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.03) -> Node2D:
+static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.03, sit := 0.97) -> Node2D:
 	var n := Node2D.new()
 	n.position = pos
 	n.z_index = z
 	n.y_sort_enabled = false
-	var feet := sit_frac(tex)
-	var sit_y := size.y * feet + 2.0
-	var stain := contact(size.x * 1.28)
-	stain.scale.y = (size.x * 0.26) / 40.0
+	var sit_y := size.y * sit
+	var stain := contact(size.x * 1.36)
+	stain.scale.y = (size.x * 0.30) / 40.0
 	stain.position = Vector2(size.x * 0.50, sit_y)
-	stain.modulate = Color(1, 1, 1, 0.92)
+	stain.modulate = Color(1, 1, 1, 0.95)
 	n.add_child(stain)
-	var core := contact(size.x * 0.78)
-	core.scale.y = (size.x * 0.12) / 40.0
-	core.position = Vector2(size.x * 0.50, sit_y - 2.0)
+	var core := contact(size.x * 0.84)
+	core.scale.y = (size.x * 0.14) / 40.0
+	core.position = Vector2(size.x * 0.50, sit_y - 1.0)
 	core.modulate = Color(1, 1, 1, 1.0)
 	n.add_child(core)
 	var s := Sprite2D.new()
@@ -184,6 +190,7 @@ static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.0
 	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	if tex:
 		s.scale = Vector2(size.x / float(tex.get_width()), size.y / float(tex.get_height()))
-	s.material = dusk_mat(fog)
+	s.position.y = 3.0
+	s.material = prop_mat(fog)
 	n.add_child(s)
 	return n
