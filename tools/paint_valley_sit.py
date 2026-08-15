@@ -324,7 +324,7 @@ def paint_floor() -> Image.Image:
     d = tile_tex(ground, h, w, 40, 30)
     g_lum = np.maximum(g.mean(axis=2, keepdims=True), 0.05)
     meadow = np.clip(g * (0.46 / g_lum), 0, 1)
-    meadow = np.clip(meadow * np.array([1.14, 1.06, 0.64], dtype=np.float32) * (0.90 + 0.16 * n[..., None]), 0, 1)
+    meadow = np.clip(meadow * np.array([1.36, 0.74, 0.40], dtype=np.float32) * (0.88 + 0.14 * n[..., None]), 0, 1)
     rgb = np.clip(meadow * 0.90 + d * np.array([0.92, 0.86, 0.58], dtype=np.float32) * 0.10, 0, 1)
 
     yy, xx = np.indices((h, w))
@@ -356,14 +356,16 @@ def paint_floor() -> Image.Image:
     ripple = 0.93 + 0.07 * flow
     spec = np.clip(0.42 + 0.58 * cross, 0, 1) * (depth ** 1.7) * 0.22
     shade = np.clip(0.80 + 0.20 * np.clip((wy - creek_y) / np.maximum(creek_half, 1.0), -1.0, 1.0), 0.68, 1.06)
-    body = np.array([0.16, 0.42, 0.52], dtype=np.float32)
-    deep = np.array([0.08, 0.26, 0.38], dtype=np.float32)
-    gloss = np.array([0.72, 0.66, 0.50], dtype=np.float32)
+    body = np.array([0.36, 0.38, 0.28], dtype=np.float32)
+    deep = np.array([0.16, 0.20, 0.16], dtype=np.float32)
+    gloss = np.array([0.88, 0.68, 0.38], dtype=np.float32)
     wet = body * (0.42 + 0.58 * depth)[..., None] + deep * (0.48 * (1.0 - depth))[..., None]
     wet = np.clip(wet * ripple[..., None] * shade[..., None], 0, 1)
     wet = np.clip(wet + gloss * spec[..., None], 0, 1)
     cover = np.clip(water_m * 1.06, 0, 0.97)
     rgb = rgb * (1.0 - cover)[..., None] + wet * cover[..., None]
+    # Cover dusk. Geometry already set. Do not move the path or creek.
+    rgb = np.clip(rgb * np.array([1.12, 0.82, 0.52], dtype=np.float32) + np.array([0.06, 0.02, 0.00], dtype=np.float32), 0, 1)
 
     ax = np.clip(xx / float(pad), 0, 1) * np.clip((w - 1 - xx) / float(pad), 0, 1)
     ay = np.clip(yy / float(pad), 0, 1) * np.clip((h - 1 - yy) / float(pad), 0, 1)

@@ -27,7 +27,7 @@ var _bar_pull: ColorRect
 
 func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_LINEAR
-	_shadow = Look.contact(28)
+	_shadow = Look.contact(Look.BODY * 0.45)
 	_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST, 2)
 	_shadow.modulate = Color(1, 1, 1, 0.95)
 	add_child(_shadow)
@@ -109,7 +109,7 @@ func _place_name() -> void:
 	if _name_card == null:
 		return
 	var p := get_global_transform_with_canvas().origin
-	_name_card.position = Vector2(p.x - 36, p.y - 100)
+	_name_card.position = Vector2(p.x - 36, p.y - Look.BODY - 28)
 	_name_card.visible = _name.text != ""
 
 

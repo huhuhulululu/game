@@ -51,7 +51,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(look, /contact\(/);
   assert.match(look, /sit_frac/);
   assert.match(look, /person_mat/);
-  assert.match(look, /const BODY := 62/);
+  assert.match(look, /const BODY := 96/);
   assert.match(look, /const FOOT := 0\.979/);
   assert.match(look, /SHADOW_EAST/);
   assert.match(look, /func air_mat/);
@@ -67,6 +67,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(artDoc, /脚影/);
   assert.match(artDoc, /禁止混包/);
   assert.match(artDoc, /SHADOW_EAST/);
+  assert.match(artDoc, /没有精神值/);
   assert.doesNotMatch(artDoc, /Kenney|itch\.io/);
   assert.match(look, /name_box/);
   assert.match(look, /func slip_box/);
@@ -87,7 +88,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.doesNotMatch(paintSlip, /Wilson|Don't Starve|Dont Starve/i);
   assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
   assert.match(look, /VALLEY_DUSK/);
-  assert.match(look, /1\.14, 0\.78, 0\.52/);
+  assert.match(look, /1\.06, 0\.90, 0\.72/);
   assert.doesNotMatch(look, /SystemFont/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
   assert.match(play, /_clamp_cam/);
@@ -96,6 +97,10 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(play, /1\.0, 1\.0, 1\.0/);
   assert.match(play, /VALLEY_DUSK/);
   assert.match(play, /air_layer/);
+  assert.match(play, /饿 %s/);
+  assert.doesNotMatch(play, /魂/);
+  assert.doesNotMatch(play, /sanity|Sanity/);
+  assert.doesNotMatch(play, /s\.get\("hp"/);
   assert.ok(existsSync("godot/fonts/multiply.ttf"));
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /CanvasLayer/);
@@ -103,6 +108,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(actor, /person_mat/);
   assert.match(actor, /Look\.BODY/);
   assert.match(actor, /Look\.FOOT/);
+  assert.match(actor, /Look\.BODY - 28/);
   assert.match(actor, /SHADOW_EAST/);
   assert.doesNotMatch(actor, /var h := 48/);
   const lookShot = readFileSync("godot/scripts/headless_look.gd", "utf8");
@@ -123,8 +129,12 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(valley, /prop-hut|prop-lodge/);
   assert.match(valley, /4\.55, 4\.72, 176, 132/);
   assert.match(valley, /16\.20, 3\.85, 220, 168/);
-  assert.match(valley, /8\.15, 2\.72, 136, 112/);
-  assert.match(valley, /6\.15, 11\.18, 96, 90/);
+  assert.match(valley, /Cover language only/);
+  assert.doesNotMatch(valley, /prop-mine\.png/);
+  assert.doesNotMatch(valley, /prop-stall\.png/);
+  assert.doesNotMatch(valley, /prop-anvil\.png/);
+  assert.doesNotMatch(valley, /prop-altar\.png/);
+  assert.doesNotMatch(valley, /prop-board\.png/);
   assert.doesNotMatch(valley, /prop-pine\.png/);
   assert.doesNotMatch(valley, /prop-tree-gold/);
   const unify = readFileSync("tools/unify_dusk.py", "utf8");
@@ -160,7 +170,8 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.doesNotMatch(valley, /band-river|band-path|band-meadow/);
   const floorPaint = readFileSync("tools/paint_valley_sit.py", "utf8");
   assert.match(floorPaint, /308\.0 \+ fx \* 82\.0/);
-  assert.match(floorPaint, /0\.16, 0\.42, 0\.52/);
+  assert.match(floorPaint, /0\.36, 0\.38, 0\.28/);
+  assert.match(floorPaint, /Do not move the path or creek/);
   assert.match(floorPaint, /short wet lip|thin wet lip/);
   assert.doesNotMatch(floorPaint, /g \/ np\.maximum\(g\.max/);
   assert.ok(existsSync("godot/assets/art/floor-valley.png"));

@@ -256,7 +256,8 @@ func _on_snap(s: Dictionary) -> void:
 	_hud_room.text = "房间 %s" % str(s.get("room", Net.room))
 	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
 	var weather: Dictionary = s.get("weather", {}) if typeof(s.get("weather", {})) == TYPE_DICTIONARY else {}
-	_hud_ink.text = "日 %s · %s · %s · %s · 金 %s · 饿 %s" % [_ink_n(s.get("day", 0)), str(s.get("season", "春")), phase, str(weather.get("name", "")), _ink_n(s.get("gold", 0)), _ink_n(s.get("hunger", 0))]
+	# No soul meter. Hunger is 饿.
+	_hud_ink.text = "日 %s · %s · %s · 金 %s · 饿 %s" % [_ink_n(s.get("day", 0)), str(s.get("season", "春")), phase, _ink_n(s.get("gold", 0)), _ink_n(s.get("hunger", 0))]
 	var prompt := str(s.get("prompt", ""))
 	_prompt.text = prompt
 	if prompt == "起竿" or prompt.find("太暗") >= 0 or prompt.find("咬") >= 0 or prompt.find("还早") >= 0:
