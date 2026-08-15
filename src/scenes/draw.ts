@@ -1121,47 +1121,46 @@ export function drawSheet(g: Ctx, name: string, c: FieldCluster): boolean {
   return blitWrap(g, name, c.x * TILE - 1, c.y * TILE - 1, c.w * TILE + 2, c.h * TILE + 2);
 }
 
-function wander(seed: number, i: number): number {
-  return Math.sin(seed * 0.19 + i * 1.17) * 0.52 + Math.sin(seed * 0.71 + i * 2.53) * 0.31 + Math.sin(seed * 1.4 + i * 0.47) * 0.17;
+function wander(seed: number, x: number): number {
+  return Math.sin(seed + x * 0.026) * 0.6 + Math.sin(seed * 1.8 + x * 0.01) * 0.28 + Math.sin(seed * 0.5 + x * 0.048) * 0.12;
 }
 
 function organicPath(g: Ctx, x: number, y: number, w: number, h: number, seed: number, amp = 12): void {
-  const p = (t: number, edge: number) => wander(seed + edge, t) * amp;
-  const across = Math.max(6, Math.round(w / 16));
-  const down = Math.max(4, Math.round(h / 18));
+  const across = Math.max(8, Math.round(w / 14));
+  const down = Math.max(5, Math.round(h / 16));
   g.beginPath();
-  g.moveTo(x + p(0, 1), y + p(0, 2));
+  g.moveTo(x + wander(seed, 0) * amp * 0.35, y + wander(seed + 1, 0) * amp);
   for (let i = 1; i <= across; i++) {
-    const t = i / across;
-    g.lineTo(x + t * w + p(i, 3) * 0.35, y + p(i, 4));
+    const px = (i / across) * w;
+    g.lineTo(x + px + wander(seed + 2, px) * amp * 0.25, y + wander(seed + 3, px) * amp);
   }
   for (let i = 1; i <= down; i++) {
-    const t = i / down;
-    g.lineTo(x + w + p(i, 5) * 0.45, y + t * h + p(i, 6) * 0.35);
+    const py = (i / down) * h;
+    g.lineTo(x + w + wander(seed + 4, py) * amp * 0.35, y + py + wander(seed + 5, py) * amp * 0.25);
   }
   for (let i = 1; i <= across; i++) {
-    const t = i / across;
-    g.lineTo(x + w * (1 - t) + p(i, 7) * 0.35, y + h + p(i, 8));
+    const px = (1 - i / across) * w;
+    g.lineTo(x + px + wander(seed + 6, px) * amp * 0.25, y + h + wander(seed + 7, px) * amp);
   }
   for (let i = 1; i <= down; i++) {
-    const t = i / down;
-    g.lineTo(x + p(i, 9) * 0.45, y + h * (1 - t) + p(i, 10) * 0.35);
+    const py = (1 - i / down) * h;
+    g.lineTo(x + wander(seed + 8, py) * amp * 0.35, y + py + wander(seed + 9, py) * amp * 0.25);
   }
   g.closePath();
 }
 
 function waveBand(g: Ctx, x: number, y: number, w: number, h: number, seed: number, amp: number): void {
-  const step = 6;
+  const step = 10;
   g.beginPath();
   g.moveTo(x, y + wander(seed, 0) * amp);
   for (let i = step; i <= w; i += step) {
     g.lineTo(x + i, y + wander(seed, i) * amp);
   }
-  g.lineTo(x + w + wander(seed, 99) * amp * 0.45, y + h * 0.45);
+  g.lineTo(x + w + wander(seed, w) * amp * 0.3, y + h * 0.5);
   for (let i = w; i >= 0; i -= step) {
-    g.lineTo(x + i, y + h + wander(seed + 2.7, i) * amp);
+    g.lineTo(x + i, y + h + wander(seed + 2.2, i) * amp);
   }
-  g.lineTo(x + wander(seed, 3) * amp * 0.45, y + h * 0.55);
+  g.lineTo(x + wander(seed, 8) * amp * 0.3, y + h * 0.5);
   g.closePath();
 }
 
@@ -1172,9 +1171,11 @@ export function drawPool(g: Ctx, c: FieldCluster): boolean {
   const h = c.h * TILE;
   const seed = c.x * 13 + c.y * 7;
   g.save();
-  waveBand(g, x - 12, y - 10, w + 24, h + 20, seed, 16);
-  g.strokeStyle = "rgba(47,90,56,0.38)";
-  g.lineWidth = 11;
+  waveBand(g, x - 12, y - 10, w + 24, h + 20, seed, 12);
+  g.strokeStyle = "rgba(47,90,56,0.34)";
+  g.lineWidth = 14;
+  g.lineJoin = "round";
+  g.lineCap = "round";
   g.stroke();
   g.clip();
   const ok = blitWrap(g, "water", x - 8, y - 8, w + 16, h + 16);
@@ -1189,9 +1190,11 @@ export function drawLane(g: Ctx, c: FieldCluster): boolean {
   const h = c.h * TILE;
   const seed = c.x * 5 + c.y * 11;
   g.save();
-  waveBand(g, x - 8, y - 10, w + 16, h + 20, seed, 13);
-  g.strokeStyle = "rgba(47,90,56,0.32)";
-  g.lineWidth = 9;
+  waveBand(g, x - 8, y - 10, w + 16, h + 20, seed, 8);
+  g.strokeStyle = "rgba(47,90,56,0.3)";
+  g.lineWidth = 12;
+  g.lineJoin = "round";
+  g.lineCap = "round";
   g.stroke();
   g.clip();
   const ok = blitWrap(g, "path", x - 6, y - 6, w + 12, h + 12);

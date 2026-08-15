@@ -52,6 +52,7 @@ function mockCtx() {
     fillText() {},
     strokeRect() {},
     lineCap: "butt" as CanvasLineCap,
+    lineJoin: "miter" as CanvasLineJoin,
     createRadialGradient() {
       return { addColorStop() {} };
     },
