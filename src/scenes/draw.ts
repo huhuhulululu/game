@@ -109,7 +109,24 @@ export function shade(hex: string, amt: number): string {
 
 function px(g: Ctx, x: number, y: number, w: number, h: number, c: string): void {
   g.fillStyle = c;
-  g.fillRect(Math.round(x), Math.round(y), Math.max(1, Math.round(w)), Math.max(1, Math.round(h)));
+  g.fillRect(x, y, w, h);
+}
+
+function oval(g: Ctx, cx: number, cy: number, rx: number, ry: number, c: string): void {
+  g.fillStyle = c;
+  g.beginPath();
+  g.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  g.fill();
+}
+
+function tri(g: Ctx, ax: number, ay: number, bx: number, by: number, cx: number, cy: number, c: string): void {
+  g.fillStyle = c;
+  g.beginPath();
+  g.moveTo(ax, ay);
+  g.lineTo(bx, by);
+  g.lineTo(cx, cy);
+  g.closePath();
+  g.fill();
 }
 
 function hash(x: number, y: number): number {
@@ -118,107 +135,117 @@ function hash(x: number, y: number): number {
   return ((n ^ (n >>> 16)) >>> 0) % 1000;
 }
 
-function dither(g: Ctx, x: number, y: number, colors: string[], step = 2): void {
-  px(g, x, y, TILE, TILE, colors[0]);
-  for (let j = 0; j < TILE; j += step) {
-    for (let i = 0; i < TILE; i += step) {
-      px(g, x + i, y + j, step, step, colors[hash(x + i, y + j) % colors.length]);
-    }
-  }
+function tuft(g: Ctx, x: number, y: number, s: number, c: string): void {
+  tri(g, x, y + s, x + s * 0.45, y, x + s * 0.9, y + s, c);
 }
 
 function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number): void {
   if (zone === "kitchen") {
-    dither(g, x, y, ["#6e4a32", "#7a5438", "#5a3c28", "#6e4a32", "#805c40"]);
-    px(g, x, y + 11, TILE, 2, "#5a3c28");
-    px(g, x, y + 23, TILE, 2, "#5a3c28");
+    px(g, x, y, TILE, TILE, "#6e4a32");
+    g.strokeStyle = "#5a3c28";
+    g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(x, y + 12);
+    g.lineTo(x + TILE, y + 12);
+    g.moveTo(x, y + 24);
+    g.lineTo(x + TILE, y + 24);
+    g.stroke();
     return;
   }
   if (zone === "mine") {
-    dither(g, x, y, ["#2a2624", "#1c1a18", "#3a3632", "#2a2624", "#221e1c"]);
+    px(g, x, y, TILE, TILE, "#2a2624");
+    oval(g, x + 12, y + 20, 8, 5, "#1c1a18");
+    oval(g, x + 26, y + 10, 6, 4, "#3a3632");
     return;
   }
   if (zone === "wild") {
     if (ch === "m") {
-      dither(g, x, y, ["#24382c", "#1a2e24", "#2a4838", "#1e3428", "#24382c"]);
-      if (Math.sin(now / 640 + x) > 0.35) px(g, x + 12, y + 16, 5, 2, "#3a6a58");
+      px(g, x, y, TILE, TILE, "#24382c");
+      oval(g, x + 18, y + 20, 12, 6, "#1a2e24");
+      if (Math.sin(now / 640 + x) > 0.2) oval(g, x + 14, y + 16, 7, 3, "#3a6a58");
       return;
     }
     if (ch === "s") {
-      dither(g, x, y, ["#6a6a30", "#7a7a38", "#5a5a28", "#8a8a40"]);
-      px(g, x + 6, y + 8, 3, 16, "#8a8a40");
-      px(g, x + 16, y + 12, 3, 14, "#7a7a38");
-      px(g, x + 26, y + 6, 3, 18, "#9a9a48");
+      px(g, x, y, TILE, TILE, "#6a6a30");
+      tuft(g, x + 6, y + 10, 16, "#8a8a40");
+      tuft(g, x + 18, y + 8, 18, "#7a7a38");
       return;
     }
-    dither(g, x, y, ["#2e3a28", "#3a4a30", "#243024", "#4a5a38", "#2e3a28"]);
+    px(g, x, y, TILE, TILE, "#2e3a28");
+    tuft(g, x + 8, y + 14, 12, "#3a4a30");
     return;
   }
   if (ch === ",") {
-    dither(g, x, y, ["#8a7a58", "#7a6a48", "#9a8a68", "#6a5a38", "#8a7a58"]);
-    px(g, x + 10, y + 14, 4, 2, "#6a5a38");
+    px(g, x, y, TILE, TILE, "#8a7a58");
+    oval(g, x + 18, y + 18, 14, 6, "#7a6a48");
+    oval(g, x + 10, y + 10, 4, 3, "#6a5a38");
     return;
   }
-  dither(g, x, y, ["#3f6d45", "#2f5a38", "#4a7d52", "#3a5a3c", "#3f6d45", "#2a4a30"]);
-  const tuft = hash(x, y);
-  if (tuft < 180) px(g, x + (tuft % 28), y + 8 + (tuft % 18), 3, 5, "#2a4a30");
-  if (tuft > 820) px(g, x + 8 + (tuft % 16), y + 20, 2, 2, "#c45c26");
+  px(g, x, y, TILE, TILE, "#3f6d45");
+  const n = hash(x, y);
+  tuft(g, x + 4 + (n % 10), y + 12 + (n % 8), 14, "#2f5a38");
+  tuft(g, x + 16 + (n % 7), y + 18, 12, "#4a7d52");
+  if (n > 780) oval(g, x + 22, y + 10, 3, 3, "#c45c26");
 }
 
 function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
   const sway = Math.sin(now / 860 + x * 0.03) * 1.4;
-  px(g, x + 8, y + 30, 22, 5, "rgba(20,16,10,0.28)");
+  oval(g, x + 18, y + 34, 12, 4, "rgba(20,16,10,0.28)");
   px(g, x + 15, y + 10, 7, 24, "#5a3a22");
   px(g, x + 16, y + 10, 2, 24, "#3a2414");
-  px(g, x + 14, y + 18, 3, 3, "#4a2e18");
-  px(g, x + 19, y + 26, 3, 2, "#3a2414");
-  px(g, x + 13, y + 32, 10, 3, "#4a2e18");
+  oval(g, x + 18, y + 34, 6, 3, "#4a2e18");
+  const cx = x + 18 + sway;
   if (pine) {
-    px(g, x + 6 + sway, y - 8, 24, 10, "#1e3a24");
-    px(g, x + 8 + sway, y - 2, 20, 10, "#2a4a30");
-    px(g, x + 10 + sway, y + 6, 16, 10, "#355a38");
-    px(g, x + 12 + sway, y + 14, 12, 8, "#2a4a28");
-    px(g, x + 16 + sway, y - 6, 5, 4, "#4a7a50");
+    tri(g, cx, y - 16, cx - 14, y + 6, cx + 14, y + 6, "#1e3a24");
+    tri(g, cx, y - 6, cx - 16, y + 16, cx + 16, y + 16, "#2a4a30");
+    tri(g, cx, y + 4, cx - 13, y + 22, cx + 13, y + 22, "#2a4a28");
     return;
   }
-  const clumps = [
-    [0, -16, 18, 14, "#2a4a28"],
-    [14, -14, 20, 16, "#3f6d4a"],
-    [6, -8, 22, 14, "#2f5a38"],
-    [-2, -4, 16, 12, "#2a4a28"],
-    [18, -2, 16, 12, "#3f6d4a"],
-    [8, 4, 18, 10, "#2f5a38"],
-    [10, -18, 8, 6, "#5a8a58"],
-  ] as const;
-  for (const [cx, cy, w, h, c] of clumps) px(g, x + 8 + cx + sway, y + 8 + cy, w, h, c);
+  oval(g, cx - 6, y + 2, 14, 12, "#2a4a28");
+  oval(g, cx + 8, y, 13, 11, "#3f6d4a");
+  oval(g, cx, y + 8, 15, 10, "#2f5a38");
+  oval(g, cx + 2, y - 6, 8, 6, "#5a8a58");
 }
 
 function water(g: Ctx, x: number, y: number, now: number): void {
-  dither(g, x, y, ["#1a5470", "#143e54", "#1e5a78", "#123848", "#1a5470"]);
+  px(g, x, y, TILE, TILE, "#1a5470");
+  px(g, x, y + 16, TILE, 20, "#143e54");
+  g.strokeStyle = "#3a8aaa";
+  g.lineWidth = 1.6;
+  g.lineCap = "round";
   const t = now / 420;
-  for (let i = 0; i < 4; i++) {
-    const yy = y + 4 + i * 8 + Math.sin(t + x * 0.05 + i * 0.9) * 1.6;
-    px(g, x + (i % 2) * 6, yy, 18, 2, i % 2 ? "#2a6a84" : "#3a7a90");
+  for (let i = 0; i < 3; i++) {
+    const yy = y + 8 + i * 9;
+    g.beginPath();
+    g.moveTo(x + 2, yy + Math.sin(t + x * 0.05 + i) * 2);
+    g.quadraticCurveTo(x + 18, yy - 3 + Math.sin(t + i) * 2, x + TILE - 2, yy + Math.sin(t + 1.2 + i) * 2);
+    g.stroke();
   }
 }
 
 function dock(g: Ctx, x: number, y: number): void {
   water(g, x, y, 0);
   px(g, x, y + 12, TILE, 16, "#6a4a28");
-  px(g, x, y + 14, TILE, 3, "#8a6a40");
-  px(g, x, y + 22, TILE, 3, "#8a6a40");
+  g.strokeStyle = "#8a6a40";
+  g.lineWidth = 2;
+  g.beginPath();
+  g.moveTo(x, y + 16);
+  g.lineTo(x + TILE, y + 16);
+  g.moveTo(x, y + 24);
+  g.lineTo(x + TILE, y + 24);
+  g.stroke();
   px(g, x + 4, y + 10, 4, 20, "#4a3018");
   px(g, x + 28, y + 10, 4, 20, "#4a3018");
 }
 
 function fire(g: Ctx, x: number, y: number, now: number): void {
-  px(g, x + 5, y + 24, 26, 8, "#4a4038");
-  px(g, x + 8, y + 22, 9, 6, "#5a3a22");
+  oval(g, x + 18, y + 28, 14, 5, "#4a4038");
+  px(g, x + 8, y + 22, 10, 6, "#5a3a22");
   px(g, x + 18, y + 23, 10, 5, "#3a2414");
   const f = 0.62 + Math.sin(now / 88) * 0.38;
-  px(g, x + 12, y + 8, 12, 16 * f, "#c45c26");
-  px(g, x + 15, y + 4, 7, 12 * f, "#e8a030");
-  px(g, x + 17, y + 1, 4, 8 * f, "#ffe8a0");
+  oval(g, x + 18, y + 16, 7, 10 * f, "#c45c26");
+  oval(g, x + 18, y + 12, 4, 7 * f, "#e8a030");
+  oval(g, x + 18, y + 8, 2, 4 * f, "#ffe8a0");
 }
 
 function roof(g: Ctx, x: number, y: number, warm: boolean): void {
@@ -254,16 +281,16 @@ function lanternDoor(g: Ctx, x: number, y: number, now: number): void {
 }
 
 function plotSoil(g: Ctx, x: number, y: number): void {
-  dither(g, x, y, ["#6b4a28", "#5a3a1c", "#7a5a30", "#4a3018"]);
-  px(g, x + 2, y + 8, TILE - 4, 4, "#5a3a1c");
-  px(g, x + 2, y + 18, TILE - 4, 4, "#5a3a1c");
-  px(g, x + 2, y + 28, TILE - 4, 3, "#4a3018");
+  px(g, x, y, TILE, TILE, "#6b4a28");
+  oval(g, x + 18, y + 12, 14, 3, "#5a3a1c");
+  oval(g, x + 18, y + 22, 14, 3, "#5a3a1c");
+  oval(g, x + 18, y + 30, 13, 2, "#4a3018");
 }
 
 function bush(g: Ctx, x: number, y: number, gold: boolean): void {
-  px(g, x + 6, y + 14, 24, 16, gold ? "#8a6a28" : "#2f5a38");
-  px(g, x + 10, y + 8, 16, 12, gold ? "#c9a06a" : "#3f6d5c");
-  px(g, x + 14, y + 6, 6, 5, gold ? "#e6d0a6" : "#5a8a58");
+  oval(g, x + 18, y + 24, 13, 8, gold ? "#8a6a28" : "#2f5a38");
+  oval(g, x + 18, y + 16, 10, 8, gold ? "#c9a06a" : "#3f6d5c");
+  oval(g, x + 18, y + 10, 5, 4, gold ? "#e6d0a6" : "#5a8a58");
 }
 
 function stall(g: Ctx, x: number, y: number): void {
@@ -380,28 +407,28 @@ function trash(g: Ctx, x: number, y: number): void {
 
 function wall(g: Ctx, x: number, y: number, zone: string): void {
   if (zone === "mine") {
-    dither(g, x, y, ["#1a1614", "#2a2420", "#12100e", "#1a1614"]);
+    px(g, x, y, TILE, TILE, "#1a1614");
+    oval(g, x + 12, y + 16, 8, 6, "#2a2420");
     px(g, x + 8, y, 4, TILE, "#4a3a2c");
     return;
   }
   if (zone === "kitchen") {
-    dither(g, x, y, ["#4a3224", "#5a4030", "#3a2418"]);
+    px(g, x, y, TILE, TILE, "#4a3224");
     return;
   }
-  dither(g, x, y, ["#2a4a28", "#1e3a24", "#3f6d4a", "#2a4a28"]);
+  px(g, x, y, TILE, TILE, "#2a4a28");
+  oval(g, x + 18, y + 10, 12, 7, "#1e3a24");
   px(g, x + 16, y + 20, 6, 12, "#5a3a22");
 }
 
 function hill(g: Ctx, x: number, y: number): void {
-  px(g, x + 2, y + 16, 32, 16, "#4a4038");
-  px(g, x + 8, y + 8, 20, 12, "#5a5248");
-  px(g, x + 14, y + 4, 10, 8, "#6a6460");
+  oval(g, x + 18, y + 24, 16, 8, "#4a4038");
+  oval(g, x + 18, y + 16, 11, 8, "#5a5248");
 }
 
 function rock(g: Ctx, x: number, y: number): void {
-  px(g, x + 8, y + 14, 20, 14, "#5a5248");
-  px(g, x + 12, y + 10, 12, 8, "#6a6460");
-  px(g, x + 10, y + 18, 8, 4, "#3a3632");
+  oval(g, x + 18, y + 22, 11, 8, "#5a5248");
+  oval(g, x + 16, y + 16, 7, 5, "#6a6460");
 }
 
 function nest(g: Ctx, x: number, y: number): void {
@@ -446,24 +473,23 @@ export function drawPlot(g: Ctx, px0: number, py0: number, stage: number, seed?:
   const name = seed ?? "";
   const green = name.includes("柿") ? "#c45c26" : name.includes("姜") ? "#d4c060" : "#3f6d4a";
   if (stage <= 0) {
-    px(g, px0 + 16, py0 + 20, 3, 4, "#6a6a38");
+    tuft(g, px0 + 14, py0 + 18, 8, "#6a6a38");
     return;
   }
   if (stage === 1) {
-    px(g, px0 + 10, py0 + 16, 3, 6, green);
-    px(g, px0 + 22, py0 + 24, 3, 5, green);
+    tuft(g, px0 + 10, py0 + 16, 10, green);
+    tuft(g, px0 + 20, py0 + 20, 9, green);
     return;
   }
   if (stage === 2) {
-    px(g, px0 + 8, py0 + 10, 6, 10, green);
-    px(g, px0 + 20, py0 + 16, 6, 10, green);
-    px(g, px0 + 10, py0 + 8, 4, 3, "#5a8a50");
+    oval(g, px0 + 12, py0 + 16, 5, 8, green);
+    oval(g, px0 + 24, py0 + 18, 5, 8, green);
     return;
   }
-  px(g, px0 + 7, py0 + 6, 8, 14, green);
-  px(g, px0 + 20, py0 + 10, 8, 14, green);
-  px(g, px0 + 9, py0 + 4, 5, 5, name.includes("柿") ? "#c45c26" : "#e8c070");
-  px(g, px0 + 22, py0 + 8, 5, 5, name.includes("姜") ? "#e8d080" : "#d4a24a");
+  oval(g, px0 + 12, py0 + 14, 6, 10, green);
+  oval(g, px0 + 24, py0 + 16, 6, 10, green);
+  oval(g, px0 + 12, py0 + 8, 4, 4, name.includes("柿") ? "#c45c26" : "#e8c070");
+  oval(g, px0 + 24, py0 + 10, 4, 4, name.includes("姜") ? "#e8d080" : "#d4a24a");
 }
 
 export function drawCell(
@@ -475,7 +501,7 @@ export function drawCell(
   now: number,
   zone = "valley",
 ): void {
-  g.imageSmoothingEnabled = false;
+  g.imageSmoothingEnabled = true;
   const look = tileLook(ch, zone);
   if (look === "water") {
     water(g, x, y, now);
@@ -569,17 +595,17 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0)
     g.stroke();
     g.lineWidth = 1;
   }
-  px(g, x - 8, y + 10, 16, 4, "rgba(20,16,10,0.3)");
+  oval(g, x, y + 12, 9, 3, "rgba(20,16,10,0.3)");
   px(g, x - 6, y + 2, 5, 9, "#3a2a1c");
   px(g, x + 1, y + 2, 5, 9, "#3a2a1c");
-  px(g, x - 8, y - 8, 16, 12, body);
-  px(g, x - 6, y - 6, 12, 6, cloth);
-  px(g, x - 6, y - 18, 12, 11, "#e8c8a0");
-  px(g, x - 6, y - 18, 12, 4, warm ? "#5a2a14" : "#2a3a30");
-  px(g, x - 2 + face[0], y - 13 + face[1], 3, 3, "#2a2018");
-  px(g, x + 3 + face[0], y - 13 + face[1], 2, 2, "#2a2018");
-  if (a.facing === 1) px(g, x + 8, y - 4, 6, 4, body);
-  if (a.facing === 3) px(g, x - 14, y - 4, 6, 4, body);
+  oval(g, x, y - 2, 9, 8, body);
+  oval(g, x, y - 2, 7, 5, cloth);
+  oval(g, x, y - 14, 7, 7, "#e8c8a0");
+  oval(g, x, y - 17, 7, 3, warm ? "#5a2a14" : "#2a3a30");
+  oval(g, x - 2 + face[0], y - 13 + face[1], 1.6, 1.6, "#2a2018");
+  oval(g, x + 3 + face[0], y - 13 + face[1], 1.4, 1.4, "#2a2018");
+  if (a.facing === 1) oval(g, x + 10, y - 2, 4, 3, body);
+  if (a.facing === 3) oval(g, x - 10, y - 2, 4, 3, body);
   const mark = heldChip(a.heldName);
   if (mark) {
     const hx = a.facing === 3 ? x - 16 : x + 8;
@@ -611,11 +637,11 @@ export function drawEnemy(g: Ctx, e: EnemySnap, ox: number, oy: number, now: num
   const y = oy + e.y;
   const bob = Math.sin(now / 180 + e.x) * 1.5;
   const c = e.flash > 0 ? "#f4e7d2" : e.hue || "#3a2018";
-  px(g, x - 9, y + 6 + bob, 18, 5, "rgba(10,8,6,0.35)");
-  px(g, x - 10, y - 4 + bob, 20, 12, c);
-  px(g, x - 6, y - 10 + bob, 12, 8, shade(typeof c === "string" && c.startsWith("#") ? c : "#3a2018", 0.7));
-  px(g, x - 4, y - 6 + bob, 3, 3, "#c45c26");
-  px(g, x + 2, y - 6 + bob, 3, 3, "#c45c26");
+  oval(g, x, y + 8 + bob, 10, 3, "rgba(10,8,6,0.35)");
+  oval(g, x, y + bob, 11, 7, c);
+  oval(g, x, y - 6 + bob, 7, 5, shade(typeof c === "string" && c.startsWith("#") ? c : "#3a2018", 0.7));
+  oval(g, x - 3, y - 5 + bob, 1.6, 1.6, "#c45c26");
+  oval(g, x + 3, y - 5 + bob, 1.6, 1.6, "#c45c26");
   px(g, x - 12, y - 16, 24 * (e.hp / e.maxHp), 3, "#c45c26");
 }
 
@@ -761,28 +787,25 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
   const w = c.w * TILE;
   const h = c.h * TILE;
   if (c.kind === "mine") {
-    px(g, x + 4, y + 8, w - 8, h - 8, "#1a1814");
-    px(g, x + 8, y + 16, w - 16, h - 20, "#0e0c0a");
-    px(g, x + 6, y + 6, w - 12, 8, "#5a4a38");
+    px(g, x + 6, y + 10, w - 12, h - 10, "#1a1814");
+    oval(g, x + w / 2, y + h * 0.55, w * 0.32, h * 0.28, "#0e0c0a");
     px(g, x + 8, y + 8, 6, h - 12, "#6a5a44");
     px(g, x + w - 14, y + 8, 6, h - 12, "#6a5a44");
     return;
   }
   const inn = c.kind === "inn";
-  px(g, x + 2, y + 18, w - 4, h - 14, "#c4a070");
-  px(g, x + 2, y + 18, w - 4, 4, "#8a6a48");
-  px(g, x - 2, y + 2, w + 4, 18, inn ? "#8a3a20" : "#c45c26");
-  px(g, x + 10, y - 6, w - 20, 12, inn ? "#6a2a14" : "#a44a20");
+  px(g, x + 2, y + 22, w - 4, h - 18, "#c4a070");
+  tri(g, x + w / 2, y - 10, x - 6, y + 24, x + w + 6, y + 24, inn ? "#8a3a20" : "#c45c26");
+  tri(g, x + w / 2, y - 4, x + 16, y + 20, x + w - 16, y + 20, inn ? "#6a2a14" : "#a44a20");
   const dx = c.doorX * TILE;
   const dy = c.doorY * TILE;
   px(g, dx + 12, dy + 16, 12, 20, inn ? "#3f6d5c" : "#5a3a22");
-  px(g, dx + 16, dy + 24, 3, 3, "#e8c070");
+  oval(g, dx + 18, dy + 26, 2, 2, "#e8c070");
   const glow = 0.5 + Math.sin(now / 220) * 0.2;
   for (let i = 0; i < c.w; i++) {
-    const wx = x + i * TILE + 8;
-    const wy = y + h - 22;
-    if (Math.abs(wx - dx) < 16) continue;
-    px(g, wx, wy, 8, 8, inn ? `rgba(255,224,138,${glow})` : "#6a8aaa");
+    const wx = x + i * TILE + 18;
+    if (Math.abs(wx - (dx + 18)) < 16) continue;
+    oval(g, wx, y + h - 16, 5, 5, inn ? `rgba(255,224,138,${glow})` : "#6a8aaa");
   }
 }
 

@@ -89,7 +89,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     }
     const g = canvas.getContext("2d");
     if (!g || !snap) return;
-    g.imageSmoothingEnabled = false;
+    g.imageSmoothingEnabled = true;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawSky(g, w, h, snap.night, snap.dusk, snap.zone, snap.weather.id);
 

@@ -29,8 +29,11 @@ function mockCtx() {
     },
     stroke() {},
     arc() {},
+    ellipse() {},
+    quadraticCurveTo() {},
     fillText() {},
     strokeRect() {},
+    lineCap: "butt" as CanvasLineCap,
     createRadialGradient() {
       return { addColorStop() {} };
     },
@@ -77,7 +80,7 @@ describe("look", () => {
   it("draws a tree as layered crown and trunk, not one fillRect", () => {
     const g = mockCtx();
     drawCell(g, "T", 0, 0, "#1e2c22", 1000, "valley");
-    assert.ok(g.rects.length >= 6);
+    assert.ok(g.fills.length >= 6);
     assert.ok(g.fills.some((c) => c.includes("5a3a22") || c.includes("3a2414")));
     assert.ok(g.fills.some((c) => c.includes("2a4a28") || c.includes("3f6d4a")));
   });
@@ -85,7 +88,8 @@ describe("look", () => {
   it("draws moving water as more than a flat pool", () => {
     const g = mockCtx();
     drawCell(g, "~", 0, 0, "#2a4454", 800, "valley");
-    assert.ok(g.rects.length >= 5);
+    assert.ok(g.rects.some((r) => r[2] >= 36));
+    assert.ok(g.fills.some((c) => c.includes("1a5470") || c.includes("143e54")));
   });
 
   it("draws a person with a body, facing and a name plate", () => {
@@ -110,13 +114,20 @@ describe("look", () => {
       ping: 0,
     };
     drawActor(g, a, 0, 0, 0);
-    assert.ok(g.rects.length >= 6);
+    assert.ok(g.fills.length >= 6);
   });
 
   it("draws crop stages on a plot", () => {
     const g = mockCtx();
     drawPlot(g, 0, 0, 3, "柿子");
-    assert.ok(g.rects.length >= 4);
+    assert.ok(g.fills.length >= 4);
+  });
+
+  it("builds shapes instead of stamping a pixel grid", () => {
+    const g = mockCtx();
+    drawCell(g, ".", 0, 0, "#3a4a34", 0, "valley");
+    const dots = g.rects.filter((r) => r[2] <= 2 && r[3] <= 2).length;
+    assert.ok(dots < 8);
   });
 
   it("fills a grass tile edge to edge so the grid line is gone", () => {
