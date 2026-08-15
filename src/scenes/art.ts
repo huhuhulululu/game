@@ -1,6 +1,6 @@
 type Sheet = HTMLCanvasElement;
 
-const ART_REV = "look7";
+const ART_REV = "look8";
 
 const SRC: Record<string, { src: string }> = {
   tree: { src: "/art/prop-tree.png" },
@@ -23,6 +23,9 @@ const SRC: Record<string, { src: string }> = {
   stove: { src: "/art/prop-stove.png" },
   icebox: { src: "/art/prop-icebox.png" },
   pantry: { src: "/art/prop-pantry.png" },
+  pot: { src: "/art/prop-pot.png" },
+  pass: { src: "/art/prop-pass.png" },
+  doorOpen: { src: "/art/prop-door-open.png" },
   cut: { src: "/art/prop-cut.png" },
   ore: { src: "/art/prop-ore.png" },
   stairs: { src: "/art/prop-stairs.png" },

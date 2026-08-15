@@ -79,6 +79,16 @@ describe("living systems", () => {
     assert.ok(snap.partner?.online);
   });
 
+  it("puts a new person on the path south of the cabin, not behind the door", () => {
+    const w = new World("LOOK");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a")!;
+    const door = w.valley.find("A")[0]!;
+    assert.ok(p.y > tileCenter(door.x, door.y).y + 24);
+    assert.equal(p.facing, 2);
+    assert.equal(p.zone, "valley");
+  });
+
   it("crock pot picks higher priority like Don't Starve", () => {
     const stew = matchPot(["meat", "meat", "meat", "herb"], () => 0);
     assert.equal(stew.id, "meaty-stew");

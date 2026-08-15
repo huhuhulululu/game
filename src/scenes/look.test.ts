@@ -4,7 +4,9 @@ import { VALLEY } from "../world/maps";
 import { blit, blitFit, blitPatch, blitStand, blitWrap } from "./art";
 import {
   cellFill,
+  chimneyMouth,
   dockSheet,
+  doorIsOpen,
   drawActor,
   drawAtlas,
   drawCell,
@@ -258,7 +260,27 @@ describe("look", () => {
     const cabin = houseClusters(VALLEY, "valley").find((h) => h.kind === "cabin");
     assert.ok(cabin);
     drawHouseCluster(g, cabin, 1000);
-    assert.ok(g.fills.some((c) => c.includes("214,206,196") || c.includes("255,196,110")));
+    assert.ok(g.fills.some((c) => c.includes("232,224,214") || c.includes("255,196,110") || c.includes("214,206,196")));
+  });
+
+  it("opens a house door only when someone is at the threshold", () => {
+    const cabin = houseClusters(VALLEY, "valley").find((h) => h.kind === "cabin");
+    assert.ok(cabin);
+    const at = { x: cabin.doorX * 36 + 18, y: cabin.doorY * 36 + 18, zone: "valley" };
+    assert.equal(doorIsOpen(cabin, [at], "valley"), true);
+    assert.equal(doorIsOpen(cabin, [{ ...at, y: at.y + 120 }], "valley"), false);
+    const inn = houseClusters(VALLEY, "valley").find((h) => h.kind === "inn");
+    assert.ok(inn);
+    assert.notEqual(chimneyMouth(cabin).x, chimneyMouth(inn).x);
+  });
+
+  it("pot and pass still have a constructed fallback", () => {
+    const pot = mockCtx();
+    drawCell(pot, "Q", 0, 0, "#e7d3b4", 0, "kitchen");
+    assert.ok(pot.fills.length >= 2);
+    const window = mockCtx();
+    drawCell(window, "W", 0, 0, "#f4e7d2", 0, "kitchen");
+    assert.ok(window.fills.length >= 2);
   });
 
   it("falls back to constructed shapes when painted sheets are not loaded", () => {

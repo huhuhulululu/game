@@ -515,10 +515,12 @@ function lurk(g: Ctx, x: number, y: number, now: number): void {
   oval(g, x + 22, y + 11 + bob, 1.6, 1.6, "#c45c26");
 }
 
-function stove(g: Ctx, x: number, y: number, now: number): void {
-  if (blitFit(g, "stove", x - 6, y - 14, 48, 54)) {
+function stove(g: Ctx, x: number, y: number, now: number, near?: Near): void {
+  if (near?.s === "U") return;
+  oval(g, x + 18, y + 32, 12, 4, "rgba(20,16,10,0.28)");
+  if (blitFit(g, "stove", x - 12, y - 36, 60, 72)) {
     const f = 0.5 + Math.sin(now / 80) * 0.4;
-    oval(g, x + 18, y + 20, 4, 3 * f, "rgba(232,160,48,0.55)");
+    oval(g, x + 18, y + 18, 5, 3.4 * f, "rgba(232,160,48,0.5)");
     return;
   }
   px(g, x + 6, y + 12, 24, 20, "#6a4030");
@@ -530,6 +532,8 @@ function stove(g: Ctx, x: number, y: number, now: number): void {
 }
 
 function plate(g: Ctx, x: number, y: number): void {
+  oval(g, x + 18, y + 32, 13, 4, "rgba(20,16,10,0.26)");
+  if (blitFit(g, "pot", x - 14, y - 28, 64, 68)) return;
   oval(g, x + 18, y + 24, 14, 6, "#3a4048");
   oval(g, x + 18, y + 20, 13, 8, "#6a7080");
   oval(g, x + 18, y + 18, 9, 5, "#c8d0d4");
@@ -538,7 +542,8 @@ function plate(g: Ctx, x: number, y: number): void {
 }
 
 function icebox(g: Ctx, x: number, y: number): void {
-  if (blitFit(g, "icebox", x - 4, y - 16, 44, 56)) return;
+  oval(g, x + 18, y + 32, 11, 4, "rgba(20,16,10,0.26)");
+  if (blitFit(g, "icebox", x - 10, y - 28, 56, 68)) return;
   px(g, x + 8, y + 6, 20, 26, "#5a3a22");
   px(g, x + 10, y + 8, 16, 12, "#7aa0b8");
   px(g, x + 10, y + 22, 16, 8, "#3a5870");
@@ -565,6 +570,8 @@ function cut(g: Ctx, x: number, y: number): void {
 }
 
 function pass(g: Ctx, x: number, y: number): void {
+  oval(g, x + 18, y + 32, 14, 4, "rgba(20,16,10,0.26)");
+  if (blitFit(g, "pass", x - 16, y - 32, 68, 70)) return;
   px(g, x + 2, y + 8, 32, 22, "#6a4a30");
   px(g, x + 6, y + 12, 24, 14, "#e8d8b8");
   px(g, x + 8, y + 4, 20, 8, "#5a3a22");
@@ -692,7 +699,7 @@ function paintProp(g: Ctx, look: string, ch: string, x: number, y: number, now: 
   else if (look === "ore") ore(g, x, y, now);
   else if (look === "stairs") stairs(g, x, y);
   else if (look === "lurk") lurk(g, x, y, now);
-  else if (look === "stove") stove(g, x, y, now);
+  else if (look === "stove") stove(g, x, y, now, near);
   else if (look === "plate") plate(g, x, y);
   else if (look === "icebox") icebox(g, x, y);
   else if (look === "pantry") pantry(g, x, y, ch);
@@ -769,6 +776,14 @@ function heldChip(name: string): string {
   return name.slice(0, 1);
 }
 
+function walkPair(warm: boolean, facing: number): [string, string] {
+  if (facing === 0) return warm ? ["warmBackWalk", "warmBackWalk2"] : ["pineBackWalk", "pineBackWalk2"];
+  if (facing === 1 || facing === 3) {
+    return warm ? ["warmSideWalk", "warmSideWalk2"] : ["pineSideWalk", "pineSideWalk2"];
+  }
+  return warm ? ["warmWalk", "warmWalk2"] : ["pineWalk", "pineWalk2"];
+}
+
 function actorSheets(warm: boolean, facing: number, moving: boolean, now: number, busy = ""): string[] {
   if (busy === "sit") return warm ? ["warmSit", "warm"] : ["pineSit", "pineChar"];
   if (busy === "fish") return warm ? ["warmFish", "warmSide", "warm"] : ["pineFish", "pineSide", "pineChar"];
@@ -831,17 +846,35 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
     g.lineWidth = 1;
   }
   const busy = a.busy ?? "";
-  const bob = busy || !moving ? 0.3 : Math.sin(now / 160) * 1.1;
+  const bob = busy || !moving ? 0.12 : Math.sin(now / 240) * 0.45;
   oval(g, x, y + 8, 11, 3.4, "rgba(20,16,10,0.3)");
   g.save();
   g.translate(x, y + bob);
   if (a.facing === 3 && busy !== "sit") g.scale(-1, 1);
   let drew = false;
   const box = busy === "sit" ? ([-24, -52, 48, 54] as const) : busy === "fish" ? ([-28, -70, 58, 70] as const) : ([-23, -70, 46, 70] as const);
-  for (const sheet of actorSheets(warm, a.facing, moving, now, busy)) {
-    if (blitStand(g, sheet, box[0], box[1], box[2], box[3])) {
+  const period = 260;
+  if (moving && !busy) {
+    const pair = walkPair(warm, a.facing);
+    const slot = Math.floor(now / period) % 2;
+    const fade = (now % period) / period;
+    const aName = pair[slot];
+    const bName = pair[1 - slot];
+    if (blitStand(g, aName, box[0], box[1], box[2], box[3])) {
       drew = true;
-      break;
+      if (fade > 0.64) {
+        g.globalAlpha = (fade - 0.64) / 0.36;
+        blitStand(g, bName, box[0], box[1], box[2], box[3]);
+        g.globalAlpha = 1;
+      }
+    }
+  }
+  if (!drew) {
+    for (const sheet of actorSheets(warm, a.facing, moving, now, busy)) {
+      if (blitStand(g, sheet, box[0], box[1], box[2], box[3])) {
+        drew = true;
+        break;
+      }
     }
   }
   g.restore();
@@ -1065,32 +1098,55 @@ export function houseClusters(rows: string[], zone: string): HouseCluster[] {
   return out;
 }
 
+export function chimneyMouth(c: HouseCluster): { x: number; y: number } {
+  const x = c.x * TILE;
+  const y = c.y * TILE;
+  const w = c.w * TILE;
+  if (c.kind === "inn") return { x: x + w * 0.22, y: y - 18 };
+  return { x: x + w * 0.8, y: y - 20 };
+}
+
 function drawSmoke(g: Ctx, x: number, y: number, now: number): void {
   for (let i = 0; i < 7; i++) {
-    const t = (now / 540 + i * 0.15) % 1;
-    const sx = x + Math.sin(now / 260 + i * 1.25) * (4 + t * 8);
-    const sy = y - t * 48;
-    oval(g, sx, sy, 5.5 + t * 11, 4.4 + t * 10, `rgba(232,224,214,${0.55 * (1 - t)})`);
+    const t = (now / 540 + i * 0.14) % 1;
+    const sx = x + Math.sin(now / 280 + i * 1.2) * (1.2 + t * 7);
+    const sy = y - t * 38;
+    oval(g, sx, sy, 1.6 + t * 9, 1.4 + t * 8, `rgba(232,224,214,${0.58 * (1 - t)})`);
   }
 }
 
-function drawDoorGlow(g: Ctx, dx: number, dy: number, now: number): void {
-  const glow = 0.2 + Math.sin(now / 220) * 0.08;
-  g.save();
-  g.globalAlpha = glow;
-  g.fillStyle = "#ffc46e";
-  g.beginPath();
-  g.moveTo(dx + 13, dy + 12);
-  g.lineTo(dx + 23, dy + 12);
-  g.lineTo(dx + 29, dy + 34);
-  g.lineTo(dx + 7, dy + 34);
-  g.closePath();
-  g.fill();
-  g.restore();
-  oval(g, dx + 18, dy + 22, 5, 7, `rgba(255,196,110,${0.28 + Math.sin(now / 220) * 0.1})`);
+function drawDoor(g: Ctx, dx: number, dy: number, open: boolean, now: number): void {
+  if (open) {
+    if (!blitFit(g, "doorOpen", dx - 10, dy - 28, 56, 64)) {
+      px(g, dx + 9, dy + 6, 18, 28, "#1a1008");
+      px(g, dx + 26, dy + 8, 9, 26, "#5a3a22");
+      px(g, dx + 27, dy + 10, 2, 22, "#3a2414");
+    }
+    const glow = 0.28 + Math.sin(now / 220) * 0.08;
+    g.save();
+    g.globalAlpha = glow;
+    g.fillStyle = "#ffc46e";
+    g.beginPath();
+    g.moveTo(dx + 12, dy + 28);
+    g.lineTo(dx + 24, dy + 28);
+    g.lineTo(dx + 34, dy + 40);
+    g.lineTo(dx + 2, dy + 40);
+    g.closePath();
+    g.fill();
+    g.restore();
+    return;
+  }
+  px(g, dx + 17, dy + 12, 2, 18, `rgba(255,196,110,${0.16 + Math.sin(now / 260) * 0.06})`);
 }
 
-export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
+export function doorIsOpen(c: HouseCluster, people: { x: number; y: number; zone?: string }[], zone: string): boolean {
+  if (zone !== "valley" && zone !== "wild") return false;
+  const dx = c.doorX * TILE + 18;
+  const dy = c.doorY * TILE + 18;
+  return people.some((a) => (a.zone ?? zone) === zone && Math.hypot(a.x - dx, a.y - dy) < 52);
+}
+
+export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number, open = false): void {
   const x = c.x * TILE;
   const y = c.y * TILE;
   const w = c.w * TILE;
@@ -1126,8 +1182,9 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
     }
   }
   if (c.kind === "cabin" || c.kind === "inn") {
-    drawSmoke(g, x + w * (c.kind === "inn" ? 0.26 : 0.8), y - 52, now);
-    drawDoorGlow(g, c.doorX * TILE, c.doorY * TILE, now);
+    const mouth = chimneyMouth(c);
+    drawSmoke(g, mouth.x, mouth.y, now);
+    drawDoor(g, c.doorX * TILE, c.doorY * TILE, open, now);
   }
 }
 
@@ -1157,6 +1214,8 @@ export function isTallLook(look: string): boolean {
     look === "stove" ||
     look === "icebox" ||
     look === "pantry" ||
+    look === "plate" ||
+    look === "pass" ||
     isHouseLook(look)
   );
 }

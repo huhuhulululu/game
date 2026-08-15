@@ -12,6 +12,7 @@ import {
   drawField,
   drawFringe,
   drawGround,
+  doorIsOpen,
   drawHouseCluster,
   drawLamp,
   drawLane,
@@ -212,9 +213,11 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const key = house.y * mw + house.x;
         if (!fogSeen.has(key)) continue;
       }
+      const folks = snap.actors;
+      const here = snap.zone;
       sprites.push({
         y: (house.y + house.h) * TILE,
-        draw: () => drawHouseCluster(g, house, now),
+        draw: () => drawHouseCluster(g, house, now, doorIsOpen(house, folks, here)),
       });
     }
     if (snap.zone === "wild") {

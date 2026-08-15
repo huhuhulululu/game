@@ -142,10 +142,12 @@ export class World {
   constructor(public room: string) {
     const home = this.valley.find("A")[0] ?? { x: 8, y: 8 };
     this.home = tileCenter(home.x, home.y);
+    this.arrive = tileCenter(home.x, home.y + 2);
     this.save.weather = rollWeather(this.rand).id;
   }
 
   home = { x: 200, y: 200 };
+  arrive = { x: 200, y: 272 };
 
   addPlayer(id: string, name: string, prefer?: "left" | "right"): "left" | "right" {
     const used = [...this.players.values()].map((p) => p.side);
@@ -153,7 +155,7 @@ export class World {
       prefer && !used.includes(prefer) ? prefer : used.includes("left") ? "right" : "left";
     if (side === "left") this.save.leftName = name;
     else this.save.rightName = name;
-    const spawn = this.home;
+    const spawn = this.arrive;
     const fighter = side === "left" ? this.save.left : this.save.right;
     this.players.set(id, {
       id,
@@ -951,8 +953,8 @@ export class World {
       p.x = c.x + (from === "wild" ? -TILE : TILE);
       p.y = c.y;
     } else {
-      p.x = this.home.x;
-      p.y = this.home.y + 30;
+      p.x = this.arrive.x;
+      p.y = this.arrive.y;
     }
     this.dirty = true;
     this.toast(`${p.name} 回到山谷`);
