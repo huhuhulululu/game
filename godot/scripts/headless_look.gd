@@ -16,7 +16,7 @@ func _initialize() -> void:
 	root.add_child(valley)
 	var you := ActorView.new()
 	root.add_child(you)
-	you.apply({"x": 280, "y": 430, "name": "暖", "side": "left", "facing": 2}, 0.0)
+	you.apply({"x": 300, "y": 500, "name": "暖", "side": "left", "facing": 2}, 0.0)
 	var cam := Camera2D.new()
 	root.add_child(cam)
 	cam.make_current()
@@ -24,7 +24,7 @@ func _initialize() -> void:
 	var vp := Vector2(1280, 720)
 	var half := vp / (2.0 * cam.zoom)
 	var sz: Vector2 = valley.size_px()
-	cam.position = Vector2(clampf(280.0, half.x, sz.x - half.x), clampf(430.0, half.y, sz.y - half.y))
+	cam.position = Vector2(clampf(300.0, half.x, sz.x - half.x), clampf(500.0, half.y, sz.y - half.y))
 	var hud := CanvasLayer.new()
 	hud.layer = 20
 	root.add_child(hud)
@@ -40,6 +40,19 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	_shot("play")
+	you.set_moving(true)
+	you.apply({"x": 300, "y": 500, "name": "暖", "side": "left", "facing": 2}, 0.21)
+	await process_frame
+	await process_frame
+	_shot("walk")
+	you.set_moving(true)
+	you.apply({"x": 330, "y": 500, "name": "暖", "side": "left", "facing": 1}, 0.42)
+	var pine := ActorView.new()
+	root.add_child(pine)
+	pine.apply({"x": 360, "y": 500, "name": "松", "side": "right", "facing": 2}, 0.0)
+	await process_frame
+	await process_frame
+	_shot("pair")
 	cam.zoom = Vector2(1280.0 / sz.x, 1280.0 / sz.x)
 	cam.position = sz * 0.5
 	await process_frame
@@ -62,6 +75,13 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	_shot("cabin")
+	you.set_moving(false)
+	you.apply({"x": 4.2 * 36.0 + 84.0, "y": 2.4 * 36.0 + 168.0, "name": "暖", "side": "left", "facing": 2}, 0.0)
+	pine.apply({"x": 4.2 * 36.0 + 118.0, "y": 2.4 * 36.0 + 168.0, "name": "松", "side": "right", "facing": 2}, 0.0)
+	cam.position = Vector2(4.2 * 36.0 + 100.0, 2.4 * 36.0 + 140.0)
+	await process_frame
+	await process_frame
+	_shot("cabin-pair")
 	print("LOOK_BOOT_OK")
 	quit(0)
 

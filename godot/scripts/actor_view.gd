@@ -24,14 +24,14 @@ var _bar_mark: ColorRect
 
 func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_LINEAR
-	_shadow = Look.contact(52)
-	_shadow.position = Vector2(0, 10)
+	_shadow = Look.contact(28)
+	_shadow.position = Vector2(0, 2)
 	_shadow.modulate = Color(1, 1, 1, 0.95)
 	add_child(_shadow)
 	_sprite = Sprite2D.new()
 	_sprite.centered = true
-	_sprite.offset = Vector2(0, -28)
-	_sprite.material = Look.dusk_mat(0.02)
+	_sprite.offset = Vector2.ZERO
+	_sprite.material = Look.person_mat()
 	_sprite.texture_filter = TEXTURE_FILTER_LINEAR
 	add_child(_sprite)
 	var layer := CanvasLayer.new()
@@ -95,7 +95,7 @@ func _place_name() -> void:
 	if _name_card == null:
 		return
 	var p := get_global_transform_with_canvas().origin
-	_name_card.position = Vector2(p.x - 36, p.y - 82)
+	_name_card.position = Vector2(p.x - 36, p.y - 100)
 	_name_card.visible = _name.text != ""
 
 
@@ -138,11 +138,12 @@ func _apply() -> void:
 	_sprite.texture = _sheet()
 	var tex := _sprite.texture
 	if tex:
-		var h := 48.0
-		var s := h / float(tex.get_height())
+		var s := Look.BODY / float(tex.get_height())
 		_sprite.scale = Vector2(s, s)
+		_sprite.position = Vector2(0.0, -Look.BODY * (Look.FOOT - 0.5))
 	_sprite.flip_h = facing == 3
 	if _shadow:
+		_shadow.position = Vector2(0, 2)
 		_shadow.modulate.a = 1.0
 	var fight := fishing == "fight"
 	if _bar_bg:

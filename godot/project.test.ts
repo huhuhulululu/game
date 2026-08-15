@@ -41,6 +41,9 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(look, /tex-plaque/);
   assert.match(look, /contact\(/);
   assert.match(look, /sit_frac/);
+  assert.match(look, /person_mat/);
+  assert.match(look, /const BODY := 62/);
+  assert.match(look, /const FOOT := 0\.979/);
   assert.match(look, /name_box/);
   assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
   assert.doesNotMatch(look, /SystemFont/);
@@ -53,6 +56,13 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /CanvasLayer/);
   assert.match(actor, /_place_name/);
+  assert.match(actor, /person_mat/);
+  assert.match(actor, /Look\.BODY/);
+  assert.match(actor, /Look\.FOOT/);
+  assert.doesNotMatch(actor, /var h := 48/);
+  const lookShot = readFileSync("godot/scripts/headless_look.gd", "utf8");
+  assert.match(lookShot, /cabin-pair/);
+  assert.match(lookShot, /set_moving/);
   const boot = readFileSync("godot/scripts/boot.gd", "utf8");
   assert.match(boot, /cover-valley/);
   assert.doesNotMatch(boot, /prop-cabin|prop-inn|Wanderer/);
@@ -76,6 +86,13 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const paint = readFileSync("tools/paint_look.py", "utf8");
   assert.match(paint, /trim_empty_feet/);
   assert.match(paint, /def finish_sit_props/);
+  const sit = readFileSync("tools/sit_chars.py", "utf8");
+  assert.match(sit, /char-warm-ref/);
+  assert.match(sit, /FOOT_Y/);
+  assert.match(sit, /BAN/);
+  assert.doesNotMatch(sit, /SRCS\[.*= .*walk-raw/);
+  const warmWalk = readFileSync("godot/assets/art/char-warm-walk.png");
+  assert.ok(!warmWalk.includes("Wilson") && !warmWalk.includes("WANDERER"));
 });
 
 test("Godot client plays fish, mine and kitchen from the same snap", () => {

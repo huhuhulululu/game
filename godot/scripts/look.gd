@@ -8,6 +8,8 @@ const GOLD := Color(0.78, 0.58, 0.32)
 const PAPER := Color(0.93, 0.86, 0.74)
 const DUSK := Color(1.0, 1.0, 1.0)
 const HAZE := Color(0.78, 0.62, 0.46)
+const BODY := 62.0
+const FOOT := 0.979
 
 
 static func cjk() -> Font:
@@ -27,6 +29,14 @@ static func dusk_mat(fog := 0.08) -> ShaderMaterial:
 	m.set_shader_parameter("edge", 0.10)
 	m.set_shader_parameter("feet", 0.16)
 	m.set_shader_parameter("grade", 0.0)
+	return m
+
+
+static func person_mat() -> ShaderMaterial:
+	var m := dusk_mat(0.0)
+	m.set_shader_parameter("feet", 0.0)
+	m.set_shader_parameter("edge", 0.06)
+	m.set_shader_parameter("fog", 0.0)
 	return m
 
 
@@ -155,7 +165,7 @@ static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.0
 	n.z_index = z
 	n.y_sort_enabled = false
 	var feet := sit_frac(tex)
-	var sit_y := size.y * feet + 7.0
+	var sit_y := size.y * feet + 2.0
 	var stain := contact(size.x * 1.28)
 	stain.scale.y = (size.x * 0.26) / 40.0
 	stain.position = Vector2(size.x * 0.50, sit_y)
