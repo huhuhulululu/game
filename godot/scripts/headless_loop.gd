@@ -232,7 +232,7 @@ func _walk_at(p: Vector2i) -> bool:
 		return false
 	var ch := rows[p.y][p.x]
 	if _zone() == "kitchen":
-		return ch == "." or ch == "L" or ch == "R"
+		return ch == "." or ch == "R"
 	if _zone() == "mine":
 		return ch != "#"
 	return not (ch == "#" or ch == "T" or ch == "C" or ch == "N")

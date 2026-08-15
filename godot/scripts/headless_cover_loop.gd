@@ -230,43 +230,51 @@ func _drive_play() -> void:
 			phase = "to_pot"
 			_log("CHOP_DONE")
 	elif phase == "to_pot":
-		if _held_id() == "":
-			var more := _bag_cook()
-			if more != "":
-				Net.send_take(more)
-		var pot := _find("Q")
-		if pot.x < 0:
-			pot = Vector2i(10, 1)
-		var drive7 := _drive(pot, 0)
-		move = drive7["move"]
-		var ptxt := _prompt()
-		if ptxt == "切" or ptxt == "切着" or ptxt == "丢掉":
-			move = _seek(_center(10, 2))
-		elif bool(drive7["here"]) or ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0:
-			move = _nudge(int(drive7["facing"])) if ptxt.find("入锅") < 0 and ptxt.find("开煮") < 0 and ptxt.find("取 ·") < 0 else Vector2.ZERO
-			if ptxt.find("取 ·") >= 0 and _act_once():
-				act = true
-				phase = "to_window"
-				if not plate_ok:
-					plate_ok = true
-					print("PLATE_OK")
-				_log("DISH")
-			elif ptxt.find("开煮") >= 0 and _act_once():
-				act = true
-				phase = "cook_wait"
-				_log("BOIL")
-			elif ptxt.find("入锅") >= 0 and _held_id() != "" and _act_once():
-				act = true
-				phase = "second"
-				_log("POT1")
-	elif phase == "second":
-		var extra2 := _bag_cook()
-		if extra2 != "":
-			Net.send_take(extra2)
-			phase = "pot2"
-			_log("TAKE " + extra2)
+		if _zone() != "kitchen":
+			phase = "go_inn"
+			_log("REENTER")
 		else:
-			phase = "pot2"
+			if _held_id() == "":
+				var more := _bag_cook()
+				if more != "":
+					Net.send_take(more)
+			var pot := _find("Q")
+			if pot.x < 0:
+				pot = Vector2i(10, 1)
+			var drive7 := _drive(pot, 0)
+			move = drive7["move"]
+			var ptxt := _prompt()
+			if ptxt == "切" or ptxt == "切着" or ptxt == "丢掉" or ptxt == "出厨房" or ptxt == "吃":
+				move = _seek(_center(10, 2))
+			elif bool(drive7["here"]) or ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0:
+				move = _nudge(int(drive7["facing"])) if ptxt.find("入锅") < 0 and ptxt.find("开煮") < 0 and ptxt.find("取 ·") < 0 else Vector2.ZERO
+				if ptxt.find("取 ·") >= 0 and _act_once():
+					act = true
+					phase = "to_window"
+					if not plate_ok:
+						plate_ok = true
+						print("PLATE_OK")
+					_log("DISH")
+				elif ptxt.find("开煮") >= 0 and _act_once():
+					act = true
+					phase = "cook_wait"
+					_log("BOIL")
+				elif ptxt.find("入锅") >= 0 and _held_id() != "" and _act_once():
+					act = true
+					phase = "second"
+					_log("POT1")
+	elif phase == "second":
+		if _zone() != "kitchen":
+			phase = "go_inn"
+			_log("REENTER")
+		else:
+			var extra2 := _bag_cook()
+			if extra2 != "":
+				Net.send_take(extra2)
+				phase = "pot2"
+				_log("TAKE " + extra2)
+			else:
+				phase = "pot2"
 	elif phase == "pot2":
 		var pot2 := _find("Q")
 		if pot2.x < 0:
@@ -463,7 +471,7 @@ func _walk_at(p: Vector2i) -> bool:
 		return false
 	var ch := rows[p.y][p.x]
 	if _zone() == "kitchen":
-		return ch == "." or ch == "L" or ch == "R"
+		return ch == "." or ch == "R"
 	if _zone() == "mine":
 		return ch != "#"
 	return not (ch == "#" or ch == "T" or ch == "C" or ch == "N")
