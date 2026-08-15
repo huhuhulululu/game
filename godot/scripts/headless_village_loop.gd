@@ -74,7 +74,7 @@ func _on_snap(s: Dictionary) -> void:
 		tiles_cache = s.get("tiles", [])
 		tiles_zone = str(s.get("zone", ""))
 	if not mapped and _zone() == "valley":
-		var vm := ValleyMap.new()
+		var vm := preload("res://scenes/valley.tscn").instantiate() as ValleyWorld
 		root.add_child(vm)
 		vm.show_crops(s.get("plots", []))
 		mapped = true

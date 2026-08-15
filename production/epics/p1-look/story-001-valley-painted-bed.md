@@ -2,7 +2,7 @@
 
 *Created: 2026-08-15*
 *Last Updated: 2026-08-15*
-*Status: Ready*
+*Status: Superseded — rebuild `r1-painted-valley` overturns incremental sticker-bed*
 *Layer: Feature*
 *Type: Visual/Feel*
 *TR-ID: (none — Path D; law is the spec)*

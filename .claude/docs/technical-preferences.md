@@ -20,11 +20,11 @@
 
 ## Naming Conventions
 
-- **Classes**: PascalCase (e.g., `ValleyMap`)
+- **Classes**: PascalCase (e.g., `ValleyWorld`)
 - **Variables**: snake_case (e.g., `move_speed`)
 - **Signals/Events**: snake_case past tense (e.g., `health_changed`)
-- **Files**: snake_case matching script (e.g., `valley_map.gd`)
-- **Scenes/Prefabs**: existing names in `godot/scenes/` (`main.tscn`, `cover_loop.tscn`)
+- **Files**: snake_case matching script (e.g., `valley_world.gd`)
+- **Scenes/Prefabs**: `main.tscn`, `play.tscn`, `valley.tscn`, `cover_loop.tscn`
 - **Constants**: UPPER_SNAKE_CASE (e.g., `MAX_HEALTH`)
 
 ## Performance Budgets

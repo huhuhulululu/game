@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-`/dev-story production/epics/p1-look/story-001-valley-painted-bed.md` — implement the valley bed from `design/assets/specs/valley-assets.md`. Path D: the spec is the law (no TR registry yet). Do not recrop FAIL PNGs. `/team-polish` waits until the bed exists.
+Rebuild foundation is in. Next: `/team-polish` the packed valley bed (`godot/scenes/valley.tscn` + `bed-valley.png`), then `/code-review` / `/story-done` on `production/epics/r1-painted-valley/story-001-packed-bed.md`. Do not recrop FAIL PNGs. Do not restore sticker `valley_map.gd`.
 
 ## Coding Standards
 

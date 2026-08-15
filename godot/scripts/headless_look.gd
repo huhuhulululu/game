@@ -15,7 +15,7 @@ func _initialize() -> void:
 	var dusk := Node2D.new()
 	dusk.modulate = Look.VALLEY_DUSK
 	root.add_child(dusk)
-	var valley := ValleyMap.new()
+	var valley := preload("res://scenes/valley.tscn").instantiate() as ValleyWorld
 	dusk.add_child(valley)
 	var you := ActorView.new()
 	dusk.add_child(you)

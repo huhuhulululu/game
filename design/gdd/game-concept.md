@@ -50,7 +50,7 @@ Two phones must affect each other: pair fish, pair anvil, pair stall, pass dishe
 
 ## Visual Identity Anchor
 
-**One painted warm-dusk language.** The lock is `godot/assets/art/cover-valley.png` (read-only, 1280×720 RGB). Soft-edge illustration. West light. Olive-gold ground, not a green field plus an orange filter. No hard ink. No Don't Starve face. No 魂. No PNG sticker crops. Next valley path: magenta-key or one painted bed.
+**One painted warm-dusk language.** The lock is `godot/assets/art/cover-valley.png` (read-only, 1280×720 RGB). Play valley is `bed-valley.png` on `valley.tscn`. Soft-edge illustration. West light. Olive-gold ground, not a green field plus an orange filter. No hard ink. No Don't Starve face. No 魂. No PNG sticker crops.
 
 Full spec: `design/art/art-bible.md`. Short lock: `godot/docs/ART.md`.
 

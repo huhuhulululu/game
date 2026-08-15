@@ -19,7 +19,7 @@ func show_room() -> void:
 
 
 func show_play() -> void:
-	_swap(preload("res://scripts/play.gd").new())
+	_swap(preload("res://scenes/play.tscn").instantiate())
 
 
 func _swap(next: Node) -> void:

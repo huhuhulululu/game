@@ -90,7 +90,7 @@ No orange full-screen grade. One light air grain. `dusk.gdshader` `grade` stays 
 
 - **Valley:** people, two cover houses, land, creek. That is the set.
 - Houses are the cover hut and lodge only. Feet belong in the painted bed, or painted onto it — not floating sticker boxes.
-- **Next valley construction (P1 look):** magenta-key the cover as one sprite, **or** sit `cover-valley.png` as one painted bed. Do **not** keep cutting trees / lamps / shore from the cover and stamping them (`prop-cover-*` failed three times).
+- **Valley construction (rebuild):** one painted bed `bed-valley.png` on `valley.tscn`. Houses and enter-frame trees are paint on that sheet. Do **not** cut trees / lamps / shore / hut / lodge from the cover and stamp them (`prop-cover-*` failed). Path B magenta-key is unused.
 - Texture philosophy: painted illustration, linear filter, HD-2D. Not nearest 8-bit. Not PBR.
 - Prop density: fewer props beat a second language. No stall, anvil, or pixel-ball trees on the valley play floor.
 - Kitchen / mine / wild may use other props, but they must still eat this dusk — do not drop a Kenney pine into the enter frame.
@@ -147,7 +147,7 @@ No orange full-screen grade. One light air grain. `dusk.gdshader` `grade` stays 
 
 - **Pass:** one painted bed, or magenta-key so leftover dusk is a key color, not dirty RGB in a=0.
 - **Fail:** rect crops with leftover sky/ground in the RGB channels and opaque edge pixels (visible quads). See `docs/asset-audit.md`.
-- This turn does not recrop.
+- Play valley is one painted bed on `valley.tscn`. FAIL crops stay on disk unused. Do not recrop them.
 
 ---
 

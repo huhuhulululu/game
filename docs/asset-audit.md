@@ -29,7 +29,7 @@ Every transparent pixel on these sheets still carries leftover cover dusk RGB (`
 | `prop-hut.png` | 157×155 | 7616 / 7616 | 125 | `(200,126,48,0)` | **FAIL** |
 | `prop-lodge.png` | 241×261 | 14858 / 14858 | 277 | `(230,158,116,0)` | **FAIL** |
 
-`valley_map.gd` still sits these on the play floor. Tests lock the filenames. Replacing them is a later look pass, not a recrop.
+These files stay on disk. The play valley no longer sits them. Do not recrop.
 
 `cover-valley.png` itself is **PASS** as the lock: 1280×720 RGB, opaque, read-only.
 
@@ -69,7 +69,7 @@ ART lock: no `prop-pine`, `prop-tree-gold`, pixel-ball trees, stall, or anvil **
 | File | Valley? | Notes |
 |------|---------|-------|
 | `prop-tree.png` | No (used in `zone_map.gd` wild) | Second crown language. Keep off the enter valley. |
-| `prop-tree-gold.png` / `prop-tree-tall.png` / `prop-tree-wide.png` / `prop-pine.png` / `prop-pine-snow.png` | Not in `valley_map.gd` | Mixed pack. Do not stamp on valley. |
+| `prop-tree-gold.png` / `prop-tree-tall.png` / `prop-tree-wide.png` / `prop-pine.png` / `prop-pine-snow.png` | Not in `valley_world.gd` | Mixed pack. Do not stamp on valley. |
 | `prop-stall.png` / `prop-anvil.png` | Forbidden on valley (tests lock this) | OK as workshop / stall props elsewhere |
 | `char-warm-*` / `char-pine-*` | Used | Same pen as cover people — **PASS** |
 | `tex-slip.png` / `tex-plaque.png` | HUD | Wood language — **PASS** |
@@ -86,15 +86,15 @@ Other unused mixed-pack trees are reserved for wild / kitchen, not orphans.
 
 | Reference Location | Expected Path |
 |-------------------|---------------|
-| — | None. `valley_map.gd` / `look.gd` / `boot.gd` / `room.gd` names exist on disk. |
+| — | None. `valley_world.gd` / `look.gd` / `boot.gd` / `room.gd` names exist on disk. |
 
 ## Recommendations
 
 1. **Do not recrop** `prop-cover-*`, `prop-hut`, `prop-lodge` again.
-2. Next studio command: `/asset-spec` for one painted valley bed or a magenta-key of `cover-valley.png`.
+2. Play valley is `valley.tscn` + `bed-valley.png`. Do not recrop FAIL files.
 3. Keep cover read-only.
 4. Do not mass-rename to the template pattern.
-5. Keep stall / anvil / pixel-ball trees off `valley_map.gd`.
+5. Keep stall / anvil / pixel-ball trees off `valley_world.gd`.
 
 ## Verdict: NON-COMPLIANT
 

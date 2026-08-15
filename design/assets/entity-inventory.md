@@ -2,7 +2,7 @@
 
 > Generated: 2026-08-15
 > Scope: **valley look only** (P1). Not a full-game inventory.
-> Sources: `design/art/art-bible.md`, `godot/docs/ART.md`, `docs/asset-audit.md`, `design/gdd/game-concept.md`, `godot/scripts/valley_map.gd` (read, not edited)
+> Sources: `design/art/art-bible.md`, `godot/docs/ART.md`, `docs/asset-audit.md`, `design/gdd/game-concept.md`, `godot/scripts/valley_world.gd`
 
 ## Entities
 

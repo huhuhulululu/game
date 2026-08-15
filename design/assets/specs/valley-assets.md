@@ -4,10 +4,10 @@
 > **Art Bible**: design/art/art-bible.md
 > **Generated**: 2026-08-15
 > **Review**: lean (art-director gate skipped). Technical sizes taken from art-bible §8.
-> **Status**: 4 assets specced / 0 approved / 0 in production / 2 reuse-done
-> **Do not implement art in the spec turn.** Do not recrop FAIL PNGs.
+> **Status**: 4 assets specced / 1 in production (ASSET-001 Path A) / 2 reuse-done / Path B unused
+> **Play valley uses `bed-valley.png`.** Do not recrop FAIL PNGs.
 
-World lock (read from `valley_map.gd`, not edited): `TILE = 36`, map `34 × 17` → **1224 × 612** px. Viewport 1280×720. Enter camera must still show trees left of the lodge, behind 暖, and on the creek — painted into the bed, not stamped.
+World lock (read from `valley_logic.gd`): `TILE = 36`, map `34 × 17` → **1224 × 612** px. Viewport 1280×720. Enter camera must still show trees left of the lodge, behind 暖, and on the creek — painted into the bed, not stamped.
 
 ---
 
@@ -60,16 +60,16 @@ Painterly warm-dusk valley, soft-edge illustration, olive-gold earth, west sunli
 **Negative:** sticker sprite, hard rect crop, mosaic upscale, pixel-ball tree, Kenney pack, orange color-grade overlay, sanity meter, 魂, 饥荒 face, magenta leftover in the bed (bed is not keyed).
 
 **Acceptance (Path A):**
-- [ ] No rectangular sticker box in the enter frame
-- [ ] No leftover dusk RGB in transparent pixels (bed is opaque paint, or if RGBA then `a=0` ⇒ RGB `0,0,0`)
-- [ ] Hut and lodge feet in the bed
-- [ ] Enter-frame trees visible without `prop-cover-*`
-- [ ] Players are cover-coat sprites (`char-warm` camel, `char-pine` olive), not DST faces
-- [ ] HUD unchanged: no 魂, no 饿 number
-- [ ] `cover-valley.png` untouched
-- [ ] FAIL PNGs not overwritten
+- [x] No rectangular sticker box in the enter frame
+- [x] No leftover dusk RGB in transparent pixels (bed is opaque paint, or if RGBA then `a=0` ⇒ RGB `0,0,0`)
+- [x] Hut and lodge feet in the bed
+- [x] Enter-frame trees visible without `prop-cover-*`
+- [x] Players are cover-coat sprites (`char-warm` camel, `char-pine` olive), not DST faces
+- [x] HUD unchanged: no 魂, no 饿 number
+- [x] `cover-valley.png` untouched
+- [x] FAIL PNGs not overwritten
 
-**Status:** Needed
+**Status:** Done (Path A — `godot/assets/art/bed-valley.png` on `valley.tscn`)
 
 ---
 
@@ -171,7 +171,7 @@ Wood slips from cabin grain + paper. Copy like `日 0 · 春 · 白天 · 金 20
 | `prop-hut.png` | FAIL |
 | `prop-lodge.png` | FAIL |
 
-Leave them on disk. A later implement story may stop *using* them. This spec does not rewrite `valley_map.gd`.
+Leave them on disk. Play no longer uses them. Do not recrop.
 
 ---
 
@@ -183,9 +183,6 @@ Kitchen / mine / wild props — other zones.
 
 ---
 
-## Implement later (not this turn)
+## Rebuild
 
-1. Paint or sit ASSET-001 (Path A) **or** produce ASSET-002 (Path B).
-2. Then change `godot/scripts/valley_map.gd` and the tests that string-lock FAIL names. That is `/dev-story`, not this file.
-3. Do not export HTML5 unless a hook requires it.
-4. Do not add look in `src/`.
+Path A is in production: `valley.tscn` + `bed-valley.png`. Sticker `valley_map.gd` is torn out. Do not add look in `src/`.

@@ -43,6 +43,25 @@ test("Godot HTML5 export is what phones open", () => {
 test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.ok(existsSync("godot/fonts/kai.ttf"));
   assert.ok(existsSync("godot/assets/art/cover-valley.png"));
+  assert.ok(existsSync("godot/assets/art/bed-valley.png"));
+  assert.ok(existsSync("godot/scenes/valley.tscn"));
+  assert.ok(existsSync("godot/scenes/play.tscn"));
+  assert.ok(existsSync("godot/scripts/valley_world.gd"));
+  assert.ok(existsSync("godot/scripts/valley_logic.gd"));
+  assert.ok(!existsSync("godot/scripts/valley_map.gd"));
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng[0], 0x89);
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const app = readFileSync("godot/scripts/app.gd", "utf8");
+  assert.match(app, /scenes\/play\.tscn/);
+  const playScene = readFileSync("godot/scenes/play.tscn", "utf8");
+  assert.match(playScene, /scripts\/play\.gd/);
+  const valleyScene = readFileSync("godot/scenes/valley.tscn", "utf8");
+  assert.match(valleyScene, /bed-valley\.png/);
+  assert.match(valleyScene, /valley_world\.gd/);
+  assert.match(valleyScene, /valley_logic\.gd/);
+  assert.doesNotMatch(valleyScene, /prop-cover-|prop-hut|prop-lodge/);
   assert.ok(existsSync("godot/assets/art/ground-valley.png"));
   const look = readFileSync("godot/scripts/look.gd", "utf8");
   assert.match(look, /kai\.ttf/);
@@ -129,22 +148,19 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const room = readFileSync("godot/scripts/room.gd", "utf8");
   assert.match(room, /cover-valley/);
   assert.doesNotMatch(room, /char-warm|char-pine|Wanderer/);
-  const valley = readFileSync("godot/scripts/valley_map.gd", "utf8");
-  assert.match(valley, /ground-valley/);
-  assert.match(valley, /prop-hut|prop-lodge/);
-  assert.match(valley, /4\.55, 4\.72, 176, 132/);
-  assert.match(valley, /16\.20, 3\.85, 220, 168/);
-  assert.match(valley, /People, two houses, land, creek/);
-  assert.match(valley, /prop-cover-tree/);
-  assert.match(valley, /prop-cover-lamp/);
-  assert.match(valley, /prop-cover-shore/);
-  assert.match(valley, /6\.35, 5\.15/);
-  assert.match(valley, /12\.15, 3\.55/);
-  assert.match(valley, /10\.55, 7\.20/);
-  assert.match(valley, /func _sit/);
-  assert.match(valley, /get_width/);
-  assert.match(valley, /prop-cover-tree-b/);
-  assert.match(valley, /8\.15, 7\.35, 52, 68/);
+  const valley = readFileSync("godot/scripts/valley_world.gd", "utf8");
+  const logic = readFileSync("godot/scripts/valley_logic.gd", "utf8");
+  const playSrc = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(valley, /bed-valley\.png/);
+  assert.match(valley, /VALLEY_DUSK/);
+  assert.match(valley, /class_name ValleyWorld/);
+  assert.match(logic, /class_name ValleyLogic/);
+  assert.match(logic, /show_crops/);
+  assert.match(playSrc, /scenes\/valley\.tscn/);
+  assert.match(playSrc, /ValleyWorld/);
+  assert.doesNotMatch(valley, /prop-cover-tree|prop-cover-lamp|prop-cover-shore|prop-cover-verge|prop-hut|prop-lodge/);
+  assert.doesNotMatch(logic, /prop-cover-tree|prop-cover-lamp|prop-cover-shore|prop-cover-verge|prop-hut|prop-lodge/);
+  assert.doesNotMatch(playSrc, /prop-cover-tree|prop-hut\.png|prop-lodge\.png/);
   assert.doesNotMatch(valley, /prop-mine\.png/);
   assert.doesNotMatch(valley, /prop-stall\.png/);
   assert.doesNotMatch(valley, /prop-anvil\.png/);
@@ -155,6 +171,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.doesNotMatch(valley, /prop-tree\.png/);
   assert.doesNotMatch(valley, /prop-dock\.png/);
   assert.doesNotMatch(valley, /prop-gate\.png/);
+  assert.doesNotMatch(logic, /prop-stall\.png|prop-anvil\.png|prop-pine\.png|prop-tree\.png/);
   const unify = readFileSync("tools/unify_dusk.py", "utf8");
   assert.match(unify, /cover-valley/);
   assert.match(unify, /quiet_scrub/);
@@ -189,6 +206,8 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.ok(existsSync("godot/assets/art/prop-cover-lamp.png"));
   assert.ok(existsSync("godot/assets/art/prop-cover-shore.png"));
   assert.ok(existsSync("godot/assets/art/prop-cover-verge.png"));
+  assert.ok(existsSync("godot/assets/art/prop-hut.png"));
+  assert.ok(existsSync("godot/assets/art/prop-lodge.png"));
   const oneLang = readFileSync("tools/paint_one_language.py", "utf8");
   assert.match(oneLang, /Does not touch the cover/);
   assert.match(oneLang, /prop-tree/);
@@ -206,8 +225,11 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const sitMain = readFileSync("tools/paint_valley_sit.py", "utf8");
   assert.match(sitMain, /Roofs are unify_dusk/);
   assert.doesNotMatch(sitMain, /save\(paint_house\("hut"\)/);
-  assert.match(valley, /floor-valley/);
-  assert.match(valley, /_bend\(/);
+  const bedPaint = readFileSync("tools/paint_valley_bed.py", "utf8");
+  assert.match(bedPaint, /Does not touch the cover/);
+  assert.match(bedPaint, /bed-valley/);
+  assert.doesNotMatch(bedPaint, /save\(.*cover-valley/);
+  assert.doesNotMatch(valley, /floor-valley|ground-valley|_bend\(/);
   assert.doesNotMatch(valley, /band-river|band-path|band-meadow/);
   const floorPaint = readFileSync("tools/paint_valley_sit.py", "utf8");
   assert.match(floorPaint, /308\.0 \+ fx \* 82\.0/);
@@ -220,7 +242,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.doesNotMatch(valley, /_tile\(/);
   assert.doesNotMatch(valley, /prop-cabin|prop-inn/);
   assert.doesNotMatch(play, /modulate = Color\(1, 1, 1, 0\.55\)/);
-  const scripts = ["boot.gd", "room.gd", "play.gd", "look.gd", "valley_map.gd", "actor_view.gd", "ear.gd"]
+  const scripts = ["boot.gd", "room.gd", "play.gd", "look.gd", "valley_world.gd", "valley_logic.gd", "actor_view.gd", "ear.gd"]
     .map((n) => readFileSync(`godot/scripts/${n}`, "utf8"))
     .join("\n");
   assert.doesNotMatch(scripts, /Wanderer|Wilson|Don't Starve|Dont Starve/i);
@@ -327,7 +349,7 @@ test("Godot village shows crops, fortune and the dawn board from the same snap",
   assert.match(play, /熟了/);
   assert.doesNotMatch(play, /waitingFortune/);
   assert.doesNotMatch(play, /另一部手机|必须两/);
-  const valley = readFileSync("godot/scripts/valley_map.gd", "utf8");
+  const valley = readFileSync("godot/scripts/valley_logic.gd", "utf8");
   assert.match(valley, /show_crops/);
   assert.match(valley, /prop-tuft|prop-bush/);
   assert.doesNotMatch(valley, /prop-cabin|prop-inn/);

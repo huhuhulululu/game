@@ -1,0 +1,46 @@
+class_name ValleyWorld
+extends Node2D
+
+## One painted dusk. People walk on it. No sticker crops.
+
+var _logic: ValleyLogic
+
+
+func _ready() -> void:
+	texture_filter = TEXTURE_FILTER_LINEAR
+	_logic = get_node_or_null("Logic") as ValleyLogic
+	if _logic == null:
+		_logic = ValleyLogic.new()
+		_logic.name = "Logic"
+		add_child(_logic)
+	var bed := get_node_or_null("Bed") as Sprite2D
+	if bed == null:
+		bed = Sprite2D.new()
+		bed.name = "Bed"
+		add_child(bed)
+		move_child(bed, 0)
+	_fit_bed(bed)
+
+
+func size_px() -> Vector2:
+	return _logic.size_px() if _logic else ValleyLogic.SIZE_PX
+
+
+func show_crops(plots: Array) -> void:
+	if _logic:
+		_logic.show_crops(plots)
+
+
+func _fit_bed(bed: Sprite2D) -> void:
+	var sheet := bed.texture
+	if sheet == null:
+		sheet = load("res://assets/art/bed-valley.png") as Texture2D
+		bed.texture = sheet
+	bed.centered = false
+	bed.position = Vector2.ZERO
+	bed.z_index = -1
+	bed.texture_filter = TEXTURE_FILTER_LINEAR
+	bed.modulate = Look.VALLEY_DUSK
+	var sz := size_px()
+	if sheet:
+		bed.scale = Vector2(sz.x / float(sheet.get_width()), sz.y / float(sheet.get_height()))

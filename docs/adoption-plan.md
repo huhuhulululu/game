@@ -184,4 +184,4 @@ Already written from the audit. Do not `/gate-check` backward to Concept.
 
 ## Re-run
 
-The three commands plus `/asset-spec` are done. Spec: `design/assets/specs/valley-assets.md`. Next: **`/dev-story production/epics/p1-look/story-001-valley-painted-bed.md`**. Do not recrop sticker PNGs. Do not `/brainstorm`. `/team-polish` is after the bed exists. A dated `/adopt` report may be added later; this file stays the Path D map.
+Rebuild docs + packed valley are in. Next: **`/team-polish`** the valley bed, then `/story-done` on `r1-painted-valley`. Do not recrop sticker PNGs. Do not `/brainstorm`. Do not restore `valley_map.gd`. A dated `/adopt` report may be added later; this file stays the Path D map.

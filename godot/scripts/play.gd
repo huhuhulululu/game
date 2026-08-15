@@ -3,7 +3,7 @@ extends Node2D
 ## Valley / mine / kitchen. Authority stays on the server.
 
 var _world: Node2D
-var _valley: ValleyMap
+var _valley: ValleyWorld
 var _zone_map: ZoneMap
 var _actors: Dictionary = {}
 var _foes: Array[Node2D] = []
@@ -52,7 +52,7 @@ func _ready() -> void:
 	_world = Node2D.new()
 	_world.y_sort_enabled = true
 	add_child(_world)
-	_valley = ValleyMap.new()
+	_valley = preload("res://scenes/valley.tscn").instantiate() as ValleyWorld
 	_world.add_child(_valley)
 	_zone_map = ZoneMap.new()
 	_zone_map.visible = false
