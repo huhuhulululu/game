@@ -44,20 +44,20 @@ HUT_POLY = (
     (18, 140),
 )
 LODGE_POLY = (
-    (95, 85),
-    (120, 40),
-    (160, 18),
-    (210, 10),
-    (270, 16),
-    (320, 32),
-    (338, 50),
-    (338, 265),
-    (290, 295),
-    (180, 305),
-    (110, 298),
-    (92, 240),
-    (88, 160),
-    (90, 110),
+    (108, 88),
+    (128, 42),
+    (168, 20),
+    (214, 12),
+    (272, 18),
+    (322, 34),
+    (338, 52),
+    (338, 258),
+    (292, 288),
+    (188, 298),
+    (118, 290),
+    (104, 236),
+    (100, 158),
+    (104, 112),
 )
 
 
@@ -148,8 +148,8 @@ def fade_bank(im: Image.Image, pad: float = 0.26) -> Image.Image:
     yy = np.arange(h, dtype=np.float32)[:, None]
     gold_water = (yy > h * 0.40) & (lum > 80.0) & (r > 140.0) & (r > b + 8.0)
     wet = (yy > h * 0.52) & ((b + 8.0 >= r) | ((lum > 58.0) & (contrast < 16.0)))
-    rock = (lum < 72.0) & (contrast > 12.0) & (yy < h * 0.62)
-    stop = rock & (yy < h * 0.58)
+    rock = (lum < 58.0) & (contrast > 16.0) & (yy < h * 0.52) & (r > b)
+    stop = rock & (yy < h * 0.48)
     seeds = [(x, h - 1) for x in range(w)] + [(x, h - 2) for x in range(w) if h > 1]
     water = _walk(rgb, seeds, stop, 34.0, 20.0) | gold_water | wet
     water = water & ~stop
@@ -350,7 +350,20 @@ def _poly_mask(size: tuple[int, int], poly: tuple[tuple[int, int], ...]) -> np.n
     return np.asarray(mask) > 127
 
 
-def cut_tree(im: Image.Image) -> Image.Image:
+def _nibble_clip(keep: np.ndarray, contrast: np.ndarray, left: bool, bottom: bool) -> np.ndarray:
+    # Cover edge is a knife. Eat the flat lip, keep high-contrast leaf tips.
+    h, w = keep.shape
+    out = keep.copy()
+    if left and w > 8 and float(keep[:, 0].mean()) > 0.40:
+        for d in range(min(7, w)):
+            out[:, d] = out[:, d] & (contrast[:, d] > 18.0)
+    if bottom and h > 8 and float(keep[-1].mean()) > 0.40:
+        for d in range(min(6, h)):
+            out[h - 1 - d] = out[h - 1 - d] & (contrast[h - 1 - d] > 16.0)
+    return out
+
+
+def cut_tree(im: Image.Image, clip_left: bool = False, clip_bottom: bool = False) -> Image.Image:
     # Cut to the leaves. Eat cover sky and dusk ground. Do not stretch later.
     rgb = np.asarray(im.convert("RGB"), dtype=np.float32)
     h, w = rgb.shape[:2]
@@ -373,6 +386,7 @@ def cut_tree(im: Image.Image) -> Image.Image:
     rim = enclosed_gold & _dilate(leaf, 3) & ~big_gold
     ground = (yy > h * 0.80) & (contrast < 10.0) & (lum > 48.0) & (r > b)
     keep = (leaf | rim) & ~sky & ~ground & ~haze & ~big_gold
+    keep = _nibble_clip(keep, contrast, clip_left, clip_bottom)
     keep = _keep_big(keep, min_px=max(16, (h * w) // 180))
     alpha = np.where(keep, 255.0, 0.0)
     # Sit the sprays into the floor. A hard crop lip is a box.
@@ -405,14 +419,23 @@ def cut_house(im: Image.Image, tol: float = 38.0, sit: float = 0.36, poly: tuple
     body = _dilate(_poly_mask((w, h), poly), 3)
     # The poly is a search region. Keep timber and glass, not the dusk field inside it.
     sky = (gold & (yy < h * 0.42)) | ((yy < h * 0.12) & (lum > 90.0))
-    wood = (lum < 80.0) & (sat > 0.42) & (r > b + 8.0) & (contrast > 8.0)
-    roof = (yy < h * 0.48) & (lum < 118.0) & (sat > 0.30) & (r > b + 4.0) & ~((lum > 132.0) & (r > 180.0))
-    keep = body & (wood | roof | glow) & ~sky & ~mountain
-    woodish = (lum < 90.0) & (sat > 0.38) & (r > b + 6.0) & ~gold
+    wood = (lum < 80.0) & (sat > 0.50) & (r > g + 4.0) & (r > b + 10.0) & (contrast > 8.0)
+    roof = (
+        (yy < h * 0.46)
+        & (lum < 112.0)
+        & (sat > 0.36)
+        & (r > g + 2.0)
+        & (r > b + 6.0)
+        & ~((lum > 128.0) & (r > 180.0))
+    )
+    # Hill trees are cooler and flatter than shingles.
+    foliage = (yy < h * 0.44) & (sat < 0.60) & ((g + 4.0 >= r) | ((r - b) < 48.0)) & ~glow
+    keep = body & (wood | roof | glow) & ~sky & ~mountain & ~foliage
+    woodish = (lum < 86.0) & (sat > 0.46) & (r > g + 2.0) & (r > b + 8.0) & ~gold & ~foliage
     for _ in range(4):
-        keep = keep | (_dilate(keep, 3) & woodish & body & ~sky & ~mountain)
+        keep = keep | (_dilate(keep, 3) & woodish & body & ~sky & ~mountain & ~foliage)
     keep = keep | (glow & body)
-    keep = np.where((yy < h * 0.22) & ~glow, keep & (lum < 112.0) & ~mountain, keep)
+    keep = np.where((yy < h * 0.20) & ~glow, keep & (lum < 108.0) & ~mountain & ~foliage, keep)
     keep = _fill_small_holes(keep, max_hole=max(36, (h * w) // 120))
     foot = (yy > h * 0.74) & (contrast > 12.0) & _dilate(keep, 5) & ~gold & (lum < 95.0)
     keep = keep | (foot & body)
@@ -445,11 +468,11 @@ def sit_cover_houses() -> None:
 def sit_cover_grove() -> None:
     # Trees, lamp, shore from the same cover. Does not touch the cover.
     cover = Image.open(ART / "cover-valley.png").convert("RGBA")
-    willow = cut_tree(cover.crop(TREE_WILLOW))
+    willow = cut_tree(cover.crop(TREE_WILLOW), clip_left=True, clip_bottom=True)
     willow.save(ART / "prop-cover-tree.png")
     print("wrote prop-cover-tree.png from cover willow", willow.size)
     # Native large willow sprays. Do not sit the titled grove haze as a tree.
-    grove = cut_tree(cover.crop(TREE_DENSE))
+    grove = cut_tree(cover.crop(TREE_DENSE), clip_left=True, clip_bottom=True)
     grove.save(ART / "prop-cover-tree-b.png")
     print("wrote prop-cover-tree-b.png from cover dense willow", grove.size)
     lamp = trim_alpha(kill_haze(keep_lamp(cover.crop(LAMP_BOX)), 40.0))
