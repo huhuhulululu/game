@@ -26,6 +26,7 @@ export interface ActorSnap {
   hunger: number;
   torch: boolean;
   ping: number;
+  away?: boolean;
   busy?: "" | "chop" | "sit" | "fish" | "forge";
 }
 

@@ -8,6 +8,7 @@ var warm := true
 var facing := 2
 var moving := false
 var ping := 0.0
+var away := false
 var busy := ""
 var fishing := "off"
 var fish_mark := 0.0
@@ -15,6 +16,7 @@ var fish_pull := 0.0
 var _t := 0.0
 var _sprite: Sprite2D
 var _shadow: Sprite2D
+var _glow: Sprite2D
 var _name: Label
 var _name_card: Panel
 var _bar_bg: Panel
@@ -29,6 +31,10 @@ func _ready() -> void:
 	_shadow.position = Vector2(0, 2)
 	_shadow.modulate = Color(1, 1, 1, 0.95)
 	add_child(_shadow)
+	_glow = Look.ping_glow(88)
+	_glow.visible = false
+	_glow.position = Vector2(0, -8)
+	add_child(_glow)
 	_sprite = Sprite2D.new()
 	_sprite.centered = true
 	_sprite.offset = Vector2.ZERO
@@ -83,6 +89,7 @@ func apply(data: Dictionary, now: float) -> void:
 	facing = int(data.get("facing", 2))
 	warm = str(data.get("side", "left")) != "right"
 	ping = float(data.get("ping", 0))
+	away = bool(data.get("away", false))
 	busy = str(data.get("busy", ""))
 	fishing = str(data.get("fishing", "off"))
 	fish_mark = float(data.get("fishMark", 0))
@@ -149,6 +156,15 @@ func _apply() -> void:
 		_sprite.scale = Vector2(s, s)
 		_sprite.position = Vector2(0.0, -Look.BODY * (Look.FOOT - 0.5))
 	_sprite.flip_h = facing == 3
+	modulate = Color(0.70, 0.64, 0.56) if away else Color(1, 1, 1)
+	if _glow:
+		var lit := ping > 0.04
+		_glow.visible = lit
+		if lit:
+			var pulse := clampf(ping / 1.6, 0.0, 1.0)
+			_glow.modulate = Color(1.0, 0.94, 0.82, 0.22 + pulse * 0.42)
+			var grow := 0.85 + (1.0 - pulse) * 0.55
+			_glow.scale = Vector2(grow, grow * 0.72)
 	if _shadow:
 		_shadow.position = Vector2(0, 2)
 		_shadow.modulate.a = 1.0

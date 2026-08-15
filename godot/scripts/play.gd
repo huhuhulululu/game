@@ -40,6 +40,7 @@ var _visible: Dictionary = {}
 var _map_w := 0
 var _hud_sign: Label
 var _sign_card: Panel
+var _hud_mate: Label
 var _plot_sig := ""
 
 
@@ -72,7 +73,7 @@ func _hud() -> void:
 	add_child(layer)
 	var card := Panel.new()
 	card.position = Vector2(16, 16)
-	card.size = Vector2(320, 128)
+	card.size = Vector2(320, 148)
 	card.add_theme_stylebox_override("panel", Look.plaque_box())
 	layer.add_child(card)
 	_hud_place = Look.ink_label("山谷", 22)
@@ -93,6 +94,10 @@ func _hud() -> void:
 	_hud_pot.position = Vector2(16, 90)
 	_hud_pot.size = Vector2(288, 22)
 	card.add_child(_hud_pot)
+	_hud_mate = Look.ink_label("", 13, Look.GOLD)
+	_hud_mate.position = Vector2(16, 114)
+	_hud_mate.size = Vector2(288, 24)
+	card.add_child(_hud_mate)
 	_sign_card = Panel.new()
 	_sign_card.position = Vector2(352, 16)
 	_sign_card.size = Vector2(400, 88)
@@ -105,7 +110,7 @@ func _hud() -> void:
 	_hud_sign.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_sign_card.add_child(_hud_sign)
 	_bag = HBoxContainer.new()
-	_bag.position = Vector2(16, 152)
+	_bag.position = Vector2(16, 172)
 	_bag.add_theme_constant_override("separation", 8)
 	layer.add_child(_bag)
 	_toasts = VBoxContainer.new()
@@ -246,6 +251,7 @@ func _on_snap(s: Dictionary) -> void:
 	else:
 		_prompt.add_theme_color_override("font_color", Look.INK)
 	_paint_signs(s)
+	_paint_mate(s)
 	var you_held := _you_held_name(s)
 	_you_held = _you_held_id(s)
 	_hud_held.text = "手里 · %s" % you_held if you_held != "" else "手里空着"
@@ -316,6 +322,25 @@ func _paint_signs(s: Dictionary) -> void:
 		bits.append("今晚 %s" % "、".join(names))
 	_hud_sign.text = "\n".join(bits)
 	_sign_card.visible = bits.size() > 0
+
+
+func _paint_mate(s: Dictionary) -> void:
+	if _hud_mate == null:
+		return
+	var raw: Variant = s.get("partner", {})
+	if typeof(raw) != TYPE_DICTIONARY:
+		_hud_mate.text = ""
+		return
+	var row: Dictionary = raw
+	var name := str(row.get("name", ""))
+	if name == "" or name == "还没来":
+		_hud_mate.text = ""
+		return
+	if bool(row.get("online", false)):
+		var where := str(row.get("where", ""))
+		_hud_mate.text = "%s 在%s" % [name, where] if where != "" else name
+	else:
+		_hud_mate.text = "%s 断线了，人还在原地" % name
 
 
 func _paint_crops(s: Dictionary) -> void:
@@ -557,7 +582,7 @@ func _remember_vis(s: Dictionary) -> void:
 func _paint_atlas(s: Dictionary) -> void:
 	if _atlas == null:
 		return
-	if _zone != "wild" or _tiles.is_empty():
+	if _tiles.is_empty():
 		_atlas.visible = false
 		return
 	_atlas.visible = true
@@ -565,6 +590,7 @@ func _paint_atlas(s: Dictionary) -> void:
 	var w := str(_tiles[0]).length()
 	if w <= 0 or h <= 0:
 		return
+	var fog := _zone == "wild"
 	var seen := {}
 	for raw in s.get("revealed", []):
 		seen[int(raw)] = true
@@ -576,7 +602,7 @@ func _paint_atlas(s: Dictionary) -> void:
 		var row := str(_tiles[y])
 		for x in mini(w, row.length()):
 			var key := y * w + x
-			if not seen.has(key):
+			if fog and not seen.has(key):
 				img.set_pixel(x, y, Color(0.36, 0.26, 0.16, 0.55))
 				continue
 			var ch := row[x]
@@ -591,17 +617,48 @@ func _paint_atlas(s: Dictionary) -> void:
 				c = Color(0.86, 0.46, 0.22, 1.0)
 			elif ch == "L":
 				c = Color(0.78, 0.42, 0.18, 1.0)
-			if not _visible.has(key):
+			elif ch == "P":
+				c = Color(0.52, 0.38, 0.22, 0.9)
+			if fog and not _visible.has(key):
 				c.a = 0.55
 			img.set_pixel(x, y, c)
+	var you_ping := float(_me(s).get("ping", 0))
+	var mate_ping := 0.0
+	var mate: Dictionary = {}
+	var partner_raw: Variant = s.get("partner", {})
+	if typeof(partner_raw) == TYPE_DICTIONARY:
+		mate_ping = float((partner_raw as Dictionary).get("ping", 0))
+	var at_raw: Variant = s.get("partnerAt", {})
+	if typeof(at_raw) == TYPE_DICTIONARY:
+		mate = at_raw
+	var same_zone := mate.size() > 0 and str(mate.get("zone", _zone)) == _zone
+	if same_zone and mate_ping > 0.04:
+		_atlas_flash(img, w, h, float(mate.get("x", 0)), float(mate.get("y", 0)), Color(0.96, 0.90, 0.78, 0.95))
 	var you: Dictionary = s.get("youAt", {})
+	if you.size() > 0 and you_ping > 0.04:
+		_atlas_flash(img, w, h, float(you.get("x", 0)), float(you.get("y", 0)), Color(0.96, 0.90, 0.78, 0.95))
+	if same_zone:
+		_atlas_dot(img, w, h, float(mate.get("x", 0)), float(mate.get("y", 0)), Color(0.25, 0.43, 0.36, 1.0))
 	if you.size() > 0:
-		var ux := clampi(int(float(you.get("x", 0)) / 36.0), 0, w - 1)
-		var uy := clampi(int(float(you.get("y", 0)) / 36.0), 0, h - 1)
-		img.set_pixel(ux, uy, Color(0.77, 0.36, 0.15, 1.0))
+		_atlas_dot(img, w, h, float(you.get("x", 0)), float(you.get("y", 0)), Color(0.77, 0.36, 0.15, 1.0))
 	_atlas.texture = ImageTexture.create_from_image(img)
-	_atlas.custom_minimum_size = Vector2(w * 4.0, h * 4.0)
-	_atlas.size = Vector2(w * 4.0, h * 4.0)
+	var cell := 4.0 if _zone == "wild" or _zone == "valley" else 6.0
+	_atlas.custom_minimum_size = Vector2(w * cell, h * cell)
+	_atlas.size = Vector2(w * cell, h * cell)
+
+
+func _atlas_dot(img: Image, w: int, h: int, px: float, py: float, c: Color) -> void:
+	var x := clampi(int(px / 36.0), 0, w - 1)
+	var y := clampi(int(py / 36.0), 0, h - 1)
+	img.set_pixel(x, y, c)
+
+
+func _atlas_flash(img: Image, w: int, h: int, px: float, py: float, c: Color) -> void:
+	var cx := clampi(int(px / 36.0), 0, w - 1)
+	var cy := clampi(int(py / 36.0), 0, h - 1)
+	for y in range(maxi(0, cy - 1), mini(h, cy + 2)):
+		for x in range(maxi(0, cx - 1), mini(w, cx + 2)):
+			img.set_pixel(x, y, c)
 
 
 func _place(z: String, rush: bool, floor: int, biome := "") -> String:

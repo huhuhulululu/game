@@ -691,6 +691,42 @@ describe("living systems", () => {
     assert.equal(one.partner?.name, "还没来");
     assert.equal(one.partner?.online, false);
     assert.equal(solo.toasts.some((t) => t.text.includes("喊")), false);
+    assert.equal((one.partner?.ping ?? 0) > 0, false);
+  });
+
+  it("a dropped phone stays put and only an away seat can sit back", () => {
+    const w = new World("DROP1");
+    w.addPlayer("a", "暖", "left");
+    w.addPlayer("b", "松", "right");
+    const left = w.players.get("a");
+    const right = w.players.get("b");
+    assert.ok(left && right);
+    right.x = 333;
+    right.y = 219;
+    right.zone = "valley";
+    w.markAway("b");
+    assert.equal(w.present().length, 1);
+    assert.equal(roomIsFull(w.present().length), false);
+    assert.equal(w.players.size, 2);
+    const parked = w.snapshot("a");
+    const body = parked.actors.find((p) => p.id === "b");
+    assert.ok(body);
+    assert.equal(body.x, 333);
+    assert.equal(body.y, 219);
+    assert.equal(body.away, true);
+    assert.equal(parked.partner?.online, false);
+    assert.equal(parked.partner?.name, "松");
+    assert.ok(parked.partner?.name !== "还没来");
+    assert.equal(w.reclaim("丙", "left"), null);
+    assert.equal(w.reclaim("松", "right"), "b");
+    w.markBack("b");
+    assert.equal(right.x, 333);
+    assert.equal(right.y, 219);
+    assert.equal(w.snapshot("a").actors.find((p) => p.id === "b")?.away, false);
+    assert.equal(w.present().length, 2);
+    assert.equal(roomIsFull(w.present().length), true);
+    assert.equal(w.reclaim("丁", "right"), null);
+    assert.equal(w.addPlayer("c", "丙", "right"), null);
   });
 
   it("walking near a partner writes the seen path into both maps", () => {

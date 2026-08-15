@@ -191,3 +191,28 @@ test("Godot village shows crops, fortune and the dawn board from the same snap",
   assert.match(world, /还早。天黑再歇/);
   assert.match(world, /一个人能问|问今日/);
 });
+
+test("Godot two phones share a shout, a map, and a seat", () => {
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_paint_mate/);
+  assert.match(play, /断线了，人还在原地/);
+  assert.match(play, /还没来/);
+  assert.match(play, /partnerAt/);
+  assert.match(play, /_atlas_flash/);
+  assert.match(play, /mate_ping|partner.*ping/);
+  assert.doesNotMatch(play, /等另一部|空等|waitingFortune/);
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /ping_glow/);
+  assert.match(actor, /away/);
+  assert.match(actor, /ping > 0/);
+  assert.doesNotMatch(actor, /Wilson|Don't Starve|Dont Starve/i);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /ping_glow/);
+  assert.match(look, /ping_tex/);
+  assert.match(look, /0\.96, 0\.90, 0\.78/);
+  const world = readFileSync("src/sim/world.ts", "utf8");
+  assert.match(world, /away: this\.away\.has/);
+  assert.match(world, /present\(\)/);
+  assert.match(world, /reclaim\(/);
+  assert.match(world, /this\.near\(/);
+});

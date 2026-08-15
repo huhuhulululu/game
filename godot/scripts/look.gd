@@ -140,6 +140,26 @@ static func shadow_tex() -> Texture2D:
 	return ImageTexture.create_from_image(img)
 
 
+static func ping_tex() -> Texture2D:
+	var img := Image.create(96, 96, false, Image.FORMAT_RGBA8)
+	for y in 96:
+		for x in 96:
+			var d := Vector2((x - 48) / 46.0, (y - 48) / 46.0).length()
+			var a := clampf(1.0 - d, 0.0, 1.0)
+			img.set_pixel(x, y, Color(0.96, 0.90, 0.78, a * a * 0.85))
+	return ImageTexture.create_from_image(img)
+
+
+static func ping_glow(width: float) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.texture = ping_tex()
+	s.centered = true
+	s.scale = Vector2(width / 96.0, width / 96.0)
+	s.z_index = -1
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	return s
+
+
 static func contact(width: float) -> Sprite2D:
 	var s := Sprite2D.new()
 	s.texture = shadow_tex()

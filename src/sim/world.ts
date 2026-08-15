@@ -456,6 +456,7 @@ export class World {
       hunger: Math.round(p.hunger),
       torch: p.torch > 0 || p.held.split(":")[0] === "torch",
       ping: p.ping,
+      away: this.away.has(p.id),
       busy: this.actorBusy(p),
     };
   }
