@@ -101,6 +101,20 @@ def soften_tex(im: Image.Image) -> Image.Image:
     return im.convert("RGB").filter(ImageFilter.GaussianBlur(radius=0.28))
 
 
+def normalize_char(im: Image.Image, name: str) -> Image.Image:
+    """Put every person on the same box so walk/chop/sit feet line up."""
+    w, h = im.size
+    box_h = 640
+    box_w = 560 if any(k in name for k in ("fish", "forge", "chop", "sit")) else 420
+    scale = min(box_h / max(1, h), box_w / max(1, w))
+    nw = max(1, round(w * scale))
+    nh = max(1, round(h * scale))
+    im = im.resize((nw, nh), Image.Resampling.LANCZOS)
+    canvas = Image.new("RGBA", (box_w, box_h), (0, 0, 0, 0))
+    canvas.paste(im, ((box_w - nw) // 2, box_h - nh), im)
+    return canvas
+
+
 def process(path: Path) -> None:
     name = path.name
     im = Image.open(path)
@@ -110,9 +124,10 @@ def process(path: Path) -> None:
         out = shrink(soften_tex(square_tex(im.convert("RGB"))), MAX_TEX)
         out.save(path, "PNG", optimize=True)
     else:
-        # Shrink a little first so chroma-key is not a multi-second pixel walk.
         work = shrink(im, max(MAX_SPRITE * 2, 960))
         out = shrink(crop_sprite(feather_alpha(key_magenta(work))), MAX_SPRITE)
+        if name.startswith("char-"):
+            out = normalize_char(out, name)
         out.save(path, "PNG", optimize=True)
     after = path.stat().st_size
     print(f"{name:28} {src} -> {out.size}  {before // 1024}k -> {after // 1024}k")

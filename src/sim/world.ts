@@ -55,6 +55,7 @@ interface Actor {
   dark: number;
   hunger: number;
   torch: number;
+  poseFlash: number;
 }
 
 interface Enemy {
@@ -173,6 +174,7 @@ export class World {
       dark: 0,
       hunger: 82,
       torch: 0,
+      poseFlash: 0,
     });
     this.toast(`${name} 进了山谷`);
     return side;
@@ -310,6 +312,7 @@ export class World {
     for (const p of this.present()) {
       p.cool = Math.max(0, p.cool - dt);
       p.ping = Math.max(0, p.ping - dt);
+      p.poseFlash = Math.max(0, p.poseFlash - dt);
       this.move(p, dt);
       this.tickFish(p, dt);
       this.tickChop(p, dt);
@@ -443,7 +446,18 @@ export class World {
       hunger: Math.round(p.hunger),
       torch: p.torch > 0 || p.held.split(":")[0] === "torch",
       ping: p.ping,
+      busy: this.actorBusy(p),
     };
+  }
+
+  private actorBusy(p: Actor): NonNullable<ActorSnap["busy"]> {
+    if (p.fish?.forge) return "forge";
+    if (p.fish && p.fish.phase !== "off") return "fish";
+    if (p.chop || p.poseFlash > 0) return "chop";
+    if (this.readySleep.has(p.id)) return "sit";
+    const still = Math.hypot(p.input.x, p.input.y) < 0.16;
+    if (still && this.isNight() && this.atHearth(p)) return "sit";
+    return "";
   }
 
   private albumOf(you?: Actor) {
@@ -1022,6 +1036,7 @@ export class World {
   }
 
   private swing(p: Actor): void {
+    p.poseFlash = 0.36;
     const o = this.other(p);
     const pow = this.power(p);
     const pairNear = this.near(p, o);
@@ -1871,6 +1886,7 @@ export class World {
   }
 
   private chopTree(p: Actor, x: number, y: number): void {
+    p.poseFlash = 0.42;
     addToBag(this.save.bag, "wood", chance(0.35, this.rand) ? 2 : 1);
     const nearSavanna = [this.wildMap?.rows[y]?.[x - 1], this.wildMap?.rows[y]?.[x + 1]].includes("s");
     const left = nearSavanna ? "s" : ".";
@@ -1880,6 +1896,7 @@ export class World {
   }
 
   private crackRock(p: Actor, x: number, y: number): void {
+    p.poseFlash = 0.42;
     this.giveLoot(p, "ore_node", this.power(p).luck, this.near(p, this.other(p)));
     if (chance(0.55, this.rand)) addToBag(this.save.bag, "flint");
     this.depleted.push({ zone: "wild", x, y, ch: "b" });

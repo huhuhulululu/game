@@ -8,6 +8,14 @@ export type Near = { n: string; s: string; e: string; w: string };
 export type DrawPart = "all" | "ground" | "prop";
 export type DrawSkip = { grass?: boolean; water?: boolean; path?: boolean };
 
+const FACE = "'Songti SC', 'STSong', 'PingFang SC', 'Hiragino Mincho ProN', serif";
+
+let lookSeason = "春";
+
+export function setLookSeason(season: string): void {
+  lookSeason = season;
+}
+
 const FILL: Record<string, string> = {
   "#": "#2a1c16",
   T: "#1e2c22",
@@ -216,9 +224,21 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
   if (n > 780) oval(g, x + 22, y + 10, 3, 3, "#c45c26");
 }
 
+function treeSheet(pine: boolean, x: number, y: number): string {
+  const n = hash(x, y);
+  if (pine) return lookSeason === "冬" || n > 740 ? "pineSnow" : "pine";
+  if (lookSeason === "秋") return n > 380 ? "treeGold" : "tree";
+  if (lookSeason === "冬") return n > 500 ? "treeGold" : "treeWide";
+  if (n > 680) return "treeGold";
+  if (n > 340) return "treeWide";
+  return "tree";
+}
+
 function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
-  oval(g, x + 18, y + 32, 14, 5, "rgba(20,16,10,0.28)");
-  if (blitFit(g, pine ? "pine" : "tree", x - 24, y - 74, 84, 114)) return;
+  const grow = 0.9 + (hash(x, y + 3) % 18) / 100;
+  const ox = (hash(x + 2, y) % 11) - 5;
+  oval(g, x + 18 + ox, y + 32, 14 * grow, 5, "rgba(20,16,10,0.28)");
+  if (blitFit(g, treeSheet(pine, x, y), x - 24 + ox, y - 74, 84 * grow, 114 * grow)) return;
   const sway = Math.sin(now / 860 + x * 0.03) * 1.4;
   oval(g, x + 18, y + 34, 12, 4, "rgba(20,16,10,0.28)");
   px(g, x + 15, y + 10, 7, 24, "#5a3a22");
@@ -667,7 +687,11 @@ function heldChip(name: string): string {
   return name.slice(0, 1);
 }
 
-function actorSheets(warm: boolean, facing: number, moving: boolean, now: number): string[] {
+function actorSheets(warm: boolean, facing: number, moving: boolean, now: number, busy = ""): string[] {
+  if (busy === "sit") return warm ? ["warmSit", "warm"] : ["pineSit", "pineChar"];
+  if (busy === "fish") return warm ? ["warmFish", "warmSide", "warm"] : ["pineFish", "pineSide", "pineChar"];
+  if (busy === "forge") return warm ? ["warmForge", "warm"] : ["pineForge", "pineChar"];
+  if (busy === "chop") return warm ? ["warmChop", "warm"] : ["pineChop", "pineChar"];
   const step = Math.floor(now / 170) % 2 === 0;
   if (facing === 0) {
     const idle = warm ? "warmBack" : "pineBack";
@@ -724,14 +748,16 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
     g.stroke();
     g.lineWidth = 1;
   }
-  const bob = moving ? Math.sin(now / 160) * 1.1 : 0.4;
+  const busy = a.busy ?? "";
+  const bob = busy || !moving ? 0.3 : Math.sin(now / 160) * 1.1;
   oval(g, x, y + 8, 11, 3.4, "rgba(20,16,10,0.3)");
   g.save();
   g.translate(x, y + bob);
-  if (a.facing === 3) g.scale(-1, 1);
+  if (a.facing === 3 && busy !== "sit") g.scale(-1, 1);
   let drew = false;
-  for (const sheet of actorSheets(warm, a.facing, moving, now)) {
-    if (blitFit(g, sheet, -23, -70, 46, 70)) {
+  const box = busy === "sit" ? ([-24, -52, 48, 54] as const) : busy === "fish" ? ([-28, -70, 58, 70] as const) : ([-23, -70, 46, 70] as const);
+  for (const sheet of actorSheets(warm, a.facing, moving, now, busy)) {
+    if (blitFit(g, sheet, box[0], box[1], box[2], box[3])) {
       drew = true;
       break;
     }
@@ -739,11 +765,11 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
   g.restore();
   if (drew) {
     const mark = heldChip(a.heldName);
-    if (mark) {
+    if (mark && busy !== "fish" && busy !== "forge" && busy !== "chop") {
       const hx = a.facing === 3 ? x - 20 : x + 12;
       oval(g, hx + 5, y - 6, 6, 6, "#d4a24a");
       g.fillStyle = "#2a2018";
-      g.font = "8px 'Noto Serif SC', serif";
+      g.font = `8px ${FACE}`;
       g.textAlign = "center";
       g.fillText(mark, hx + 5, y - 2);
     }
@@ -752,11 +778,12 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
       g.strokeRect(x - 18, y - 24, 36, 36);
     }
     const nw = Math.min(52, a.name.length * 8 + 10);
-    px(g, x - nw / 2, y - 78, nw, 11, "rgba(40,28,16,0.78)");
+    const nameY = busy === "sit" ? y - 58 : y - 78;
+    px(g, x - nw / 2, nameY, nw, 11, "rgba(40,28,16,0.78)");
     g.fillStyle = "#f4e8d0";
-    g.font = "10px 'Noto Serif SC', serif";
+    g.font = `10px ${FACE}`;
     g.textAlign = "center";
-    g.fillText(a.name, x, y - 69);
+    g.fillText(a.name, x, nameY + 9);
     px(g, x - 11, y + 5, 22, 3, "#3a2018");
     px(g, x - 11, y + 5, 22 * Math.max(0, a.hp / a.maxHp), 3, a.hp / a.maxHp < 0.35 ? "#c45c26" : "#3f6d5c");
     px(g, x - 11, y + 9, 22 * Math.max(0, a.hunger / 100), 2, "#6aa36a");
@@ -779,7 +806,7 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
     const hy = y - 6;
     px(g, hx, hy, 10, 10, "#d4a24a");
     g.fillStyle = "#2a2018";
-    g.font = "8px 'Noto Serif SC', serif";
+    g.font = `8px ${FACE}`;
     g.textAlign = "center";
     g.fillText(mark, hx + 5, hy + 8);
   }
@@ -790,7 +817,7 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
   const nw = Math.min(48, a.name.length * 8 + 10);
   px(g, x - nw / 2, y - 30, nw, 11, "rgba(40,28,16,0.78)");
   g.fillStyle = "#f4e8d0";
-  g.font = "10px 'Noto Serif SC', serif";
+  g.font = `10px ${FACE}`;
   g.textAlign = "center";
   g.fillText(a.name, x, y - 21);
   px(g, x - 10, y + 12, 20, 3, "#3a2018");
@@ -1078,24 +1105,61 @@ export function drawSheet(g: Ctx, name: string, c: FieldCluster): boolean {
   return blitWrap(g, name, c.x * TILE - 1, c.y * TILE - 1, c.w * TILE + 2, c.h * TILE + 2);
 }
 
+function organicPath(g: Ctx, x: number, y: number, w: number, h: number, seed: number, amp = 8): void {
+  const bump = (i: number) => Math.sin(seed * 0.19 + i * 1.61) * amp;
+  g.beginPath();
+  g.moveTo(x + bump(0), y + bump(1));
+  g.quadraticCurveTo(x + w * 0.28, y - 5 + bump(2), x + w * 0.52, y + bump(3));
+  g.quadraticCurveTo(x + w * 0.78, y - 4 + bump(4), x + w + bump(5), y + bump(6));
+  g.quadraticCurveTo(x + w + 6 + bump(7), y + h * 0.48, x + w + bump(8), y + h + bump(9));
+  g.quadraticCurveTo(x + w * 0.55, y + h + 7 + bump(10), x + bump(11), y + h + bump(12));
+  g.quadraticCurveTo(x - 6 + bump(13), y + h * 0.52, x + bump(0), y + bump(1));
+  g.closePath();
+}
+
+export function drawPool(g: Ctx, c: FieldCluster): boolean {
+  const x = c.x * TILE;
+  const y = c.y * TILE;
+  const w = c.w * TILE;
+  const h = c.h * TILE;
+  g.save();
+  organicPath(g, x - 8, y - 10, w + 16, h + 16, c.x * 13 + c.y * 7, 9);
+  g.clip();
+  const ok = blitWrap(g, "water", x - 2, y - 2, w + 4, h + 4);
+  g.restore();
+  return ok;
+}
+
+export function drawLane(g: Ctx, c: FieldCluster): boolean {
+  const x = c.x * TILE;
+  const y = c.y * TILE;
+  const w = c.w * TILE;
+  const h = c.h * TILE;
+  g.save();
+  organicPath(g, x - 4, y - 6, w + 8, h + 12, c.x * 5 + c.y * 11, 5);
+  g.clip();
+  const ok = blitWrap(g, "path", x - 2, y - 2, w + 4, h + 4);
+  g.restore();
+  return ok;
+}
+
 export function drawField(g: Ctx, c: FieldCluster): void {
   const x = c.x * TILE;
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
   g.save();
-  g.beginPath();
-  g.roundRect(x + 2, y + 3, w - 4, h - 6, 14);
+  organicPath(g, x - 6, y - 4, w + 12, h + 10, c.x * 9 + c.y, 6);
+  g.fillStyle = "rgba(47,90,56,0.22)";
+  g.fill();
+  g.restore();
+  g.save();
+  organicPath(g, x + 3, y + 4, w - 6, h - 8, c.x * 9 + c.y + 2, 7);
   g.clip();
   for (let ty = 0; ty < c.h; ty++) {
     for (let tx = 0; tx < c.w; tx++) plotSoil(g, x + tx * TILE, y + ty * TILE);
   }
   g.restore();
-  g.strokeStyle = "rgba(30,18,10,0.22)";
-  g.lineWidth = 2;
-  g.beginPath();
-  g.roundRect(x + 2, y + 3, w - 4, h - 6, 14);
-  g.stroke();
 }
 
 function wet(look: string): boolean {

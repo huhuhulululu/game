@@ -34,7 +34,7 @@ body,
   overflow: hidden;
   background: var(--dusk);
   color: var(--paper);
-  font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+  font-family: "Songti SC", "STSong", "Songti", "PingFang SC", "Hiragino Mincho ProN", "Source Han Serif SC", serif;
   user-select: none;
   touch-action: none;
 }
@@ -442,8 +442,10 @@ button {
   display: block;
   width: 100%;
   margin-top: 8px;
-  image-rendering: pixelated;
+  image-rendering: auto;
   border: 1px solid rgba(201, 160, 106, 0.25);
+  border-radius: 8px;
+  background: #c9a06a;
 }
 
 .map-panel {
@@ -469,8 +471,9 @@ button {
   display: block;
   width: 100%;
   height: auto;
-  image-rendering: pixelated;
+  image-rendering: auto;
   border: 1px solid rgba(201, 160, 106, 0.25);
+  border-radius: 8px;
 }
 
 .scene {

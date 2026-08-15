@@ -14,11 +14,13 @@ import {
   drawGround,
   drawHouseCluster,
   drawLamp,
+  drawLane,
   drawMeadow,
   drawNightVignette,
   drawPlot,
-  drawSheet,
+  drawPool,
   fillClusters,
+  setLookSeason,
   drawSky,
   houseClusters,
   isHouseLook,
@@ -102,6 +104,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const world = snap;
     g.imageSmoothingEnabled = true;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    setLookSeason(snap.season);
     drawSky(g, w, h, snap.night, snap.dusk, snap.zone, snap.weather.id);
 
     const me = snap.actors.find((a) => a.id === snap!.you) ?? snap.actors[0];
@@ -140,10 +143,10 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     let waterSheet = false;
     let pathSheet = false;
     for (const pool of fillClusters(rows, (ch) => ch === "~" || ch === "D")) {
-      if (drawSheet(g, "water", pool)) waterSheet = true;
+      if (drawPool(g, pool)) waterSheet = true;
     }
     for (const lane of fillClusters(rows, (ch) => ch === ",")) {
-      if (drawSheet(g, "path", lane)) pathSheet = true;
+      if (drawLane(g, lane)) pathSheet = true;
     }
     for (let y = y0; y <= y1; y++) {
       for (let x = x0; x <= x1; x++) {
@@ -297,40 +300,50 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
 
   const paintAtlas = () => {
     const atlas = hud.querySelector("#atlas") as HTMLCanvasElement | null;
-    if (!atlas || !snap || snap.zone !== "wild") return;
+    if (!atlas || !snap) return;
     const rows = snap.tiles;
     const mw = rows[0]?.length ?? 1;
     const mh = rows.length;
-    const cell = Math.max(3, Math.min(6, Math.floor(220 / mw)));
+    const cell = Math.max(5, Math.min(10, Math.floor(240 / mw)));
     atlas.width = mw * cell;
     atlas.height = mh * cell;
     const g = atlas.getContext("2d");
     if (!g) return;
-    g.fillStyle = "#050403";
+    g.imageSmoothingEnabled = true;
+    const paper = g.createLinearGradient(0, 0, atlas.width, atlas.height);
+    paper.addColorStop(0, "#d8c09a");
+    paper.addColorStop(1, "#b88958");
+    g.fillStyle = paper;
     g.fillRect(0, 0, atlas.width, atlas.height);
+    const wild = snap.zone === "wild";
     for (let y = 0; y < mh; y++) {
       for (let x = 0; x < mw; x++) {
         const key = y * mw + x;
-        if (!fogSeen.has(key)) continue;
+        if (wild && !fogSeen.has(key)) continue;
         const ch = rows[y][x];
-        let fill = cellFill(ch, "wild");
-        if (!fogVis.has(key)) fill = shade(fill, 0.5);
+        const look = tileLook(ch, snap.zone);
+        let fill = cellFill(ch, snap.zone);
+        if (look === "water" || look === "dock") fill = "#2a5470";
+        else if (look === "grass" || look === "tree") fill = "#3f6d5c";
+        else if (look === "path" || look === "plot") fill = "#8a6a40";
+        else if (look === "cabin" || look === "inn" || look === "lantern") fill = "#c45c26";
+        if (wild && !fogVis.has(key)) fill = shade(fill, 0.55);
         if (snap.fires.includes(key)) fill = "#e08a4f";
         g.fillStyle = fill;
-        g.fillRect(x * cell, y * cell, cell, cell);
+        g.beginPath();
+        g.ellipse(x * cell + cell / 2, y * cell + cell / 2, cell * 0.62, cell * 0.5, 0, 0, Math.PI * 2);
+        g.fill();
       }
     }
-    const you = snap.youAt;
-    g.fillStyle = "#c45c26";
-    g.fillRect(Math.floor(you.x / TILE) * cell - 1, Math.floor(you.y / TILE) * cell - 1, cell + 2, cell + 2);
-    if (snap.partnerAt && snap.partnerAt.zone === "wild") {
-      g.fillStyle = snap.partner?.ping ? "#f4e7d2" : "#3f6d5c";
-      g.fillRect(
-        Math.floor(snap.partnerAt.x / TILE) * cell - 1,
-        Math.floor(snap.partnerAt.y / TILE) * cell - 1,
-        cell + 2,
-        cell + 2,
-      );
+    const mark = (px: number, py: number, color: string) => {
+      g.fillStyle = color;
+      g.beginPath();
+      g.arc((px / TILE) * cell, (py / TILE) * cell, Math.max(3, cell * 0.55), 0, Math.PI * 2);
+      g.fill();
+    };
+    mark(snap.youAt.x, snap.youAt.y, "#c45c26");
+    if (snap.partnerAt && snap.partnerAt.zone === snap.zone) {
+      mark(snap.partnerAt.x, snap.partnerAt.y, snap.partner?.ping ? "#f4e7d2" : "#3f6d5c");
     }
   };
 
@@ -425,11 +438,14 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       </div>
       <div class="sheet ${open === "map" ? "" : "hidden"}" id="map">
         <header>图</header>
-        ${
+        <p>${
           snap.zone === "wild"
-            ? `<p>已照亮 ${snap.revealed.length} 格 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}</p><canvas id="atlas"></canvas>`
-            : "<p>出谷之后，地图才会一点点亮起来。两人走近，会把看见的路写进彼此的图里。</p>"
-        }
+            ? `已照亮 ${snap.revealed.length} 处 · ${snap.night ? (snap.lit ? "火还在" : "别停在黑里") : "趁天光走远一点"}`
+            : snap.zone === "mine"
+              ? `矿 ${snap.floor}层。柿色是你，松色是她。`
+              : "柿色是你，松色是她。出谷之后，荒野才会一点点亮起来。"
+        }</p>
+        <canvas id="atlas"></canvas>
       </div>
     `;
     const toggle = (id: "bag" | "book" | "map") => {

@@ -141,6 +141,12 @@ describe("look", () => {
     const walk = mockCtx();
     drawActor(walk, { ...a, facing: 2 }, 0, 0, 400, true);
     assert.ok(walk.fills.length >= 6);
+    const chop = mockCtx();
+    drawActor(chop, { ...a, busy: "chop" }, 0, 0, 0);
+    assert.ok(chop.fills.length >= 4);
+    const sit = mockCtx();
+    drawActor(sit, { ...a, busy: "sit" }, 0, 0, 0);
+    assert.ok(sit.fills.length >= 4);
   });
 
   it("ore, stairs and lurkers still have a constructed fallback", () => {
