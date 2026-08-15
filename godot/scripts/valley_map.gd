@@ -157,15 +157,14 @@ func _ridge() -> void:
 	# Cover trees from the same painting. Few and large. No pixel balls.
 	_prop("prop-cover-tree.png", 0.35, 1.55, 148, 208, 6, 0.04, 0.94)
 	_prop("prop-cover-tree.png", 1.85, 3.45, 142, 198, 7, 0.03, 0.94)
-	_prop("prop-cover-tree-b.png", 11.70, 0.85, 168, 204, 6, 0.04, 0.93)
 	_prop("prop-cover-tree-b.png", 21.55, 2.55, 158, 196, 7, 0.03, 0.93)
 	_prop("prop-cover-tree.png", 22.60, 1.15, 136, 188, 6, 0.04, 0.94)
 
 
 func _shore() -> void:
-	# Cover bank stones on the land lip. Not water stamps on the creek.
-	_prop("prop-cover-shore.png", 7.20, _bend(7.20, "creek") - 1.05, 92, 48, 4, 0.03, 0.90)
-	_prop("prop-cover-shore.png", 16.80, _bend(16.80, "creek") - 1.00, 100, 52, 4, 0.03, 0.90)
+	# Cover bank on the land lip. Not water stamps on the creek sheet.
+	_prop("prop-cover-verge.png", 8.80, _bend(8.80, "creek") - 1.58, 88, 40, 3, 0.03, 0.88)
+	_prop("prop-cover-shore.png", 22.40, _bend(22.40, "creek") - 1.62, 80, 42, 4, 0.03, 0.90)
 	_prop("prop-cover-verge.png", 14.40, _bend(14.40, "path") - 0.22, 96, 44, 3, 0.03, 0.88)
 	_prop("prop-cover-verge.png", 21.10, _bend(21.10, "path") - 0.18, 90, 42, 3, 0.03, 0.88)
 
