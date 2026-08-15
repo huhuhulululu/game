@@ -47,6 +47,7 @@ var act_cool := 0
 var last_log := ""
 var tiles_cache: Array = []
 var tiles_zone := ""
+var play_seen: Dictionary = {}
 
 
 func _ready() -> void:
@@ -338,6 +339,31 @@ func _note() -> void:
 	if held.begins_with("dish") and not plate_ok:
 		plate_ok = true
 		print("PLATE_OK ", _held_name())
+	_note_play()
+
+
+func _note_play() -> void:
+	if play == null:
+		return
+	var valley: Node = play.get("_valley")
+	var zone_map: Node = play.get("_zone_map")
+	var fish_hud: CanvasItem = play.get("_fish_hud")
+	var z := _zone()
+	if z == "valley" and valley is CanvasItem and (valley as CanvasItem).visible and zone_map is CanvasItem and not (zone_map as CanvasItem).visible:
+		_play_tok("PLAY_ZONE_VALLEY")
+	if z == "mine" and zone_map is CanvasItem and (zone_map as CanvasItem).visible and valley is CanvasItem and not (valley as CanvasItem).visible:
+		_play_tok("PLAY_ZONE_MINE")
+	if z == "kitchen" and zone_map is CanvasItem and (zone_map as CanvasItem).visible and valley is CanvasItem and not (valley as CanvasItem).visible:
+		_play_tok("PLAY_ZONE_KITCHEN")
+	if _fishing() == "fight" and fish_hud != null and fish_hud.visible:
+		_play_tok("PLAY_FISH_MARK")
+
+
+func _play_tok(tok: String) -> void:
+	if play_seen.has(tok):
+		return
+	play_seen[tok] = true
+	print(tok)
 
 
 func _held_id() -> String:
