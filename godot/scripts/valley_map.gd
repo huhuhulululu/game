@@ -169,9 +169,9 @@ func _ridge() -> void:
 	for i in walls.size():
 		var p: Vector2 = walls[i]
 		_prop(kinds[(i + 2) % kinds.size()], p.x, p.y, 70, 94, 12 + int(p.y), 0.10, 0.96)
-	_prop("prop-bush.png", 6.8, 4.15, 38, 32, 5, 0.08, 0.88)
-	_prop("prop-bush.png", 12.8, 4.20, 36, 32, 5, 0.08, 0.88)
-	_prop("prop-bush.png", 20.6, 4.05, 38, 32, 5, 0.08, 0.88)
+	_prop("prop-bush.png", 6.8, 4.15, 48, 40, 5, 0.08, 0.88)
+	_prop("prop-bush.png", 12.8, 4.20, 46, 40, 5, 0.08, 0.88)
+	_prop("prop-bush.png", 20.6, 4.05, 48, 40, 5, 0.08, 0.88)
 
 
 func _shore() -> void:
@@ -198,5 +198,5 @@ func _bits() -> void:
 	_prop("prop-anvil.png", 21.4, 11.55, 56, 60, 7, 0.05, 0.98)
 	_prop("prop-gate.png", 30.2, 13.2, 48, 56, 7, 0.08, 0.94)
 	_prop("prop-tree.png", 29.4, 12.2, 70, 94, 9, 0.08, 0.96)
-	_prop("prop-bush.png", 16.6, 4.9, 40, 36, 5, 0.10, 0.88)
-	_prop("prop-bush.png", 18.4, 5.1, 36, 32, 5, 0.10, 0.88)
+	_prop("prop-bush.png", 16.6, 4.9, 50, 42, 5, 0.10, 0.88)
+	_prop("prop-bush.png", 18.4, 5.1, 46, 40, 5, 0.10, 0.88)

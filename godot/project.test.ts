@@ -57,6 +57,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(look, /func air_mat/);
   assert.match(look, /func air_layer/);
   assert.match(look, /air\.gdshader/);
+  assert.match(look, /Sprite2D/);
   assert.ok(existsSync("godot/shaders/air.gdshader"));
   assert.ok(existsSync("godot/docs/ART.md"));
   const artDoc = readFileSync("godot/docs/ART.md", "utf8");

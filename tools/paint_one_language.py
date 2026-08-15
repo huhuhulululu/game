@@ -106,6 +106,16 @@ def paste_soft(dst: Image.Image, src: Image.Image, xy: tuple[int, int], radius: 
     dst.alpha_composite(src, xy)
 
 
+def lift_canopy(im: Image.Image) -> Image.Image:
+    # Small sits read dark tree holes as ink. Lift them toward dusk gold.
+    arr = np.asarray(im.convert("RGBA"), dtype=np.float32)
+    lum = arr[:, :, :3] @ np.array([0.3, 0.5, 0.2], dtype=np.float32)
+    t = np.clip((58.0 - lum) / 58.0, 0, 1) * (arr[:, :, 3] > 30)
+    gold = np.array([108.0, 88.0, 38.0], dtype=np.float32)
+    arr[:, :, :3] = arr[:, :, :3] * (1.0 - t[:, :, None] * 0.62) + gold * t[:, :, None] * 0.62
+    return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGBA")
+
+
 def paint_bush() -> Image.Image:
     # Same canopy as the north ridge. One pen for tree and shrub.
     tree = kill_black(Image.open(ART / "prop-tree.png"))
@@ -114,7 +124,7 @@ def paint_bush() -> Image.Image:
     paste_soft(canvas, clump(tree, (70, 18, 310, 230), (250, 210), 14), (8, 20))
     paste_soft(canvas, clump(wide, (200, 8, 430, 190), (220, 170), 12), (90, 55))
     paste_soft(canvas, clump(tree, (300, 36, 540, 240), (200, 170), 12), (140, 70))
-    return canvas
+    return lift_canopy(canvas)
 
 
 def paint_tuft() -> Image.Image:
@@ -126,7 +136,7 @@ def paint_tuft() -> Image.Image:
     earth = wood_plank((90, 28), (80, 300, 260, 360), horizontal=True).convert("RGBA")
     earth.putalpha(ellipse_mask((90, 28), cy=0.55, ry=0.42, blur=5))
     canvas.alpha_composite(earth, (64, 158))
-    return canvas
+    return lift_canopy(canvas)
 
 
 def _dirt_color() -> np.ndarray:

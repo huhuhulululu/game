@@ -53,23 +53,22 @@ static func prop_mat(fog := 0.03) -> ShaderMaterial:
 static func air_mat() -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/air.gdshader") as Shader
-	m.set_shader_parameter("grain", 0.028)
-	m.set_shader_parameter("vig", 0.16)
+	m.set_shader_parameter("grain", 0.036)
+	m.set_shader_parameter("vig", 0.22)
 	m.set_shader_parameter("dusk", Color(0.42, 0.22, 0.10, 1.0))
 	return m
 
 
-static func air_veil() -> ColorRect:
-	var r := ColorRect.new()
-	r.set_anchors_preset(Control.PRESET_FULL_RECT)
-	r.offset_left = 0
-	r.offset_top = 0
-	r.offset_right = 0
-	r.offset_bottom = 0
-	r.size = Vector2(1280, 720)
-	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	r.material = air_mat()
-	return r
+static func air_veil() -> Sprite2D:
+	# Sprite, not ColorRect: CanvasLayer does not give Controls a viewport size.
+	var img := Image.create(1280, 720, false, Image.FORMAT_RGBA8)
+	img.fill(Color(1, 1, 1, 1))
+	var s := Sprite2D.new()
+	s.texture = ImageTexture.create_from_image(img)
+	s.centered = false
+	s.position = Vector2.ZERO
+	s.material = air_mat()
+	return s
 
 
 static func air_layer(z := 80) -> CanvasLayer:
