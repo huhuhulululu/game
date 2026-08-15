@@ -4,11 +4,14 @@ Brownfield install. This is **not** a new game. Do not run `/brainstorm`. Do not
 
 ## Technology Stack
 
-- **Engine**: Godot 4.4+ (project file is 4.4.1; `project.godot` features string stays `"4.3"` because tests lock it)
+- **Engine**: Godot 4.4
 - **Language**: GDScript
+- **Build System**: SCons (engine), Godot Export Templates
+- **Asset Pipeline**: Godot Import System + custom resource pipeline
 - **Version Control**: Git
-- **Build System**: Godot HTML5 export (`npm run export:web`) first; iOS from Godot later
-- **Asset Pipeline**: Godot Import System. Playable art lives in `godot/assets/art/`. Cover `cover-valley.png` is read-only.
+- **Export**: HTML5 first (`godot/export/web/`). iOS later from the same project.
+- **Pin**: editor 4.4.1. `project.godot` features string stays `"4.3"` because tests lock it. Do not upgrade to 4.5 / 4.6.
+- **Art path**: `godot/assets/art/`. Cover `cover-valley.png` is read-only.
 
 ## North star (do not violate)
 
@@ -38,7 +41,8 @@ Locks:
 | `src/` | TypeScript **reference only**. Systems already ported here. Do not add look. **Do not overwrite.** |
 | `docs/WORLD.md`, `docs/CHARTER.md` | Design authority. **Do not overwrite.** |
 | `godot/docs/ART.md` | Art authority. |
-| `design/gdd/` | Not created yet — migrate from WORLD/CHARTER/ART. See `docs/adoption-plan.md`. |
+| `design/gdd/game-concept.md` | Migration stub from CHARTER + WORLD. Authority stays WORLD / CHARTER. |
+| `design/art/art-bible.md` | Full art bible. Short lock remains `godot/docs/ART.md`. |
 | `.claude/` | Vendored CCGS (Godot specialist set; Unity/Unreal agents dropped). |
 | `.cursor/skills/` | Cursor-readable copy of the same slash-command skills. |
 | `production/` | `stage.txt`, `review-mode.txt`. |
@@ -51,7 +55,7 @@ Locks:
 
 @docs/engine-reference/godot/VERSION.md
 
-This repo is pinned to **Godot 4.4.1**. The vendored VERSION.md may still say 4.6 until the next run executes `/setup-engine godot 4.4`. Do not treat 4.6 as the project engine.
+This repo is pinned to **Godot 4.4.1**. `/setup-engine godot 4.4` is done. Do not treat 4.6 as the project engine.
 
 ## Coordination / review
 
@@ -59,13 +63,9 @@ This repo is pinned to **Godot 4.4.1**. The vendored VERSION.md may still say 4.
 
 Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not ask "May I write this file?" for routine Path D work.
 
-## Next three slash commands (next run, not this install)
+## Next studio command
 
-1. `/setup-engine godot 4.4` — refresh engine-reference to 4.4; do not change engine or language
-2. `/art-bible` — from current `godot/docs/ART.md` (one painted dusk; no DST face; no 魂; no PNG sticker crops)
-3. `/asset-audit` — target `godot/assets/art` (not the template's `assets/art/`)
-
-Full migration map: `docs/adoption-plan.md`.
+`/asset-spec` for the valley — one painted dusk bed or magenta-key. Do not recrop sticker PNGs. See `docs/asset-audit.md` and `docs/adoption-plan.md`.
 
 ## Coding Standards
 

@@ -1,6 +1,6 @@
 # Godot Rendering — Quick Reference
 
-Last verified: 2026-02-12 | Engine: Godot 4.6
+Last verified: 2026-08-15 | Engine: Godot 4.4.1 (4.5 / 4.6 rows below are out of scope)
 
 ## What Changed Since ~4.3 (LLM Cutoff)
 

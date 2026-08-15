@@ -1,6 +1,6 @@
 # Godot — Deprecated APIs
 
-Last verified: 2026-02-12
+Last verified: 2026-08-15 | Engine: Godot 4.4.1 (do not apply 4.5 / 4.6)
 
 If an agent suggests any API in the "Deprecated" column, it MUST be replaced
 with the "Use Instead" column.
@@ -26,7 +26,7 @@ with the "Use Instead" column.
 | `PackedScene.instance()` | `PackedScene.instantiate()` | 4.0 | Renamed |
 | `get_world()` | `get_world_3d()` | 4.0 | Explicit 2D/3D split |
 | `OS.get_ticks_msec()` | `Time.get_ticks_msec()` | 4.0 | Time singleton preferred |
-| `duplicate()` for nested resources | `duplicate_deep()` | 4.5 | Explicit deep copy control |
+| `duplicate()` for nested resources | `duplicate_deep()` | 4.5 | **Not this pin.** 4.4 keeps `duplicate()`. Do not require `duplicate_deep()`. |
 | `Skeleton3D` signal `bone_pose_updated` | `skeleton_updated` | 4.3 | Renamed |
 | `AnimationPlayer.method_call_mode` | `AnimationMixer.callback_mode_method` | 4.3 | Moved to base class |
 | `AnimationPlayer.playback_active` | `AnimationMixer.active` | 4.3 | Moved to base class |
@@ -40,4 +40,4 @@ with the "Use Instead" column.
 | Untyped `Array` / `Dictionary` | `Array[Type]`, typed variables | GDScript compiler optimizations |
 | `Texture2D` in shader parameters | `Texture` base type | Changed in 4.4 |
 | Manual post-process viewport chains | `Compositor` + `CompositorEffect` | Structured post-processing (4.3+) |
-| GodotPhysics3D for new projects | Jolt Physics 3D | Default since 4.6; better stability |
+| GodotPhysics3D for new 3D projects | Jolt Physics 3D | 4.6 default only. **This project is 2D on 4.4.1 — keep Godot Physics 2D.** |

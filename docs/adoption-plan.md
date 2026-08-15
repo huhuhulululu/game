@@ -24,7 +24,7 @@ Do **not** overwrite `godot/`, `server/`, `src/`, `docs/WORLD.md`, or `docs/CHAR
 | Studio stage heuristic | 41 TS files in `src/` plus a playable Godot client → **Production**. Not Concept. Not Systems Design. Not Polish (look is unfinished; Polish is an explicit `/gate-check` only). |
 | `design/gdd/` | Missing. Design already lives in WORLD / CHARTER / ART. |
 | ADRs / stories / sprint yaml | Missing. Do not invent a second design spine. |
-| Engine pin | Written this install in `.claude/docs/technical-preferences.md`. Vendored `docs/engine-reference/godot/VERSION.md` still says upstream 4.6 until `/setup-engine godot 4.4`. |
+| Engine pin | `/setup-engine godot 4.4` done 2026-08-15. `VERSION.md` is 4.4.1. Do not upgrade to 4.6. |
 
 `production/stage.txt` is `Production` from this audit, not from a fresh `/start`.
 
@@ -70,18 +70,18 @@ Execute in this order. Review mode is already `lean`.
    - Engine and GDScript are already pinned. Refresh `docs/engine-reference/godot/` from the 4.6 snapshot to **4.4**.
    - Do not change language. Do not offer Unity / Unreal. Do not create a new Godot project.
    - Time: 30 min
-   - [ ] Engine reference matches Godot 4.4
+   - [x] Engine reference matches Godot 4.4
 
 2. **`/art-bible`**
    - Source: `godot/docs/ART.md` + the correction above.
    - One painted dusk cover language. No DST face. No 魂. No PNG sticker crops.
    - Time: 1 session
-   - [ ] `design/art/art-bible.md` exists and does not contradict CHARTER / ART locks
+   - [x] `design/art/art-bible.md` exists and does not contradict CHARTER / ART locks
 
 3. **`/asset-audit`** on `godot/assets/art`
    - Naming in this repo is `char-*`, `prop-*`, `tex-*`, `cover-valley`, `floor-valley`, `ground-valley` — do not mass-rename to the template `category_name_variant_size` pattern; report drift only.
    - Time: 30 min
-   - [ ] Audit written; cover left read-only
+   - [x] Audit written (`docs/asset-audit.md`); cover left read-only; sticker crops marked FAIL; not recropped
 
 ---
 
@@ -105,7 +105,7 @@ Fix: migrate (table above). Do not replace WORLD / CHARTER.
 
 Time: 1 session (after the three commands, or as a prerequisite write if `/art-bible` blocks)
 
-- [ ] `design/gdd/game-concept.md` migrated from CHARTER + WORLD
+- [x] `design/gdd/game-concept.md` migrated from CHARTER + WORLD
 - [ ] `design/gdd/systems-index.md` migrated from WORLD (no parenthetical status values)
 
 ### 2b. Engine reference version drift
@@ -114,7 +114,7 @@ Problem: vendored VERSION.md says Godot 4.6. This project is 4.4.1.
 
 Fix: `/setup-engine godot 4.4`
 
-- [ ] VERSION.md pins 4.4
+- [x] VERSION.md pins 4.4.1
 
 ### 2c. Asset path drift
 
@@ -122,7 +122,7 @@ Problem: `/asset-audit` defaults to `assets/art/`.
 
 Fix: pass `godot/assets/art`.
 
-- [ ] Audit run on the Godot art folder
+- [x] Audit run on the Godot art folder (`docs/asset-audit.md`)
 
 ---
 
@@ -184,4 +184,4 @@ Already written from the audit. Do not `/gate-check` backward to Concept.
 
 ## Re-run
 
-After the three commands, re-read this plan. A dated `/adopt` report (`docs/adoption-plan-YYYY-MM-DD.md`) may be added later; this file stays the Path D map.
+The three commands are done. Next studio command: **`/asset-spec`** for the valley (one painted dusk bed or magenta-key). Do not recrop sticker PNGs. Do not `/brainstorm`. A dated `/adopt` report may be added later; this file stays the Path D map.

@@ -12,5 +12,6 @@ Read `CLAUDE.md` first. Then `.claude/docs/technical-preferences.md`, `docs/adop
 - Do not overwrite `godot/`, `server/`, `src/`, `docs/WORLD.md`, or `docs/CHARTER.md`.
 - `production/review-mode.txt` is `lean`. Do not stop for a director gate on every file.
 - `production/stage.txt` is `Production`. Look is the open gap. TypeScript in `src/` is reference only.
-- Next commands: `/setup-engine godot 4.4`, `/art-bible` from `godot/docs/ART.md`, `/asset-audit` on `godot/assets/art`.
+- Engine pin is done (Godot 4.4.1). Art bible: `design/art/art-bible.md`. Asset audit: `docs/asset-audit.md`.
+- Next command: `/asset-spec` for the valley painted bed or magenta-key. Do not recrop sticker PNGs.
 - Unity / Unreal specialist agents are not in this tree. Use the Godot specialist set.

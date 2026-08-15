@@ -1,10 +1,10 @@
 # Technical Preferences
 
-<!-- Path D brownfield pin for 并肩山谷. Next run: /setup-engine godot 4.4 to refresh engine-reference. Do not switch engine. -->
+<!-- Path D brownfield pin for 并肩山谷. /setup-engine godot 4.4 completed 2026-08-15. Do not switch engine. Do not upgrade to 4.5 / 4.6. -->
 
 ## Engine & Language
 
-- **Engine**: Godot 4.4 (editor 4.4.1). HTML5 export first. iOS later from the same Godot project. Do not use Unity. Do not use Unreal. Do not scaffold a second Godot project.
+- **Engine**: Godot 4.4 (editor 4.4.1). HTML5 export first. iOS later from the same Godot project. Do not use Unity. Do not use Unreal. Do not scaffold a second Godot project. Do not upgrade to 4.5 or 4.6.
 - **Language**: GDScript
 - **Rendering**: 2D CanvasItem, GL Compatibility, linear texture filter (illustration / HD-2D, not nearest 8-bit). `dusk.gdshader` `grade` stays `0.0`. `Look.VALLEY_DUSK = Color(1, 1, 1)`.
 - **Physics**: Godot 2D as already used in `godot/`. Do not replace the Node / WebSocket authority sim.
