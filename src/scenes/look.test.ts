@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { VALLEY } from "../world/maps";
+import { blit } from "./art";
 import { cellFill, drawActor, drawCell, drawPlot, houseClusters, plotIndex, shade, tileLook, viewScale } from "./draw";
 import type { ActorSnap } from "../sim/net";
 
@@ -44,6 +45,11 @@ function mockCtx() {
       return { width: t.length * 8 };
     },
     globalAlpha: 1,
+    save() {},
+    restore() {},
+    translate() {},
+    scale() {},
+    drawImage() {},
   };
   return ctx as typeof ctx & CanvasRenderingContext2D;
 }
@@ -148,5 +154,12 @@ describe("look", () => {
   it("zooms the camera so a wide window does not leave a dead strip", () => {
     assert.ok(viewScale(1400, 800) > 1.6);
     assert.ok(viewScale(390, 844) > 1.1);
+  });
+
+  it("falls back to constructed shapes when painted sheets are not loaded", () => {
+    const g = mockCtx();
+    assert.equal(blit(g, "tree", 0, 0, 10, 10), false);
+    drawCell(g, "T", 0, 0, "#1e2c22", 0, "valley");
+    assert.ok(g.fills.some((c) => c.includes("5a3a22") || c.includes("2a4a28")));
   });
 });

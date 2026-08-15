@@ -1,5 +1,6 @@
 import type { ActorSnap, EnemySnap } from "../sim/net";
 import { TILE } from "../world/maps";
+import { blit } from "./art";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -189,6 +190,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
 }
 
 function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
+  if (blit(g, pine ? "pine" : "tree", x - 14, y - 44, 64, 88)) return;
   const sway = Math.sin(now / 860 + x * 0.03) * 1.4;
   oval(g, x + 18, y + 34, 12, 4, "rgba(20,16,10,0.28)");
   px(g, x + 15, y + 10, 7, 24, "#5a3a22");
@@ -239,6 +241,7 @@ function dock(g: Ctx, x: number, y: number): void {
 }
 
 function fire(g: Ctx, x: number, y: number, now: number): void {
+  if (blit(g, "fire", x - 6, y - 10, 48, 52)) return;
   oval(g, x + 18, y + 28, 14, 5, "#4a4038");
   px(g, x + 8, y + 22, 10, 6, "#5a3a22");
   px(g, x + 18, y + 23, 10, 5, "#3a2414");
@@ -595,6 +598,39 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0)
     g.stroke();
     g.lineWidth = 1;
   }
+  const painted = warm ? "warm" : "pineChar";
+  const bob = Math.sin((a.x + a.y) * 0.12) * 1.2;
+  g.save();
+  g.translate(x, y + bob);
+  if (a.facing === 3) g.scale(-1, 1);
+  const drew = blit(g, painted, -22, -42, 44, 58);
+  g.restore();
+  if (drew) {
+    const mark = heldChip(a.heldName);
+    if (mark) {
+      const hx = a.facing === 3 ? x - 18 : x + 10;
+      oval(g, hx + 5, y - 4, 6, 6, "#d4a24a");
+      g.fillStyle = "#2a2018";
+      g.font = "8px 'Noto Serif SC', serif";
+      g.textAlign = "center";
+      g.fillText(mark, hx + 5, y);
+    }
+    if (a.fishing === "bite") {
+      g.strokeStyle = "#f4e7d2";
+      g.strokeRect(x - 16, y - 20, 32, 32);
+    }
+    const nw = Math.min(48, a.name.length * 8 + 10);
+    px(g, x - nw / 2, y - 48, nw, 11, "rgba(40,28,16,0.78)");
+    g.fillStyle = "#f4e8d0";
+    g.font = "10px 'Noto Serif SC', serif";
+    g.textAlign = "center";
+    g.fillText(a.name, x, y - 39);
+    px(g, x - 10, y + 16, 20, 3, "#3a2018");
+    px(g, x - 10, y + 16, 20 * Math.max(0, a.hp / a.maxHp), 3, a.hp / a.maxHp < 0.35 ? "#c45c26" : "#3f6d5c");
+    px(g, x - 10, y + 20, 20 * Math.max(0, a.hunger / 100), 2, "#6aa36a");
+    void now;
+    return;
+  }
   oval(g, x, y + 12, 9, 3, "rgba(20,16,10,0.3)");
   px(g, x - 6, y + 2, 5, 9, "#3a2a1c");
   px(g, x + 1, y + 2, 5, 9, "#3a2a1c");
@@ -786,6 +822,11 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
+  const painted =
+    (c.kind === "cabin" && blit(g, "cabin", x - 10, y - 28, w + 20, h + 36)) ||
+    (c.kind === "inn" && blit(g, "inn", x - 10, y - 28, w + 20, h + 36)) ||
+    (c.kind === "mine" && blit(g, "mine", x - 8, y - 16, w + 16, h + 24));
+  if (painted) return;
   if (c.kind === "mine") {
     px(g, x + 6, y + 10, w - 12, h - 10, "#1a1814");
     oval(g, x + w / 2, y + h * 0.55, w * 0.32, h * 0.28, "#0e0c0a");

@@ -23,8 +23,10 @@ import {
   viewScale,
 } from "./draw";
 import { el } from "../ui/dom";
+import { loadArt } from "./art";
 
 export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
+  loadArt();
   const scene = el("section", "scene play-scene");
   const canvas = document.createElement("canvas");
   const hud = el("div", "live-hud");
