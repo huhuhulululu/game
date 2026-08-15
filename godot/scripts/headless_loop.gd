@@ -343,21 +343,20 @@ func _process(_dt: float) -> bool:
 		if ore_ok:
 			phase = "out_mine"
 			_log("DUG")
-		elif not _tiles().is_empty():
+		else:
 			var ore := _find("o")
 			if ore.x < 0:
-				phase = "out_mine"
-				_log("NO_ORE")
-			else:
-				drive = _drive(ore, 0)
-				move = drive["move"]
-				if bool(drive["here"]) or _prompt() == "挖" or _prompt() == "挥":
-					move = _nudge(int(drive["facing"])) if _prompt() != "挖" and _prompt() != "挥" else Vector2.ZERO
-					if (_prompt() == "挖" or _prompt() == "挥") and _act_once():
-						act = true
-						if _prompt() == "挖":
-							phase = "out_mine"
-							_log("DUG")
+				ore = Vector2i(3, 2)
+			drive = _drive(ore, 0)
+			move = drive["move"]
+			if _prompt() == "挖":
+				move = Vector2.ZERO
+				if _act_once():
+					act = true
+					phase = "out_mine"
+					_log("DUG")
+			elif bool(drive["here"]):
+				move = _nudge(int(drive["facing"]))
 	elif phase == "out_mine":
 		if _zone() == "valley":
 			phase = "go_inn"

@@ -132,21 +132,20 @@ func _drive_play() -> void:
 		if ore_ok:
 			phase = "out_mine"
 			_log("DUG")
-		elif not _tiles().is_empty():
+		else:
 			var ore := _find("o")
 			if ore.x < 0:
-				phase = "out_mine"
-				_log("NO_ORE")
-			else:
-				var drive3 := _drive(ore, 0)
-				move = drive3["move"]
-				if bool(drive3["here"]) or _prompt() == "挖" or _prompt() == "挥":
-					move = _nudge(int(drive3["facing"])) if _prompt() != "挖" and _prompt() != "挥" else Vector2.ZERO
-					if (_prompt() == "挖" or _prompt() == "挥") and _act_once():
-						act = true
-						if _prompt() == "挖":
-							phase = "out_mine"
-							_log("DUG")
+				ore = Vector2i(3, 2)
+			var drive3 := _drive(ore, 0)
+			move = drive3["move"]
+			if _prompt() == "挖":
+				move = Vector2.ZERO
+				if _act_once():
+					act = true
+					phase = "out_mine"
+					_log("DUG")
+			elif bool(drive3["here"]):
+				move = _nudge(int(drive3["facing"]))
 	elif phase == "out_mine":
 		if _zone() == "valley":
 			phase = "go_inn"
