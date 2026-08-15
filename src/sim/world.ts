@@ -598,6 +598,10 @@ export class World {
   private prompt(p: Actor): string {
     if (p.fish?.phase === "wait") return this.pairFishing() ? "两人同钓 · 水面还没动" : "水面还没动";
     if (p.fish?.phase === "bite") return "起竿";
+    if (p.fish?.phase === "fight" && p.fish.forge) {
+      const left = Math.max(1, 3 - (this.forgeJob?.hits ?? 0));
+      return `锻 · 绿的时候按 · 还差${left}下`;
+    }
     if (p.fish?.phase === "fight") return "稳住 · 绿的时候按";
     const map = this.mapFor(p.zone);
     const f = this.facingTile(p);
@@ -617,7 +621,7 @@ export class World {
       }
       if (ch === "V" || cell === "gate") return this.isNight() ? "出谷 · 夜里没火会咬人" : "出谷 · 荒野";
       if (cell === "shop") return this.shopPrompt();
-      if (cell === "forge") return this.forgeJob ? "锻 · 绿的时候按" : "打造";
+      if (cell === "forge") return this.forgeJob ? "锻 · 绿的时候按" : "打造 · 矿×2 木×1";
       if (cell === "gacha") return this.save.fortuneId ? "今日已问过" : "问今日";
       if (cell === "board") return this.boardPrompt(p);
       if (this.idleFace(cell) && eatValue(p.held)) return "吃";
@@ -1579,7 +1583,7 @@ export class World {
     takeFromBag(this.save.bag, "wood", 1);
     this.forgeJob = { starter: p.id, hits: 0, good: {} };
     p.fish = { phase: "fight", t: 4, window: 1, mark: 0.2, pull: 1, dir: 1, forge: true };
-    this.toast("炉子热了");
+    this.toast("炉子热了。绿的时候敲三下。");
   }
 
   private yankForge(p: Actor): void {
@@ -1589,6 +1593,7 @@ export class World {
     const good = mark > 0.38 && mark < 0.72;
     this.forgeJob.hits += 1;
     this.forgeJob.good[p.id] = (this.forgeJob.good[p.id] ?? 0) + (good ? 1 : 0);
+    if (!good && this.forgeJob.hits < 3) this.toast("偏了。");
     if (this.forgeJob.hits >= 3) this.finishForge();
   }
 
@@ -1626,7 +1631,8 @@ export class World {
       (job.good[partner.id] ?? 0) >= 1;
     if (goods < 1) {
       addToBag(this.save.bag, "ore", 1);
-      this.toast("卷刃了");
+      this.fillHand(starter, "ore");
+      this.toast("卷刃了。退回一块矿。");
       return;
     }
     const skill = this.skills(starter).forge;
@@ -1637,10 +1643,13 @@ export class World {
       gear.pairId = starter.side === "left" ? "twin_right" : "twin_left";
       gear.name = gear.name.replace(/^锻·/, "并肩·");
       this.toast("两个人对着砧");
+    } else {
+      gear.name = gear.name.replace(/之并肩/g, "");
     }
     this.keepGear(starter, gear);
     this.skills(starter).forge += 1;
-    this.toast(`${starter.name} 锻出${gear.name}`);
+    const worn = this.fighter(starter).weaponUid === gear.uid;
+    this.toast(`${starter.name} 收刃：${gear.name}${worn ? "。佩上了。" : "。在鉴里。"}`);
   }
 
   private boardPrompt(p: Actor): string {

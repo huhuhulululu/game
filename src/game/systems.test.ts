@@ -852,11 +852,13 @@ describe("living systems", () => {
     tap(miss, "a");
     m.fish!.mark = 0.1;
     tap(miss, "a");
+    assert.ok(miss.toasts.some((t) => t.text.includes("偏了")));
     tap(miss, "a");
     tap(miss, "a");
     assert.equal(miss.save.gear.length, 0);
     assert.equal(miss.save.leftSkills.forge, 1);
-    assert.equal(countOf(miss.save.bag, "ore"), 1);
+    assert.equal(countOf(miss.save.bag, "ore") + (m.held.startsWith("ore") ? 1 : 0), 1);
+    assert.ok(miss.toasts.some((t) => t.text.includes("卷刃") && t.text.includes("退")));
   });
 
   it("two people hitting the green at the anvil make a pair; away falls back to solo", () => {
@@ -1371,5 +1373,44 @@ describe("living systems", () => {
     assert.equal(snap.lit, true);
     assert.equal(p.hp, 20);
     assert.ok(w.toasts.some((t) => t.text.includes("天黑") && t.text.includes("灯")));
+  });
+
+  it("the anvil says three green hits, and a finished blade is worn not lost", () => {
+    const w = new World("ANVIL2");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    addToBag(w.save.bag, "ore", 2);
+    addToBag(w.save.bag, "wood", 1);
+    const anvil = w.valley.find("Y")[0];
+    standFacing(p, anvil);
+    assert.ok(w.snapshot("a").prompt.includes("矿×2"));
+    tap(w, "a");
+    assert.ok(w.toasts.some((t) => t.text.includes("炉子热了") && t.text.includes("三下")));
+    assert.ok(w.snapshot("a").prompt.includes("锻") && w.snapshot("a").prompt.includes("还差3下"));
+    p.fish!.mark = 0.5;
+    tap(w, "a");
+    assert.ok(w.snapshot("a").prompt.includes("还差2下"));
+    tap(w, "a");
+    tap(w, "a");
+    assert.equal(w.save.gear.length, 1);
+    assert.equal(w.save.left.weaponUid, w.save.gear[0].uid);
+    assert.ok(w.toasts.some((t) => t.text.includes("收刃") && t.text.includes("佩上")));
+    assert.ok(!w.toasts.some((t) => t.text.includes("两个人对着砧")));
+    assert.equal(w.save.gear[0].pairId, undefined);
+    assert.ok(!w.save.gear[0].name.includes("并肩"));
+
+    const late = new World("ANVIL3");
+    late.addPlayer("a", "暖", "left");
+    const q = late.players.get("a");
+    assert.ok(q);
+    addToBag(late.save.bag, "ore", 2);
+    addToBag(late.save.bag, "wood", 1);
+    standFacing(q, late.valley.find("Y")[0]);
+    tap(late, "a");
+    for (let i = 0; i < 80; i++) late.tick(0.06);
+    assert.equal(late.save.gear.length, 0);
+    assert.ok(q.held.startsWith("ore"));
+    assert.ok(late.toasts.some((t) => t.text.includes("卷刃") && t.text.includes("退")));
   });
 });
