@@ -33,6 +33,7 @@ import {
   viewScale,
 } from "./draw";
 import { el } from "../ui/dom";
+import { itemMark, markSvg } from "../ui/marks";
 import { loadArt } from "./art";
 import { emptyFeel, tickFeel } from "../game/feel";
 
@@ -368,13 +369,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           <div class="bar hp" title="血"><i style="width:${hp}%"></i></div>
           <div class="bar hunger" title="饿"><i style="width:${hg}%"></i></div>
         </div>
-        <div class="hud-chips">
-          <span>${snap.season}</span>
-          <span>${phase}</span>
-          <span>${snap.weather.name}</span>
-          <span>金 ${snap.gold}</span>
-          <span>默契 ${snap.bond}</span>
-        </div>
+        <div class="hud-ink">${snap.season} · ${phase} · ${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
         ${partnerLine ? `<div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>` : ""}
       </div>
       <div class="hud-stack">
@@ -404,7 +399,10 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         <div class="sheet-grid">
           ${
             snap.bag
-              .map((s) => `<button type="button" class="sheet-cell" data-take="${s.id}"><i class="ico item"></i><b>${s.name}</b><span>×${s.n}</span></button>`)
+              .map(
+                (s) =>
+                  `<button type="button" class="sheet-cell" data-take="${s.id}">${markSvg(itemMark(s.id))}<b>${s.name}</b><span>×${s.n}</span></button>`,
+              )
               .join("") || `<div class="sheet-empty">空</div>`
           }
         </div>
@@ -413,12 +411,12 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       <div class="sheet ${open === "book" ? "" : "hidden"}" id="book">
         <header>图鉴</header>
         <div class="sheet-grid stats">
-          <div class="sheet-cell"><i class="ico fish"></i><b>鱼</b><span>${snap.album.fish}/${snap.album.fishMax}</span></div>
-          <div class="sheet-cell"><i class="ico cook"></i><b>菜</b><span>${snap.album.cook}/${snap.album.cookMax}</span></div>
-          <div class="sheet-cell"><i class="ico map"></i><b>图</b><span>${snap.album.map}%</span></div>
+          <div class="sheet-cell">${markSvg("fish")}<b>鱼</b><span>${snap.album.fish}/${snap.album.fishMax}</span></div>
+          <div class="sheet-cell">${markSvg("cook")}<b>菜</b><span>${snap.album.cook}/${snap.album.cookMax}</span></div>
+          <div class="sheet-cell">${markSvg("map")}<b>图</b><span>${snap.album.map}%</span></div>
         </div>
         <div class="sheet-grid">
-          ${snap.cookbook.map((n) => `<div class="sheet-cell"><i class="ico cook"></i><b>${n}</b></div>`).join("") || `<div class="sheet-empty">还没写出第一道</div>`}
+          ${snap.cookbook.map((n) => `<div class="sheet-cell">${markSvg("cook")}<b>${n}</b></div>`).join("") || `<div class="sheet-empty">还没写出第一道</div>`}
         </div>
       </div>
       <div class="sheet ${open === "map" ? "" : "hidden"}" id="map">

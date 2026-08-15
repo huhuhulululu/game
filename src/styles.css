@@ -149,12 +149,15 @@ button {
   gap: 8px;
   max-width: min(58vw, 280px);
   padding: 10px 12px 12px;
-  background:
-    linear-gradient(180deg, rgba(244, 231, 210, 0.1), transparent 28%),
-    #2a1c12;
-  border: 3px solid #8a6238;
+  background-color: #3a2418;
+  background-image:
+    linear-gradient(180deg, rgba(244, 231, 210, 0.1), transparent 28%, rgba(12, 8, 6, 0.22)),
+    url("/art/tex-wood.png?v=look10");
+  background-size: auto, 180px;
+  border: 0;
   box-shadow:
-    inset 0 0 0 1px #c9a06a,
+    inset 0 0 0 2px #2a1810,
+    inset 0 0 0 4px #7a5230,
     0 10px 22px rgba(8, 6, 4, 0.42);
 }
 
@@ -184,10 +187,13 @@ button {
 }
 
 .bar {
-  height: 9px;
+  height: 8px;
   background: #140e0a;
-  border: 1px solid rgba(40, 24, 12, 0.55);
+  border: 0;
   overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px #5a3a22,
+    inset 0 2px 3px rgba(0, 0, 0, 0.45);
 }
 
 .bar i {
@@ -203,34 +209,29 @@ button {
   background: linear-gradient(90deg, #2a4a38, var(--pine));
 }
 
-.hud-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.hud-chips span {
-  padding: 2px 7px;
-  border: 1px solid rgba(201, 160, 106, 0.4);
-  background: rgba(16, 10, 6, 0.45);
+.hud-ink {
   color: var(--gold-soft);
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  line-height: 1.55;
 }
 
 .prompt-toast {
   position: fixed;
   left: 50%;
   bottom: calc(168px + var(--safe-bottom));
-  transform: translateX(-50%);
+  transform: translateX(-50%) rotate(-0.4deg);
   max-width: min(78vw, 360px);
   padding: 8px 16px;
-  background: rgba(40, 28, 16, 0.82);
-  border-top: 3px solid var(--persimmon);
-  color: var(--paper);
+  background:
+    linear-gradient(180deg, #f4e7d2, #e7d3b4);
+  color: var(--ink);
   letter-spacing: 0.16em;
   font-size: 14px;
   text-align: center;
+  box-shadow:
+    2px 3px 0 #2a1810,
+    0 8px 16px var(--shadow);
 }
 
 .live-top {
@@ -299,35 +300,56 @@ button {
   position: absolute;
   right: calc(12px + var(--safe-right));
   top: calc(8px + var(--safe-top));
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  border: 2px solid #8a6238;
+  width: 46px;
+  height: 40px;
+  border-radius: 2px 2px 7px 7px;
+  border: 0;
   color: var(--gold-soft);
-  background: #2a1c12;
-  box-shadow: inset 0 0 0 1px #c9a06a;
+  background-color: #3a2418;
+  background-image:
+    linear-gradient(180deg, rgba(244, 231, 210, 0.12), transparent 42%),
+    url("/art/tex-wood.png?v=look10");
+  background-size: auto, 90px;
+  box-shadow:
+    inset 0 0 0 2px #2a1810,
+    inset 0 0 0 3px #7a5230,
+    0 6px 10px rgba(8, 6, 4, 0.35);
+}
+
+.bag-toggle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  width: 2px;
+  height: 12px;
+  background: #8a6a40;
+  transform: translateX(-50%);
 }
 
 .book-toggle {
-  top: 48px;
+  top: 56px;
 }
 
 .map-toggle {
-  top: 96px;
+  top: 104px;
 }
 
 .mute-toggle {
-  top: 144px;
+  top: 152px;
 }
 
 .tickets.rush .ticket {
-  box-shadow: 0 0 0 1px #c45c26;
+  box-shadow:
+    2px 3px 0 #2a1810,
+    0 0 0 1px #c45c26,
+    0 8px 16px var(--shadow);
 }
 
 .bag-panel button,
 .sheet-cell {
   pointer-events: auto;
-  border: 1px solid rgba(201, 160, 106, 0.25);
+  border: 0;
   padding: 4px 8px;
   color: var(--gold-soft);
 }
@@ -361,13 +383,18 @@ button {
   position: absolute;
   left: 50%;
   top: calc(72px + var(--safe-top));
-  transform: translateX(-50%);
+  transform: translateX(-50%) rotate(-0.3deg);
   width: min(86vw, 360px);
-  background:
-    linear-gradient(180deg, rgba(244, 231, 210, 0.06), transparent 18%),
-    #241810;
-  border: 2px solid rgba(201, 160, 106, 0.45);
-  box-shadow: 0 16px 40px rgba(8, 6, 4, 0.45);
+  background-color: #2a1c14;
+  background-image:
+    linear-gradient(180deg, rgba(244, 231, 210, 0.08), transparent 18%, rgba(12, 8, 6, 0.2)),
+    url("/art/tex-wood.png?v=look10");
+  background-size: auto, 220px;
+  border: 0;
+  box-shadow:
+    inset 0 0 0 2px #2a1810,
+    inset 0 0 0 4px #7a5230,
+    0 16px 40px rgba(8, 6, 4, 0.45);
   padding: 12px 14px 16px;
 }
 
@@ -395,8 +422,10 @@ button {
   gap: 4px;
   min-height: 64px;
   padding: 8px;
-  background: rgba(16, 11, 8, 0.55);
+  background: rgba(244, 231, 210, 0.08);
+  border: 0;
   text-align: left;
+  box-shadow: inset 0 0 0 1px rgba(42, 24, 16, 0.5);
 }
 
 .sheet-cell b {
@@ -417,29 +446,11 @@ button {
   text-align: center;
 }
 
-.ico {
-  width: 18px;
-  height: 18px;
+.mark {
+  width: 22px;
+  height: 22px;
   display: block;
-}
-
-.ico.fish {
-  background: #4a8aaa;
-  clip-path: polygon(0 50%, 40% 20%, 80% 35%, 100% 50%, 80% 65%, 40% 80%);
-}
-
-.ico.cook {
-  background: var(--persimmon);
-  border-radius: 50% 50% 40% 40%;
-}
-
-.ico.map {
-  background: var(--pine);
-}
-
-.ico.item {
-  background: var(--gold);
-  border-radius: 2px;
+  overflow: visible;
 }
 
 .sheet footer,
@@ -985,12 +996,24 @@ button {
 }
 
 .ticket {
-  background: var(--paper);
+  background:
+    linear-gradient(180deg, #f4e7d2 0%, #e7d3b4 100%);
   color: var(--ink);
   min-width: 108px;
   padding: 7px 10px 8px;
-  border-radius: 3px;
-  box-shadow: 0 8px 16px var(--shadow);
+  border-radius: 1px;
+  transform: rotate(-1.1deg);
+  box-shadow:
+    2px 3px 0 #2a1810,
+    0 8px 16px var(--shadow);
+}
+
+.ticket:nth-child(2n) {
+  transform: rotate(0.8deg);
+}
+
+.ticket:nth-child(3n) {
+  transform: rotate(-0.4deg);
 }
 
 .ticket b {

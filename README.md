@@ -4,7 +4,7 @@
 
 钓鱼、下矿、打造、做菜、种田、问今日之运，都开着。没有人规定今晚的高潮在厨房还是在河边。
 
-设计说明见 [docs/WORLD.md](docs/WORLD.md)。
+立项见 [docs/CHARTER.md](docs/CHARTER.md)。世界怎么活见 [docs/WORLD.md](docs/WORLD.md)。
 
 ## 两部手机怎么玩
 

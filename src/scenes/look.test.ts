@@ -26,6 +26,7 @@ import {
   viewScale,
 } from "./draw";
 import type { ActorSnap } from "../sim/net";
+import { itemMark, markSvg } from "../ui/marks";
 
 function mockCtx() {
   const fills: string[] = [];
@@ -81,6 +82,18 @@ function mockCtx() {
 }
 
 describe("look", () => {
+  it("bag marks are drawn things, not one gold square", () => {
+    assert.equal(itemMark("herb"), "leaf");
+    assert.equal(itemMark("fish_heavy"), "fish");
+    assert.equal(itemMark("ore"), "stone");
+    assert.equal(itemMark("tomato_seed"), "seed");
+    assert.equal(itemMark("wood_blade"), "wood");
+    assert.equal(itemMark("torch"), "flame");
+    const svg = markSvg(itemMark("herb"));
+    assert.ok(svg.includes("<path"));
+    assert.ok(!svg.includes("rect"));
+  });
+
   it("still paints trees, water, fire, plots, ore and houses as named things", () => {
     assert.equal(tileLook("T"), "tree");
     assert.equal(tileLook("t", "wild"), "tree");
