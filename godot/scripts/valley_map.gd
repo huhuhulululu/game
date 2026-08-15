@@ -135,8 +135,8 @@ func _land() -> void:
 
 
 func _houses() -> void:
-	_prop("prop-hut.png", 4.55, 4.72, 176, 132, 8, 0.03, 0.93)
-	_prop("prop-lodge.png", 16.20, 3.85, 220, 168, 8, 0.03, 0.93)
+	_prop("prop-hut.png", 4.55, 4.72, 176, 132, 8, 0.0, 0.93)
+	_prop("prop-lodge.png", 16.20, 3.85, 220, 168, 8, 0.0, 0.93)
 
 
 func _hang(name: String, gx: float, gy: float, w: float, h: float, z: int, fog := 0.02) -> void:
@@ -155,9 +155,9 @@ func _hang(name: String, gx: float, gy: float, w: float, h: float, z: int, fog :
 
 func _ridge() -> void:
 	# Cover trees in the enter frame: behind 暖, left of the lodge, on the creek.
-	_prop("prop-cover-tree.png", 6.35, 5.15, 176, 236, 7, 0.03, 0.94)
-	_prop("prop-cover-tree.png", 12.15, 3.55, 196, 252, 7, 0.03, 0.94)
-	_prop("prop-cover-tree.png", 10.55, 7.20, 168, 228, 9, 0.03, 0.94)
+	_prop("prop-cover-tree.png", 6.35, 5.15, 176, 236, 7, 0.0, 0.94)
+	_prop("prop-cover-tree.png", 12.15, 3.55, 196, 252, 7, 0.0, 0.94)
+	_prop("prop-cover-tree.png", 10.55, 7.20, 168, 228, 9, 0.0, 0.94)
 
 
 func _shore() -> void:
@@ -175,5 +175,5 @@ func _docks() -> void:
 
 func _bits() -> void:
 	# Cover lamps in the enter frame. No stall, no anvil.
-	_hang("prop-cover-lamp.png", 8.15, 7.35, 52, 68, 12, 0.02)
-	_hang("prop-cover-lamp.png", 16.85, 5.05, 58, 76, 12, 0.02)
+	_hang("prop-cover-lamp.png", 8.15, 7.35, 52, 68, 12, 0.0)
+	_hang("prop-cover-lamp.png", 16.85, 5.05, 58, 76, 12, 0.0)

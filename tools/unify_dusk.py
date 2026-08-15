@@ -102,41 +102,44 @@ def fade_edges(im: Image.Image, pad: float = 0.14) -> Image.Image:
 
 
 def fade_bank(im: Image.Image, pad: float = 0.26) -> Image.Image:
-    # Shore and verge keep grass and water. soften_sit would eat both.
+    # Land lip. Eat the gold water sheet so the bank is not an oval stamp.
     buf = np.asarray(im.convert("RGBA"), dtype=np.float32)
     h, w = buf.shape[:2]
-    yy = np.linspace(0, 1, h, dtype=np.float32)[:, None]
+    r, g, b = buf[:, :, 0], buf[:, :, 1], buf[:, :, 2]
+    lum = 0.30 * r + 0.50 * g + 0.20 * b
+    yy = np.arange(h, dtype=np.float32)[:, None]
     xx = np.linspace(0, 1, w, dtype=np.float32)[None, :]
-    fx = np.clip(np.minimum(xx / pad, (1.0 - xx) / pad), 0.0, 1.0)
-    fy = np.clip(np.minimum(yy / pad, (1.0 - yy) / pad), 0.0, 1.0)
-    t = np.minimum(fx, fy)
-    edge = t * t * (3.0 - 2.0 * t)
-    cy, cx = 0.48, 0.50
-    dist = np.sqrt(((xx - cx) / 0.56) ** 2 + ((yy - cy) / 0.56) ** 2)
-    blob = np.clip(1.12 - dist, 0.0, 1.0)
-    blob = blob * blob
-    buf[:, :, 3] *= edge * blob
-    out = Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
-    a = out.getchannel("A").filter(ImageFilter.GaussianBlur(2.4))
-    out.putalpha(a)
-    return out
+    pad_lum = np.pad(lum, 2, mode="edge")
+    contrast = np.zeros_like(lum)
+    for dy in (-2, 0, 2):
+        for dx in (-2, 0, 2):
+            contrast = np.maximum(contrast, np.abs(pad_lum[2 + dy : 2 + dy + h, 2 + dx : 2 + dx + w] - lum))
+    rock = (yy < h * 0.64) & ((contrast > 10) | ((lum < 80) & (yy < h * 0.50)))
+    lip = (yy >= h * 0.50) & (yy < h * 0.74) & (contrast > 9) & (lum < 100)
+    keep = rock | lip
+    yyn = yy / max(1.0, h - 1)
+    edge = np.clip(np.minimum(xx / max(0.12, pad * 0.55), (1.0 - xx) / max(0.12, pad * 0.55)), 0.0, 1.0)
+    edge = np.minimum(edge, np.clip(np.minimum(yyn / 0.14, (1.0 - yyn) / 0.22), 0.0, 1.0))
+    buf[:, :, 3] = np.where(keep, 255.0, 0.0) * (edge * edge * (3.0 - 2.0 * edge))
+    return Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
 
 
 def keep_lamp(im: Image.Image) -> Image.Image:
+    # Lamp and bloom only. The lodge wall is a box.
     buf = np.asarray(im.convert("RGBA"), dtype=np.float32)
     h, w = buf.shape[:2]
+    r, g, b = buf[:, :, 0], buf[:, :, 1], buf[:, :, 2]
+    lum = 0.30 * r + 0.50 * g + 0.20 * b
+    glow = (lum > 88) & (r > 130) & (r > b + 14)
+    if not glow.any():
+        glow = lum > np.quantile(lum, 0.88)
+    ys, xs = np.where(glow)
+    cy, cx = float(ys.mean()), float(xs.mean())
     yy, xx = np.ogrid[:h, :w]
-    cy, cx = h * 0.50, w * 0.40
-    dist = np.sqrt(((xx - cx) / (w * 0.46)) ** 2 + ((yy - cy) / (h * 0.46)) ** 2)
-    fall = np.clip(1.18 - dist, 0.0, 1.0)
-    fall = fall * fall
-    lum = buf[:, :, :3] @ np.array([0.35, 0.45, 0.20], dtype=np.float32)
-    glow = np.clip((lum - 48.0) / 90.0, 0.0, 1.0)
-    buf[:, :, 3] *= np.clip(np.maximum(fall, glow), 0.0, 1.0)
-    out = Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
-    a = out.getchannel("A").filter(ImageFilter.GaussianBlur(1.2))
-    out.putalpha(a)
-    return out
+    dist = np.sqrt(((xx - cx) / max(5.0, w * 0.22)) ** 2 + ((yy - cy) / max(5.0, h * 0.26)) ** 2)
+    keep = ((dist < 0.92) | glow) & ~((lum < 62) & (dist > 0.55))
+    buf[:, :, 3] = np.where(keep, 255.0, 0.0)
+    return Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
 
 
 def trim_alpha(im: Image.Image, t: int = 10) -> Image.Image:
@@ -147,26 +150,119 @@ def trim_alpha(im: Image.Image, t: int = 10) -> Image.Image:
     return im.crop((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
 
 
-def cut_house(im: Image.Image, tol: float = 38.0, sit: float = 0.36) -> Image.Image:
-    # Cut to the roof. Eat the cover floor so the play sheet is not a box.
-    look = _look()
-    cut = eat_corners(im.convert("RGBA"), tol)
-    buf = np.asarray(cut, dtype=np.float32)
-    h, _w = buf.shape[:2]
-    rgb = buf[:, :, :3]
-    a = buf[:, :, 3]
-    lum = rgb @ np.array([0.30, 0.50, 0.20], dtype=np.float32)
-    r = rgb[:, :, 0]
-    g = rgb[:, :, 1]
+def kill_haze(im: Image.Image, t: float = 52.0) -> Image.Image:
+    # Weak dusk wash on a sprite reads as a box on the play floor.
+    buf = np.asarray(im.convert("RGBA"), dtype=np.float32)
+    r, g, b, a = buf[:, :, 0], buf[:, :, 1], buf[:, :, 2], buf[:, :, 3]
+    lum = 0.30 * r + 0.50 * g + 0.20 * b
     glow = (r > 150.0) & (r > g + 16.0) & (lum > 88.0)
+    buf[:, :, 3] = np.where((a < t) & (~glow), 0.0, a)
+    return Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
+
+
+def _dilate(mask: np.ndarray, k: int = 3) -> np.ndarray:
+    k = k if k % 2 == 1 else k + 1
+    im = Image.fromarray((mask.astype(np.uint8) * 255), "L")
+    return np.asarray(im.filter(ImageFilter.MaxFilter(k))) > 127
+
+
+def _erode(mask: np.ndarray, k: int = 3) -> np.ndarray:
+    k = k if k % 2 == 1 else k + 1
+    im = Image.fromarray((mask.astype(np.uint8) * 255), "L")
+    return np.asarray(im.filter(ImageFilter.MinFilter(k))) > 127
+
+
+def _flood(seeds, h: int, w: int, can_enter: np.ndarray) -> np.ndarray:
+    vis = np.zeros((h, w), dtype=bool)
+    q = deque(seeds)
+    while q:
+        x, y = q.popleft()
+        if x < 0 or y < 0 or x >= w or y >= h or vis[y, x]:
+            continue
+        if not can_enter[y, x]:
+            continue
+        vis[y, x] = True
+        q.extend(((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+    return vis
+
+
+def _keep_big(mask: np.ndarray, min_px: int) -> np.ndarray:
+    h, w = mask.shape
+    seen = np.zeros_like(mask, dtype=bool)
+    out = np.zeros_like(mask, dtype=bool)
+    for y in range(h):
+        for x in range(w):
+            if not mask[y, x] or seen[y, x]:
+                continue
+            q = deque([(x, y)])
+            seen[y, x] = True
+            comp = []
+            while q:
+                cx, cy = q.popleft()
+                comp.append((cx, cy))
+                for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                    if 0 <= nx < w and 0 <= ny < h and mask[ny, nx] and not seen[ny, nx]:
+                        seen[ny, nx] = True
+                        q.append((nx, ny))
+            if len(comp) >= min_px:
+                for cx, cy in comp:
+                    out[cy, cx] = True
+    return out
+
+
+def _fill_holes(mask: np.ndarray) -> np.ndarray:
+    h, w = mask.shape
+    seeds = [(x, 0) for x in range(w)] + [(x, h - 1) for x in range(w)]
+    seeds += [(0, y) for y in range(h)] + [(w - 1, y) for y in range(h)]
+    exterior = _flood(seeds, h, w, ~mask)
+    return mask | (~mask & ~exterior)
+
+
+def cut_house(im: Image.Image, tol: float = 38.0, sit: float = 0.36) -> Image.Image:
+    # Cut to the roof. Eat cover sky, mountain, and the dusk field under the crop.
+    rgb = np.asarray(im.convert("RGB"), dtype=np.float32)
+    h, w = rgb.shape[:2]
+    r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+    lum = 0.30 * r + 0.50 * g + 0.20 * b
     yy = np.arange(h, dtype=np.float32)[:, None]
-    floor = (yy > h * 0.58) & (a > 6.0) & (~glow) & (lum < 100.0)
-    t = np.clip((h - yy) / max(12.0, h * 0.42), 0.0, 1.0)
-    buf[:, :, 3] = np.where(floor, a * (t * t), a)
-    cut = Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
-    cut = look.soften_sit(cut, sit)
-    cut = fade_edges(cut, 0.08)
-    return trim_alpha(cut)
+    warm = r - b
+    sat = warm / np.maximum(lum, 1.0)
+    gold = (lum > 108) & (r > 128) & (r + 10 >= g) & (r > b + 5)
+    glow = (r > 148) & (r > g + 12) & (lum > 88) & (r > b + 16)
+    wood = ((lum < 76) & (sat > 0.90) & (warm > 38)) | ((lum < 50) & (r >= b - 2))
+    mountain = (lum > 74) & (lum < 118) & (sat < 0.88) & ~glow
+    top_gold = _flood(
+        [(x, 0) for x in range(w)] + [(0, y) for y in range(min(12, h))] + [(w - 1, y) for y in range(min(12, h))],
+        h,
+        w,
+        gold | ((yy < h * 0.18) & (lum > 92)),
+    )
+    windows = glow & ~top_gold & (yy > h * 0.14) & ~mountain
+    can = (wood | windows | glow) & ~top_gold & ~mountain
+    house = (wood & (yy < h * 0.68) & (yy > h * 0.06)) | windows
+    house = house & ~top_gold & ~mountain
+    for _ in range(6):
+        house = _dilate(house, 3) & can & (yy < h * 0.74)
+    house = _fill_holes(_erode(_dilate(house | windows, 3), 3) | windows)
+    house = (house | windows) & ~mountain & ~top_gold & (~gold | windows)
+    house = _keep_big(house, min_px=max(60, (h * w) // 90))
+    pad = np.pad(lum, 2, mode="edge")
+    contrast = np.zeros_like(lum)
+    for dy in (-2, 0, 2):
+        for dx in (-2, 0, 2):
+            contrast = np.maximum(contrast, np.abs(pad[2 + dy : 2 + dy + h, 2 + dx : 2 + dx + w] - lum))
+    foot_can = ((wood & (yy > h * 0.55)) | ((contrast > 11) & (sat > 0.62) & (lum < 110) & (yy > h * 0.58))) & ~top_gold
+    feet = house.copy()
+    for _ in range(5):
+        feet = _dilate(feet, 3) & (foot_can | house)
+    keep = house | (feet & (yy > h * 0.55)) | windows
+    alpha = np.where(keep, 255.0, 0.0)
+    foot_y = h * (1.0 - sit)
+    t = np.clip((h - yy) / max(8.0, h * sit), 0.0, 1.0)
+    alpha = np.where((yy > foot_y) & ~windows, alpha * (t * t), alpha)
+    alpha = np.where((alpha < 62) & ~windows, 0.0, alpha)
+    out = Image.fromarray(np.dstack([rgb.astype(np.uint8), np.clip(alpha, 0, 255).astype(np.uint8)]), "RGBA")
+    return trim_alpha(kill_haze(out, 56.0))
 
 
 def sit_cover_houses() -> None:
@@ -187,25 +283,26 @@ def sit_cover_grove() -> None:
     # Trees, lamp, shore from the same cover. Does not touch the cover.
     cover = Image.open(ART / "cover-valley.png").convert("RGBA")
     look = _look()
-    willow = trim_alpha(
-        look.soften_sit(
-            fade_edges(eat_gold_sky(eat_sky(cover.crop(WILLOW_BOX), 16.0), 112.0), 0.08),
-            0.12,
-        )
-    )
+    raw = eat_gold_sky(eat_sky(cover.crop(WILLOW_BOX), 16.0), 100.0)
+    buf = np.asarray(raw, dtype=np.float32)
+    r, g, b, a = buf[:, :, 0], buf[:, :, 1], buf[:, :, 2], buf[:, :, 3]
+    lum = 0.30 * r + 0.50 * g + 0.20 * b
+    leaf = (a > 8) & (lum < 110) & ~((lum > 90) & (r > 136) & (r > b + 8))
+    buf[:, :, 3] = np.where(leaf, 255.0, 0.0)
+    willow = trim_alpha(kill_haze(Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA"), 40.0))
     willow.save(ART / "prop-cover-tree.png")
     print("wrote prop-cover-tree.png from cover willow", willow.size)
     # Ridge canopy is gold-lit. Do not flood-eat the sky or the crown goes with it.
     ridge = trim_alpha(look.soften_sit(fade_edges(cover.crop(RIDGE_BOX), 0.12), 0.14))
     ridge.save(ART / "prop-cover-tree-b.png")
     print("wrote prop-cover-tree-b.png from cover ridge", ridge.size)
-    lamp = trim_alpha(look.soften_sit(keep_lamp(cover.crop(LAMP_BOX)), 0.10))
+    lamp = trim_alpha(kill_haze(keep_lamp(cover.crop(LAMP_BOX)), 40.0))
     lamp.save(ART / "prop-cover-lamp.png")
     print("wrote prop-cover-lamp.png from cover lamp", lamp.size)
-    shore = trim_alpha(fade_bank(cover.crop(SHORE_BOX), 0.26))
+    shore = trim_alpha(kill_haze(fade_bank(cover.crop(SHORE_BOX), 0.26), 52.0))
     shore.save(ART / "prop-cover-shore.png")
     print("wrote prop-cover-shore.png from cover shore", shore.size)
-    verge = trim_alpha(fade_bank(cover.crop(VERGE_BOX), 0.28))
+    verge = trim_alpha(kill_haze(fade_bank(cover.crop(VERGE_BOX), 0.28), 52.0))
     verge.save(ART / "prop-cover-verge.png")
     print("wrote prop-cover-verge.png from cover verge", verge.size)
 
