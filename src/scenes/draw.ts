@@ -186,10 +186,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
       tuft(g, x + 18, y + 8, 18, "#7a7a38");
       return;
     }
-    if (blitWrap(g, "grass", x, y, TILE, TILE)) {
-      if (hash(x, y) > 860) tuft(g, x + 8, y + 16, 10, "#2a4a30");
-      return;
-    }
+    if (blitWrap(g, "grass", x, y, TILE, TILE)) return;
     px(g, x, y, TILE, TILE, "#2e3a28");
     tuft(g, x + 8, y + 14, 12, "#3a4a30");
     return;
@@ -201,11 +198,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
     oval(g, x + 10, y + 10, 4, 3, "#6a5a38");
     return;
   }
-  if (blitWrap(g, "grass", x, y, TILE, TILE)) {
-    const n = hash(x, y);
-    if (n > 880) oval(g, x + 6 + (n % 12), y + 16, 4, 2.2, "rgba(30,60,40,0.28)");
-    return;
-  }
+  if (blitWrap(g, "grass", x, y, TILE, TILE)) return;
   px(g, x, y, TILE, TILE, "#3f6d45");
   const n = hash(x, y);
   tuft(g, x + 4 + (n % 10), y + 12 + (n % 8), 14, "#2f5a38");
@@ -214,8 +207,8 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
 }
 
 function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
-  oval(g, x + 18, y + 32, 12, 4, "rgba(20,16,10,0.28)");
-  if (blitFit(g, pine ? "pine" : "tree", x - 16, y - 52, 68, 92)) return;
+  oval(g, x + 18, y + 32, 14, 5, "rgba(20,16,10,0.28)");
+  if (blitFit(g, pine ? "pine" : "tree", x - 24, y - 74, 84, 114)) return;
   const sway = Math.sin(now / 860 + x * 0.03) * 1.4;
   oval(g, x + 18, y + 34, 12, 4, "rgba(20,16,10,0.28)");
   px(g, x + 15, y + 10, 7, 24, "#5a3a22");
@@ -239,22 +232,13 @@ function water(g: Ctx, x: number, y: number, now: number): void {
     px(g, x, y, TILE, TILE, "#1a5470");
     px(g, x, y + 16, TILE, 20, "#143e54");
   }
-  g.strokeStyle = "rgba(210,230,230,0.16)";
-  g.lineWidth = 1.2;
-  g.lineCap = "butt";
-  const t = now / 640;
-  const base = y + 16;
-  const y0 = base + Math.sin(t + x * 0.05) * 1.4;
-  const y1 = base + Math.sin(t + (x + TILE) * 0.05) * 1.4;
-  g.beginPath();
-  g.moveTo(x, y0);
-  g.lineTo(x + TILE, y1);
-  g.stroke();
+  const pulse = 0.05 + Math.sin(now / 920 + x * 0.03 + y * 0.02) * 0.03;
+  oval(g, x + 18, y + 17, 13, 6, `rgba(190,214,220,${pulse})`);
 }
 
 function dock(g: Ctx, x: number, y: number): void {
   water(g, x, y, 0);
-  if (blitFit(g, "dock", x - 6, y - 8, TILE + 12, TILE + 10)) return;
+  if (blitFit(g, "dock", x - 10, y - 14, TILE + 20, TILE + 18)) return;
   px(g, x, y + 12, TILE, 16, "#6a4a28");
   g.strokeStyle = "#8a6a40";
   g.lineWidth = 2;
@@ -338,7 +322,7 @@ function stall(g: Ctx, x: number, y: number, near?: Near): void {
     return;
   }
   oval(g, x + 18, y + 32, 14, 4, "rgba(20,16,10,0.22)");
-  if (blitFit(g, "stall", x - 8, y - 28, 52, 68)) return;
+  if (blitFit(g, "stall", x - 12, y - 36, 60, 78)) return;
   px(g, x + 2, y + 16, 32, 16, "#8a6a40");
   px(g, x + 4, y + 18, 28, 8, "#c4a060");
   tri(g, x + 18, y + 2, x, y + 16, x + 36, y + 16, "#c45c26");
@@ -390,6 +374,11 @@ function mineMouth(g: Ctx, x: number, y: number): void {
 }
 
 function ore(g: Ctx, x: number, y: number, now: number): void {
+  oval(g, x + 18, y + 30, 12, 4, "rgba(20,16,10,0.28)");
+  if (blitFit(g, "ore", x - 10, y - 10, 56, 50)) {
+    if (Math.sin(now / 220 + x) > 0.35) oval(g, x + 22, y + 14, 4, 3, "rgba(220,210,160,0.28)");
+    return;
+  }
   oval(g, x + 18, y + 28, 12, 4, "#2a2218");
   tri(g, x + 10, y + 26, x + 16, y + 10, x + 22, y + 26, "#4a443c");
   tri(g, x + 16, y + 26, x + 24, y + 8, x + 30, y + 26, "#6a6460");
@@ -397,6 +386,7 @@ function ore(g: Ctx, x: number, y: number, now: number): void {
 }
 
 function stairs(g: Ctx, x: number, y: number): void {
+  if (blitFit(g, "stairs", x - 8, y - 10, 52, 50)) return;
   px(g, x + 4, y + 6, 28, 8, "#6a5a44");
   px(g, x + 7, y + 14, 22, 8, "#5a4a38");
   px(g, x + 10, y + 22, 16, 8, "#3a2e22");
@@ -406,6 +396,8 @@ function stairs(g: Ctx, x: number, y: number): void {
 
 function lurk(g: Ctx, x: number, y: number, now: number): void {
   const bob = Math.sin(now / 400) * 2;
+  oval(g, x + 18, y + 30 + bob, 11, 4, "rgba(10,8,6,0.32)");
+  if (blitFit(g, "beast", x - 12, y - 18 + bob, 60, 54)) return;
   oval(g, x + 18, y + 28 + bob, 10, 3, "rgba(10,8,6,0.35)");
   oval(g, x + 18, y + 20 + bob, 11, 8, "#1a1410");
   oval(g, x + 18, y + 12 + bob, 7, 6, "#2a2018");
@@ -617,6 +609,7 @@ export function drawCell(
   part: DrawPart = "all",
 ): void {
   g.imageSmoothingEnabled = true;
+  if ("imageSmoothingQuality" in g) g.imageSmoothingQuality = "high";
   const look = tileLook(ch, zone);
   const floor =
     look === "grass" ||
@@ -659,7 +652,42 @@ function heldChip(name: string): string {
   return name.slice(0, 1);
 }
 
-export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0): void {
+function actorSheets(warm: boolean, facing: number, moving: boolean, now: number): string[] {
+  const step = Math.floor(now / 170) % 2 === 0;
+  if (facing === 0) {
+    const idle = warm ? "warmBack" : "pineBack";
+    if (!moving) return [idle];
+    return warm
+      ? step
+        ? ["warmBackWalk", idle]
+        : ["warmBackWalk2", idle]
+      : step
+        ? ["pineBackWalk", idle]
+        : ["pineBackWalk2", idle];
+  }
+  if (facing === 1 || facing === 3) {
+    const idle = warm ? "warmSide" : "pineSide";
+    if (!moving) return [idle];
+    return warm
+      ? step
+        ? ["warmSideWalk", idle]
+        : ["warmSideWalk2", idle]
+      : step
+        ? ["pineSideWalk", idle]
+        : ["pineSideWalk2", idle];
+  }
+  const idle = warm ? "warm" : "pineChar";
+  if (!moving) return [idle];
+  return warm
+    ? step
+      ? ["warmWalk", idle]
+      : ["warmWalk2", idle]
+    : step
+      ? ["pineWalk", idle]
+      : ["pineWalk2", idle];
+}
+
+export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0, moving = false): void {
   const x = ox + a.x;
   const y = oy + a.y;
   const warm = a.side === "left";
@@ -681,52 +709,42 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0)
     g.stroke();
     g.lineWidth = 1;
   }
-  const painted =
-    a.facing === 0
-      ? warm
-        ? "warmBack"
-        : "pineBack"
-      : a.facing === 1 || a.facing === 3
-        ? warm
-          ? "warmSide"
-          : "pineSide"
-        : warm
-          ? "warm"
-          : "pineChar";
-  const gait = (a.x + a.y) * 0.28;
-  const bob = Math.sin(gait) * 2.4;
-  const sway = Math.sin(gait) * 0.07;
-  oval(g, x, y + 7, 9, 3, "rgba(20,16,10,0.32)");
+  const bob = moving ? Math.sin(now / 160) * 1.1 : 0.4;
+  oval(g, x, y + 8, 11, 3.4, "rgba(20,16,10,0.3)");
   g.save();
   g.translate(x, y + bob);
-  g.rotate(a.facing === 1 ? sway : a.facing === 3 ? -sway : sway * 0.35);
   if (a.facing === 3) g.scale(-1, 1);
-  const drew = blitFit(g, painted, -16, -50, 32, 50);
+  let drew = false;
+  for (const sheet of actorSheets(warm, a.facing, moving, now)) {
+    if (blitFit(g, sheet, -23, -70, 46, 70)) {
+      drew = true;
+      break;
+    }
+  }
   g.restore();
   if (drew) {
     const mark = heldChip(a.heldName);
     if (mark) {
-      const hx = a.facing === 3 ? x - 18 : x + 10;
-      oval(g, hx + 5, y - 4, 6, 6, "#d4a24a");
+      const hx = a.facing === 3 ? x - 20 : x + 12;
+      oval(g, hx + 5, y - 6, 6, 6, "#d4a24a");
       g.fillStyle = "#2a2018";
       g.font = "8px 'Noto Serif SC', serif";
       g.textAlign = "center";
-      g.fillText(mark, hx + 5, y);
+      g.fillText(mark, hx + 5, y - 2);
     }
     if (a.fishing === "bite") {
       g.strokeStyle = "#f4e7d2";
-      g.strokeRect(x - 16, y - 20, 32, 32);
+      g.strokeRect(x - 18, y - 24, 36, 36);
     }
-    const nw = Math.min(48, a.name.length * 8 + 10);
-    px(g, x - nw / 2, y - 58, nw, 11, "rgba(40,28,16,0.78)");
+    const nw = Math.min(52, a.name.length * 8 + 10);
+    px(g, x - nw / 2, y - 78, nw, 11, "rgba(40,28,16,0.78)");
     g.fillStyle = "#f4e8d0";
     g.font = "10px 'Noto Serif SC', serif";
     g.textAlign = "center";
-    g.fillText(a.name, x, y - 49);
-    px(g, x - 10, y + 4, 20, 3, "#3a2018");
-    px(g, x - 10, y + 4, 20 * Math.max(0, a.hp / a.maxHp), 3, a.hp / a.maxHp < 0.35 ? "#c45c26" : "#3f6d5c");
-    px(g, x - 10, y + 8, 20 * Math.max(0, a.hunger / 100), 2, "#6aa36a");
-    void now;
+    g.fillText(a.name, x, y - 69);
+    px(g, x - 11, y + 5, 22, 3, "#3a2018");
+    px(g, x - 11, y + 5, 22 * Math.max(0, a.hp / a.maxHp), 3, a.hp / a.maxHp < 0.35 ? "#c45c26" : "#3f6d5c");
+    px(g, x - 11, y + 9, 22 * Math.max(0, a.hunger / 100), 2, "#6aa36a");
     return;
   }
   oval(g, x, y + 12, 9, 3, "rgba(20,16,10,0.3)");
@@ -772,7 +790,12 @@ export function drawEnemy(g: Ctx, e: EnemySnap, ox: number, oy: number, now: num
   const bob = Math.sin(now / 180 + e.x) * 1.5;
   const c = e.flash > 0 ? "#f4e7d2" : e.hue || "#3a2018";
   const ink = typeof c === "string" && c.startsWith("#") ? c : "#3a2018";
-  oval(g, x, y + 10 + bob, 11, 3, "rgba(10,8,6,0.35)");
+  oval(g, x, y + 12 + bob, 12, 4, "rgba(10,8,6,0.35)");
+  if (e.flash > 0) oval(g, x, y - 4 + bob, 18, 14, "rgba(244,231,210,0.4)");
+  if (blitFit(g, "beast", x - 24, y - 42 + bob, 48, 50)) {
+    px(g, x - 12, y - 44 + bob, 24 * (e.hp / e.maxHp), 3, "#c45c26");
+    return;
+  }
   oval(g, x - 7, y + 6 + bob, 3, 5, shade(ink, 0.55));
   oval(g, x + 7, y + 6 + bob, 3, 5, shade(ink, 0.55));
   oval(g, x, y + bob, 12, 8, c);
@@ -923,13 +946,13 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
-  oval(g, x + w / 2, y + h - 2, w * 0.4, 7, "rgba(20,16,10,0.28)");
-  const boxW = w + 24;
-  const boxH = h + 52;
+  oval(g, x + w / 2, y + h - 2, w * 0.42, 8, "rgba(20,16,10,0.28)");
+  const boxW = w + 36;
+  const boxH = h + 72;
   const painted =
-    (c.kind === "cabin" && blitFit(g, "cabin", x - 12, y - 40, boxW, boxH)) ||
-    (c.kind === "inn" && blitFit(g, "inn", x - 12, y - 40, boxW, boxH)) ||
-    (c.kind === "mine" && blitFit(g, "mine", x - 10, y - 20, w + 20, h + 28));
+    (c.kind === "cabin" && blitFit(g, "cabin", x - 18, y - 56, boxW, boxH)) ||
+    (c.kind === "inn" && blitFit(g, "inn", x - 18, y - 56, boxW, boxH)) ||
+    (c.kind === "mine" && blitFit(g, "mine", x - 14, y - 28, w + 28, h + 40));
   if (painted) return;
   if (c.kind === "mine") {
     px(g, x + 6, y + 10, w - 12, h - 10, "#1a1814");
@@ -1062,26 +1085,32 @@ export function drawFringe(g: Ctx, ch: string, near: Near, x: number, y: number,
   const s = tileLook(near.s, zone);
   const e = tileLook(near.e, zone);
   const w = tileLook(near.w, zone);
+  const wash = (x0: number, y0: number, x1: number, y1: number, from: string) => {
+    const grd = g.createLinearGradient(x0, y0, x1, y1);
+    grd.addColorStop(0, from);
+    grd.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = grd;
+    g.fillRect(Math.min(x0, x1), Math.min(y0, y1), x0 === x1 ? TILE : Math.abs(x1 - x0), y0 === y1 ? TILE : Math.abs(y1 - y0));
+  };
   if (wet(look)) {
-    const foam = (cx: number, cy: number) => oval(g, cx, cy, 7, 2.4, "rgba(220,220,210,0.16)");
-    if (!wet(n)) foam(x + 18, y + 3);
-    if (!wet(s)) foam(x + 18, y + 33);
-    if (!wet(e)) foam(x + 33, y + 18);
-    if (!wet(w)) foam(x + 3, y + 18);
+    if (!wet(n)) wash(x, y, x, y + 14, "rgba(47,90,56,0.38)");
+    if (!wet(s)) wash(x, y + TILE, x, y + TILE - 14, "rgba(47,90,56,0.34)");
+    if (!wet(e)) wash(x + TILE, y, x + TILE - 14, y, "rgba(47,90,56,0.3)");
+    if (!wet(w)) wash(x, y, x + 14, y, "rgba(47,90,56,0.3)");
     void now;
     return;
   }
   if (look === "path" || look === "plot") {
-    if (n === "grass") oval(g, x + 18, y + 2, 16, 4, "rgba(47,90,56,0.32)");
-    if (s === "grass") oval(g, x + 18, y + 34, 16, 4, "rgba(47,90,56,0.32)");
-    if (w === "grass") oval(g, x + 2, y + 18, 4, 14, "rgba(47,90,56,0.32)");
-    if (e === "grass") oval(g, x + 34, y + 18, 4, 14, "rgba(47,90,56,0.32)");
+    if (n === "grass") wash(x, y, x, y + 10, "rgba(47,90,56,0.28)");
+    if (s === "grass") wash(x, y + TILE, x, y + TILE - 10, "rgba(47,90,56,0.28)");
+    if (w === "grass") wash(x, y, x + 10, y, "rgba(47,90,56,0.24)");
+    if (e === "grass") wash(x + TILE, y, x + TILE - 10, y, "rgba(47,90,56,0.24)");
   }
   if (look === "grass" && (wet(n) || wet(s) || wet(e) || wet(w))) {
-    if (wet(s)) oval(g, x + 18, y + 32, 16, 5, "rgba(20,40,28,0.28)");
-    if (wet(n)) oval(g, x + 18, y + 4, 16, 5, "rgba(20,40,28,0.28)");
-    if (wet(e)) oval(g, x + 32, y + 18, 5, 14, "rgba(20,40,28,0.28)");
-    if (wet(w)) oval(g, x + 4, y + 18, 5, 14, "rgba(20,40,28,0.28)");
+    if (wet(s)) wash(x, y + TILE, x, y + TILE - 16, "rgba(26,68,88,0.32)");
+    if (wet(n)) wash(x, y, x, y + 16, "rgba(26,68,88,0.28)");
+    if (wet(e)) wash(x + TILE, y, x + TILE - 16, y, "rgba(26,68,88,0.26)");
+    if (wet(w)) wash(x, y, x + 16, y, "rgba(26,68,88,0.26)");
   }
 }
 

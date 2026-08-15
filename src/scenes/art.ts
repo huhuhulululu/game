@@ -1,55 +1,62 @@
 type Sheet = HTMLCanvasElement;
 
-const SRC: Record<string, { src: string; key: boolean }> = {
-  tree: { src: "/art/prop-tree.png", key: true },
-  pine: { src: "/art/prop-pine.png", key: true },
-  fire: { src: "/art/prop-fire.png", key: true },
-  cabin: { src: "/art/prop-cabin.png", key: true },
-  inn: { src: "/art/prop-inn.png", key: true },
-  mine: { src: "/art/prop-mine.png", key: true },
-  stall: { src: "/art/prop-stall.png", key: true },
-  dock: { src: "/art/prop-dock.png", key: true },
-  anvil: { src: "/art/prop-anvil.png", key: true },
-  altar: { src: "/art/prop-altar.png", key: true },
-  board: { src: "/art/prop-board.png", key: true },
-  bush: { src: "/art/prop-bush.png", key: true },
-  gate: { src: "/art/prop-gate.png", key: true },
-  stove: { src: "/art/prop-stove.png", key: true },
-  icebox: { src: "/art/prop-icebox.png", key: true },
-  pantry: { src: "/art/prop-pantry.png", key: true },
-  cut: { src: "/art/prop-cut.png", key: true },
-  warm: { src: "/art/char-warm.png", key: true },
-  pineChar: { src: "/art/char-pine.png", key: true },
-  warmSide: { src: "/art/char-warm-side.png", key: true },
-  pineSide: { src: "/art/char-pine-side.png", key: true },
-  warmBack: { src: "/art/char-warm-back.png", key: true },
-  pineBack: { src: "/art/char-pine-back.png", key: true },
-  grass: { src: "/art/tex-grass.png", key: false },
-  path: { src: "/art/tex-path.png", key: false },
-  water: { src: "/art/tex-water.png", key: false },
-  wood: { src: "/art/tex-wood.png", key: false },
-  stone: { src: "/art/tex-stone.png", key: false },
-  marsh: { src: "/art/tex-marsh.png", key: false },
+const SRC: Record<string, { src: string }> = {
+  tree: { src: "/art/prop-tree.png" },
+  pine: { src: "/art/prop-pine.png" },
+  fire: { src: "/art/prop-fire.png" },
+  cabin: { src: "/art/prop-cabin.png" },
+  inn: { src: "/art/prop-inn.png" },
+  mine: { src: "/art/prop-mine.png" },
+  stall: { src: "/art/prop-stall.png" },
+  dock: { src: "/art/prop-dock.png" },
+  anvil: { src: "/art/prop-anvil.png" },
+  altar: { src: "/art/prop-altar.png" },
+  board: { src: "/art/prop-board.png" },
+  bush: { src: "/art/prop-bush.png" },
+  gate: { src: "/art/prop-gate.png" },
+  stove: { src: "/art/prop-stove.png" },
+  icebox: { src: "/art/prop-icebox.png" },
+  pantry: { src: "/art/prop-pantry.png" },
+  cut: { src: "/art/prop-cut.png" },
+  ore: { src: "/art/prop-ore.png" },
+  stairs: { src: "/art/prop-stairs.png" },
+  beast: { src: "/art/prop-beast.png" },
+  warm: { src: "/art/char-warm.png" },
+  pineChar: { src: "/art/char-pine.png" },
+  warmSide: { src: "/art/char-warm-side.png" },
+  pineSide: { src: "/art/char-pine-side.png" },
+  warmBack: { src: "/art/char-warm-back.png" },
+  pineBack: { src: "/art/char-pine-back.png" },
+  warmWalk: { src: "/art/char-warm-walk.png" },
+  warmWalk2: { src: "/art/char-warm-walk2.png" },
+  pineWalk: { src: "/art/char-pine-walk.png" },
+  pineWalk2: { src: "/art/char-pine-walk2.png" },
+  warmSideWalk: { src: "/art/char-warm-side-walk.png" },
+  warmSideWalk2: { src: "/art/char-warm-side-walk2.png" },
+  pineSideWalk: { src: "/art/char-pine-side-walk.png" },
+  pineSideWalk2: { src: "/art/char-pine-side-walk2.png" },
+  warmBackWalk: { src: "/art/char-warm-back-walk.png" },
+  warmBackWalk2: { src: "/art/char-warm-back-walk2.png" },
+  pineBackWalk: { src: "/art/char-pine-back-walk.png" },
+  pineBackWalk2: { src: "/art/char-pine-back-walk2.png" },
+  grass: { src: "/art/tex-grass.png" },
+  path: { src: "/art/tex-path.png" },
+  water: { src: "/art/tex-water.png" },
+  wood: { src: "/art/tex-wood.png" },
+  stone: { src: "/art/tex-stone.png" },
+  marsh: { src: "/art/tex-marsh.png" },
 };
 
 const sheets = new Map<string, Sheet>();
 
-function keyMagenta(img: HTMLImageElement, key: boolean): Sheet {
+function sheetFrom(img: HTMLImageElement): Sheet {
   const c = document.createElement("canvas");
   c.width = img.width;
   c.height = img.height;
   const g = c.getContext("2d");
   if (!g) return c;
+  g.imageSmoothingEnabled = true;
   g.drawImage(img, 0, 0);
-  if (!key) return c;
-  const d = g.getImageData(0, 0, c.width, c.height);
-  for (let i = 0; i < d.data.length; i += 4) {
-    const r = d.data[i];
-    const gr = d.data[i + 1];
-    const b = d.data[i + 2];
-    if (r > 170 && b > 160 && gr < 100) d.data[i + 3] = 0;
-  }
-  g.putImageData(d, 0, 0);
   return c;
 }
 
@@ -58,9 +65,18 @@ export function loadArt(): void {
   for (const [name, spec] of Object.entries(SRC)) {
     if (sheets.has(name)) continue;
     const img = new Image();
-    img.onload = () => sheets.set(name, keyMagenta(img, spec.key));
+    img.onload = () => sheets.set(name, sheetFrom(img));
     img.src = spec.src;
   }
+}
+
+export function hasSheet(name: string): boolean {
+  return sheets.has(name);
+}
+
+function smooth(g: CanvasRenderingContext2D): void {
+  g.imageSmoothingEnabled = true;
+  if ("imageSmoothingQuality" in g) g.imageSmoothingQuality = "high";
 }
 
 export function blit(
@@ -73,6 +89,7 @@ export function blit(
 ): boolean {
   const s = sheets.get(name);
   if (!s) return false;
+  smooth(g);
   g.drawImage(s, x, y, w, h);
   return true;
 }
@@ -95,6 +112,7 @@ export function blitFit(
     h = boxH;
     w = h * ar;
   }
+  smooth(g);
   g.drawImage(s, x + (boxW - w) / 2, y + boxH - h, w, h);
   return true;
 }
@@ -112,12 +130,31 @@ export function blitPatch(
 ): boolean {
   const s = sheets.get(name);
   if (!s) return false;
-  const tw = Math.min(96, s.width);
-  const th = Math.min(96, s.height);
+  const tw = Math.min(160, s.width);
+  const th = Math.min(160, s.height);
   const sx = Math.abs(Math.imul(seedX, 17) + seedY * 3) % Math.max(1, s.width - tw);
   const sy = Math.abs(Math.imul(seedY, 13) + seedX * 5) % Math.max(1, s.height - th);
+  smooth(g);
   g.drawImage(s, sx, sy, tw, th, x, y, w, h);
   return true;
+}
+
+const TEXEL = 2.8;
+
+function wrapBlit(
+  g: CanvasRenderingContext2D,
+  s: Sheet,
+  sx: number,
+  sy: number,
+  sw: number,
+  sh: number,
+  dx: number,
+  dy: number,
+  dw: number,
+  dh: number,
+): void {
+  if (sw < 0.6 || sh < 0.6 || dw < 0.4 || dh < 0.4) return;
+  g.drawImage(s, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
 /** Paint a tile from a wrapping texture using world pixels so neighbors meet. */
@@ -131,15 +168,34 @@ export function blitWrap(
 ): boolean {
   const s = sheets.get(name);
   if (!s) return false;
+  smooth(g);
+  const zoom = TEXEL;
+  try {
+    const pat = g.createPattern(s, "repeat");
+    if (pat && typeof pat.setTransform === "function") {
+      const m = new DOMMatrix();
+      m.scaleSelf(1 / zoom, 1 / zoom);
+      pat.setTransform(m);
+      g.fillStyle = pat;
+      g.fillRect(x, y, w, h);
+      return true;
+    }
+  } catch {
+    /* fall through to wrapped drawImage */
+  }
   const tw = s.width;
   const th = s.height;
-  const sx = ((x % tw) + tw) % tw;
-  const sy = ((y % th) + th) % th;
-  const w1 = Math.min(w, tw - sx);
-  const h1 = Math.min(h, th - sy);
-  g.drawImage(s, sx, sy, w1, h1, x, y, w1, h1);
-  if (w1 < w) g.drawImage(s, 0, sy, w - w1, h1, x + w1, y, w - w1, h1);
-  if (h1 < h) g.drawImage(s, sx, 0, w1, h - h1, x, y + h1, w1, h - h1);
-  if (w1 < w && h1 < h) g.drawImage(s, 0, 0, w - w1, h - h1, x + w1, y + h1, w - w1, h - h1);
+  const srcW = w * zoom;
+  const srcH = h * zoom;
+  const sx0 = (((x * zoom) % tw) + tw) % tw;
+  const sy0 = (((y * zoom) % th) + th) % th;
+  const w1 = Math.min(srcW, tw - sx0);
+  const h1 = Math.min(srcH, th - sy0);
+  const dw1 = (w1 / srcW) * w;
+  const dh1 = (h1 / srcH) * h;
+  wrapBlit(g, s, sx0, sy0, w1, h1, x, y, dw1, dh1);
+  if (w1 < srcW) wrapBlit(g, s, 0, sy0, srcW - w1, h1, x + dw1, y, w - dw1, dh1);
+  if (h1 < srcH) wrapBlit(g, s, sx0, 0, w1, srcH - h1, x, y + dh1, dw1, h - dh1);
+  if (w1 < srcW && h1 < srcH) wrapBlit(g, s, 0, 0, srcW - w1, srcH - h1, x + dw1, y + dh1, w - dw1, h - dh1);
   return true;
 }

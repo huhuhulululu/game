@@ -45,6 +45,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   let fogVis = new Set<number>();
   let persistAt = 0;
   let lastToast = "";
+  const gait = new Map<string, { x: number; y: number; heat: number }>();
 
   const net = connectRoom(
     room,
@@ -213,7 +214,11 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       sprites.push({
         y: a.y,
         draw: () => {
-          drawActor(g, a, 0, 0, now);
+          const prev = gait.get(a.id);
+          const dist = prev ? Math.hypot(a.x - prev.x, a.y - prev.y) : 0;
+          const heat = dist > 0.32 ? 1 : Math.max(0, (prev?.heat ?? 0) - 0.08);
+          gait.set(a.id, { x: a.x, y: a.y, heat });
+          drawActor(g, a, 0, 0, now, heat > 0.15);
           if (a.fishing !== "fight") return;
           const x = a.x;
           const y = a.y + 28;

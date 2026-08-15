@@ -136,6 +136,21 @@ describe("look", () => {
     };
     drawActor(g, a, 0, 0, 0);
     assert.ok(g.fills.length >= 6);
+    const walk = mockCtx();
+    drawActor(walk, { ...a, facing: 2 }, 0, 0, 400, true);
+    assert.ok(walk.fills.length >= 6);
+  });
+
+  it("ore, stairs and lurkers still have a constructed fallback", () => {
+    const ore = mockCtx();
+    drawCell(ore, "o", 0, 0, "#7d8490", 0, "mine");
+    assert.ok(ore.fills.length >= 3);
+    const stairs = mockCtx();
+    drawCell(stairs, "Z", 0, 0, "#7ec8d6", 0, "mine");
+    assert.ok(stairs.fills.some((c) => c.includes("6a5a44") || c.includes("5a4a38")));
+    const lurk = mockCtx();
+    drawCell(lurk, "e", 0, 0, "#3a3344", 200, "mine");
+    assert.ok(lurk.fills.length >= 4);
   });
 
   it("draws crop stages on a plot", () => {
