@@ -9,8 +9,8 @@ const PAPER := Color(0.93, 0.86, 0.74)
 const MOSS := Color(0.25, 0.43, 0.36)
 const DUSK := Color(1.0, 1.0, 1.0)
 const HAZE := Color(0.78, 0.62, 0.46)
-const VALLEY_DUSK := Color(1.06, 0.90, 0.72)
-const BODY := 96.0
+const VALLEY_DUSK := Color(1.0, 1.0, 1.0)
+const BODY := 128.0
 const FOOT := 0.979
 const SHADOW_EAST := 0.10
 
@@ -53,9 +53,9 @@ static func prop_mat(fog := 0.03) -> ShaderMaterial:
 static func air_mat() -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/air.gdshader") as Shader
-	m.set_shader_parameter("grain", 0.036)
-	m.set_shader_parameter("vig", 0.22)
-	m.set_shader_parameter("dusk", Color(0.32, 0.20, 0.12, 1.0))
+	m.set_shader_parameter("grain", 0.018)
+	m.set_shader_parameter("vig", 0.08)
+	m.set_shader_parameter("dusk", Color(0.10, 0.08, 0.06, 1.0))
 	return m
 
 

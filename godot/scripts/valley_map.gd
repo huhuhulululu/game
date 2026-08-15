@@ -88,6 +88,7 @@ func _tex(name: String) -> Texture2D:
 
 
 func _paint() -> void:
+	# People, two houses, land, creek.
 	var sz := size_px()
 	var pad := 420.0
 	var sheet := _tex("ground-valley.png")
@@ -99,24 +100,10 @@ func _paint() -> void:
 	if sheet:
 		bed.scale = Vector2((sz.x + pad * 2.0) / float(sheet.get_width()), (sz.y + pad * 2.0) / float(sheet.get_height()))
 	bed.z_index = -2
-	bed.modulate = Color(1.04, 0.86, 0.58)
+	bed.modulate = Color(1, 1, 1)
 	add_child(bed)
-	var ground := Sprite2D.new()
-	ground.texture = sheet
-	ground.centered = false
-	ground.position = Vector2(-80, -80)
-	ground.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	if sheet:
-		ground.scale = Vector2((sz.x + 160.0) / float(sheet.get_width()), (sz.y + 160.0) / float(sheet.get_height()))
-	ground.z_index = 0
-	ground.material = Look.prop_mat(0.0)
-	add_child(ground)
 	_land()
 	_houses()
-	_ridge()
-	_shore()
-	_docks()
-	_bits()
 
 
 func _prop(name: String, gx: float, gy: float, w: float, h: float, z: int, fog := 0.03, sit := 0.97) -> void:
@@ -150,49 +137,20 @@ func _houses() -> void:
 
 
 func _ridge() -> void:
-	var kinds: Array[String] = ["prop-tree.png", "prop-tree-wide.png"]
-	# Crowns sit in the spawn frame, behind the cottages — not a fringe above y=0.
-	var north: Array[Vector2] = [
-		Vector2(1.4, 3.55), Vector2(4.8, 3.35), Vector2(8.6, 3.50),
-		Vector2(12.4, 3.40), Vector2(16.0, 3.55), Vector2(20.2, 3.30),
-		Vector2(23.6, 3.60), Vector2(27.8, 3.45), Vector2(30.6, 3.70),
-	]
-	for i in north.size():
-		var p: Vector2 = north[i]
-		_prop(kinds[i % kinds.size()], p.x, p.y, 74, 98, 5, 0.10, 0.96)
-	var walls: Array[Vector2] = [
-		Vector2(0.5, 6.5), Vector2(0.9, 9.4),
-		Vector2(23.2, 10.35),
-		Vector2(27.4, 6.9), Vector2(29.2, 9.1), Vector2(26.6, 12.0),
-	]
-	for i in walls.size():
-		var p: Vector2 = walls[i]
-		_prop(kinds[(i + 2) % kinds.size()], p.x, p.y, 70, 94, 12 + int(p.y), 0.10, 0.96)
-	_prop("prop-bush.png", 6.8, 4.15, 48, 40, 5, 0.08, 0.88)
-	_prop("prop-bush.png", 12.8, 4.20, 46, 40, 5, 0.08, 0.88)
-	_prop("prop-bush.png", 20.6, 4.05, 48, 40, 5, 0.08, 0.88)
+	# People, two houses, land, creek. No second tree language.
+	pass
 
 
 func _shore() -> void:
-	for i in 8:
-		var x := 2.4 + float(i) * 3.4
-		_prop("prop-tuft.png", x, _bend(x, "creek") - 0.42 + float(i % 2) * 0.14, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-rock.png", 7.6, _bend(7.6, "creek") - 0.20, 32, 28, 6, 0.08, 0.90)
-	_prop("prop-rock.png", 19.8, _bend(19.8, "creek") - 0.18, 30, 26, 6, 0.08, 0.90)
-	_prop("prop-tuft.png", 10.4, _bend(10.4, "path") - 0.20, 24, 20, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 14.8, _bend(14.8, "path") + 0.18, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 20.2, _bend(20.2, "path") - 0.12, 24, 20, 4, 0.06, 0.86)
+	pass
 
 
 func _docks() -> void:
 	# hung() puts the node at the sprite top. Deck sits ~0.74 down the 36px dock.
-	_prop("prop-dock.png", 4.2, _bend(4.2, "creek") - 0.82, 56, 36, 4, 0.06, 0.98)
-	_prop("prop-dock-b.png", 11.2, _bend(11.2, "creek") - 0.82, 56, 36, 4, 0.06, 0.98)
+	# Docks stay off the valley. Creek is the floor sheet.
+	pass
 
 
 func _bits() -> void:
-	# Cover language only: two houses, trees, docks, the gate. Shore toys stay tiles.
-	_prop("prop-gate.png", 30.2, 13.2, 48, 56, 7, 0.08, 0.94)
-	_prop("prop-tree.png", 29.4, 12.2, 70, 94, 9, 0.08, 0.96)
-	_prop("prop-bush.png", 16.6, 4.9, 50, 42, 5, 0.10, 0.88)
-	_prop("prop-bush.png", 18.4, 5.1, 46, 40, 5, 0.10, 0.88)
+	# People, two houses, land, creek.
+	pass

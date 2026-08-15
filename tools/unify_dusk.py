@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+from collections import deque
 from pathlib import Path
 
 import numpy as np
@@ -12,18 +13,14 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "godot" / "assets" / "art"
 
+# Cover boxes. Read only. Does not write cover-valley.png.
+HUT_BOX = (60, 310, 260, 550)
+LODGE_BOX = (840, 190, 1180, 510)
+
 
 def quiet_scrub(im: Image.Image) -> Image.Image:
-    # Cover the English lettering with local wood. Do not paste a second sign.
-    arr = np.asarray(im.convert("RGBA"), dtype=np.float32)
-    for x0, y0, x1, y1 in ((8, 148, 168, 310), (236, 318, 404, 478)):
-        region = arr[y0:y1, x0:x1]
-        lum = region[:, :, :3] @ np.array([0.3, 0.5, 0.2], dtype=np.float32)
-        letter = lum > 140
-        wood = np.array([78.0, 50.0, 32.0, 255.0], dtype=np.float32)
-        region[letter] = wood
-        arr[y0:y1, x0:x1] = region
-    return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGBA")
+    # Kept so an old English inn can be scrubbed. Cover roofs do not need it.
+    return im.convert("RGBA")
 
 
 def _look() -> object:
@@ -33,14 +30,37 @@ def _look() -> object:
     return mod
 
 
+def eat_corners(im: Image.Image, tol: float = 34.0) -> Image.Image:
+    rgb = np.asarray(im.convert("RGB"), dtype=np.float32)
+    h, w = rgb.shape[:2]
+    vis = np.zeros((h, w), dtype=bool)
+    seeds = [(2, 2), (w - 3, 2), (2, h - 3), (w - 3, h - 3), (w // 2, 2)]
+    for sx, sy in seeds:
+        seed = rgb[sy, sx]
+        q = deque([(sx, sy)])
+        while q:
+            x, y = q.popleft()
+            if x < 0 or y < 0 or x >= w or y >= h or vis[y, x]:
+                continue
+            if float(np.linalg.norm(rgb[y, x] - seed)) > tol:
+                continue
+            vis[y, x] = True
+            q.extend(((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+    alpha = np.where(vis, 0, 255).astype(np.uint8)
+    out = Image.fromarray(np.dstack([rgb.astype(np.uint8), alpha]), "RGBA")
+    return out
+
+
 def sit_cover_houses() -> None:
+    # Read the cover. Does not touch the cover.
+    cover = Image.open(ART / "cover-valley.png").convert("RGBA")
     look = _look()
-    hut = look.soften_sit(Image.open(ART / "prop-cabin.png"), 0.24)
+    hut = look.soften_sit(eat_corners(cover.crop(HUT_BOX)), 0.28)
     hut.save(ART / "prop-hut.png")
-    print("wrote prop-hut.png from cover cabin", hut.size)
-    lodge = look.soften_sit(quiet_scrub(Image.open(ART / "prop-inn.png")), 0.22)
+    print("wrote prop-hut.png from cover hut", hut.size)
+    lodge = look.soften_sit(eat_corners(cover.crop(LODGE_BOX)), 0.26)
     lodge.save(ART / "prop-lodge.png")
-    print("wrote prop-lodge.png from cover inn", lodge.size)
+    print("wrote prop-lodge.png from cover lodge", lodge.size)
     raw = (ART / "prop-lodge.png").read_bytes()
     if b"Wanderer" in raw or b"WANDERER" in raw or b"Good Ale" in raw:
         raise SystemExit("English inn sign still on the play lodge")

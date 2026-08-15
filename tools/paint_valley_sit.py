@@ -322,10 +322,14 @@ def paint_floor() -> Image.Image:
     n2 = fbm(h, w, 77)
     g = tile_tex(grass, h, w, 8, 16) * (1.0 - n)[..., None] + tile_tex(grass, h, w, 380, 290) * n[..., None]
     d = tile_tex(ground, h, w, 40, 30)
-    g_lum = np.maximum(g.mean(axis=2, keepdims=True), 0.05)
-    meadow = np.clip(g * (0.46 / g_lum), 0, 1)
-    meadow = np.clip(meadow * np.array([1.24, 0.86, 0.50], dtype=np.float32) * (0.88 + 0.14 * n[..., None]), 0, 1)
-    rgb = np.clip(meadow * 0.90 + d * np.array([0.92, 0.86, 0.58], dtype=np.float32) * 0.10, 0, 1)
+    # Cover olive-gold from luminance. Drop the green grass hue. No second grade later.
+    g_lum = np.maximum(g.mean(axis=2, keepdims=True), 0.04)
+    t = np.clip((g_lum - 0.10) / 0.36, 0, 1)
+    olive = np.array([0.40, 0.26, 0.10], dtype=np.float32)
+    sun = np.array([0.58, 0.40, 0.16], dtype=np.float32)
+    meadow = np.clip(olive + (sun - olive) * t, 0, 1)
+    meadow = np.clip(meadow * (0.84 + 0.22 * n[..., None]), 0, 1)
+    rgb = np.clip(meadow * 0.90 + d * np.array([0.78, 0.58, 0.28], dtype=np.float32) * 0.10, 0, 1)
 
     yy, xx = np.indices((h, w))
     wx = xx.astype(np.float32) - pad
@@ -337,7 +341,7 @@ def paint_floor() -> Image.Image:
     path_m = np.clip(1.0 - (np.abs(wy - path_y) - path_half * 0.28) / (path_half + 7.0), 0, 1) ** 1.12
     path_m *= span
     path_m = np.where((n2 > 0.78) & (np.abs(wy - path_y) > 4.0), path_m * 0.22, path_m)
-    path_c = np.clip(d * np.array([1.18, 0.94, 0.56], dtype=np.float32) * (0.96 + 0.10 * n[..., None]), 0, 1)
+    path_c = np.clip(d * np.array([0.82, 0.60, 0.32], dtype=np.float32) * (0.90 + 0.12 * n[..., None]), 0, 1)
     rgb = rgb * (1.0 - path_m * 0.86)[..., None] + path_c * (path_m * 0.86)[..., None]
 
     creek_y = creek_center(wx)
@@ -364,8 +368,8 @@ def paint_floor() -> Image.Image:
     wet = np.clip(wet + gloss * spec[..., None], 0, 1)
     cover = np.clip(water_m * 1.06, 0, 0.97)
     rgb = rgb * (1.0 - cover)[..., None] + wet * cover[..., None]
-    # Cover dusk: olive gold, not rust, not day green. Do not move the path or creek.
-    rgb = np.clip(rgb * np.array([1.08, 0.88, 0.66], dtype=np.float32) + np.array([0.04, 0.03, 0.03], dtype=np.float32), 0, 1)
+    # Land is already cover dusk. Do not stack a filter. Do not move the path or creek.
+    rgb = np.clip(rgb * np.array([1.00, 0.98, 0.88], dtype=np.float32) + np.array([0.02, 0.02, 0.01], dtype=np.float32), 0, 1)
 
     ax = np.clip(xx / float(pad), 0, 1) * np.clip((w - 1 - xx) / float(pad), 0, 1)
     ay = np.clip(yy / float(pad), 0, 1) * np.clip((h - 1 - yy) / float(pad), 0, 1)
@@ -377,9 +381,20 @@ def paint_floor() -> Image.Image:
     return out
 
 
+def paint_bed(ground: np.ndarray) -> Image.Image:
+    lum = np.maximum(ground.mean(axis=2, keepdims=True), 0.04)
+    t = np.clip((lum - 0.10) / 0.40, 0, 1)
+    olive = np.array([0.38, 0.25, 0.10], dtype=np.float32)
+    sun = np.array([0.56, 0.38, 0.15], dtype=np.float32)
+    rgb = np.clip(olive + (sun - olive) * t, 0, 1)
+    return Image.fromarray(np.clip(rgb * 255, 0, 255).astype(np.uint8), "RGB")
+
+
 def main() -> None:
     if "--land" in __import__("sys").argv:
+        ground = load_rgb("ground-valley.png")
         save(paint_floor(), "floor-valley.png")
+        save(paint_bed(ground), "ground-valley.png")
         return
     # Play roofs are the cover buildings. unify_dusk.py sits them. Do not paint red cottages.
     print("paint_valley_sit: use --land for the floor. Roofs are unify_dusk.")
