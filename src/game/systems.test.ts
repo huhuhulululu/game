@@ -16,7 +16,7 @@ import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
 import { resolveHelloRoom, roomIsFull, takeRoom } from "../../server/join";
 import { World } from "../sim/world";
-import { buildMap, mineTemplate, replaceTile, TILE, tileCenter, VALLEY } from "../world/maps";
+import { buildMap, mineTemplate, replaceTile, TILE, tileCenter, toTile, VALLEY } from "../world/maps";
 import { createAudio } from "./audio";
 import { pickAmbient, tickFeel } from "./feel";
 import { generateWild, WILD_W } from "../world/wild";
@@ -1492,6 +1492,46 @@ describe("living systems", () => {
     p.held = "";
     tap(w, "a");
     assert.ok(w.toasts.some((t) => t.text.includes("放进锅")));
+  });
+
+  it("the east gate is reachable from the cabin path without swimming", () => {
+    const w = new World("PATH1");
+    w.addPlayer("a", "暖", "left");
+    const gate = w.valley.find("V")[0];
+    assert.ok(gate);
+    assert.equal(w.valley.walk(gate.x - 1, 10), true);
+    assert.equal(w.valley.walk(gate.x - 1, 11), true);
+    assert.equal(w.valley.walk(gate.x, 10), true);
+    assert.equal(w.valley.walk(gate.x, 11), true);
+    const p = w.players.get("a");
+    assert.ok(p);
+    const start = toTile(p.x, p.y);
+    const q: { x: number; y: number }[] = [start];
+    const seen = new Set([`${start.x},${start.y}`]);
+    const dirs = [
+      [0, -1],
+      [1, 0],
+      [0, 1],
+      [-1, 0],
+    ];
+    let i = 0;
+    let hit = false;
+    while (i < q.length) {
+      const cur = q[i++];
+      if (Math.abs(cur.x - gate.x) + Math.abs(cur.y - gate.y) <= 1) {
+        hit = true;
+        break;
+      }
+      for (const [dx, dy] of dirs) {
+        const nx = cur.x + dx;
+        const ny = cur.y + dy;
+        const key = `${nx},${ny}`;
+        if (seen.has(key) || !w.valley.walk(nx, ny)) continue;
+        seen.add(key);
+        q.push({ x: nx, y: ny });
+      }
+    }
+    assert.equal(hit, true);
   });
 
   it("empty 做 in the wild speaks, and a lone hole says it does not go through", () => {

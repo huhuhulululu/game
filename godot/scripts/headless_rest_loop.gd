@@ -15,8 +15,8 @@ const VALLEY_ROWS: PackedStringArray = [
 	"#....C..A...PPPP...N..I..........#",
 	"#...........PPPP.................#",
 	"#....,,,,,,,,,,,,,,,,,,,,,.......#",
-	"#~~~~D~~~~~~D~~~~~~~~~~~~~~~~~~~~#",
-	"#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#",
+	"#~~~~D~~~~~~D~~~~~~~~~~~~~~~~~,,~#",
+	"#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~,,~#",
 	"#................................#",
 	"#......SS....GG....BB....YY......#",
 	"#......S.................Y.....O.#",
@@ -242,7 +242,7 @@ func _walk_at(p: Vector2i) -> bool:
 		return ch != "#"
 	if _zone() == "wild":
 		return not (ch == "#" or ch == "T" or ch == "~")
-	return not (ch == "#" or ch == "T" or ch == "C" or ch == "N")
+	return not (ch == "#" or ch == "T" or ch == "C" or ch == "N" or ch == "~")
 
 
 func _bfs_next(goal: Vector2) -> Vector2i:
@@ -479,8 +479,10 @@ func _process(_dt: float) -> bool:
 	net.send_input(move.x, move.y, act, act, false)
 	if wild_ok and forge_ok and stall_ok:
 		_finish()
+	if frames % 400 == 0:
+		_log("TICK %s %s %s %s" % [phase, _pos(), _zone(), _prompt()])
 	if frames > 18000:
-		printerr("TIMEOUT phase=%s wild=%s forge=%s stall=%s zone=%s prompt=%s held=%s" % [phase, wild_ok, forge_ok, stall_ok, _zone(), _prompt(), _held_id()])
+		printerr("TIMEOUT phase=%s wild=%s forge=%s stall=%s zone=%s prompt=%s held=%s pos=%s" % [phase, wild_ok, forge_ok, stall_ok, _zone(), _prompt(), _held_id(), _pos()])
 		quit(1)
 	return false
 
