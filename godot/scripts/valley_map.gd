@@ -163,20 +163,11 @@ func _ridge() -> void:
 
 
 func _shore() -> void:
-	# Cover creek stones and path verge. Same painting.
-	for item in [
-		[3.10, 188.0, 82.0],
-		[8.20, 200.0, 88.0],
-		[14.10, 176.0, 78.0],
-		[20.40, 190.0, 84.0],
-		[25.80, 168.0, 74.0],
-	]:
-		var gx: float = item[0]
-		var gy := _bend(gx, "creek") - 0.40
-		_prop("prop-cover-shore.png", gx, gy, item[1], item[2], 4, 0.03, 0.90)
-	_prop("prop-cover-verge.png", 5.15, _bend(5.15, "path") - 0.10, 118, 56, 3, 0.03, 0.88)
-	_prop("prop-cover-verge.png", 12.55, _bend(12.55, "path") - 0.08, 110, 54, 3, 0.03, 0.88)
-	_prop("prop-cover-verge.png", 18.35, _bend(18.35, "path") - 0.12, 116, 56, 3, 0.03, 0.88)
+	# Cover bank stones on the land lip. Not water stamps on the creek.
+	_prop("prop-cover-shore.png", 7.20, _bend(7.20, "creek") - 1.05, 92, 48, 4, 0.03, 0.90)
+	_prop("prop-cover-shore.png", 16.80, _bend(16.80, "creek") - 1.00, 100, 52, 4, 0.03, 0.90)
+	_prop("prop-cover-verge.png", 14.40, _bend(14.40, "path") - 0.22, 96, 44, 3, 0.03, 0.88)
+	_prop("prop-cover-verge.png", 21.10, _bend(21.10, "path") - 0.18, 90, 42, 3, 0.03, 0.88)
 
 
 func _docks() -> void:

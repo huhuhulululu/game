@@ -163,7 +163,8 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(unify, /0, 168, 90, 338/);
   assert.match(unify, /1195, 105, 1280, 190/);
   assert.match(unify, /918, 298, 972, 372/);
-  assert.match(unify, /880, 540, 1120, 700/);
+  assert.match(unify, /1008, 548, 1148, 668/);
+  assert.match(unify, /fade_bank/);
   assert.doesNotMatch(unify, /Wilson|Don't Starve|Dont Starve/i);
   assert.ok(existsSync("godot/assets/art/prop-cover-tree.png"));
   assert.ok(existsSync("godot/assets/art/prop-cover-tree-b.png"));

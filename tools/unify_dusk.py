@@ -20,8 +20,8 @@ LODGE_BOX = (840, 190, 1180, 510)
 WILLOW_BOX = (0, 168, 90, 338)
 RIDGE_BOX = (1195, 105, 1280, 190)
 LAMP_BOX = (918, 298, 972, 372)
-SHORE_BOX = (880, 540, 1120, 700)
-VERGE_BOX = (200, 520, 360, 680)
+SHORE_BOX = (1008, 548, 1148, 668)
+VERGE_BOX = (210, 535, 345, 665)
 
 
 def quiet_scrub(im: Image.Image) -> Image.Image:
@@ -91,6 +91,27 @@ def fade_edges(im: Image.Image, pad: float = 0.14) -> Image.Image:
     return Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
 
 
+def fade_bank(im: Image.Image, pad: float = 0.26) -> Image.Image:
+    # Shore and verge keep grass and water. soften_sit would eat both.
+    buf = np.asarray(im.convert("RGBA"), dtype=np.float32)
+    h, w = buf.shape[:2]
+    yy = np.linspace(0, 1, h, dtype=np.float32)[:, None]
+    xx = np.linspace(0, 1, w, dtype=np.float32)[None, :]
+    fx = np.clip(np.minimum(xx / pad, (1.0 - xx) / pad), 0.0, 1.0)
+    fy = np.clip(np.minimum(yy / pad, (1.0 - yy) / pad), 0.0, 1.0)
+    t = np.minimum(fx, fy)
+    edge = t * t * (3.0 - 2.0 * t)
+    cy, cx = 0.48, 0.50
+    dist = np.sqrt(((xx - cx) / 0.56) ** 2 + ((yy - cy) / 0.56) ** 2)
+    blob = np.clip(1.12 - dist, 0.0, 1.0)
+    blob = blob * blob
+    buf[:, :, 3] *= edge * blob
+    out = Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
+    a = out.getchannel("A").filter(ImageFilter.GaussianBlur(2.4))
+    out.putalpha(a)
+    return out
+
+
 def keep_lamp(im: Image.Image) -> Image.Image:
     buf = np.asarray(im.convert("RGBA"), dtype=np.float32)
     h, w = buf.shape[:2]
@@ -145,10 +166,10 @@ def sit_cover_grove() -> None:
     lamp = trim_alpha(look.soften_sit(keep_lamp(cover.crop(LAMP_BOX)), 0.10))
     lamp.save(ART / "prop-cover-lamp.png")
     print("wrote prop-cover-lamp.png from cover lamp", lamp.size)
-    shore = trim_alpha(look.soften_sit(fade_edges(cover.crop(SHORE_BOX), 0.16), 0.18))
+    shore = trim_alpha(fade_bank(cover.crop(SHORE_BOX), 0.26))
     shore.save(ART / "prop-cover-shore.png")
     print("wrote prop-cover-shore.png from cover shore", shore.size)
-    verge = trim_alpha(look.soften_sit(fade_edges(cover.crop(VERGE_BOX), 0.18), 0.20))
+    verge = trim_alpha(fade_bank(cover.crop(VERGE_BOX), 0.28))
     verge.save(ART / "prop-cover-verge.png")
     print("wrote prop-cover-verge.png from cover verge", verge.size)
 
