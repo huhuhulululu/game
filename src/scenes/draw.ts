@@ -1164,6 +1164,21 @@ function waveBand(g: Ctx, x: number, y: number, w: number, h: number, seed: numb
   g.closePath();
 }
 
+function nibbleGrass(g: Ctx, x: number, y: number, w: number, seed: number, dir: number): void {
+  for (let i = -8; i <= w + 8; i += 14) {
+    const cx = x + i + wander(seed, i) * 9;
+    const cy = y + wander(seed + 2, i) * 6 * dir;
+    g.save();
+    g.beginPath();
+    g.ellipse(cx, cy, 17, 10, wander(seed, i + 3) * 0.4, 0, Math.PI * 2);
+    g.clip();
+    if (!blitWrap(g, "grass", cx - 20, cy - 12, 40, 24)) {
+      oval(g, cx, cy, 16, 9, "#3f6d45");
+    }
+    g.restore();
+  }
+}
+
 export function drawPool(g: Ctx, c: FieldCluster): boolean {
   const x = c.x * TILE;
   const y = c.y * TILE;
@@ -1171,15 +1186,12 @@ export function drawPool(g: Ctx, c: FieldCluster): boolean {
   const h = c.h * TILE;
   const seed = c.x * 13 + c.y * 7;
   g.save();
-  waveBand(g, x - 12, y - 10, w + 24, h + 20, seed, 12);
-  g.strokeStyle = "rgba(47,90,56,0.34)";
-  g.lineWidth = 14;
-  g.lineJoin = "round";
-  g.lineCap = "round";
-  g.stroke();
+  waveBand(g, x - 10, y - 8, w + 20, h + 16, seed, 10);
   g.clip();
   const ok = blitWrap(g, "water", x - 8, y - 8, w + 16, h + 16);
   g.restore();
+  nibbleGrass(g, x - 4, y - 2, w + 8, seed, -1);
+  nibbleGrass(g, x - 4, y + h + 2, w + 8, seed + 4, 1);
   return ok;
 }
 
@@ -1190,15 +1202,12 @@ export function drawLane(g: Ctx, c: FieldCluster): boolean {
   const h = c.h * TILE;
   const seed = c.x * 5 + c.y * 11;
   g.save();
-  waveBand(g, x - 8, y - 10, w + 16, h + 20, seed, 8);
-  g.strokeStyle = "rgba(47,90,56,0.3)";
-  g.lineWidth = 12;
-  g.lineJoin = "round";
-  g.lineCap = "round";
-  g.stroke();
+  waveBand(g, x - 6, y - 8, w + 12, h + 16, seed, 7);
   g.clip();
   const ok = blitWrap(g, "path", x - 6, y - 6, w + 12, h + 12);
   g.restore();
+  nibbleGrass(g, x - 2, y, w + 4, seed, -1);
+  nibbleGrass(g, x - 2, y + h, w + 4, seed + 5, 1);
   return ok;
 }
 
@@ -1209,12 +1218,7 @@ export function drawField(g: Ctx, c: FieldCluster): void {
   const h = c.h * TILE;
   const seed = c.x * 9 + c.y;
   g.save();
-  organicPath(g, x - 16, y - 14, w + 32, h + 28, seed, 16);
-  g.fillStyle = "rgba(47,90,56,0.4)";
-  g.fill();
-  g.restore();
-  g.save();
-  organicPath(g, x + 3, y + 5, w - 6, h - 10, seed + 2, 15);
+  organicPath(g, x + 2, y + 4, w - 4, h - 8, seed + 2, 14);
   g.clip();
   if (!blitWrap(g, "path", x - 8, y - 8, w + 16, h + 16)) {
     g.fillStyle = "#6b4a28";
@@ -1233,6 +1237,8 @@ export function drawField(g: Ctx, c: FieldCluster): void {
     g.stroke();
   }
   g.restore();
+  nibbleGrass(g, x, y + 2, w, seed, -1);
+  nibbleGrass(g, x, y + h - 2, w, seed + 6, 1);
 }
 
 function wet(look: string): boolean {
