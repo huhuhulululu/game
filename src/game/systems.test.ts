@@ -1157,4 +1157,77 @@ describe("living systems", () => {
     assert.ok(w.toasts.some((t) => t.text.includes("堂口热起来") && t.text.includes("端")));
     assert.ok(!w.toasts.some((t) => t.text.includes("两个人得传菜")));
   });
+
+  it("a solo wild night says the dark bites, and Charlie does not bite the valley gate", () => {
+    const w = new World("GATE2");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    const gate = w.valley.find("V")[0];
+    assert.ok(gate);
+    standFacing(p, gate);
+    w.clock = 0.8;
+    const nightGate = w.snapshot("a");
+    assert.equal(nightGate.night, true);
+    assert.ok(nightGate.prompt.includes("没火"));
+    p.hp = 20;
+    w.tick(3);
+    assert.equal(p.hp, 20);
+    tap(w, "a");
+    assert.equal(p.zone, "wild");
+    assert.ok(w.toasts.some((t) => t.text.includes("出了谷") && t.text.includes("没火")));
+    w.clock = nightAfter(seasonOf(w.save.day)) - 0.01;
+    w.howled = false;
+    w.fires.clear();
+    p.torch = 0;
+    p.held = "";
+    w.tick(3);
+    assert.ok(w.toasts.some((t) => t.text.includes("天黑") && t.text.includes("火")));
+    assert.ok(p.hp < 20);
+  });
+
+  it("picked food goes in the hand, and a fire does not eat wood when the thing needs the kitchen", () => {
+    const w = new World("HAND2");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.rand = () => 0.01;
+    w.wildMap = buildMap(generateWild(11), "wild");
+    const bush = w.wildMap.find("F")[0];
+    const fire = w.wildMap.find("K")[0];
+    assert.ok(bush && fire);
+    standFacing(p, bush);
+    p.zone = "wild";
+    tap(w, "a");
+    assert.ok(p.held);
+    assert.ok(p.held.startsWith("mushroom") || p.held.startsWith("herb"));
+    w.fires.set(`${fire.x},${fire.y}`, 40);
+    const wood = countOf(w.save.bag, "wood");
+    p.held = "mushroom:raw:90";
+    standFacing(p, fire);
+    assert.ok(w.snapshot("a").prompt.includes("再切"));
+    tap(w, "a");
+    assert.equal(p.held, "mushroom:raw:90");
+    assert.equal(countOf(w.save.bag, "wood"), wood);
+    assert.ok(w.toasts.some((t) => t.text.includes("再切")));
+  });
+
+  it("coming back from the wild faces the village and points at the inn", () => {
+    const w = new World("HOME2");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.wildMap = buildMap(generateWild(3), "wild");
+    const leave = w.wildMap.find("L")[0];
+    assert.ok(leave);
+    const stand = tileCenter(leave.x, leave.y - 1);
+    p.zone = "wild";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 2;
+    tap(w, "a");
+    assert.equal(p.zone, "valley");
+    assert.equal(p.facing, 3);
+    assert.ok(w.toasts.some((t) => t.text.includes("回到山谷") && t.text.includes("客栈")));
+  });
 });

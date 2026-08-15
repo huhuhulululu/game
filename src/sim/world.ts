@@ -615,7 +615,7 @@ export class World {
         if (this.present().length < 2 && !this.isNight()) return "还早。天黑再歇。";
         return "歇一夜（田会自己长）";
       }
-      if (ch === "V" || cell === "gate") return "出谷 · 荒野";
+      if (ch === "V" || cell === "gate") return this.isNight() ? "出谷 · 夜里没火会咬人" : "出谷 · 荒野";
       if (cell === "shop") return this.shopPrompt();
       if (cell === "forge") return this.forgeJob ? "锻 · 绿的时候按" : "打造";
       if (cell === "gacha") return this.save.fortuneId ? "今日已问过" : "问今日";
@@ -655,9 +655,11 @@ export class World {
       if (cell === "fire") {
         const lit = this.fires.has(`${f.x},${f.y}`);
         if (lit && this.canCookAtFire(p)) return "烤";
+        if (lit && this.needsKitchen(p)) return "回客栈再切";
         if (countOf(this.save.bag, "flint") && countOf(this.save.bag, "wood") && countOf(this.save.bag, "herb") && lit)
           return "搓火把";
-        return lit ? "火还旺" : "添火";
+        if (!lit || countOf(this.save.bag, "wood") || countOf(this.save.bag, "herb")) return "添火";
+        return "火还旺";
       }
       if (cell === "relic") return "翻残骸";
       if (cell === "camp") return this.near(p, this.other(p)) ? "并肩搜旧营" : "搜旧营";
@@ -736,9 +738,15 @@ export class World {
       if (cell === "rock") return this.crackRock(p, f.x, f.y);
       if (cell === "fire") {
         if (this.cookAtFire(p, f.x, f.y)) return;
+        if (this.fires.has(`${f.x},${f.y}`) && this.needsKitchen(p)) {
+          this.toast("回客栈再切");
+          return;
+        }
         if (!this.fires.has(`${f.x},${f.y}`)) return this.stoke(p, f.x, f.y);
         if (this.tryTorch(p, f.x, f.y)) return;
-        return this.stoke(p, f.x, f.y);
+        if (countOf(this.save.bag, "wood") || countOf(this.save.bag, "herb")) return this.stoke(p, f.x, f.y);
+        this.toast("火还旺");
+        return;
       }
       if (cell === "relic") return this.relic(p, f.x, f.y);
       if (cell === "camp") return this.lootCamp(p, f.x, f.y);
@@ -906,6 +914,10 @@ export class World {
       return;
     }
     addToBag(this.save.bag, id);
+    if (!p.held) {
+      const fresh = takeFresh(this.save.bag, id) ?? 100;
+      p.held = writeHeld(id, item(id).cook === "none" ? "ready" : "raw", fresh);
+    }
     this.toast(`${p.name} 采到${item(id).name}`);
     if (x === undefined || y === undefined) return;
     const map = this.mapFor(p.zone);
@@ -957,12 +969,13 @@ export class World {
       const c = tileCenter(door.x, door.y);
       p.x = c.x + (from === "wild" ? -TILE : TILE);
       p.y = c.y;
+      if (from === "wild") p.facing = 3;
     } else {
       p.x = this.arrive.x;
       p.y = this.arrive.y;
     }
     this.dirty = true;
-    this.toast(`${p.name} 回到山谷`);
+    this.toast(from === "wild" ? `${p.name} 回到山谷。客栈在西边。` : `${p.name} 回到山谷`);
   }
 
   private downFloor(first = false): void {
@@ -1957,7 +1970,10 @@ export class World {
     const wasNight = this.isNight();
     this.clock += dt / 200;
     if (this.clock >= 1) this.clock -= 1;
-    if (!wasNight && this.isNight()) this.toast("天黑了。客栈门还亮着。");
+    if (!wasNight && this.isNight()) {
+      const out = this.present().some((a) => a.zone === "wild");
+      this.toast(out ? "天黑了。别停在黑里，靠近火。" : "天黑了。客栈门还亮着。");
+    }
     if (wasNight && !this.isNight()) {
       this.howled = false;
       this.hearthDone = false;
@@ -2024,7 +2040,7 @@ export class World {
       return;
     }
     for (const p of this.present()) {
-      if (p.zone === "kitchen" || p.zone === "mine" || this.isLit(p)) {
+      if (p.zone === "kitchen" || p.zone === "mine" || p.zone === "valley" || this.isLit(p)) {
         p.dark = 0;
         continue;
       }
@@ -2128,7 +2144,7 @@ export class World {
     p.x = c.x;
     p.y = c.y;
     this.dirty = true;
-    this.toast(`${p.name} 出了谷。地图还是黑的`);
+    this.toast(this.isNight() ? `${p.name} 出了谷。夜里没火会咬人。` : `${p.name} 出了谷。地图还是黑的`);
   }
 
   private stoke(p: Actor, x: number, y: number): void {
@@ -2160,6 +2176,12 @@ export class World {
     const need = item(held.id).cook;
     if (need !== "cook" && need !== "both") return false;
     return held.state !== "cooked" && held.state !== "prepped" && held.state !== "ready";
+  }
+
+  private needsKitchen(p: Actor): boolean {
+    const held = parseHeld(p.held);
+    if (!held.id || held.id === "torch") return false;
+    return item(held.id).cook === "chop" && (!held.state || held.state === "raw");
   }
 
   private cookAtFire(p: Actor, x: number, y: number): boolean {
