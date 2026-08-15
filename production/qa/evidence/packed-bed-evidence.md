@@ -7,7 +7,7 @@
 ## What changed
 
 - Graph: `godot/scenes/play.tscn` → `godot/scenes/valley.tscn` (`ValleyWorld` + `Bed` + `ValleyLogic`)
-- Look: `godot/assets/art/bed-valley.png` 1224×612 RGB from the cover. Title cropped at `CROP_Y0 = 302`. Baked 暖/松 / 点灯进谷 lifted with same-y 1:1 path clone (no resized dirt plate).
+- Look: `godot/assets/art/bed-valley.png` 1224×612 RGB from the cover. Title cropped at `CROP_Y0 = 302`. Baked 暖/松 / 点灯进谷 lifted with same-y path seed + NS inpaint (no resized dirt plate, no Telea).
 - Play valley: no hung `prop-tuft` / `prop-bush`. Atlas hidden when `_zone == "valley"`.
 - Actors: larger under-foot contact shadow. `person_mat` edge 0 so feet are not eaten.
 - Torn out: `godot/scripts/valley_map.gd` sticker stamps.

@@ -51,7 +51,7 @@ func show_crops(plots: Array) -> void:
 		add_child(_crops)
 	for child in _crops.get_children():
 		child.queue_free()
-	# Walk plots so the API stays live. Do not Look.hung tuft/bush onto the bed.
+	# Walk plots so the API stays live. Do not hang tuft/bush sprites on the bed.
 	var i := 0
 	for y in ROWS.size():
 		var row := ROWS[y]

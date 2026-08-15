@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import cv2
 import numpy as np
 from PIL import Image, ImageFilter
 
@@ -59,10 +60,10 @@ def _runs(xs: np.ndarray) -> list[tuple[int, int]]:
 
 
 def lift_cover(rgb: np.ndarray) -> np.ndarray:
-    """1:1 same-y path clone per coat. No nearest-column pillar, no resized plate."""
+    """Same-y path seed, then NS inpaint. No resized plate, no Telea smear."""
     h, w = rgb.shape[:2]
     core = _dilate(_people_mask(h, w), 2)
-    out = rgb.copy()
+    seeded = rgb.copy()
     for y in range(h):
         bad = np.flatnonzero(core[y])
         if bad.size == 0:
@@ -73,22 +74,21 @@ def lift_cover(rgb: np.ndarray) -> np.ndarray:
             src0 = x0 - width
             src1 = x0
             if src0 >= 0 and not np.any(core[y, src0:src1]):
-                out[y, x0:x1] = rgb[y, src0:src1]
-                continue
-            if safe.size >= width:
-                out[y, x0:x1] = rgb[y, safe[-width:]]
+                chunk = rgb[y, src0:src1].astype(np.float32)
+            elif safe.size >= width:
+                chunk = rgb[y, safe[-width:]].astype(np.float32)
             elif safe.size:
                 t = np.linspace(0, safe.size - 1, width)
-                out[y, x0:x1] = rgb[y, safe[np.round(t).astype(np.int32)]]
-    ring = np.asarray(
-        Image.fromarray((core.astype(np.uint8) * 255), "L").filter(ImageFilter.GaussianBlur(5))
-    ).astype(np.float32) / 255.0
-    edge = (ring > 0.04) & (ring < 0.92) & (~core)
-    if np.any(edge):
-        blur = np.asarray(Image.fromarray(out).filter(ImageFilter.GaussianBlur(2)))
-        t = np.clip((ring - 0.04) / 0.88, 0, 1)[:, :, None]
-        mixed = (out.astype(np.float32) * (1.0 - t) + blur.astype(np.float32) * t).astype(np.uint8)
-        out = np.where(edge[:, :, None], mixed, out)
+                chunk = rgb[y, safe[np.round(t).astype(np.int32)]].astype(np.float32)
+            else:
+                continue
+            edge0 = max(0, x0 - 10)
+            border = rgb[y, edge0:x0].astype(np.float32)
+            if border.size:
+                chunk = chunk - chunk.mean(axis=0) + border.mean(axis=0)
+            seeded[y, x0:x1] = np.clip(chunk, 0, 255).astype(np.uint8)
+    hole = (core.astype(np.uint8) * 255)
+    out = cv2.inpaint(seeded, hole, 7, cv2.INPAINT_NS)
     return out
 
 
