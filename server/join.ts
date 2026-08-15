@@ -19,3 +19,16 @@ export function resolveHelloRoom(
 export function roomIsFull(presentCount: number): boolean {
   return presentCount >= 2;
 }
+
+export function takeRoom<T>(
+  rooms: Map<string, T>,
+  resolved: { room: string; create: boolean },
+  make: (id: string) => T,
+): { ok: T } | { err: string } {
+  const hit = rooms.get(resolved.room);
+  if (hit) return { ok: hit };
+  if (!resolved.create) return { err: "没有这间山谷" };
+  const rec = make(resolved.room);
+  rooms.set(resolved.room, rec);
+  return { ok: rec };
+}

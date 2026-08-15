@@ -14,7 +14,7 @@ import { growPlots } from "./progress";
 import { nightAfter, seasonOf } from "./season";
 import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
-import { resolveHelloRoom, roomIsFull } from "../../server/join";
+import { resolveHelloRoom, roomIsFull, takeRoom } from "../../server/join";
 import { World } from "../sim/world";
 import { buildMap, mineTemplate, TILE, tileCenter, VALLEY } from "../world/maps";
 import { createAudio } from "./audio";
@@ -685,6 +685,27 @@ describe("living systems", () => {
     known.set("AB12", true);
     const join = resolveHelloRoom("ab12", known, () => "NOPE");
     assert.deepEqual(join, { room: "AB12", create: false });
+    const rooms = new Map<string, { id: string }>();
+    let made = 0;
+    const skipped = takeRoom(rooms, { room: "7K3P", create: false }, (id) => {
+      made += 1;
+      return { id };
+    });
+    assert.deepEqual(skipped, { err: "没有这间山谷" });
+    assert.equal(made, 0);
+    assert.equal(rooms.size, 0);
+    const opened = takeRoom(rooms, { room: "AB12", create: true }, (id) => {
+      made += 1;
+      return { id };
+    });
+    assert.deepEqual(opened, { ok: { id: "AB12" } });
+    assert.equal(made, 1);
+    const again = takeRoom(rooms, { room: "AB12", create: false }, (id) => {
+      made += 1;
+      return { id };
+    });
+    assert.deepEqual(again, { ok: { id: "AB12" } });
+    assert.equal(made, 1);
   });
 
   it("village plots stay lit at night; Charlie only bites the wild", () => {
@@ -1527,5 +1548,120 @@ describe("living systems", () => {
     assert.ok(pair.toasts.some((t) => t.text.includes("先躺下")));
     tap(pair, "b");
     assert.equal(pair.save.day, 1);
+  });
+
+  it("two phones share a room without a third body, a stolen pair, or a waiting HUD", () => {
+    const seats = new World("SEATS2");
+    seats.addPlayer("a", "阿左", "left");
+    seats.save.rightName = "阿右";
+    assert.equal(seats.snapshot("a").partner?.name, "还没来");
+    assert.equal(seats.snapshot("a").partner?.online, false);
+    assert.equal(seats.addPlayer("b", "Brainbird", "right"), "right");
+    assert.equal(seats.snapshot("a").partner?.name, "Brainbird");
+    assert.equal(seats.snapshot("a").partner?.online, true);
+    assert.equal(seats.snapshot("b").partner?.name, "阿左");
+    assert.equal(seats.snapshot("b").partner?.online, true);
+    assert.equal(seats.addPlayer("c", "丙", "left"), null);
+    assert.equal(seats.players.size, 2);
+    assert.equal(roomIsFull(seats.present().length), true);
+    assert.equal(seats.occupyAway("丁", "right"), null);
+    assert.equal(seats.reclaim("Brainbird", "right"), null);
+
+    const ghost = seats.players.get("b");
+    assert.ok(ghost);
+    ghost.x = 321;
+    ghost.y = 210;
+    ghost.zone = "wild";
+    seats.markAway("b");
+    assert.equal(seats.present().length, 1);
+    assert.equal(roomIsFull(seats.present().length), false);
+    assert.equal(seats.addPlayer("c", "丙", "right"), null);
+    assert.equal(seats.players.size, 2);
+    assert.equal(seats.reclaim("Brainbird", "right"), "b");
+    seats.markBack("b");
+    assert.equal(ghost.x, 321);
+    assert.equal(ghost.zone, "wild");
+    assert.equal(seats.snapshot("a").partner?.online, true);
+    assert.equal(seats.snapshot("a").partner?.name, "Brainbird");
+
+    const fish = new World("PAIR3");
+    fish.addPlayer("a", "阿左", "left");
+    fish.addPlayer("b", "阿右", "right");
+    const fa = fish.players.get("a");
+    const fb = fish.players.get("b");
+    assert.ok(fa && fb);
+    const dock = fish.valley.find("D")[0];
+    const water = tileCenter(dock.x - 1, dock.y);
+    fa.x = water.x;
+    fa.y = water.y;
+    fa.facing = 1;
+    fb.x = water.x + 400;
+    fb.y = water.y;
+    fb.facing = 1;
+    tap(fish, "a");
+    assert.ok(fa.fish);
+    assert.equal(fb.fish, null);
+    assert.ok(!fish.snapshot("a").prompt.includes("两人同钓"));
+
+    const forge = new World("FORGE4");
+    forge.addPlayer("a", "阿左", "left");
+    forge.addPlayer("b", "阿右", "right");
+    const ga = forge.players.get("a");
+    const gb = forge.players.get("b");
+    assert.ok(ga && gb);
+    addToBag(forge.save.bag, "ore", 2);
+    addToBag(forge.save.bag, "wood", 1);
+    const anvil = forge.valley.find("Y")[0];
+    standFacing(ga, anvil);
+    standFacing(gb, anvil);
+    gb.x = ga.x + 400;
+    tap(forge, "a");
+    ga.fish!.mark = 0.5;
+    tap(forge, "a");
+    tap(forge, "a");
+    tap(forge, "a");
+    assert.equal(forge.save.gear[0]?.pairId, undefined);
+    assert.ok(!forge.toasts.some((t) => t.text.includes("两个人对着砧")));
+
+    const stall = new World("STALL5");
+    stall.addPlayer("a", "阿左", "left");
+    stall.addPlayer("b", "阿右", "right");
+    const sa = stall.players.get("a");
+    const sb = stall.players.get("b");
+    assert.ok(sa && sb);
+    stall.save.gold = 30;
+    stall.stall = {
+      goods: [{ id: "osmanthus", price: 18 }],
+      pairId: "ring_left",
+      pairMate: "ring_right",
+      pairTaken: false,
+    };
+    const shop = stall.valley.find("S")[0];
+    standFacing(sa, shop);
+    standFacing(sb, shop);
+    sb.x = sa.x + 400;
+    tap(stall, "a");
+    sa.fish!.mark = 0.45;
+    tap(stall, "a");
+    tap(stall, "a");
+    tap(stall, "a");
+    assert.equal(stall.save.gear.length, 0);
+    assert.ok(!stall.toasts.some((t) => t.text.includes("两个人在摊前")));
+
+    const night = new World("BED4");
+    night.addPlayer("a", "阿左", "left");
+    night.addPlayer("b", "阿右", "right");
+    const na = night.players.get("a");
+    const nb = night.players.get("b");
+    assert.ok(na && nb);
+    standFacing(na, night.valley.find("A")[0]);
+    standFacing(nb, night.valley.find("A")[0]);
+    nb.x = na.x + 12;
+    night.clock = nightAfter(seasonOf(night.save.day)) + 0.01;
+    assert.equal(night.snapshot("a").partner?.online, true);
+    tap(night, "a");
+    assert.equal(night.save.day, 0);
+    tap(night, "b");
+    assert.equal(night.save.day, 1);
   });
 });

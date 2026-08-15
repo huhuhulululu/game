@@ -149,8 +149,10 @@ export class World {
   home = { x: 200, y: 200 };
   arrive = { x: 200, y: 272 };
 
-  addPlayer(id: string, name: string, prefer?: "left" | "right"): "left" | "right" {
+  addPlayer(id: string, name: string, prefer?: "left" | "right"): "left" | "right" | null {
+    if (this.present().length >= 2) return null;
     const used = [...this.players.values()].map((p) => p.side);
+    if (used.includes("left") && used.includes("right")) return null;
     const side: "left" | "right" =
       prefer && !used.includes(prefer) ? prefer : used.includes("left") ? "right" : "left";
     if (side === "left") this.save.leftName = name;
@@ -391,7 +393,7 @@ export class World {
             biome: other.zone === "wild" ? this.biomeAt(other) : undefined,
             ping: other.ping,
           }
-        : { name: you?.side === "left" ? this.save.rightName || "还没来" : this.save.leftName || "还没来", zone: "valley", online: false },
+        : { name: "还没来", zone: "valley", online: false },
       zone,
       tiles: full ? this.mapFor(zone).rows : [],
       floor: this.mineFloor,
@@ -489,7 +491,8 @@ export class World {
   }
 
   private other(p: Actor): Actor | undefined {
-    return [...this.players.values()].find((o) => o.id !== p.id);
+    const all = [...this.players.values()].filter((o) => o.id !== p.id);
+    return all.find((o) => !this.away.has(o.id)) ?? all[0];
   }
 
   private fortune(): Fortune | null {
