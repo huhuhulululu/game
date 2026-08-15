@@ -1,6 +1,6 @@
 import type { ActorSnap, EnemySnap } from "../sim/net";
 import { TILE } from "../world/maps";
-import { blit } from "./art";
+import { blitFit, blitPatch } from "./art";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -142,6 +142,7 @@ function tuft(g: Ctx, x: number, y: number, s: number, c: string): void {
 
 function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number): void {
   if (zone === "kitchen") {
+    if (blitPatch(g, "wood", x, y, TILE, TILE, x, y)) return;
     px(g, x, y, TILE, TILE, "#6e4a32");
     g.strokeStyle = "#5a3c28";
     g.lineWidth = 2;
@@ -154,6 +155,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
     return;
   }
   if (zone === "mine") {
+    if (blitPatch(g, "stone", x, y, TILE, TILE, x, y)) return;
     px(g, x, y, TILE, TILE, "#2a2624");
     oval(g, x + 12, y + 20, 8, 5, "#1c1a18");
     oval(g, x + 26, y + 10, 6, 4, "#3a3632");
@@ -161,6 +163,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
   }
   if (zone === "wild") {
     if (ch === "m") {
+      if (blitPatch(g, "marsh", x, y, TILE, TILE, x, y)) return;
       px(g, x, y, TILE, TILE, "#24382c");
       oval(g, x + 18, y + 20, 12, 6, "#1a2e24");
       if (Math.sin(now / 640 + x) > 0.2) oval(g, x + 14, y + 16, 7, 3, "#3a6a58");
@@ -172,16 +175,19 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
       tuft(g, x + 18, y + 8, 18, "#7a7a38");
       return;
     }
+    if (blitPatch(g, "grass", x, y, TILE, TILE, x, y)) return;
     px(g, x, y, TILE, TILE, "#2e3a28");
     tuft(g, x + 8, y + 14, 12, "#3a4a30");
     return;
   }
   if (ch === ",") {
+    if (blitPatch(g, "path", x, y, TILE, TILE, x, y)) return;
     px(g, x, y, TILE, TILE, "#8a7a58");
     oval(g, x + 18, y + 18, 14, 6, "#7a6a48");
     oval(g, x + 10, y + 10, 4, 3, "#6a5a38");
     return;
   }
+  if (blitPatch(g, "grass", x, y, TILE, TILE, x, y)) return;
   px(g, x, y, TILE, TILE, "#3f6d45");
   const n = hash(x, y);
   tuft(g, x + 4 + (n % 10), y + 12 + (n % 8), 14, "#2f5a38");
@@ -190,7 +196,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
 }
 
 function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
-  if (blit(g, pine ? "pine" : "tree", x - 14, y - 44, 64, 88)) return;
+  if (blitFit(g, pine ? "pine" : "tree", x - 16, y - 52, 68, 92)) return;
   const sway = Math.sin(now / 860 + x * 0.03) * 1.4;
   oval(g, x + 18, y + 34, 12, 4, "rgba(20,16,10,0.28)");
   px(g, x + 15, y + 10, 7, 24, "#5a3a22");
@@ -210,9 +216,11 @@ function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
 }
 
 function water(g: Ctx, x: number, y: number, now: number): void {
-  px(g, x, y, TILE, TILE, "#1a5470");
-  px(g, x, y + 16, TILE, 20, "#143e54");
-  g.strokeStyle = "#3a8aaa";
+  if (!blitPatch(g, "water", x, y, TILE, TILE, x, y)) {
+    px(g, x, y, TILE, TILE, "#1a5470");
+    px(g, x, y + 16, TILE, 20, "#143e54");
+  }
+  g.strokeStyle = "rgba(180,220,230,0.45)";
   g.lineWidth = 1.6;
   g.lineCap = "round";
   const t = now / 420;
@@ -227,6 +235,7 @@ function water(g: Ctx, x: number, y: number, now: number): void {
 
 function dock(g: Ctx, x: number, y: number): void {
   water(g, x, y, 0);
+  if (blitFit(g, "dock", x - 6, y - 8, TILE + 12, TILE + 10)) return;
   px(g, x, y + 12, TILE, 16, "#6a4a28");
   g.strokeStyle = "#8a6a40";
   g.lineWidth = 2;
@@ -241,7 +250,7 @@ function dock(g: Ctx, x: number, y: number): void {
 }
 
 function fire(g: Ctx, x: number, y: number, now: number): void {
-  if (blit(g, "fire", x - 6, y - 10, 48, 52)) return;
+  if (blitFit(g, "fire", x - 8, y - 16, 52, 56)) return;
   oval(g, x + 18, y + 28, 14, 5, "#4a4038");
   px(g, x + 8, y + 22, 10, 6, "#5a3a22");
   px(g, x + 18, y + 23, 10, 5, "#3a2414");
@@ -284,6 +293,14 @@ function lanternDoor(g: Ctx, x: number, y: number, now: number): void {
 }
 
 function plotSoil(g: Ctx, x: number, y: number): void {
+  if (blitPatch(g, "path", x, y, TILE, TILE, x + 11, y + 7)) {
+    g.globalAlpha = 0.38;
+    oval(g, x + 18, y + 12, 14, 3, "#3a2414");
+    oval(g, x + 18, y + 22, 14, 3, "#3a2414");
+    oval(g, x + 18, y + 30, 13, 2, "#2a1810");
+    g.globalAlpha = 1;
+    return;
+  }
   px(g, x, y, TILE, TILE, "#6b4a28");
   oval(g, x + 18, y + 12, 14, 3, "#5a3a1c");
   oval(g, x + 18, y + 22, 14, 3, "#5a3a1c");
@@ -291,44 +308,60 @@ function plotSoil(g: Ctx, x: number, y: number): void {
 }
 
 function bush(g: Ctx, x: number, y: number, gold: boolean): void {
+  if (blitFit(g, "bush", x - 8, y - 14, 52, 52)) {
+    if (gold) {
+      oval(g, x + 10, y + 12, 3, 3, "#e6d0a6");
+      oval(g, x + 24, y + 16, 3, 3, "#c9a06a");
+    }
+    return;
+  }
   oval(g, x + 18, y + 24, 13, 8, gold ? "#8a6a28" : "#2f5a38");
   oval(g, x + 18, y + 16, 10, 8, gold ? "#c9a06a" : "#3f6d5c");
   oval(g, x + 18, y + 10, 5, 4, gold ? "#e6d0a6" : "#5a8a58");
 }
 
 function stall(g: Ctx, x: number, y: number): void {
+  if (blitFit(g, "stall", x - 8, y - 28, 52, 68)) return;
   px(g, x + 2, y + 16, 32, 16, "#8a6a40");
   px(g, x + 4, y + 18, 28, 8, "#c4a060");
-  px(g, x + 2, y + 6, 32, 12, "#c45c26");
-  px(g, x + 6, y + 8, 8, 6, "#3f6d5c");
-  px(g, x + 22, y + 8, 8, 6, "#3f6d5c");
+  tri(g, x + 18, y + 2, x, y + 16, x + 36, y + 16, "#c45c26");
+  oval(g, x + 10, y + 20, 4, 3, "#c45c26");
+  oval(g, x + 26, y + 20, 4, 3, "#3f6d5c");
 }
 
 function anvil(g: Ctx, x: number, y: number): void {
+  if (blitFit(g, "anvil", x - 6, y - 8, 48, 48)) return;
+  oval(g, x + 18, y + 30, 12, 5, "#4a3420");
   px(g, x + 10, y + 22, 16, 10, "#3a342c");
-  px(g, x + 6, y + 12, 24, 12, "#6a6460");
+  px(g, x + 6, y + 14, 24, 10, "#6a6460");
+  px(g, x + 4, y + 12, 10, 6, "#8a8480");
   px(g, x + 8, y + 10, 20, 4, "#8a8480");
-  px(g, x + 20, y + 8, 8, 6, "#4a4844");
 }
 
 function altar(g: Ctx, x: number, y: number): void {
+  if (blitFit(g, "altar", x - 6, y - 10, 48, 50)) return;
   px(g, x + 8, y + 18, 20, 14, "#6a5848");
-  px(g, x + 12, y + 8, 12, 12, "#8a7868");
-  px(g, x + 15, y + 4, 6, 6, "#d4a24a");
+  px(g, x + 12, y + 10, 12, 10, "#8a7868");
+  oval(g, x + 18, y + 8, 5, 4, "#c45c26");
+  oval(g, x + 18, y + 5, 2, 2, "#3f6d5c");
 }
 
 function board(g: Ctx, x: number, y: number): void {
-  px(g, x + 8, y + 6, 20, 24, "#5a4838");
-  px(g, x + 10, y + 8, 16, 20, "#d4c4a0");
-  px(g, x + 12, y + 12, 12, 2, "#8a6a40");
-  px(g, x + 12, y + 18, 10, 2, "#8a6a40");
+  if (blitFit(g, "board", x - 6, y - 14, 48, 54)) return;
+  px(g, x + 8, y + 22, 4, 12, "#5a3a22");
+  px(g, x + 24, y + 22, 4, 12, "#5a3a22");
+  px(g, x + 6, y + 6, 24, 20, "#6a4a30");
+  px(g, x + 8, y + 8, 20, 16, "#e6d0a6");
+  px(g, x + 10, y + 12, 14, 2, "#8a6a40");
+  px(g, x + 10, y + 17, 10, 2, "#8a6a40");
 }
 
 function gate(g: Ctx, x: number, y: number): void {
+  if (blitFit(g, "gate", x - 8, y - 16, 52, 56)) return;
   px(g, x + 4, y + 4, 6, 28, "#5a3a22");
   px(g, x + 26, y + 4, 6, 28, "#5a3a22");
   px(g, x + 6, y + 8, 24, 6, "#3f6d5c");
-  px(g, x + 10, y + 18, 16, 4, "#2a4a38");
+  oval(g, x + 30, y + 10, 4, 5, "#c45c26");
 }
 
 function mineMouth(g: Ctx, x: number, y: number): void {
@@ -340,86 +373,107 @@ function mineMouth(g: Ctx, x: number, y: number): void {
 }
 
 function ore(g: Ctx, x: number, y: number, now: number): void {
-  px(g, x + 6, y + 10, 24, 20, "#4a443c");
-  px(g, x + 10, y + 14, 8, 8, "#6a6460");
-  px(g, x + 14, y + 22, 6, 4, "#8a8070");
-  if (Math.sin(now / 200 + x) > 0.25) px(g, x + 20, y + 16, 5, 5, "#c8d0d8");
+  oval(g, x + 18, y + 28, 12, 4, "#2a2218");
+  tri(g, x + 10, y + 26, x + 16, y + 10, x + 22, y + 26, "#4a443c");
+  tri(g, x + 16, y + 26, x + 24, y + 8, x + 30, y + 26, "#6a6460");
+  if (Math.sin(now / 200 + x) > 0.25) oval(g, x + 22, y + 14, 3, 3, "#c8d0d8");
 }
 
 function stairs(g: Ctx, x: number, y: number): void {
-  px(g, x + 6, y + 6, 24, 6, "#5a4a38");
-  px(g, x + 8, y + 14, 20, 6, "#4a3a2c");
-  px(g, x + 10, y + 22, 16, 6, "#3a2e22");
+  px(g, x + 4, y + 6, 28, 8, "#6a5a44");
+  px(g, x + 7, y + 14, 22, 8, "#5a4a38");
+  px(g, x + 10, y + 22, 16, 8, "#3a2e22");
+  px(g, x + 4, y + 12, 28, 2, "#2a2018");
+  px(g, x + 7, y + 20, 22, 2, "#2a2018");
 }
 
 function lurk(g: Ctx, x: number, y: number, now: number): void {
   const bob = Math.sin(now / 400) * 2;
-  px(g, x + 10, y + 14 + bob, 16, 14, "#1a1410");
-  px(g, x + 12, y + 10 + bob, 12, 8, "#2a2018");
-  px(g, x + 14, y + 16 + bob, 3, 3, "#c45c26");
-  px(g, x + 22, y + 16 + bob, 3, 3, "#c45c26");
+  oval(g, x + 18, y + 28 + bob, 10, 3, "rgba(10,8,6,0.35)");
+  oval(g, x + 18, y + 20 + bob, 11, 8, "#1a1410");
+  oval(g, x + 18, y + 12 + bob, 7, 6, "#2a2018");
+  oval(g, x + 15, y + 11 + bob, 1.6, 1.6, "#c45c26");
+  oval(g, x + 22, y + 11 + bob, 1.6, 1.6, "#c45c26");
 }
 
 function stove(g: Ctx, x: number, y: number, now: number): void {
-  px(g, x + 4, y + 10, 28, 22, "#6a4030");
-  px(g, x + 8, y + 14, 20, 10, "#2a2018");
+  if (blitFit(g, "stove", x - 6, y - 14, 48, 54)) {
+    const f = 0.5 + Math.sin(now / 80) * 0.4;
+    oval(g, x + 18, y + 20, 4, 3 * f, "rgba(232,160,48,0.55)");
+    return;
+  }
+  px(g, x + 6, y + 12, 24, 20, "#6a4030");
+  px(g, x + 8, y + 8, 20, 6, "#4a2a1c");
+  oval(g, x + 18, y + 22, 8, 7, "#2a2018");
   const f = 0.5 + Math.sin(now / 80) * 0.4;
-  px(g, x + 14, y + 16, 8, 8 * f, "#c45c26");
-  px(g, x + 16, y + 14, 4, 6 * f, "#e8a030");
+  oval(g, x + 18, y + 22, 5, 5 * f, "#c45c26");
+  oval(g, x + 18, y + 20, 3, 3 * f, "#e8a030");
 }
 
 function plate(g: Ctx, x: number, y: number): void {
-  px(g, x + 8, y + 14, 20, 16, "#4a5060");
-  px(g, x + 6, y + 18, 4, 8, "#6a7080");
-  px(g, x + 26, y + 18, 4, 8, "#6a7080");
-  px(g, x + 12, y + 10, 12, 6, "#8a9098");
+  oval(g, x + 18, y + 24, 14, 6, "#3a4048");
+  oval(g, x + 18, y + 20, 13, 8, "#6a7080");
+  oval(g, x + 18, y + 18, 9, 5, "#c8d0d4");
+  px(g, x + 8, y + 16, 4, 8, "#5a6068");
+  px(g, x + 24, y + 16, 4, 8, "#5a6068");
 }
 
 function icebox(g: Ctx, x: number, y: number): void {
-  px(g, x + 6, y + 6, 24, 26, "#4a6a88");
-  px(g, x + 8, y + 8, 20, 10, "#7aa0b8");
-  px(g, x + 8, y + 20, 20, 8, "#3a5870");
+  if (blitFit(g, "icebox", x - 4, y - 16, 44, 56)) return;
+  px(g, x + 8, y + 6, 20, 26, "#5a3a22");
+  px(g, x + 10, y + 8, 16, 12, "#7aa0b8");
+  px(g, x + 10, y + 22, 16, 8, "#3a5870");
+  oval(g, x + 22, y + 20, 2, 2, "#d4a24a");
 }
 
 function pantry(g: Ctx, x: number, y: number, ch: string): void {
+  if (blitFit(g, "pantry", x - 4, y - 10, 44, 50)) return;
   px(g, x + 4, y + 6, 28, 26, "#6a4a30");
   px(g, x + 6, y + 8, 11, 20, "#8a6a48");
   px(g, x + 19, y + 8, 11, 20, "#8a6a48");
   const jar =
     ch === "1" ? "#c45c3e" : ch === "2" ? "#e6c36a" : ch === "4" ? "#5a8f62" : ch === "5" ? "#8aa4b5" : "#d4a24a";
-  px(g, x + 8, y + 12, 6, 8, jar);
-  px(g, x + 21, y + 14, 6, 8, jar);
+  oval(g, x + 11, y + 16, 4, 5, jar);
+  oval(g, x + 24, y + 18, 4, 5, jar);
 }
 
 function cut(g: Ctx, x: number, y: number): void {
-  px(g, x + 4, y + 16, 28, 12, "#8a6a40");
-  px(g, x + 6, y + 18, 24, 6, "#c4a070");
-  px(g, x + 22, y + 12, 8, 3, "#8a8480");
+  if (blitFit(g, "cut", x - 6, y - 6, 48, 44)) return;
+  oval(g, x + 18, y + 22, 14, 7, "#6a4a28");
+  oval(g, x + 18, y + 20, 13, 6, "#c4a070");
+  px(g, x + 20, y + 10, 10, 3, "#8a8480");
+  px(g, x + 28, y + 8, 3, 6, "#6a6460");
 }
 
 function pass(g: Ctx, x: number, y: number): void {
-  px(g, x + 2, y + 6, 32, 24, "#c8b090");
-  px(g, x + 6, y + 10, 24, 16, "#e8d8b8");
-  px(g, x + 12, y + 4, 12, 8, "#8a6a40");
+  px(g, x + 2, y + 8, 32, 22, "#6a4a30");
+  px(g, x + 6, y + 12, 24, 14, "#e8d8b8");
+  px(g, x + 8, y + 4, 20, 8, "#5a3a22");
+  oval(g, x + 18, y + 18, 8, 4, "#c45c26");
 }
 
 function trash(g: Ctx, x: number, y: number): void {
-  px(g, x + 10, y + 12, 16, 18, "#3a2020");
-  px(g, x + 8, y + 10, 20, 4, "#5a3030");
+  oval(g, x + 18, y + 28, 8, 3, "#2a1810");
+  px(g, x + 10, y + 14, 16, 14, "#3a2020");
+  px(g, x + 8, y + 12, 20, 4, "#5a3030");
+  oval(g, x + 18, y + 12, 10, 3, "#4a2820");
 }
 
 function wall(g: Ctx, x: number, y: number, zone: string): void {
   if (zone === "mine") {
-    px(g, x, y, TILE, TILE, "#1a1614");
-    oval(g, x + 12, y + 16, 8, 6, "#2a2420");
+    if (!blitPatch(g, "stone", x, y, TILE, TILE, x, y)) {
+      px(g, x, y, TILE, TILE, "#1a1614");
+      oval(g, x + 12, y + 16, 8, 6, "#2a2420");
+    }
     px(g, x + 8, y, 4, TILE, "#4a3a2c");
     return;
   }
   if (zone === "kitchen") {
+    if (blitPatch(g, "wood", x, y, TILE, TILE, x + 3, y + 5)) return;
     px(g, x, y, TILE, TILE, "#4a3224");
     return;
   }
-  px(g, x, y, TILE, TILE, "#2a4a28");
+  if (!blitPatch(g, "grass", x, y, TILE, TILE, x, y)) px(g, x, y, TILE, TILE, "#2a4a28");
   oval(g, x + 18, y + 10, 12, 7, "#1e3a24");
   px(g, x + 16, y + 20, 6, 12, "#5a3a22");
 }
@@ -598,12 +652,23 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0)
     g.stroke();
     g.lineWidth = 1;
   }
-  const painted = warm ? "warm" : "pineChar";
+  const painted =
+    a.facing === 0
+      ? warm
+        ? "warmBack"
+        : "pineBack"
+      : a.facing === 1 || a.facing === 3
+        ? warm
+          ? "warmSide"
+          : "pineSide"
+        : warm
+          ? "warm"
+          : "pineChar";
   const bob = Math.sin((a.x + a.y) * 0.12) * 1.2;
   g.save();
   g.translate(x, y + bob);
   if (a.facing === 3) g.scale(-1, 1);
-  const drew = blit(g, painted, -22, -42, 44, 58);
+  const drew = blitFit(g, painted, -16, -50, 32, 50);
   g.restore();
   if (drew) {
     const mark = heldChip(a.heldName);
@@ -620,14 +685,14 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0)
       g.strokeRect(x - 16, y - 20, 32, 32);
     }
     const nw = Math.min(48, a.name.length * 8 + 10);
-    px(g, x - nw / 2, y - 48, nw, 11, "rgba(40,28,16,0.78)");
+    px(g, x - nw / 2, y - 58, nw, 11, "rgba(40,28,16,0.78)");
     g.fillStyle = "#f4e8d0";
     g.font = "10px 'Noto Serif SC', serif";
     g.textAlign = "center";
-    g.fillText(a.name, x, y - 39);
-    px(g, x - 10, y + 16, 20, 3, "#3a2018");
-    px(g, x - 10, y + 16, 20 * Math.max(0, a.hp / a.maxHp), 3, a.hp / a.maxHp < 0.35 ? "#c45c26" : "#3f6d5c");
-    px(g, x - 10, y + 20, 20 * Math.max(0, a.hunger / 100), 2, "#6aa36a");
+    g.fillText(a.name, x, y - 49);
+    px(g, x - 10, y + 4, 20, 3, "#3a2018");
+    px(g, x - 10, y + 4, 20 * Math.max(0, a.hp / a.maxHp), 3, a.hp / a.maxHp < 0.35 ? "#c45c26" : "#3f6d5c");
+    px(g, x - 10, y + 8, 20 * Math.max(0, a.hunger / 100), 2, "#6aa36a");
     void now;
     return;
   }
@@ -673,12 +738,15 @@ export function drawEnemy(g: Ctx, e: EnemySnap, ox: number, oy: number, now: num
   const y = oy + e.y;
   const bob = Math.sin(now / 180 + e.x) * 1.5;
   const c = e.flash > 0 ? "#f4e7d2" : e.hue || "#3a2018";
-  oval(g, x, y + 8 + bob, 10, 3, "rgba(10,8,6,0.35)");
-  oval(g, x, y + bob, 11, 7, c);
-  oval(g, x, y - 6 + bob, 7, 5, shade(typeof c === "string" && c.startsWith("#") ? c : "#3a2018", 0.7));
-  oval(g, x - 3, y - 5 + bob, 1.6, 1.6, "#c45c26");
-  oval(g, x + 3, y - 5 + bob, 1.6, 1.6, "#c45c26");
-  px(g, x - 12, y - 16, 24 * (e.hp / e.maxHp), 3, "#c45c26");
+  const ink = typeof c === "string" && c.startsWith("#") ? c : "#3a2018";
+  oval(g, x, y + 10 + bob, 11, 3, "rgba(10,8,6,0.35)");
+  oval(g, x - 7, y + 6 + bob, 3, 5, shade(ink, 0.55));
+  oval(g, x + 7, y + 6 + bob, 3, 5, shade(ink, 0.55));
+  oval(g, x, y + bob, 12, 8, c);
+  oval(g, x, y - 8 + bob, 7, 6, shade(ink, 0.72));
+  oval(g, x - 3, y - 8 + bob, 1.7, 1.7, "#c45c26");
+  oval(g, x + 3, y - 8 + bob, 1.7, 1.7, "#c45c26");
+  px(g, x - 12, y - 20, 24 * (e.hp / e.maxHp), 3, "#c45c26");
 }
 
 export function drawSky(g: Ctx, w: number, h: number, night: boolean, dusk: boolean, zone: string, weather: string): void {
@@ -822,10 +890,12 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
+  const boxW = w + 24;
+  const boxH = h + 52;
   const painted =
-    (c.kind === "cabin" && blit(g, "cabin", x - 10, y - 28, w + 20, h + 36)) ||
-    (c.kind === "inn" && blit(g, "inn", x - 10, y - 28, w + 20, h + 36)) ||
-    (c.kind === "mine" && blit(g, "mine", x - 8, y - 16, w + 16, h + 24));
+    (c.kind === "cabin" && blitFit(g, "cabin", x - 12, y - 40, boxW, boxH)) ||
+    (c.kind === "inn" && blitFit(g, "inn", x - 12, y - 40, boxW, boxH)) ||
+    (c.kind === "mine" && blitFit(g, "mine", x - 10, y - 20, w + 20, h + 28));
   if (painted) return;
   if (c.kind === "mine") {
     px(g, x + 6, y + 10, w - 12, h - 10, "#1a1814");
