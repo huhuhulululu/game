@@ -947,4 +947,117 @@ describe("living systems", () => {
     tap(w, "a");
     assert.equal(w.combo, 0);
   });
+
+  it("solo stall buy is a common good with no pair extra", () => {
+    const w = new World("STALL1");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.save.gold = 30;
+    w.stall = {
+      goods: [
+        { id: "osmanthus", price: 18 },
+        { id: "flint", price: 6 },
+      ],
+      pairId: "ring_left",
+      pairMate: "ring_right",
+      pairTaken: false,
+    };
+    standFacing(p, w.valley.find("S")[0]);
+    tap(w, "a");
+    assert.ok(p.fish?.shop);
+    p.fish.mark = 0.45;
+    tap(w, "a");
+    tap(w, "a");
+    tap(w, "a");
+    assert.equal(countOf(w.save.bag, "osmanthus"), 1);
+    assert.equal(w.save.gear.length, 0);
+    assert.ok(!w.toasts.some((t) => t.text.includes("两个人在摊前")));
+    assert.ok(!w.save.gear.some((g) => item(g.base).pairId));
+  });
+
+  it("two people confirming the same stall good get today's pair extra", () => {
+    const w = new World("STALL2");
+    w.addPlayer("a", "阿左", "left");
+    w.addPlayer("b", "阿右", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    w.save.gold = 30;
+    w.stall = {
+      goods: [
+        { id: "osmanthus", price: 18 },
+        { id: "flint", price: 6 },
+      ],
+      pairId: "ring_left",
+      pairMate: "ring_right",
+      pairTaken: false,
+    };
+    const stall = w.valley.find("S")[0];
+    standFacing(a, stall);
+    standFacing(b, stall);
+    b.x = a.x + 12;
+    tap(w, "a");
+    a.fish!.mark = 0.45;
+    tap(w, "a");
+    tap(w, "b");
+    tap(w, "a");
+    assert.equal(countOf(w.save.bag, "osmanthus"), 1);
+    assert.ok(w.save.gear.some((g) => g.base === "ring_left"));
+    assert.ok(w.save.gear.some((g) => g.base === "ring_right"));
+    assert.ok(item("ring_left").pairId);
+    assert.ok(w.toasts.some((t) => t.text.includes("两个人在摊前点了同一件")));
+  });
+
+  it("an away partner turns a stall deal into a solo buy; a miss keeps the goods", () => {
+    const away = new World("STALL3");
+    away.addPlayer("a", "阿左", "left");
+    away.addPlayer("b", "阿右", "right");
+    const aa = away.players.get("a");
+    const ab = away.players.get("b");
+    assert.ok(aa && ab);
+    away.save.gold = 30;
+    away.stall = {
+      goods: [
+        { id: "osmanthus", price: 18 },
+        { id: "flint", price: 6 },
+      ],
+      pairId: "ring_left",
+      pairMate: "ring_right",
+      pairTaken: false,
+    };
+    const tile = away.valley.find("S")[0];
+    standFacing(aa, tile);
+    standFacing(ab, tile);
+    tap(away, "a");
+    away.markAway("b");
+    aa.fish!.mark = 0.45;
+    tap(away, "a");
+    tap(away, "a");
+    tap(away, "a");
+    assert.equal(countOf(away.save.bag, "osmanthus"), 1);
+    assert.equal(away.save.gear.length, 0);
+    assert.ok(!away.toasts.some((t) => t.text.includes("两个人在摊前")));
+
+    const miss = new World("STALL0");
+    miss.addPlayer("a", "阿左", "left");
+    const m = miss.players.get("a");
+    assert.ok(m);
+    miss.save.gold = 30;
+    miss.stall = {
+      goods: [{ id: "osmanthus", price: 18 }],
+      pairId: "lucky_bell",
+      pairTaken: false,
+    };
+    standFacing(m, miss.valley.find("S")[0]);
+    tap(miss, "a");
+    m.fish!.mark = 0.1;
+    tap(miss, "a");
+    tap(miss, "a");
+    tap(miss, "a");
+    assert.equal(countOf(miss.save.bag, "osmanthus"), 0);
+    assert.equal(miss.save.gold, 28);
+    assert.equal(miss.stall?.goods[0]?.id, "osmanthus");
+    assert.ok(miss.toasts.some((t) => t.text.includes("定金没了")));
+  });
 });

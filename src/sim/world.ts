@@ -1,6 +1,6 @@
 import { craftGear, makeGear, type GearInst } from "../game/affix";
 import { addToBag, countOf, takeFresh, takeFromBag } from "../game/bag";
-import { maxHp, shopStock, todayEvent } from "../game/content";
+import { maxHp, pickStallGoods, STALL_DEPOSIT, todayPairExtra } from "../game/content";
 import { eatValue, heldLabel } from "../game/eat";
 import { ageBag, freshWord, parseHeld, sleepSpoil, spoilRate, writeHeld } from "../game/spoil";
 import { gradeName, rollCatch } from "../game/fishQuality";
@@ -46,6 +46,7 @@ interface Actor {
     pull: number;
     dir: number;
     forge?: boolean;
+    shop?: boolean;
   } | null;
   chop: { t: number; id: string; key: string } | null;
   input: InputState;
@@ -130,6 +131,8 @@ export class World {
   rainOutT = 0;
   away = new Set<string>();
   forgeJob: { starter: string; hits: number; good: Record<string, number> } | null = null;
+  shopJob: { starter: string; hits: number; good: Record<string, number>; pick: Record<string, number> } | null = null;
+  stall: { goods: { id: string; price: number }[]; pairId: string; pairMate?: string; pairTaken: boolean } | null = null;
   boardTickets: string[] = [];
   boardOn = false;
   boardAsked: ("left" | "right")[] = [];
@@ -267,6 +270,8 @@ export class World {
     this.hearthDone = false;
     this.hearthT = 0;
     this.forgeJob = null;
+    this.shopJob = null;
+    this.stall = null;
     this.boardOn = false;
     this.boardAsked = [];
     this.boardServed = 0;
@@ -327,6 +332,7 @@ export class World {
     this.tickFires(dt);
     this.tickHearth(dt);
     this.tickForge();
+    this.tickShop();
     this.tickWild(dt);
     this.rotFood(false, dt);
     this.comboT = Math.max(0, this.comboT - dt);
@@ -589,7 +595,7 @@ export class World {
         return "歇一夜（田会自己长）";
       }
       if (ch === "V" || cell === "gate") return "出谷 · 荒野";
-      if (cell === "shop") return "摊位";
+      if (cell === "shop") return this.shopPrompt();
       if (cell === "forge") return this.forgeJob ? "锻 · 绿的时候按" : "打造";
       if (cell === "gacha") return this.save.fortuneId ? "今日已问过" : "问今日";
       if (cell === "board") return this.boardPrompt(p);
@@ -674,7 +680,7 @@ export class World {
       if (ch === "I") return this.enterKitchen(p);
       if (ch === "A") return this.sleep(p.id);
       if (ch === "V" || cell === "gate") return this.enterWild(p);
-      if (cell === "shop") return this.shop(p);
+      if (cell === "shop") return this.shopAct(p);
       if (cell === "forge") return this.forgeAct(p);
       if (cell === "gacha") return this.askFortune(p);
       if (cell === "board") return this.revealBoard(p);
@@ -747,8 +753,9 @@ export class World {
       p.fish = null;
       this.toast("走了");
     } else if (p.fish.phase === "fight") {
-      if (p.fish.forge) {
-        if (this.forgeJob && p.id !== this.forgeJob.starter) return;
+      if (p.fish.forge || p.fish.shop) {
+        if (p.fish.forge && this.forgeJob && p.id !== this.forgeJob.starter) return;
+        if (p.fish.shop && this.shopJob && p.id !== this.shopJob.starter) return;
         p.fish.mark += p.fish.dir * dt * 1.15;
         if (p.fish.mark > 1) {
           p.fish.mark = 1;
@@ -758,7 +765,10 @@ export class World {
           p.fish.mark = 0;
           p.fish.dir = 1;
         }
-        if (p.fish.t <= 0) this.finishForge();
+        if (p.fish.t <= 0) {
+          if (p.fish.forge) this.finishForge();
+          else this.finishShop();
+        }
         return;
       }
       p.fish.mark += p.fish.dir * dt * (1.15 + this.skills(p).fish * 0.02);
@@ -782,6 +792,10 @@ export class World {
     if (!p.fish || p.fish.phase !== "fight") return;
     if (p.fish.forge || this.forgeJob) {
       this.yankForge(p);
+      return;
+    }
+    if (p.fish.shop || this.shopJob) {
+      this.yankShop(p);
       return;
     }
     const good = p.fish.mark > 0.38 && p.fish.mark < 0.72;
@@ -1305,18 +1319,147 @@ export class World {
     );
   }
 
-  private shop(p: Actor): void {
-    const stock = shopStock(this.save.day);
-    const ev = todayEvent(this.save.day);
-    const row = stock[Math.floor(this.rand() * Math.min(3, stock.length))];
-    const price = Math.max(1, Math.floor(row.price * (1 - ev.shop)));
-    if (this.save.gold < price) {
+  private ensureStall(): void {
+    if (this.stall?.goods.length) return;
+    const extra = todayPairExtra(this.save.day);
+    this.stall = {
+      goods: pickStallGoods(this.save.day, this.rand),
+      pairId: extra.id,
+      pairMate: extra.mate,
+      pairTaken: false,
+    };
+  }
+
+  private shopPrompt(): string {
+    this.ensureStall();
+    if (!this.stall?.goods.length) return "今日卖完了";
+    if (!this.shopJob) return `看货 · ${this.stall.goods.map((g) => item(g.id).name).join("、")}`;
+    const starter = this.players.get(this.shopJob.starter);
+    const mark = starter?.fish?.mark ?? 0.2;
+    const row = this.stall.goods[this.shopPick(mark)];
+    return row ? `看货 · ${item(row.id).name} · 绿的时候按` : "看货 · 绿的时候按";
+  }
+
+  private shopPick(mark: number): number {
+    const n = this.stall?.goods.length ?? 1;
+    return Math.min(n - 1, Math.max(0, Math.floor(mark * n)));
+  }
+
+  private facingShop(p: Actor): boolean {
+    if (p.zone !== "valley") return false;
+    const f = this.facingTile(p);
+    return this.mapFor(p.zone).cell(f.x, f.y) === "shop";
+  }
+
+  private canShopYank(p: Actor): boolean {
+    if (!this.shopJob || this.away.has(p.id)) return false;
+    if (p.id === this.shopJob.starter) return true;
+    const starter = this.players.get(this.shopJob.starter);
+    return !!starter && !this.away.has(starter.id) && this.near(p, starter) && this.facingShop(p);
+  }
+
+  private shopAct(p: Actor): void {
+    if (this.shopJob) {
+      this.yankShop(p);
+      return;
+    }
+    this.ensureStall();
+    if (!this.stall?.goods.length) {
+      this.toast("今日卖完了");
+      return;
+    }
+    if (this.save.gold < STALL_DEPOSIT) {
+      this.toast("还差定金");
+      return;
+    }
+    this.save.gold -= STALL_DEPOSIT;
+    this.shopJob = { starter: p.id, hits: 0, good: {}, pick: {} };
+    p.fish = { phase: "fight", t: 4, window: 1, mark: 0.2, pull: 1, dir: 1, shop: true };
+    this.toast(`今日摊上：${this.stall.goods.map((g) => item(g.id).name).join("、")}`);
+  }
+
+  private yankShop(p: Actor): void {
+    if (!this.shopJob || !this.canShopYank(p) || !this.stall) return;
+    const starter = this.players.get(this.shopJob.starter);
+    const mark = starter?.fish?.mark ?? p.fish?.mark ?? 0;
+    const good = mark > 0.38 && mark < 0.72;
+    this.shopJob.hits += 1;
+    if (good) {
+      this.shopJob.good[p.id] = (this.shopJob.good[p.id] ?? 0) + 1;
+      this.shopJob.pick[p.id] = this.shopPick(mark);
+    }
+    if (this.shopJob.hits >= 3) this.finishShop();
+  }
+
+  private tickShop(): void {
+    if (!this.shopJob) return;
+    const starter = this.players.get(this.shopJob.starter);
+    if (!starter?.fish?.shop) {
+      this.finishShop();
+      return;
+    }
+    const o = this.other(starter);
+    if (o && !this.away.has(o.id) && this.facingShop(o) && this.near(starter, o)) {
+      o.fish = { ...starter.fish };
+    } else if (o?.fish?.shop) {
+      o.fish = null;
+    }
+  }
+
+  private finishShop(): void {
+    const job = this.shopJob;
+    if (!job) return;
+    this.shopJob = null;
+    const starter = this.players.get(job.starter);
+    for (const p of this.players.values()) {
+      if (p.fish?.shop) p.fish = null;
+    }
+    if (!starter || !this.stall) return;
+    const greens = Object.values(job.good).reduce((s, n) => s + n, 0);
+    if (greens < 1) {
+      this.toast("没看清，定金没了");
+      return;
+    }
+    const idx = job.pick[starter.id] ?? 0;
+    const row = this.stall.goods[idx];
+    if (!row) {
+      this.toast("这件已经被人拿走了");
+      return;
+    }
+    const remain = row.price - STALL_DEPOSIT;
+    if (remain > 0 && this.save.gold < remain) {
       this.toast(`想买${item(row.id).name}，还差金`);
       return;
     }
-    this.save.gold -= price;
-    addToBag(this.save.bag, row.id);
-    this.toast(`${p.name} 买下${item(row.id).name}`);
+    if (remain > 0) this.save.gold -= remain;
+    this.giveShopItem(starter, row.id);
+    this.stall.goods.splice(idx, 1);
+    const partner = this.other(starter);
+    const pairOk =
+      !!partner &&
+      !this.away.has(partner.id) &&
+      this.near(starter, partner) &&
+      this.facingShop(partner) &&
+      (job.good[starter.id] ?? 0) >= 1 &&
+      (job.good[partner.id] ?? 0) >= 1 &&
+      job.pick[starter.id] === job.pick[partner.id] &&
+      !this.stall.pairTaken;
+    if (pairOk && partner) {
+      this.giveShopItem(starter, this.stall.pairId);
+      if (this.stall.pairMate) this.giveShopItem(partner, this.stall.pairMate);
+      this.stall.pairTaken = true;
+      this.toast(`两个人在摊前点了同一件 · ${item(this.stall.pairId).name}`);
+    }
+    this.toast(`${starter.name} 买下${item(row.id).name}`);
+  }
+
+  private giveShopItem(p: Actor, id: string): void {
+    const def = item(id);
+    if (def.kind === "equip") {
+      this.keepGear(p, makeGear(id, 1 + this.save.day, this.power(p).luck, this.rand, def.rarity === "pair"));
+      return;
+    }
+    addToBag(this.save.bag, id);
   }
 
   private askFortune(p: Actor): void {
