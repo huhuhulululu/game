@@ -16,7 +16,7 @@ import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
 import { resolveHelloRoom, roomIsFull, takeRoom } from "../../server/join";
 import { World } from "../sim/world";
-import { buildMap, mineTemplate, TILE, tileCenter, VALLEY } from "../world/maps";
+import { buildMap, mineTemplate, replaceTile, TILE, tileCenter, VALLEY } from "../world/maps";
 import { createAudio } from "./audio";
 import { pickAmbient, tickFeel } from "./feel";
 import { generateWild, WILD_W } from "../world/wild";
@@ -1492,6 +1492,35 @@ describe("living systems", () => {
     p.held = "";
     tap(w, "a");
     assert.ok(w.toasts.some((t) => t.text.includes("放进锅")));
+  });
+
+  it("empty 做 in the wild speaks, and a lone hole says it does not go through", () => {
+    const w = new World("SAY2");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.wildMap = buildMap(generateWild(7), "wild");
+    p.zone = "wild";
+    let grass: { x: number; y: number } | null = null;
+    for (let y = 2; y < w.wildMap.h - 2 && !grass; y++) {
+      for (let x = 2; x < w.wildMap.w - 2 && !grass; x++) {
+        if (w.wildMap.rows[y][x] === "." && w.wildMap.rows[y - 1][x] === ".") grass = { x, y };
+      }
+    }
+    assert.ok(grass);
+    const stand = tileCenter(grass.x, grass.y);
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 0;
+    tap(w, "a");
+    assert.ok(w.toasts.some((t) => t.text.includes("面向树") || t.text.includes("太暗")));
+    for (const h of w.wildMap.find("H")) w.wildMap = replaceTile(w.wildMap, "wild", h.x, h.y, ".");
+    const hole = { x: grass.x, y: grass.y - 1 };
+    w.wildMap = replaceTile(w.wildMap, "wild", hole.x, hole.y, "H");
+    standFacing(p, hole);
+    p.zone = "wild";
+    tap(w, "a");
+    assert.ok(w.toasts.some((t) => t.text.includes("洞") && t.text.includes("通不了")));
   });
 
   it("a solo wild night says the dark bites, and Charlie does not bite the valley gate", () => {

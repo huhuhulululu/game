@@ -118,6 +118,9 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(play, /_paint_fish/);
   assert.match(play, /Look\.MOSS/);
   assert.match(play, /_tiles = \[\]/);
+  assert.match(play, /show_fog/);
+  assert.match(play, /biome/);
+  assert.match(play, /fires/);
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /fishMark|fish_mark/);
   assert.match(actor, /char-%s-fish/);
@@ -127,8 +130,14 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(look, /const MOSS/);
   const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
   assert.match(zone, /ch == "#"/);
+  assert.match(zone, /show_fog/);
+  assert.match(zone, /ch == "F"/);
+  assert.match(zone, /ch == "J"/);
+  const net = readFileSync("godot/scripts/net.gd", "utf8");
+  assert.match(net, /revealed/);
   const world = readFileSync("src/sim/world.ts", "utf8");
   assert.match(world, /先面向要做的事/);
+  assert.match(world, /先面向树、火或能砍的/);
   assert.match(world, /手里没有能切的/);
   assert.doesNotMatch(world, /if \(!p\.input\.held\) return;/);
   const loop = readFileSync("godot/scripts/headless_loop.gd", "utf8");
@@ -143,4 +152,10 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(loop, /if ore_ok:/);
   assert.match(loop, /send_acc/);
   assert.match(loop, /quit\(0\)[\s\S]{0,20}return/);
+  assert.ok(existsSync("godot/scripts/headless_rest_loop.gd"));
+  const rest = readFileSync("godot/scripts/headless_rest_loop.gd", "utf8");
+  assert.match(rest, /WILD_OK/);
+  assert.match(rest, /FORGE_OK/);
+  assert.match(rest, /STALL_OK/);
+  assert.doesNotMatch(rest, /Wilson|Don't Starve|Dont Starve/i);
 });

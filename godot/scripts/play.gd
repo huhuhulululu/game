@@ -35,6 +35,9 @@ var _fish_hud: Panel
 var _fish_ok: ColorRect
 var _fish_mark: ColorRect
 var _fish_pull: ColorRect
+var _atlas: TextureRect
+var _visible: Dictionary = {}
+var _map_w := 0
 
 
 func _ready() -> void:
@@ -146,6 +149,12 @@ func _hud() -> void:
 	_fish_pull.size = Vector2(2, 6)
 	_fish_pull.color = Look.GOLD
 	_fish_hud.add_child(_fish_pull)
+	_atlas = TextureRect.new()
+	_atlas.position = Vector2(16, 290)
+	_atlas.size = Vector2(192, 128)
+	_atlas.visible = false
+	_atlas.texture_filter = TEXTURE_FILTER_NEAREST
+	layer.add_child(_atlas)
 
 
 func _on_pad(e: InputEvent) -> void:
@@ -207,14 +216,14 @@ func _process(_dt: float) -> void:
 
 func _on_snap(s: Dictionary) -> void:
 	var zone := str(s.get("zone", "valley"))
-	_hud_place.text = _place(zone, bool(s.get("rush", false)), int(s.get("floor", 0)))
+	_hud_place.text = _place(zone, bool(s.get("rush", false)), int(s.get("floor", 0)), str(s.get("biome", "")))
 	_hud_room.text = "房间 %s" % str(s.get("room", Net.room))
 	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
 	var weather: Dictionary = s.get("weather", {}) if typeof(s.get("weather", {})) == TYPE_DICTIONARY else {}
-	_hud_ink.text = "%s · %s · %s · 金 %s" % [str(s.get("season", "春")), phase, str(weather.get("name", "")), _ink_n(s.get("gold", 0))]
+	_hud_ink.text = "%s · %s · %s · 金 %s · 饿 %s" % [str(s.get("season", "春")), phase, str(weather.get("name", "")), _ink_n(s.get("gold", 0)), _ink_n(s.get("hunger", 0))]
 	var prompt := str(s.get("prompt", ""))
 	_prompt.text = prompt
-	if prompt == "起竿":
+	if prompt == "起竿" or prompt.find("太暗") >= 0 or prompt.find("咬") >= 0:
 		_prompt.add_theme_color_override("font_color", Color(0.55, 0.22, 0.14))
 	elif prompt.find("绿") >= 0:
 		_prompt.add_theme_color_override("font_color", Look.MOSS)
@@ -240,8 +249,13 @@ func _on_snap(s: Dictionary) -> void:
 		_tiles = rows
 	if zone != _zone:
 		_cam_locked = false
-		_tiles = []
+		if rows.size() == 0:
+			_tiles = []
 	_show_zone(zone, _tiles)
+	if _zone_map.visible:
+		_zone_map.show_fog(s.get("revealed", []), s.get("visible", []), s.get("fires", []))
+	_remember_vis(s)
+	_paint_atlas(s)
 	var you: Dictionary = s.get("youAt", {})
 	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.58, 1.58)
 	if you.size() > 0:
@@ -255,8 +269,10 @@ func _on_snap(s: Dictionary) -> void:
 		else:
 			_cam.position = target
 	# Painting keeps its own dusk. Never purple night.
-	if bool(s.get("night", false)) and zone != "kitchen" and zone != "mine":
-		_world.modulate = Color(0.78, 0.68, 0.52)
+	var night := bool(s.get("night", false))
+	var lit := bool(s.get("lit", true))
+	if night and zone != "kitchen" and zone != "mine":
+		_world.modulate = Color(0.46, 0.38, 0.28) if zone == "wild" and not lit else Color(0.78, 0.68, 0.52)
 	else:
 		_world.modulate = Color(1.0, 1.0, 1.0)
 	_paint_people(s)
@@ -344,7 +360,16 @@ func _paint_foes(raws: Array) -> void:
 		var tex := n.texture
 		if tex:
 			n.scale = Vector2(40.0 / float(tex.get_width()), 40.0 / float(tex.get_height()))
-		n.modulate = Color(1, 1, 1, 1) if float(e.get("flash", 0)) <= 0.0 else Color(1.2, 0.8, 0.7)
+		var hue := str(e.get("hue", ""))
+		var tint := Color(1, 1, 1, 1)
+		if hue.begins_with("#") and hue.length() >= 7:
+			tint = Color.from_string(hue, Color(0.28, 0.24, 0.22))
+		n.modulate = Color(1.2, 0.8, 0.7) if float(e.get("flash", 0)) > 0.0 else tint
+		if _zone == "wild" and _map_w > 0:
+			var key := int(n.position.y / 36.0) * _map_w + int(n.position.x / 36.0)
+			n.visible = _visible.has(key)
+		else:
+			n.visible = true
 
 
 func _ink_n(v: Variant) -> String:
@@ -463,11 +488,69 @@ func _clamp_cam(p: Vector2) -> Vector2:
 	return p
 
 
-func _place(z: String, rush: bool, floor: int) -> String:
+func _remember_vis(s: Dictionary) -> void:
+	_visible.clear()
+	for raw in s.get("visible", []):
+		_visible[int(raw)] = true
+	if _tiles.size() > 0:
+		_map_w = str(_tiles[0]).length()
+
+
+func _paint_atlas(s: Dictionary) -> void:
+	if _atlas == null:
+		return
+	if _zone != "wild" or _tiles.is_empty():
+		_atlas.visible = false
+		return
+	_atlas.visible = true
+	var h := _tiles.size()
+	var w := str(_tiles[0]).length()
+	if w <= 0 or h <= 0:
+		return
+	var seen := {}
+	for raw in s.get("revealed", []):
+		seen[int(raw)] = true
+	var lit := {}
+	for raw in s.get("fires", []):
+		lit[int(raw)] = true
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		var row := str(_tiles[y])
+		for x in mini(w, row.length()):
+			var key := y * w + x
+			if not seen.has(key):
+				img.set_pixel(x, y, Color(0.36, 0.26, 0.16, 0.55))
+				continue
+			var ch := row[x]
+			var c := Color(0.62, 0.52, 0.34, 0.9)
+			if ch == "~" or ch == "D":
+				c = Color(0.22, 0.42, 0.50, 0.95)
+			elif ch == ",":
+				c = Color(0.70, 0.54, 0.32, 0.95)
+			elif ch == "t" or ch == "T":
+				c = Color(0.22, 0.38, 0.24, 0.95)
+			elif ch == "K" or lit.has(key):
+				c = Color(0.86, 0.46, 0.22, 1.0)
+			elif ch == "L":
+				c = Color(0.78, 0.42, 0.18, 1.0)
+			if not _visible.has(key):
+				c.a = 0.55
+			img.set_pixel(x, y, c)
+	var you: Dictionary = s.get("youAt", {})
+	if you.size() > 0:
+		var ux := clampi(int(float(you.get("x", 0)) / 36.0), 0, w - 1)
+		var uy := clampi(int(float(you.get("y", 0)) / 36.0), 0, h - 1)
+		img.set_pixel(ux, uy, Color(0.77, 0.36, 0.15, 1.0))
+	_atlas.texture = ImageTexture.create_from_image(img)
+	_atlas.custom_minimum_size = Vector2(w * 4.0, h * 4.0)
+	_atlas.size = Vector2(w * 4.0, h * 4.0)
+
+
+func _place(z: String, rush: bool, floor: int, biome := "") -> String:
 	if z == "kitchen":
 		return "厨房 · 堂口热" if rush else "厨房"
 	if z == "mine":
 		return "矿 %s层" % str(floor) if floor > 0 else "矿里"
 	if z == "wild":
-		return "荒野"
+		return "荒野 · %s" % biome if biome != "" and biome != "野地" else "荒野"
 	return "山谷"

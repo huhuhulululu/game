@@ -94,6 +94,22 @@ func _on_text(txt: String) -> void:
 	elif t == "snap":
 		var data: Variant = msg.get("snap", {})
 		if typeof(data) == TYPE_DICTIONARY:
-			last_snap = data
+			last_snap = _merge_snap(data)
 			you_id = str(last_snap.get("you", ""))
 			snap_got.emit(last_snap)
+
+
+func _merge_snap(next: Dictionary) -> Dictionary:
+	if bool(next.get("full", true)) or last_snap.is_empty():
+		return next
+	var out: Dictionary = last_snap.duplicate(true)
+	for k in next.keys():
+		out[k] = next[k]
+	if (next.get("tiles", []) as Array).is_empty():
+		out["tiles"] = last_snap.get("tiles", [])
+	if (next.get("revealed", []) as Array).is_empty():
+		out["revealed"] = last_snap.get("revealed", [])
+	if (next.get("fires", []) as Array).is_empty():
+		out["fires"] = last_snap.get("fires", [])
+	out["full"] = false
+	return out

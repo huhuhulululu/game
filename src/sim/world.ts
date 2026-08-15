@@ -1137,7 +1137,12 @@ export class World {
         if (crit) this.toast("并肩一击");
       }
     }
-    if (!hit) return;
+    if (!hit) {
+      if (p.zone === "wild") {
+        this.toast(this.isNight() && !this.isLit(p) ? "太暗了。靠近火" : "先面向树、火或能砍的");
+      }
+      return;
+    }
     this.skills(p).fight += 1;
     const dead = this.enemies.filter((e) => e.hp <= 0);
     this.enemies = this.enemies.filter((e) => e.hp > 0);
@@ -1515,7 +1520,11 @@ export class World {
   }
 
   private yankShop(p: Actor): void {
-    if (!this.shopJob || !this.canShopYank(p) || !this.stall) return;
+    if (!this.shopJob || !this.stall) return;
+    if (!this.canShopYank(p)) {
+      this.toast("也得对着摊");
+      return;
+    }
     const starter = this.players.get(this.shopJob.starter);
     const mark = starter?.fish?.mark ?? p.fish?.mark ?? 0;
     const good = mark > 0.38 && mark < 0.72;
@@ -1662,7 +1671,11 @@ export class World {
   }
 
   private yankForge(p: Actor): void {
-    if (!this.forgeJob || !this.canForgeYank(p)) return;
+    if (!this.forgeJob) return;
+    if (!this.canForgeYank(p)) {
+      this.toast("也得对着砧");
+      return;
+    }
     const starter = this.players.get(this.forgeJob.starter);
     const mark = starter?.fish?.mark ?? p.fish?.mark ?? 0;
     const good = mark > 0.38 && mark < 0.72;
@@ -2412,7 +2425,10 @@ export class World {
 
   private hole(p: Actor): void {
     const holes = this.wildMap?.find("H") ?? [];
-    if (holes.length < 2) return;
+    if (holes.length < 2) {
+      this.toast("这个洞通不了");
+      return;
+    }
     const t = toTile(p.x, p.y);
     const here = holes.find((h) => Math.abs(h.x - t.x) + Math.abs(h.y - t.y) <= 1) ?? holes[0];
     const dest = holes.find((h) => h !== here) ?? holes[0];
