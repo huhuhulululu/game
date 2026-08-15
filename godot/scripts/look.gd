@@ -6,12 +6,16 @@ extends Object
 const INK := Color(0.24, 0.15, 0.09)
 const GOLD := Color(0.78, 0.58, 0.32)
 const PAPER := Color(0.93, 0.86, 0.74)
-const DUSK := Color(1.04, 0.90, 0.76)
-const HAZE := Color(0.72, 0.54, 0.40)
+const DUSK := Color(1.02, 0.97, 0.90)
+const HAZE := Color(0.78, 0.62, 0.46)
 
 
 static func cjk() -> Font:
-	return load("res://fonts/kai.ttf") as Font
+	var base := load("res://fonts/kai.ttf") as Font
+	var extra := load("res://fonts/multiply.ttf") as Font
+	if base and extra:
+		base.fallbacks = [extra]
+	return base
 
 
 static func dusk_mat(fog := 0.08) -> ShaderMaterial:
@@ -20,7 +24,9 @@ static func dusk_mat(fog := 0.08) -> ShaderMaterial:
 	m.set_shader_parameter("dusk", DUSK)
 	m.set_shader_parameter("haze", HAZE)
 	m.set_shader_parameter("fog", fog)
-	m.set_shader_parameter("edge", 0.10)
+	m.set_shader_parameter("edge", 0.11)
+	m.set_shader_parameter("feet", 0.20)
+	m.set_shader_parameter("grade", 0.08)
 	return m
 
 
@@ -35,6 +41,19 @@ static func plaque_box() -> StyleBoxTexture:
 	s.content_margin_top = 12
 	s.content_margin_right = 16
 	s.content_margin_bottom = 12
+	return s
+
+
+static func name_box() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = PAPER
+	s.border_color = Color(0.42, 0.28, 0.16, 0.85)
+	s.set_border_width_all(1)
+	s.set_corner_radius_all(4)
+	s.content_margin_left = 6
+	s.content_margin_right = 6
+	s.content_margin_top = 2
+	s.content_margin_bottom = 2
 	return s
 
 
@@ -93,12 +112,12 @@ static func field(placeholder: String) -> LineEdit:
 
 
 static func shadow_tex() -> Texture2D:
-	var img := Image.create(64, 32, false, Image.FORMAT_RGBA8)
-	for y in 32:
-		for x in 64:
-			var d := Vector2((x - 32) / 32.0, (y - 16) / 12.0).length()
+	var img := Image.create(96, 40, false, Image.FORMAT_RGBA8)
+	for y in 40:
+		for x in 96:
+			var d := Vector2((x - 48) / 46.0, (y - 20) / 14.0).length()
 			var a := clampf(1.0 - d, 0.0, 1.0)
-			img.set_pixel(x, y, Color(0.12, 0.08, 0.05, a * a * 0.62))
+			img.set_pixel(x, y, Color(0.08, 0.05, 0.03, a * a * 0.88))
 	return ImageTexture.create_from_image(img)
 
 
@@ -106,23 +125,24 @@ static func contact(width: float) -> Sprite2D:
 	var s := Sprite2D.new()
 	s.texture = shadow_tex()
 	s.centered = true
-	s.scale = Vector2(width / 56.0, (width * 0.34) / 32.0)
-	s.z_index = -1
+	s.scale = Vector2(width / 72.0, (width * 0.42) / 40.0)
+	s.z_index = 0
 	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	return s
 
 
-static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.08) -> Node2D:
+static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.03) -> Node2D:
 	var n := Node2D.new()
 	n.position = pos
 	n.z_index = z
-	n.y_sort_enabled = true
-	var sh := contact(size.x * 0.72)
-	sh.position = Vector2(size.x * 0.5, size.y * 0.92)
+	n.y_sort_enabled = false
+	var sh := contact(size.x * 0.98)
+	sh.position = Vector2(size.x * 0.50, size.y * 0.90)
 	n.add_child(sh)
 	var s := Sprite2D.new()
 	s.texture = tex
 	s.centered = false
+	s.z_index = 1
 	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	if tex:
 		s.scale = Vector2(size.x / float(tex.get_width()), size.y / float(tex.get_height()))

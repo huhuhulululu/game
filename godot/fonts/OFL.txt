@@ -1,5 +1,6 @@
 Copyright 2021-2025 LXGW (https://github.com/lxgw/LxgwWenKai)
 Copyright 2020 The Klee Project Authors (https://github.com/fontworks-fonts/Klee)
+Copyright 2015-2022 Google Inc. Noto Serif (multiply.ttf is a one-glyph OFL subset for ×)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

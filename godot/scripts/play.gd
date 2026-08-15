@@ -203,16 +203,16 @@ func _on_snap(s: Dictionary) -> void:
 		_tiles = rows
 	_show_zone(zone, _tiles)
 	var you: Dictionary = s.get("youAt", {})
-	if you.size() > 0:
-		_cam.position = Vector2(float(you.get("x", 0)), float(you.get("y", 0)))
 	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.85, 1.85)
-	# Warm lamp-dusk, never purple night.
+	if you.size() > 0:
+		_cam.position = _clamp_cam(Vector2(float(you.get("x", 0)), float(you.get("y", 0))))
+	# One notch of dusk. Let the painting keep its own light. Never purple night.
 	if bool(s.get("night", false)) and zone != "kitchen" and zone != "mine":
-		_world.modulate = Color(0.62, 0.48, 0.34)
+		_world.modulate = Color(0.78, 0.68, 0.52)
 	elif bool(s.get("dusk", false)):
-		_world.modulate = Color(1.02, 0.90, 0.76)
+		_world.modulate = Color(1.0, 1.0, 0.97)
 	else:
-		_world.modulate = Color(1.0, 0.96, 0.88)
+		_world.modulate = Color(1.0, 1.0, 1.0)
 	_paint_people(s)
 	_paint_foes(s.get("enemies", []))
 
@@ -353,6 +353,21 @@ func _take(item_id: String) -> void:
 		_prompt.text = "手里满了"
 		return
 	Net.send_take(item_id)
+
+
+func _clamp_cam(p: Vector2) -> Vector2:
+	var vp := get_viewport_rect().size
+	var half := Vector2(vp.x / (2.0 * _cam.zoom.x), vp.y / (2.0 * _cam.zoom.y))
+	var sz := _valley.size_px() if _zone == "valley" else _zone_map.size_px()
+	if sz.x <= half.x * 2.0:
+		p.x = sz.x * 0.5
+	else:
+		p.x = clampf(p.x, half.x, sz.x - half.x)
+	if sz.y <= half.y * 2.0:
+		p.y = sz.y * 0.5
+	else:
+		p.y = clampf(p.y, half.y, sz.y - half.y)
+	return p
 
 
 func _place(z: String, rush: bool, floor: int) -> String:

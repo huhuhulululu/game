@@ -6,6 +6,12 @@ extends Node2D
 const TILE := 36
 
 var _sig := ""
+var _w := 0
+var _h := 0
+
+
+func size_px() -> Vector2:
+	return Vector2(max(_w, 1) * TILE, max(_h, 1) * TILE)
 
 
 func show_map(zone: String, rows: Array) -> void:
@@ -53,6 +59,8 @@ func _paint(zone: String, rows: PackedStringArray) -> void:
 	var floor := _tex("tex-wood.png") if zone == "kitchen" else _tex("tex-stone.png" if zone == "mine" else "tex-paper.png")
 	var h := rows.size()
 	var w := rows[0].length()
+	_w = w
+	_h = h
 	_floor(floor, w, h)
 	for y in h:
 		for x in w:

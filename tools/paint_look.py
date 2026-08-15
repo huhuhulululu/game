@@ -152,6 +152,47 @@ def cut_prop(im: Image.Image, tol: float = 36.0) -> Image.Image:
     return spr
 
 
+def soften_sit(im: Image.Image, fade: float = 0.30) -> Image.Image:
+    """Fade the feet and kill ink rings. Do not grade dusk again."""
+    buf = np.asarray(im.convert("RGBA"), dtype=np.float32) / 255.0
+    h, _w = buf.shape[:2]
+    a = buf[:, :, 3]
+    ys = np.where(a > 0.08)[0]
+    if len(ys) == 0:
+        return im.convert("RGBA")
+    y0, y1 = int(ys.min()), int(ys.max())
+    span = max(1, y1 - y0)
+    fade_from = y1 - int(span * fade)
+    yy = np.arange(h)[:, None]
+    t = np.clip((y1 - yy) / max(10.0, span * fade), 0, 1)
+    fall = np.where(yy > fade_from, t * t, 1.0)
+    g, r, b = buf[:, :, 1], buf[:, :, 0], buf[:, :, 2]
+    grass = (g > r + 0.03) & (g > b) & (yy > y0 + span * 0.52)
+    waterish = (b > r + 0.04) & (b > g * 0.9) & (yy > y0 + span * 0.50)
+    fall = np.where(grass | waterish, fall * 0.12, fall)
+    buf[:, :, 3] *= fall
+    lum = buf[:, :, :3] @ np.array([0.3, 0.5, 0.2], dtype=np.float32)
+    buf[(lum < 0.04) & (buf[:, :, 3] < 0.75), 3] = 0
+    out = Image.fromarray(np.clip(buf * 255, 0, 255).astype(np.uint8), "RGBA")
+    a = out.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(2.0))
+    out.putalpha(a)
+    return out
+
+
+def finish_sit_props() -> None:
+    for name, fade in (
+        ("prop-cabin.png", 0.28),
+        ("prop-stall.png", 0.26),
+        ("prop-dock.png", 0.34),
+        ("prop-dock-b.png", 0.34),
+        ("prop-anvil.png", 0.22),
+        ("prop-altar.png", 0.22),
+    ):
+        p = ART / name
+        if p.exists():
+            save(soften_sit(Image.open(p), fade), name)
+
+
 def finish_anvil_altar() -> None:
     for dest, src, fade in (
         ("prop-anvil.png", "anvil-ref.png", 0.14),

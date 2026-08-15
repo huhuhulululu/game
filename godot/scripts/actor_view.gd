@@ -16,6 +16,7 @@ var _t := 0.0
 var _sprite: Sprite2D
 var _shadow: Sprite2D
 var _name: Label
+var _name_card: Panel
 var _bar_bg: Panel
 var _bar_ok: ColorRect
 var _bar_mark: ColorRect
@@ -23,20 +24,27 @@ var _bar_mark: ColorRect
 
 func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_LINEAR
-	_shadow = Look.contact(36)
-	_shadow.position = Vector2(0, 4)
+	_shadow = Look.contact(40)
+	_shadow.position = Vector2(0, 6)
 	add_child(_shadow)
 	_sprite = Sprite2D.new()
 	_sprite.centered = true
 	_sprite.offset = Vector2(0, -28)
-	_sprite.material = Look.dusk_mat(0.04)
+	_sprite.material = Look.dusk_mat(0.02)
 	_sprite.texture_filter = TEXTURE_FILTER_LINEAR
 	add_child(_sprite)
-	_name = Look.ink_label("", 13, Look.PAPER)
-	_name.position = Vector2(-36, -78)
+	var layer := CanvasLayer.new()
+	layer.layer = 8
+	add_child(layer)
+	_name_card = Panel.new()
+	_name_card.size = Vector2(44, 26)
+	_name_card.add_theme_stylebox_override("panel", Look.name_box())
+	layer.add_child(_name_card)
+	_name = Look.ink_label("", 18, Look.INK)
+	_name.position = Vector2(4, 2)
+	_name.size = Vector2(36, 22)
 	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name.custom_minimum_size = Vector2(72, 18)
-	add_child(_name)
+	_name_card.add_child(_name)
 	_bars()
 	_apply()
 
@@ -74,7 +82,20 @@ func apply(data: Dictionary, now: float) -> void:
 	_name.text = str(data.get("name", ""))
 	z_index = 20 + int(position.y / 8.0)
 	_t = now
+	_place_name()
 	_apply()
+
+
+func _process(_dt: float) -> void:
+	_place_name()
+
+
+func _place_name() -> void:
+	if _name_card == null:
+		return
+	var p := get_global_transform_with_canvas().origin
+	_name_card.position = Vector2(p.x - 28, p.y - 70)
+	_name_card.visible = _name.text != ""
 
 
 func set_moving(v: bool) -> void:

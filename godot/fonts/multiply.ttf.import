@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://b3k10watqtyco"
-path="res://.godot/imported/kai.ttf-3a80b106672abdc6a806bf3ee50c1e4d.fontdata"
+uid="uid://25fh0y2jp8kf"
+path="res://.godot/imported/multiply.ttf-7510e22b37df6bfec09e334d0f7ec1a1.fontdata"
 
 [deps]
 
-source_file="res://fonts/kai.ttf"
-dest_files=["res://.godot/imported/kai.ttf-3a80b106672abdc6a806bf3ee50c1e4d.fontdata"]
+source_file="res://fonts/multiply.ttf"
+dest_files=["res://.godot/imported/multiply.ttf-7510e22b37df6bfec09e334d0f7ec1a1.fontdata"]
 
 [params]
 
@@ -26,7 +26,7 @@ subpixel_positioning=4
 keep_rounding_remainders=true
 oversampling=0.0
 Fallbacks=null
-fallbacks=["res://fonts/multiply.ttf"]
+fallbacks=[]
 Compress=null
 compress=true
 preload=[]

@@ -40,16 +40,27 @@ func _tex(name: String) -> Texture2D:
 
 
 func _paint() -> void:
+	var sz := size_px()
+	var bed := Polygon2D.new()
+	bed.color = Color(0.36, 0.22, 0.11)
+	bed.polygon = PackedVector2Array([
+		Vector2(-900, -900),
+		Vector2(sz.x + 900, -900),
+		Vector2(sz.x + 900, sz.y + 900),
+		Vector2(-900, sz.y + 900),
+	])
+	bed.z_index = -2
+	add_child(bed)
 	var ground := Sprite2D.new()
 	ground.texture = _tex("ground-valley.png")
 	ground.centered = false
+	ground.position = Vector2(-80, -80)
 	ground.texture_filter = TEXTURE_FILTER_LINEAR
-	var sz := size_px()
 	var tex := ground.texture
 	if tex:
-		ground.scale = Vector2(sz.x / float(tex.get_width()), sz.y / float(tex.get_height()))
+		ground.scale = Vector2((sz.x + 160.0) / float(tex.get_width()), (sz.y + 160.0) / float(tex.get_height()))
 	ground.z_index = 0
-	ground.material = Look.dusk_mat(0.06)
+	ground.material = Look.dusk_mat(0.0)
 	add_child(ground)
 	_houses()
 	_trees()
@@ -57,7 +68,7 @@ func _paint() -> void:
 	_bits()
 
 
-func _prop(name: String, gx: float, gy: float, w: float, h: float, z: int, fog := 0.08) -> void:
+func _prop(name: String, gx: float, gy: float, w: float, h: float, z: int, fog := 0.03) -> void:
 	add_child(Look.hung(_tex(name), Vector2(gx * TILE, gy * TILE), Vector2(w, h), z, fog))
 
 
