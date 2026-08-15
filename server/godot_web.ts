@@ -54,7 +54,7 @@ export function serveGodotWeb(req: IncomingMessage, res: ServerResponse, root = 
   const file = godotFilePath(pathname, root);
   if (!file) return false;
   res.setHeader("Content-Type", mimeFor(file));
-  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
   res.setHeader("Cross-Origin-Resource-Policy", "same-origin");

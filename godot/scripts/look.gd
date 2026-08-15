@@ -1,28 +1,53 @@
 class_name Look
 extends Object
 
-## Shared ink / wood look. No editor-default grey.
+## Warm dusk. Old paper and wood ink. Not DST rings, not system grey.
 
-const INK := Color(0.956, 0.905, 0.823)
-const GOLD := Color(0.89, 0.72, 0.42)
-const NIGHT := Color(0.08, 0.09, 0.07)
-const MEADOW := Color(0.16, 0.2, 0.14)
+const INK := Color(0.24, 0.15, 0.09)
+const GOLD := Color(0.78, 0.58, 0.32)
+const PAPER := Color(0.93, 0.86, 0.74)
+const DUSK := Color(1.04, 0.90, 0.76)
+const HAZE := Color(0.72, 0.54, 0.40)
 
 
 static func cjk() -> Font:
-	return load("res://fonts/cjk.tres") as Font
+	return load("res://fonts/kai.ttf") as Font
 
 
-static func wood_box() -> StyleBoxTexture:
+static func dusk_mat(fog := 0.08) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/dusk.gdshader") as Shader
+	m.set_shader_parameter("dusk", DUSK)
+	m.set_shader_parameter("haze", HAZE)
+	m.set_shader_parameter("fog", fog)
+	m.set_shader_parameter("edge", 0.07)
+	return m
+
+
+static func plaque_box() -> StyleBoxTexture:
 	var s := StyleBoxTexture.new()
-	s.texture = load("res://assets/art/tex-wood.png") as Texture2D
-	s.texture_margin_left = 10
-	s.texture_margin_top = 10
-	s.texture_margin_right = 10
-	s.texture_margin_bottom = 10
-	s.content_margin_left = 18
+	s.texture = load("res://assets/art/tex-plaque.png") as Texture2D
+	s.texture_margin_left = 18
+	s.texture_margin_top = 16
+	s.texture_margin_right = 18
+	s.texture_margin_bottom = 16
+	s.content_margin_left = 16
 	s.content_margin_top = 12
-	s.content_margin_right = 18
+	s.content_margin_right = 16
+	s.content_margin_bottom = 12
+	return s
+
+
+static func paper_box() -> StyleBoxTexture:
+	var s := StyleBoxTexture.new()
+	s.texture = load("res://assets/art/tex-paper.png") as Texture2D
+	s.texture_margin_left = 8
+	s.texture_margin_top = 8
+	s.texture_margin_right = 8
+	s.texture_margin_bottom = 8
+	s.content_margin_left = 16
+	s.content_margin_top = 12
+	s.content_margin_right = 16
 	s.content_margin_bottom = 12
 	return s
 
@@ -45,7 +70,7 @@ static func wood_button(text: String, wide := 220) -> Button:
 	b.add_theme_color_override("font_color", INK)
 	b.add_theme_color_override("font_hover_color", GOLD)
 	b.add_theme_color_override("font_pressed_color", GOLD)
-	var box := wood_box()
+	var box := plaque_box()
 	b.add_theme_stylebox_override("normal", box)
 	b.add_theme_stylebox_override("hover", box)
 	b.add_theme_stylebox_override("pressed", box)
@@ -62,6 +87,45 @@ static func field(placeholder: String) -> LineEdit:
 	e.add_theme_font_size_override("font_size", 18)
 	e.add_theme_color_override("font_color", INK)
 	e.add_theme_color_override("font_placeholder_color", Color(INK, 0.45))
-	e.add_theme_stylebox_override("normal", wood_box())
-	e.add_theme_stylebox_override("focus", wood_box())
+	e.add_theme_stylebox_override("normal", paper_box())
+	e.add_theme_stylebox_override("focus", paper_box())
 	return e
+
+
+static func shadow_tex() -> Texture2D:
+	var img := Image.create(64, 32, false, Image.FORMAT_RGBA8)
+	for y in 32:
+		for x in 64:
+			var d := Vector2((x - 32) / 32.0, (y - 16) / 12.0).length()
+			var a := clampf(1.0 - d, 0.0, 1.0)
+			img.set_pixel(x, y, Color(0.12, 0.08, 0.05, a * a * 0.62))
+	return ImageTexture.create_from_image(img)
+
+
+static func contact(width: float) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.texture = shadow_tex()
+	s.centered = true
+	s.scale = Vector2(width / 56.0, (width * 0.34) / 32.0)
+	s.z_index = -1
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	return s
+
+
+static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.08) -> Node2D:
+	var n := Node2D.new()
+	n.position = pos
+	n.z_index = z
+	n.y_sort_enabled = true
+	var sh := contact(size.x * 0.72)
+	sh.position = Vector2(size.x * 0.5, size.y * 0.92)
+	n.add_child(sh)
+	var s := Sprite2D.new()
+	s.texture = tex
+	s.centered = false
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	if tex:
+		s.scale = Vector2(size.x / float(tex.get_width()), size.y / float(tex.get_height()))
+	s.material = dusk_mat(fog)
+	n.add_child(s)
+	return n

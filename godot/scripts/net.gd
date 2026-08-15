@@ -57,6 +57,10 @@ func send_input(x: float, y: float, action: bool, held: bool, ping: bool) -> voi
 	send({"t": "input", "x": x, "y": y, "action": action, "held": held, "ping": ping})
 
 
+func send_take(item_id: String) -> void:
+	send({"t": "take", "id": item_id})
+
+
 func _process(_dt: float) -> void:
 	socket.poll()
 	var st := socket.get_ready_state()

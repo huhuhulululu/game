@@ -1,42 +1,65 @@
 class_name ActorView
 extends Node2D
 
-## 暖 / 松 use the painted stand-ins. No grey capsule.
+## 暖 / 松 — one pair, one light. Feet on the ground.
 
 var actor_id := ""
 var warm := true
 var facing := 2
 var moving := false
 var ping := 0.0
+var busy := ""
+var fishing := "off"
+var fish_mark := 0.0
+var fish_pull := 0.0
 var _t := 0.0
 var _sprite: Sprite2D
-var _glow: Sprite2D
+var _shadow: Sprite2D
 var _name: Label
+var _bar_bg: Panel
+var _bar_ok: ColorRect
+var _bar_mark: ColorRect
 
 
 func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_LINEAR
-	_glow = Sprite2D.new()
-	var img := Image.create(64, 64, false, Image.FORMAT_RGBA8)
-	for y in 64:
-		for x in 64:
-			var d := Vector2(x - 32, y - 32).length() / 32.0
-			var a := clampf(1.0 - d, 0.0, 1.0)
-			img.set_pixel(x, y, Color(0.956, 0.905, 0.823, a * a))
-	_glow.texture = ImageTexture.create_from_image(img)
-	_glow.modulate = Color(1, 1, 1, 0)
-	_glow.scale = Vector2(1.4, 0.9)
-	add_child(_glow)
+	_shadow = Look.contact(36)
+	_shadow.position = Vector2(0, 4)
+	add_child(_shadow)
 	_sprite = Sprite2D.new()
 	_sprite.centered = true
 	_sprite.offset = Vector2(0, -28)
+	_sprite.material = Look.dusk_mat(0.04)
+	_sprite.texture_filter = TEXTURE_FILTER_LINEAR
 	add_child(_sprite)
-	_name = Look.ink_label("", 13, Color(0.956, 0.905, 0.823))
-	_name.position = Vector2(-28, -78)
+	_name = Look.ink_label("", 13, Look.PAPER)
+	_name.position = Vector2(-36, -78)
 	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name.custom_minimum_size = Vector2(56, 18)
+	_name.custom_minimum_size = Vector2(72, 18)
 	add_child(_name)
+	_bars()
 	_apply()
+
+
+func _bars() -> void:
+	_bar_bg = Panel.new()
+	_bar_bg.size = Vector2(64, 12)
+	_bar_bg.position = Vector2(-32, 10)
+	_bar_bg.add_theme_stylebox_override("panel", Look.paper_box())
+	_bar_bg.visible = false
+	add_child(_bar_bg)
+	_bar_ok = ColorRect.new()
+	_bar_ok.size = Vector2(64 * 0.34, 6)
+	_bar_ok.position = Vector2(-32 + 64 * 0.38, 13)
+	_bar_ok.color = Color(0.42, 0.36, 0.22, 0.9)
+	_bar_ok.visible = false
+	add_child(_bar_ok)
+	_bar_mark = ColorRect.new()
+	_bar_mark.size = Vector2(2, 12)
+	_bar_mark.position = Vector2(-32, 10)
+	_bar_mark.color = Look.INK
+	_bar_mark.visible = false
+	add_child(_bar_mark)
 
 
 func apply(data: Dictionary, now: float) -> void:
@@ -44,6 +67,10 @@ func apply(data: Dictionary, now: float) -> void:
 	facing = int(data.get("facing", 2))
 	warm = str(data.get("side", "left")) != "right"
 	ping = float(data.get("ping", 0))
+	busy = str(data.get("busy", ""))
+	fishing = str(data.get("fishing", "off"))
+	fish_mark = float(data.get("fishMark", 0))
+	fish_pull = float(data.get("fishPull", 0))
 	_name.text = str(data.get("name", ""))
 	z_index = 20 + int(position.y / 8.0)
 	_t = now
@@ -60,8 +87,16 @@ func _tex(path: String) -> Texture2D:
 
 
 func _sheet() -> Texture2D:
-	var step := int(_t / 0.21) % 2 == 0
 	var w := "warm" if warm else "pine"
+	if busy == "fish":
+		return _tex("char-%s-fish.png" % w)
+	if busy == "chop":
+		return _tex("char-%s-chop.png" % w)
+	if busy == "forge":
+		return _tex("char-%s-forge.png" % w)
+	if busy == "sit":
+		return _tex("char-%s-sit.png" % w)
+	var step := int(_t / 0.21) % 2 == 0
 	if facing == 0:
 		if not moving:
 			return _tex("char-%s-back.png" % w)
@@ -81,12 +116,16 @@ func _apply() -> void:
 	_sprite.texture = _sheet()
 	var tex := _sprite.texture
 	if tex:
-		var h := 72.0
+		var h := 48.0
 		var s := h / float(tex.get_height())
 		_sprite.scale = Vector2(s, s)
 	_sprite.flip_h = facing == 3
-	if _glow and ping > 0.0:
-		_glow.modulate.a = minf(0.45, ping * 0.28)
-		_glow.scale = Vector2(0.28 + (1.6 - ping) * 0.08, 0.18 + (1.6 - ping) * 0.05)
-	elif _glow:
-		_glow.modulate.a = 0.0
+	if _shadow:
+		_shadow.modulate.a = 1.0
+	var fight := fishing == "fight"
+	if _bar_bg:
+		_bar_bg.visible = fight
+		_bar_ok.visible = fight
+		_bar_mark.visible = fight
+		if fight:
+			_bar_mark.position.x = -32 + 64.0 * clampf(fish_mark, 0.0, 1.0) - 1.0

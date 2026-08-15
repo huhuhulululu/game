@@ -1,14 +1,22 @@
 extends Node2D
 
-## Valley, two painted people, stick / 做 / 喊. Authority stays on the server.
+## Valley / mine / kitchen. Authority stays on the server.
 
 var _world: Node2D
+var _valley: ValleyMap
+var _zone_map: ZoneMap
 var _actors: Dictionary = {}
+var _foes: Array[Node2D] = []
 var _cam: Camera2D
 var _hud_place: Label
 var _hud_room: Label
 var _hud_ink: Label
+var _hud_held: Label
+var _hud_pot: Label
 var _prompt: Label
+var _toasts: VBoxContainer
+var _bag: HBoxContainer
+var _orders: VBoxContainer
 var _stick_v := Vector2.ZERO
 var _act := false
 var _held := false
@@ -16,6 +24,9 @@ var _ping := false
 var _stick_down := false
 var _stick_origin := Vector2.ZERO
 var _last_pos: Dictionary = {}
+var _tiles: Array = []
+var _zone := "valley"
+var _you_held := ""
 
 
 func _ready() -> void:
@@ -23,8 +34,11 @@ func _ready() -> void:
 	_world = Node2D.new()
 	_world.y_sort_enabled = true
 	add_child(_world)
-	var valley := ValleyMap.new()
-	_world.add_child(valley)
+	_valley = ValleyMap.new()
+	_world.add_child(_valley)
+	_zone_map = ZoneMap.new()
+	_zone_map.visible = false
+	_world.add_child(_zone_map)
 	_cam = Camera2D.new()
 	_cam.zoom = Vector2(1.85, 1.85)
 	_cam.position_smoothing_enabled = true
@@ -43,24 +57,50 @@ func _hud() -> void:
 	add_child(layer)
 	var card := Panel.new()
 	card.position = Vector2(16, 16)
-	card.size = Vector2(280, 92)
-	card.add_theme_stylebox_override("panel", Look.wood_box())
+	card.size = Vector2(320, 128)
+	card.add_theme_stylebox_override("panel", Look.plaque_box())
 	layer.add_child(card)
 	_hud_place = Look.ink_label("山谷", 22)
-	_hud_place.position = Vector2(16, 10)
+	_hud_place.position = Vector2(16, 8)
 	card.add_child(_hud_place)
 	_hud_room = Look.ink_label("", 13, Look.GOLD)
-	_hud_room.position = Vector2(150, 16)
+	_hud_room.position = Vector2(168, 14)
 	card.add_child(_hud_room)
 	_hud_ink = Look.ink_label("", 13)
-	_hud_ink.position = Vector2(16, 52)
-	_hud_ink.size = Vector2(248, 28)
+	_hud_ink.position = Vector2(16, 42)
+	_hud_ink.size = Vector2(288, 22)
 	card.add_child(_hud_ink)
-	_prompt = Look.ink_label("", 16)
-	_prompt.position = Vector2(400, 640)
-	_prompt.size = Vector2(480, 32)
+	_hud_held = Look.ink_label("手里空着", 14, Look.GOLD)
+	_hud_held.position = Vector2(16, 66)
+	_hud_held.size = Vector2(288, 22)
+	card.add_child(_hud_held)
+	_hud_pot = Look.ink_label("", 13)
+	_hud_pot.position = Vector2(16, 90)
+	_hud_pot.size = Vector2(288, 22)
+	card.add_child(_hud_pot)
+	_bag = HBoxContainer.new()
+	_bag.position = Vector2(16, 152)
+	_bag.add_theme_constant_override("separation", 8)
+	layer.add_child(_bag)
+	_toasts = VBoxContainer.new()
+	_toasts.position = Vector2(900, 16)
+	_toasts.size = Vector2(360, 220)
+	_toasts.add_theme_constant_override("separation", 6)
+	layer.add_child(_toasts)
+	_orders = VBoxContainer.new()
+	_orders.position = Vector2(900, 250)
+	_orders.size = Vector2(360, 160)
+	layer.add_child(_orders)
+	var plaque := Panel.new()
+	plaque.position = Vector2(360, 620)
+	plaque.size = Vector2(560, 44)
+	plaque.add_theme_stylebox_override("panel", Look.plaque_box())
+	layer.add_child(plaque)
+	_prompt = Look.ink_label("", 18)
+	_prompt.position = Vector2(12, 8)
+	_prompt.size = Vector2(536, 28)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	layer.add_child(_prompt)
+	plaque.add_child(_prompt)
 	var act := Look.wood_button("做", 88)
 	act.position = Vector2(1160, 600)
 	act.button_down.connect(func() -> void: _act = true; _held = true)
@@ -74,7 +114,7 @@ func _hud() -> void:
 	pad.position = Vector2(36, 560)
 	pad.size = Vector2(120, 120)
 	pad.modulate = Color(1, 1, 1, 0.55)
-	pad.add_theme_stylebox_override("panel", Look.wood_box())
+	pad.add_theme_stylebox_override("panel", Look.plaque_box())
 	pad.gui_input.connect(_on_pad)
 	layer.add_child(pad)
 
@@ -137,15 +177,81 @@ func _process(_dt: float) -> void:
 
 
 func _on_snap(s: Dictionary) -> void:
-	_hud_place.text = _place(str(s.get("zone", "valley")), bool(s.get("rush", false)))
+	var zone := str(s.get("zone", "valley"))
+	_hud_place.text = _place(zone, bool(s.get("rush", false)), int(s.get("floor", 0)))
 	_hud_room.text = "房间 %s" % str(s.get("room", Net.room))
 	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
-	_hud_ink.text = "%s · %s · %s" % [str(s.get("season", "春")), phase, str((s.get("weather", {}) as Dictionary).get("name", ""))]
+	var weather: Dictionary = s.get("weather", {}) if typeof(s.get("weather", {})) == TYPE_DICTIONARY else {}
+	_hud_ink.text = "%s · %s · %s · 金 %s" % [str(s.get("season", "春")), phase, str(weather.get("name", "")), str(s.get("gold", 0))]
 	_prompt.text = str(s.get("prompt", ""))
+	var you_held := _you_held_name(s)
+	_you_held = _you_held_id(s)
+	_hud_held.text = "手里 · %s" % you_held if you_held != "" else "手里空着"
+	var pot: Array = s.get("pot", [])
+	var ready := str(s.get("potReady", ""))
+	if ready != "":
+		_hud_pot.text = "锅 · %s 好了" % ready
+	elif pot.size() > 0:
+		_hud_pot.text = "锅 · %s" % "、".join(pot)
+	else:
+		_hud_pot.text = ""
+	_paint_toasts(s.get("toasts", []))
+	_paint_bag(s.get("bag", []))
+	_paint_orders(s.get("orders", []))
+	var rows: Array = s.get("tiles", [])
+	if rows.size() > 0:
+		_tiles = rows
+	_show_zone(zone, _tiles)
 	var you: Dictionary = s.get("youAt", {})
 	if you.size() > 0:
 		_cam.position = Vector2(float(you.get("x", 0)), float(you.get("y", 0)))
-	_world.modulate = Color(0.55, 0.58, 0.7) if bool(s.get("night", false)) else Color.WHITE
+	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.85, 1.85)
+	# Warm lamp-dusk, never purple night.
+	if bool(s.get("night", false)) and zone != "kitchen" and zone != "mine":
+		_world.modulate = Color(0.62, 0.48, 0.34)
+	elif bool(s.get("dusk", false)):
+		_world.modulate = Color(1.02, 0.90, 0.76)
+	else:
+		_world.modulate = Color(1.0, 0.96, 0.88)
+	_paint_people(s)
+	_paint_foes(s.get("enemies", []))
+
+
+func _you_held_name(s: Dictionary) -> String:
+	var me := _me(s)
+	if me.is_empty():
+		return ""
+	return str(me.get("heldName", ""))
+
+
+func _you_held_id(s: Dictionary) -> String:
+	var me := _me(s)
+	if me.is_empty():
+		return ""
+	return str(me.get("held", "")).split(":")[0]
+
+
+func _me(s: Dictionary) -> Dictionary:
+	var you := str(s.get("you", Net.you_id))
+	for raw in s.get("actors", []):
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var a: Dictionary = raw
+		if str(a.get("id", "")) == you:
+			return a
+	return {}
+
+
+func _show_zone(zone: String, rows: Array) -> void:
+	_zone = zone
+	var indoor := zone == "mine" or zone == "kitchen" or zone == "wild"
+	_valley.visible = zone == "valley"
+	_zone_map.visible = indoor
+	if indoor and rows.size() > 0:
+		_zone_map.show_map(zone, rows)
+
+
+func _paint_people(s: Dictionary) -> void:
 	var seen := {}
 	for raw in s.get("actors", []):
 		if typeof(raw) != TYPE_DICTIONARY:
@@ -170,11 +276,90 @@ func _on_snap(s: Dictionary) -> void:
 			_actors.erase(id)
 
 
-func _place(z: String, rush: bool) -> String:
+func _paint_foes(raws: Array) -> void:
+	while _foes.size() > raws.size():
+		var old: Node2D = _foes.pop_back()
+		old.queue_free()
+	while _foes.size() < raws.size():
+		var n := Sprite2D.new()
+		n.texture = load("res://assets/art/prop-beast.png") as Texture2D
+		n.centered = true
+		n.texture_filter = TEXTURE_FILTER_LINEAR
+		n.material = Look.dusk_mat(0.08)
+		_world.add_child(n)
+		_foes.append(n)
+	for i in raws.size():
+		if typeof(raws[i]) != TYPE_DICTIONARY:
+			continue
+		var e: Dictionary = raws[i]
+		var n: Sprite2D = _foes[i]
+		n.position = Vector2(float(e.get("x", 0)), float(e.get("y", 0)))
+		n.z_index = 18 + int(n.position.y / 8.0)
+		var tex := n.texture
+		if tex:
+			n.scale = Vector2(40.0 / float(tex.get_width()), 40.0 / float(tex.get_height()))
+		n.modulate = Color(1, 1, 1, 1) if float(e.get("flash", 0)) <= 0.0 else Color(1.2, 0.8, 0.7)
+
+
+func _paint_toasts(raws: Array) -> void:
+	for child in _toasts.get_children():
+		child.queue_free()
+	var n := 0
+	for raw in raws:
+		if n >= 4:
+			break
+		var line := Look.ink_label(str(raw), 14)
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		line.custom_minimum_size = Vector2(340, 0)
+		var card := Panel.new()
+		card.custom_minimum_size = Vector2(360, 36)
+		card.add_theme_stylebox_override("panel", Look.plaque_box())
+		card.add_child(line)
+		line.position = Vector2(12, 8)
+		line.size = Vector2(336, 40)
+		_toasts.add_child(card)
+		n += 1
+
+
+func _paint_bag(raws: Array) -> void:
+	for child in _bag.get_children():
+		child.queue_free()
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		var id := str(row.get("id", ""))
+		var label := "%s×%s" % [str(row.get("name", id)), str(row.get("n", 1))]
+		var b := Look.wood_button(label, 108)
+		b.custom_minimum_size = Vector2(108, 36)
+		b.add_theme_font_size_override("font_size", 14)
+		b.pressed.connect(func() -> void: _take(id))
+		_bag.add_child(b)
+
+
+func _paint_orders(raws: Array) -> void:
+	for child in _orders.get_children():
+		child.queue_free()
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var o: Dictionary = raw
+		var line := Look.ink_label("%s · %s" % [str(o.get("recipe", "")), str(o.get("name", ""))], 14, Look.GOLD)
+		_orders.add_child(line)
+
+
+func _take(item_id: String) -> void:
+	if _you_held != "":
+		_prompt.text = "手里满了"
+		return
+	Net.send_take(item_id)
+
+
+func _place(z: String, rush: bool, floor: int) -> String:
 	if z == "kitchen":
 		return "厨房 · 堂口热" if rush else "厨房"
 	if z == "mine":
-		return "矿里"
+		return "矿 %s层" % str(floor) if floor > 0 else "矿里"
 	if z == "wild":
 		return "荒野"
 	return "山谷"

@@ -30,3 +30,41 @@ test("Godot HTML5 export is what phones open", () => {
   assert.ok(existsSync("godot/export/web/index.pck"));
   assert.ok(existsSync("godot/export/web/index.js"));
 });
+
+test("Valley look is one dusk illustration, not DST stickers", () => {
+  assert.ok(existsSync("godot/fonts/kai.ttf"));
+  assert.ok(existsSync("godot/assets/art/cover-valley.png"));
+  assert.ok(existsSync("godot/assets/art/ground-valley.png"));
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /kai\.ttf/);
+  assert.match(look, /tex-plaque/);
+  assert.doesNotMatch(look, /SystemFont/);
+  const boot = readFileSync("godot/scripts/boot.gd", "utf8");
+  assert.match(boot, /cover-valley/);
+  assert.doesNotMatch(boot, /prop-cabin|prop-inn|Wanderer/);
+  const room = readFileSync("godot/scripts/room.gd", "utf8");
+  assert.match(room, /cover-valley/);
+  assert.doesNotMatch(room, /char-warm|char-pine|Wanderer/);
+  const valley = readFileSync("godot/scripts/valley_map.gd", "utf8");
+  assert.match(valley, /ground-valley/);
+  assert.doesNotMatch(valley, /_tile\(/);
+  const scripts = ["boot.gd", "room.gd", "play.gd", "look.gd", "valley_map.gd", "actor_view.gd"]
+    .map((n) => readFileSync(`godot/scripts/${n}`, "utf8"))
+    .join("\n");
+  assert.doesNotMatch(scripts, /Wanderer|Wilson|Don't Starve|Dont Starve/i);
+});
+
+test("Godot client plays fish, mine and kitchen from the same snap", () => {
+  assert.ok(existsSync("godot/scripts/zone_map.gd"));
+  assert.ok(existsSync("godot/scripts/headless_loop.gd"));
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /toasts/);
+  assert.match(play, /send_take/);
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /fishMark|fish_mark/);
+  assert.match(actor, /char-%s-fish/);
+  const loop = readFileSync("godot/scripts/headless_loop.gd", "utf8");
+  assert.match(loop, /FISH_OK/);
+  assert.match(loop, /ORE_OK/);
+  assert.match(loop, /PLATE_OK/);
+});
