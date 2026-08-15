@@ -138,6 +138,10 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(valley, /prop-cover-tree/);
   assert.match(valley, /prop-cover-lamp/);
   assert.match(valley, /prop-cover-shore/);
+  assert.match(valley, /6\.35, 5\.15, 176, 236/);
+  assert.match(valley, /12\.15, 3\.55, 196, 252/);
+  assert.match(valley, /10\.55, 7\.20, 168, 228/);
+  assert.match(valley, /8\.15, 7\.35, 52, 68/);
   assert.doesNotMatch(valley, /prop-mine\.png/);
   assert.doesNotMatch(valley, /prop-stall\.png/);
   assert.doesNotMatch(valley, /prop-anvil\.png/);
@@ -165,6 +169,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(unify, /918, 298, 972, 372/);
   assert.match(unify, /1008, 548, 1148, 668/);
   assert.match(unify, /fade_bank/);
+  assert.match(unify, /cut_house/);
   assert.doesNotMatch(unify, /Wilson|Don't Starve|Dont Starve/i);
   assert.ok(existsSync("godot/assets/art/prop-cover-tree.png"));
   assert.ok(existsSync("godot/assets/art/prop-cover-tree-b.png"));

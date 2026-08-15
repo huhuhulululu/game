@@ -9,7 +9,7 @@
 - **主光：** 西 / 左。太阳在封面左脊。高光在物的左侧，脚影偏东 / 右。`Look.SHADOW_EAST`。不要顶光、不要第二轮太阳。
 - **描边：** 无硬墨线。软边插画。形靠色和光，不靠黑圈。禁止饥荒笔触、禁止像素描边。
 - **脚影：** 同一套软椭圆接地影，偏东。人、屋同一规则。不要每件道具自带另一种影子。
-- **禁止混包：** 人和屋和地来自封面同一支笔、同一套比例。玩区屋只用 `prop-hut` / `prop-lodge`（封面那两座，经 `unify_dusk` 从封面裁下）。谷里的树、灯、岸也只从同一张封面裁：`prop-cover-tree` / `prop-cover-lamp` / `prop-cover-shore`。不要 Wanderer 客栈、不要 `prop-pine`、不要 `prop-tree-gold`、不要红顶像素屋、不要另一套小人、不要像素球树。
+- **禁止混包：** 人和屋和地来自封面同一支笔、同一套比例。玩区屋只用 `prop-hut` / `prop-lodge`（封面那两座，经 `unify_dusk` 的 `cut_house` 从封面裁到形，脚吃进地，不要方盒子）。谷里的树、灯、岸也只从同一张封面裁：`prop-cover-tree` / `prop-cover-lamp` / `prop-cover-shore`。进谷镜头里要看得见树。不要 Wanderer 客栈、不要 `prop-pine`、不要 `prop-tree-gold`、不要红顶像素屋、不要另一套小人、不要像素球树。
 
 ## 这一套是什么
 

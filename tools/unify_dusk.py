@@ -137,14 +137,35 @@ def trim_alpha(im: Image.Image, t: int = 10) -> Image.Image:
     return im.crop((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
 
 
+def cut_house(im: Image.Image, tol: float = 38.0, sit: float = 0.36) -> Image.Image:
+    # Cut to the roof. Eat the cover floor so the play sheet is not a box.
+    look = _look()
+    cut = eat_corners(im.convert("RGBA"), tol)
+    buf = np.asarray(cut, dtype=np.float32)
+    h, _w = buf.shape[:2]
+    rgb = buf[:, :, :3]
+    a = buf[:, :, 3]
+    lum = rgb @ np.array([0.30, 0.50, 0.20], dtype=np.float32)
+    r = rgb[:, :, 0]
+    g = rgb[:, :, 1]
+    glow = (r > 150.0) & (r > g + 16.0) & (lum > 88.0)
+    yy = np.arange(h, dtype=np.float32)[:, None]
+    floor = (yy > h * 0.58) & (a > 6.0) & (~glow) & (lum < 100.0)
+    t = np.clip((h - yy) / max(12.0, h * 0.42), 0.0, 1.0)
+    buf[:, :, 3] = np.where(floor, a * (t * t), a)
+    cut = Image.fromarray(np.clip(buf, 0, 255).astype(np.uint8), "RGBA")
+    cut = look.soften_sit(cut, sit)
+    cut = fade_edges(cut, 0.08)
+    return trim_alpha(cut)
+
+
 def sit_cover_houses() -> None:
     # Read the cover. Does not touch the cover.
     cover = Image.open(ART / "cover-valley.png").convert("RGBA")
-    look = _look()
-    hut = look.soften_sit(eat_corners(cover.crop(HUT_BOX)), 0.28)
+    hut = cut_house(cover.crop(HUT_BOX), 36.0, 0.36)
     hut.save(ART / "prop-hut.png")
     print("wrote prop-hut.png from cover hut", hut.size)
-    lodge = look.soften_sit(eat_corners(cover.crop(LODGE_BOX)), 0.26)
+    lodge = cut_house(cover.crop(LODGE_BOX), 38.0, 0.38)
     lodge.save(ART / "prop-lodge.png")
     print("wrote prop-lodge.png from cover lodge", lodge.size)
     raw = (ART / "prop-lodge.png").read_bytes()
@@ -156,7 +177,7 @@ def sit_cover_grove() -> None:
     # Trees, lamp, shore from the same cover. Does not touch the cover.
     cover = Image.open(ART / "cover-valley.png").convert("RGBA")
     look = _look()
-    willow = trim_alpha(look.soften_sit(fade_edges(eat_sky(cover.crop(WILLOW_BOX), 16.0), 0.12), 0.16))
+    willow = trim_alpha(look.soften_sit(fade_edges(eat_sky(cover.crop(WILLOW_BOX), 16.0), 0.08), 0.12))
     willow.save(ART / "prop-cover-tree.png")
     print("wrote prop-cover-tree.png from cover willow", willow.size)
     # Ridge canopy is gold-lit. Do not flood-eat the sky or the crown goes with it.

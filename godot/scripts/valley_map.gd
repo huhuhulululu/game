@@ -154,19 +154,17 @@ func _hang(name: String, gx: float, gy: float, w: float, h: float, z: int, fog :
 
 
 func _ridge() -> void:
-	# Cover trees from the same painting. Few and large. No pixel balls.
-	_prop("prop-cover-tree.png", 0.35, 1.55, 148, 208, 6, 0.04, 0.94)
-	_prop("prop-cover-tree.png", 1.85, 3.45, 142, 198, 7, 0.03, 0.94)
-	_prop("prop-cover-tree-b.png", 21.55, 2.55, 158, 196, 7, 0.03, 0.93)
-	_prop("prop-cover-tree.png", 22.60, 1.15, 136, 188, 6, 0.04, 0.94)
+	# Cover trees in the enter frame: behind 暖, left of the lodge, on the creek.
+	_prop("prop-cover-tree.png", 6.35, 5.15, 176, 236, 7, 0.03, 0.94)
+	_prop("prop-cover-tree.png", 12.15, 3.55, 196, 252, 7, 0.03, 0.94)
+	_prop("prop-cover-tree.png", 10.55, 7.20, 168, 228, 9, 0.03, 0.94)
 
 
 func _shore() -> void:
-	# Cover bank on the land lip. Not water stamps on the creek sheet.
-	_prop("prop-cover-verge.png", 8.80, _bend(8.80, "creek") - 1.58, 88, 40, 3, 0.03, 0.88)
-	_prop("prop-cover-shore.png", 22.40, _bend(22.40, "creek") - 1.62, 80, 42, 4, 0.03, 0.90)
-	_prop("prop-cover-verge.png", 14.40, _bend(14.40, "path") - 0.22, 96, 44, 3, 0.03, 0.88)
-	_prop("prop-cover-verge.png", 21.10, _bend(21.10, "path") - 0.18, 90, 42, 3, 0.03, 0.88)
+	# Cover bank in the enter frame. Land lip, not water stamps.
+	_prop("prop-cover-verge.png", 9.60, _bend(9.60, "creek") - 1.70, 130, 58, 4, 0.03, 0.88)
+	_prop("prop-cover-shore.png", 13.20, _bend(13.20, "creek") - 1.65, 120, 56, 4, 0.03, 0.90)
+	_prop("prop-cover-verge.png", 15.40, _bend(15.40, "path") - 0.20, 110, 50, 3, 0.03, 0.88)
 
 
 func _docks() -> void:
@@ -176,6 +174,6 @@ func _docks() -> void:
 
 
 func _bits() -> void:
-	# Cover lamps on the two cover roofs. No stall, no anvil.
-	_hang("prop-cover-lamp.png", 6.82, 6.52, 38, 50, 11, 0.02)
-	_hang("prop-cover-lamp.png", 17.18, 5.12, 42, 54, 11, 0.02)
+	# Cover lamps in the enter frame. No stall, no anvil.
+	_hang("prop-cover-lamp.png", 8.15, 7.35, 52, 68, 12, 0.02)
+	_hang("prop-cover-lamp.png", 16.85, 5.05, 58, 76, 12, 0.02)
