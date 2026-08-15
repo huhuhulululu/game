@@ -1,6 +1,6 @@
 import type { ActorSnap, EnemySnap } from "../sim/net";
 import { TILE } from "../world/maps";
-import { blitFit, blitStand, blitWrap } from "./art";
+import { blitFit, blitStand, blitWrap, blitWrapZoom } from "./art";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -155,7 +155,34 @@ function tuft(g: Ctx, x: number, y: number, s: number, c: string): void {
 export function drawMeadow(g: Ctx, x: number, y: number, w: number, h: number): boolean {
   g.imageSmoothingEnabled = true;
   if ("imageSmoothingQuality" in g) g.imageSmoothingQuality = "high";
-  return blitWrap(g, "grass", x, y, w, h);
+  const base = blitWrapZoom(g, "grass", x, y, w, h, 2.55);
+  if (!base) return false;
+  g.save();
+  g.globalAlpha = 0.3;
+  g.translate(x + w, y);
+  g.scale(-1, 1);
+  blitWrapZoom(g, "grass", 0, 0, w, h, 1.62, 74, 51);
+  g.restore();
+  g.save();
+  g.globalAlpha = 0.16;
+  blitWrapZoom(g, "grass", x, y, w, h, 3.1, 118, 86);
+  g.restore();
+  const step = 47;
+  const x0 = Math.floor(x / step) * step;
+  const y0 = Math.floor(y / step) * step;
+  for (let py = y0; py < y + h; py += step) {
+    for (let px = x0; px < x + w; px += step) {
+      const n = hash(px, py);
+      if ((n + hash(py, px + 3)) % 1000 < 560) continue;
+      const ox = px + (n % 23) - 11;
+      const oy = py + (hash(py, px) % 21) - 10;
+      if (!blitFit(g, "tuft", ox - 8, oy - 6, 15 + (n % 9), 12 + (n % 6))) {
+        if (n > 880) oval(g, ox + 8, oy + 6, 2, 2, "#c45c26");
+        else tuft(g, ox, oy, 7 + (n % 5), "#2f5a38");
+      }
+    }
+  }
+  return true;
 }
 
 function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number, skipGrass = false, skipPath = false): void {
@@ -282,9 +309,23 @@ function water(g: Ctx, x: number, y: number, now: number): void {
   oval(g, x + 18, y + 17, 13, 6, `rgba(190,214,220,${pulse})`);
 }
 
+export function dockSheet(x: number, y: number): string {
+  void y;
+  return Math.floor(x / TILE) % 2 === 0 ? "dock" : "dockB";
+}
+
 function dock(g: Ctx, x: number, y: number, skipWater = false): void {
   if (!skipWater) water(g, x, y, 0);
-  if (blitFit(g, "dock", x - 10, y - 14, TILE + 20, TILE + 18)) return;
+  const n = hash(x, y);
+  const name = dockSheet(x, y);
+  const grow = 0.9 + (n % 14) / 80;
+  oval(g, x + 18, y + 30, 14 * grow, 4, "rgba(20,16,10,0.22)");
+  g.save();
+  g.translate(x + 18, y + 28);
+  if (n % 2 === 0) g.scale(-1, 1);
+  const painted = blitFit(g, name, -30 * grow, -34 * grow, 60 * grow, 48 * grow);
+  g.restore();
+  if (painted) return;
   px(g, x, y + 12, TILE, 16, "#6a4a28");
   g.strokeStyle = "#8a6a40";
   g.lineWidth = 2;
@@ -493,7 +534,7 @@ function pantry(g: Ctx, x: number, y: number, ch: string): void {
 }
 
 function cut(g: Ctx, x: number, y: number): void {
-  if (blitFit(g, "cut", x - 6, y - 6, 48, 44)) return;
+  if (blitFit(g, "cut", x - 10, y - 12, 56, 52)) return;
   oval(g, x + 18, y + 22, 14, 7, "#6a4a28");
   oval(g, x + 18, y + 20, 13, 6, "#c4a070");
   px(g, x + 20, y + 10, 10, 3, "#8a8480");
@@ -508,6 +549,8 @@ function pass(g: Ctx, x: number, y: number): void {
 }
 
 function trash(g: Ctx, x: number, y: number): void {
+  oval(g, x + 18, y + 30, 10, 4, "rgba(20,16,10,0.28)");
+  if (blitFit(g, "trash", x - 10, y - 20, 56, 58)) return;
   oval(g, x + 18, y + 28, 8, 3, "#2a1810");
   px(g, x + 10, y + 14, 16, 14, "#3a2020");
   px(g, x + 8, y + 12, 20, 4, "#5a3030");
@@ -539,6 +582,8 @@ function hill(g: Ctx, x: number, y: number): void {
 }
 
 function rock(g: Ctx, x: number, y: number): void {
+  oval(g, x + 18, y + 28, 12, 4, "rgba(20,16,10,0.26)");
+  if (blitFit(g, "rock", x - 12, y - 14, 60, 52)) return;
   oval(g, x + 18, y + 22, 11, 8, "#5a5248");
   oval(g, x + 16, y + 16, 7, 5, "#6a6460");
 }
@@ -708,7 +753,7 @@ function actorSheets(warm: boolean, facing: number, moving: boolean, now: number
   if (busy === "fish") return warm ? ["warmFish", "warmSide", "warm"] : ["pineFish", "pineSide", "pineChar"];
   if (busy === "forge") return warm ? ["warmForge", "warm"] : ["pineForge", "pineChar"];
   if (busy === "chop") return warm ? ["warmChop", "warm"] : ["pineChop", "pineChar"];
-  const step = Math.floor(now / 170) % 2 === 0;
+  const step = Math.floor(now / 210) % 2 === 0;
   if (facing === 0) {
     const idle = warm ? "warmBack" : "pineBack";
     if (!moving) return [idle];
@@ -999,6 +1044,31 @@ export function houseClusters(rows: string[], zone: string): HouseCluster[] {
   return out;
 }
 
+function drawSmoke(g: Ctx, x: number, y: number, now: number): void {
+  for (let i = 0; i < 6; i++) {
+    const t = (now / 560 + i * 0.17) % 1;
+    const sx = x + Math.sin(now / 280 + i * 1.3) * (3 + t * 6);
+    const sy = y - t * 40;
+    oval(g, sx, sy, 3.6 + t * 8, 3 + t * 7, `rgba(214,206,196,${0.3 * (1 - t)})`);
+  }
+}
+
+function drawDoorGlow(g: Ctx, dx: number, dy: number, now: number): void {
+  const glow = 0.2 + Math.sin(now / 220) * 0.08;
+  g.save();
+  g.globalAlpha = glow;
+  g.fillStyle = "#ffc46e";
+  g.beginPath();
+  g.moveTo(dx + 13, dy + 12);
+  g.lineTo(dx + 23, dy + 12);
+  g.lineTo(dx + 29, dy + 34);
+  g.lineTo(dx + 7, dy + 34);
+  g.closePath();
+  g.fill();
+  g.restore();
+  oval(g, dx + 18, dy + 22, 5, 7, `rgba(255,196,110,${0.28 + Math.sin(now / 220) * 0.1})`);
+}
+
 export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
   const x = c.x * TILE;
   const y = c.y * TILE;
@@ -1011,27 +1081,32 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
     (c.kind === "cabin" && blitFit(g, "cabin", x - 18, y - 56, boxW, boxH)) ||
     (c.kind === "inn" && blitFit(g, "inn", x - 18, y - 56, boxW, boxH)) ||
     (c.kind === "mine" && blitFit(g, "mine", x - 14, y - 28, w + 28, h + 40));
-  if (painted) return;
-  if (c.kind === "mine") {
-    px(g, x + 6, y + 10, w - 12, h - 10, "#1a1814");
-    oval(g, x + w / 2, y + h * 0.55, w * 0.32, h * 0.28, "#0e0c0a");
-    px(g, x + 8, y + 8, 6, h - 12, "#6a5a44");
-    px(g, x + w - 14, y + 8, 6, h - 12, "#6a5a44");
-    return;
+  if (!painted) {
+    if (c.kind === "mine") {
+      px(g, x + 6, y + 10, w - 12, h - 10, "#1a1814");
+      oval(g, x + w / 2, y + h * 0.55, w * 0.32, h * 0.28, "#0e0c0a");
+      px(g, x + 8, y + 8, 6, h - 12, "#6a5a44");
+      px(g, x + w - 14, y + 8, 6, h - 12, "#6a5a44");
+    } else {
+      const inn = c.kind === "inn";
+      px(g, x + 2, y + 22, w - 4, h - 18, "#c4a070");
+      tri(g, x + w / 2, y - 10, x - 6, y + 24, x + w + 6, y + 24, inn ? "#8a3a20" : "#c45c26");
+      tri(g, x + w / 2, y - 4, x + 16, y + 20, x + w - 16, y + 20, inn ? "#6a2a14" : "#a44a20");
+      const dx = c.doorX * TILE;
+      const dy = c.doorY * TILE;
+      px(g, dx + 12, dy + 16, 12, 20, inn ? "#3f6d5c" : "#5a3a22");
+      oval(g, dx + 18, dy + 26, 2, 2, "#e8c070");
+      const glow = 0.5 + Math.sin(now / 220) * 0.2;
+      for (let i = 0; i < c.w; i++) {
+        const wx = x + i * TILE + 18;
+        if (Math.abs(wx - (dx + 18)) < 16) continue;
+        oval(g, wx, y + h - 16, 5, 5, inn ? `rgba(255,224,138,${glow})` : "#6a8aaa");
+      }
+    }
   }
-  const inn = c.kind === "inn";
-  px(g, x + 2, y + 22, w - 4, h - 18, "#c4a070");
-  tri(g, x + w / 2, y - 10, x - 6, y + 24, x + w + 6, y + 24, inn ? "#8a3a20" : "#c45c26");
-  tri(g, x + w / 2, y - 4, x + 16, y + 20, x + w - 16, y + 20, inn ? "#6a2a14" : "#a44a20");
-  const dx = c.doorX * TILE;
-  const dy = c.doorY * TILE;
-  px(g, dx + 12, dy + 16, 12, 20, inn ? "#3f6d5c" : "#5a3a22");
-  oval(g, dx + 18, dy + 26, 2, 2, "#e8c070");
-  const glow = 0.5 + Math.sin(now / 220) * 0.2;
-  for (let i = 0; i < c.w; i++) {
-    const wx = x + i * TILE + 18;
-    if (Math.abs(wx - (dx + 18)) < 16) continue;
-    oval(g, wx, y + h - 16, 5, 5, inn ? `rgba(255,224,138,${glow})` : "#6a8aaa");
+  if (c.kind === "cabin" || c.kind === "inn") {
+    drawSmoke(g, x + w * (c.kind === "inn" ? 0.32 : 0.7), y + 2, now);
+    drawDoorGlow(g, c.doorX * TILE, c.doorY * TILE, now);
   }
 }
 
@@ -1216,15 +1291,39 @@ export function drawLane(g: Ctx, c: FieldCluster): boolean {
   const w = c.w * TILE;
   const h = c.h * TILE;
   const seed = c.x * 5 + c.y * 11;
+  const mid = y + h / 2;
+  const step = 8;
   g.save();
-  waveBand(g, x - 6, y - 8, w + 12, h + 16, seed, 7);
+  g.beginPath();
+  g.moveTo(x - 14, mid + wander(seed, -14) * 18 - 16);
+  for (let i = -14; i <= w + 14; i += step) {
+    const half = 15 + wander(seed + 3, i) * 9;
+    g.lineTo(x + i, mid + wander(seed, i) * 18 - half);
+  }
+  for (let i = w + 14; i >= -14; i -= step) {
+    const half = 15 + wander(seed + 3, i) * 9;
+    g.lineTo(x + i, mid + wander(seed, i) * 18 + half);
+  }
+  g.closePath();
   g.clip();
-  const ok = blitWrap(g, "path", x - 6, y - 6, w + 12, h + 12);
+  const ok = blitWrapZoom(g, "path", x - 20, mid - 40, w + 40, 80, 2.7, seed * 3, seed);
+  if (!ok) {
+    g.fillStyle = "#8a7a58";
+    g.fill();
+  }
   g.restore();
-  nibbleGrass(g, x - 2, y, w + 4, seed, -1);
-  nibbleGrass(g, x - 2, y + h, w + 4, seed + 5, 1);
-  nibbleGrassV(g, x, y - 2, h + 4, seed + 7, -1);
-  nibbleGrassV(g, x + w, y - 2, h + 4, seed + 8, 1);
+  for (let i = 16; i < w; i += 40) {
+    const cx = x + i + wander(seed + 9, i) * 12;
+    const cy = mid + wander(seed + 11, i) * 16;
+    g.save();
+    g.beginPath();
+    g.ellipse(cx, cy, 10, 7, 0.18, 0, Math.PI * 2);
+    g.clip();
+    blitWrapZoom(g, "path", cx - 12, cy - 8, 24, 16, 3.2, i, seed);
+    g.restore();
+  }
+  nibbleGrass(g, x - 10, mid - 20, w + 20, seed, -1);
+  nibbleGrass(g, x - 10, mid + 20, w + 20, seed + 6, 1);
   return ok;
 }
 

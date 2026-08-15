@@ -1,6 +1,6 @@
 type Sheet = HTMLCanvasElement;
 
-const ART_REV = "look3";
+const ART_REV = "look5";
 
 const SRC: Record<string, { src: string }> = {
   tree: { src: "/art/prop-tree.png" },
@@ -11,6 +11,10 @@ const SRC: Record<string, { src: string }> = {
   mine: { src: "/art/prop-mine.png" },
   stall: { src: "/art/prop-stall.png" },
   dock: { src: "/art/prop-dock.png" },
+  dockB: { src: "/art/prop-dock-b.png" },
+  trash: { src: "/art/prop-trash.png" },
+  rock: { src: "/art/prop-rock.png" },
+  tuft: { src: "/art/prop-tuft.png" },
   anvil: { src: "/art/prop-anvil.png" },
   altar: { src: "/art/prop-altar.png" },
   board: { src: "/art/prop-board.png" },
@@ -171,7 +175,7 @@ export function blitPatch(
   return true;
 }
 
-const TEXEL = 1.25;
+const TEXEL = 2.35;
 
 function wrapBlit(
   g: CanvasRenderingContext2D,
@@ -189,24 +193,27 @@ function wrapBlit(
   g.drawImage(s, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-/** Paint a tile from a wrapping texture using world pixels so neighbors meet. */
-export function blitWrap(
+/** Paint a wrapping texture. Higher zoom makes painted clumps smaller so the field is not wallpaper. */
+export function blitWrapZoom(
   g: CanvasRenderingContext2D,
   name: string,
   x: number,
   y: number,
   w: number,
   h: number,
+  zoom = TEXEL,
+  ox = 0,
+  oy = 0,
 ): boolean {
   const s = sheets.get(name);
   if (!s) return false;
   smooth(g);
-  const zoom = TEXEL;
   try {
     const pat = g.createPattern(s, "repeat");
     if (pat && typeof pat.setTransform === "function") {
       const m = new DOMMatrix();
       m.scaleSelf(1 / zoom, 1 / zoom);
+      m.translateSelf(ox, oy);
       pat.setTransform(m);
       g.fillStyle = pat;
       g.fillRect(x, y, w, h);
@@ -219,8 +226,8 @@ export function blitWrap(
   const th = s.height;
   const srcW = w * zoom;
   const srcH = h * zoom;
-  const sx0 = (((x * zoom) % tw) + tw) % tw;
-  const sy0 = (((y * zoom) % th) + th) % th;
+  const sx0 = ((((x + ox) * zoom) % tw) + tw) % tw;
+  const sy0 = ((((y + oy) * zoom) % th) + th) % th;
   const w1 = Math.min(srcW, tw - sx0);
   const h1 = Math.min(srcH, th - sy0);
   const dw1 = (w1 / srcW) * w;
@@ -230,4 +237,16 @@ export function blitWrap(
   if (h1 < srcH) wrapBlit(g, s, sx0, 0, w1, srcH - h1, x, y + dh1, dw1, h - dh1);
   if (w1 < srcW && h1 < srcH) wrapBlit(g, s, 0, 0, srcW - w1, srcH - h1, x + dw1, y + dh1, w - dw1, h - dh1);
   return true;
+}
+
+/** Paint a tile from a wrapping texture using world pixels so neighbors meet. */
+export function blitWrap(
+  g: CanvasRenderingContext2D,
+  name: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): boolean {
+  return blitWrapZoom(g, name, x, y, w, h, TEXEL);
 }

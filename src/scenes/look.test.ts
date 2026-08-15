@@ -4,9 +4,11 @@ import { VALLEY } from "../world/maps";
 import { blit, blitFit, blitPatch, blitStand, blitWrap } from "./art";
 import {
   cellFill,
+  dockSheet,
   drawActor,
   drawAtlas,
   drawCell,
+  drawHouseCluster,
   drawMeadow,
   drawPlot,
   houseClusters,
@@ -224,6 +226,32 @@ describe("look", () => {
     assert.ok(g.fills.length >= 4);
     const tiny = g.rects.filter((r) => r[2] <= 4 && r[3] <= 4).length;
     assert.ok(tiny < 8);
+  });
+
+  it("gives the two valley docks different sheets", () => {
+    assert.notEqual(dockSheet(5 * 36, 10 * 36), dockSheet(12 * 36, 10 * 36));
+    assert.ok(["dock", "dockB"].includes(dockSheet(5 * 36, 10 * 36)));
+    assert.ok(["dock", "dockB"].includes(dockSheet(12 * 36, 10 * 36)));
+  });
+
+  it("trash, rock and the cutting board still have a constructed fallback", () => {
+    const board = mockCtx();
+    drawCell(board, "C", 0, 0, "#5a3224", 0, "kitchen");
+    assert.ok(board.fills.length >= 2);
+    const bin = mockCtx();
+    drawCell(bin, "X", 0, 0, "#3a2020", 0, "kitchen");
+    assert.ok(bin.fills.length >= 2);
+    const stone = mockCtx();
+    drawCell(stone, "b", 0, 0, "#5a5248", 0, "wild");
+    assert.ok(stone.fills.length >= 2);
+  });
+
+  it("keeps cabin smoke and a door glow when the house sheet is missing", () => {
+    const g = mockCtx();
+    const cabin = houseClusters(VALLEY, "valley").find((h) => h.kind === "cabin");
+    assert.ok(cabin);
+    drawHouseCluster(g, cabin, 1000);
+    assert.ok(g.fills.some((c) => c.includes("214,206,196") || c.includes("255,196,110")));
   });
 
   it("falls back to constructed shapes when painted sheets are not loaded", () => {
