@@ -91,13 +91,13 @@ static func paper_box() -> StyleBoxTexture:
 
 
 static func slip_box() -> StyleBoxTexture:
-	# Narrow wood-and-paper slip. The big plaque 9-slice turns chips into beige forms.
+	# Mini plaque. Keep the 14px wood rim so chips are not beige form pills.
 	var s := StyleBoxTexture.new()
 	s.texture = load("res://assets/art/tex-plaque.png") as Texture2D
-	s.texture_margin_left = 12
-	s.texture_margin_top = 10
-	s.texture_margin_right = 12
-	s.texture_margin_bottom = 10
+	s.texture_margin_left = 14
+	s.texture_margin_top = 14
+	s.texture_margin_right = 14
+	s.texture_margin_bottom = 14
 	s.content_margin_left = 12
 	s.content_margin_top = 8
 	s.content_margin_right = 12
@@ -134,7 +134,7 @@ static func wood_button(text: String, wide := 220) -> Button:
 static func chip_button(text: String, wide := 128) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(wide, 42)
+	b.custom_minimum_size = Vector2(wide, 48)
 	b.focus_mode = Control.FOCUS_NONE
 	b.add_theme_font_override("font", cjk())
 	b.add_theme_font_size_override("font_size", 16)
