@@ -340,7 +340,10 @@ func _process(_dt: float) -> bool:
 			if _prompt() == "进矿" and _act_once():
 				act = true
 	elif phase == "in_mine":
-		if not _tiles().is_empty():
+		if ore_ok:
+			phase = "out_mine"
+			_log("DUG")
+		elif not _tiles().is_empty():
 			var ore := _find("o")
 			if ore.x < 0:
 				phase = "out_mine"

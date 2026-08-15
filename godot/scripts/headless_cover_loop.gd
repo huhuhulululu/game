@@ -129,7 +129,10 @@ func _drive_play() -> void:
 			if _prompt() == "进矿" and _act_once():
 				act = true
 	elif phase == "in_mine":
-		if not _tiles().is_empty():
+		if ore_ok:
+			phase = "out_mine"
+			_log("DUG")
+		elif not _tiles().is_empty():
 			var ore := _find("o")
 			if ore.x < 0:
 				phase = "out_mine"
@@ -171,30 +174,50 @@ func _drive_play() -> void:
 			move = _nudge(int(drive5["facing"])) if _prompt() != "进厨房" else Vector2.ZERO
 			if _prompt() == "进厨房" and _act_once():
 				act = true
-	elif phase == "to_cut":
-		if _held_id() == "" or _held_id() == "ore":
-			var extra := _bag_cook()
-			if extra != "":
-				Net.send_take(extra)
-				_log("TAKE " + extra)
-		var cut := _find("C")
-		if cut.x < 0:
-			cut = Vector2i(1, 3)
-		var drive6 := _drive(cut, 3)
-		move = drive6["move"]
-		if bool(drive6["here"]) or _prompt() == "切" or _prompt() == "切着":
-			move = _nudge(int(drive6["facing"])) if _prompt() != "切" and _prompt() != "切着" else Vector2.ZERO
-			if _prompt() == "切" and _act_once():
+	elif phase == "dump":
+		var trash := _find("X")
+		if trash.x < 0:
+			trash = Vector2i(14, 1)
+		var drive_d := _drive(trash, 0)
+		move = drive_d["move"]
+		if bool(drive_d["here"]) or _prompt() == "丢掉":
+			move = _nudge(int(drive_d["facing"])) if _prompt() != "丢掉" else Vector2.ZERO
+			if _prompt() == "丢掉" and _act_once():
 				act = true
-				held = true
-				hold_left = 40
-				phase = "chop"
-				_log("CHOP")
-			elif _prompt() == "切着":
-				phase = "chop"
+				phase = "to_cut"
+				_log("DUMPED")
+	elif phase == "to_cut":
+		if _held_id() == "ore" or _held_id() == "wood" or _held_id() == "flint":
+			phase = "dump"
+			_log("DUMP")
+		else:
+			if _held_id() == "":
+				var extra := _bag_cook()
+				if extra != "":
+					Net.send_take(extra)
+					_log("TAKE " + extra)
+			var cut := _find("C")
+			if cut.x < 0:
+				cut = Vector2i(1, 3)
+			var drive6 := _drive(cut, 3)
+			move = drive6["move"]
+			if bool(drive6["here"]) or _prompt() == "切" or _prompt() == "切着":
+				move = _nudge(int(drive6["facing"])) if _prompt() != "切" and _prompt() != "切着" else Vector2.ZERO
+				if _prompt() == "切" and _act_once():
+					act = true
+					held = true
+					hold_left = 40
+					phase = "chop"
+					_log("CHOP")
+				elif _prompt() == "切着":
+					phase = "chop"
 	elif phase == "chop":
 		held = true
-		if _prompt() != "切着" and hold_left <= 0:
+		if _prompt() == "切着":
+			pass
+		elif hold_left <= 0:
+			if _prompt() == "切" and _held_id() == "" and _act_once():
+				act = true
 			phase = "to_pot"
 			_log("CHOP_DONE")
 	elif phase == "to_pot":
