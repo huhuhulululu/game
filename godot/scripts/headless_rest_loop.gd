@@ -296,15 +296,20 @@ func _log(msg: String) -> void:
 	print(msg)
 
 
-func _act_once() -> bool:
+func _act_once(cool := 12) -> bool:
 	if act_cool > 0:
 		return false
-	act_cool = 12
+	act_cool = cool
 	return true
 
 
 func _green() -> bool:
 	return _fishing() == "fight" and _mark() > 0.40 and _mark() < 0.70
+
+
+func _cheap_stall() -> bool:
+	var p := _prompt()
+	return p.find("热茶") >= 0 or p.find("种") >= 0 or p.find("蛋") >= 0 or p.find("桂") >= 0 or p.find("燧") >= 0
 
 
 func _process(_dt: float) -> bool:
@@ -452,7 +457,7 @@ func _process(_dt: float) -> bool:
 		elif _fishing() != "fight":
 			phase = "go_mine" if _ore_count() < ore_need else "go_anvil"
 			_log("FORGE_RETRY")
-		elif _green() and _act_once():
+		elif _green() and _act_once(5):
 			act = true
 	elif phase == "go_stall":
 		if _fishing() == "fight" and _prompt().find("摊") >= 0:
@@ -474,7 +479,7 @@ func _process(_dt: float) -> bool:
 		elif _fishing() != "fight":
 			phase = "go_stall"
 			_log("SHOP_RETRY")
-		elif _green() and _act_once():
+		elif _green() and _cheap_stall() and _act_once(5):
 			act = true
 	net.send_input(move.x, move.y, act, act, false)
 	if wild_ok and forge_ok and stall_ok:
