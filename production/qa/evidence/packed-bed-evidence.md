@@ -45,4 +45,4 @@ Enter camera: one dusk painting (hut, path, stream, lodge), live `char-warm` / `
 
 ## Sign-off
 
-`/team-polish` lean (director spawn skipped). Visual/Feel evidence. `/story-done` waits on Brainbird's next enter-frame sentence.
+`/team-polish` lean (director spawn skipped). Brainbird 2026-08-15 实机：一幅黄昏风景，封面大衣人站在路上，木头 HUD，没有魂，没有巨型封面人，没有贴纸盒. `/story-done` closed.

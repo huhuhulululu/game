@@ -1,7 +1,7 @@
 # Story 001: Cover-coat people
 
 > **Epic**: Two players
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -14,14 +14,14 @@
 
 ## Acceptance Criteria
 
-- [ ] Valley actors use `char-warm` / `char-pine`
-- [ ] `Look.BODY = 128`, `FOOT`, `SHADOW_EAST`
-- [ ] No Wilson / Wanderer / Don't Starve face
-- [ ] People are not baked into the play bed
+- [x] Valley actors use `char-warm` / `char-pine`
+- [x] `Look.BODY = 128`, `FOOT`, `SHADOW_EAST`
+- [x] No Wilson / Wanderer / Don't Starve face
+- [x] People are not baked into the play bed
 
 ## Implementation Notes
 
-Keep `actor_view.gd`. Do not add a second head style.
+Keep `actor_view.gd`. Do not add a second head style. Live sprites walk the packed `bed-valley.png`. Bed corridor lifts the cover pair so they are not painted into the sheet.
 
 ## Out of Scope
 
@@ -30,14 +30,21 @@ Keep `actor_view.gd`. Do not add a second head style.
 ## QA Test Cases
 
 - Manual: enter frame shows live sprites on the bed
-- Tests already lock actor sheets and BODY 128
+- Tests lock actor sheets and BODY 128
 
 ## Test Evidence
 
-existing actor locks in `godot/project.test.ts`
-**Status**: [x] P0
+existing actor locks in `godot/project.test.ts` + `production/qa/evidence/cover-coats-evidence.md`
+**Status**: [x] Complete — Brainbird enter frame: 封面大衣人站在路上
 
 ## Dependencies
 
 - Depends on: r1-painted-valley
 - Unlocks: r1-move-do-shout
+
+## Completion Notes
+**Completed**: 2026-08-15
+**Criteria**: 4/4 passing
+**Deviations**: None. Lean: director/agent spawn skipped.
+**Test Evidence**: Visual/Feel — `production/qa/evidence/cover-coats-evidence.md` + `godot/project.test.ts`
+**Code Review**: Skipped — lean

@@ -3,7 +3,7 @@
 > **Layer**: Core
 > **GDD**: ART + WORLD
 > **Architecture Module**: ActorView
-> **Status**: Ready
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
@@ -14,4 +14,4 @@
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | Cover-coat people | Visual/Feel | Ready | ADR-0003 |
+| 001 | Cover-coat people | Visual/Feel | Complete | ADR-0003 |

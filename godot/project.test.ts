@@ -141,6 +141,8 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(lookShot, /air_layer/);
   assert.match(lookShot, /山谷/);
   assert.match(lookShot, /日 0 · 春 · 白天 · 金 20/);
+  assert.match(lookShot, /_shot\("fish"\)/);
+  assert.match(lookShot, /busy": "fish"/);
   assert.doesNotMatch(lookShot, /魂|饿/);
   const boot = readFileSync("godot/scripts/boot.gd", "utf8");
   assert.match(boot, /cover-valley/);
@@ -370,6 +372,37 @@ test("Godot village shows crops, fortune and the dawn board from the same snap",
   assert.match(world, /也得对着铺/);
   assert.match(world, /还早。天黑再歇/);
   assert.match(world, /一个人能问|问今日/);
+});
+
+test("Cover-coat people walk and act on the painted bed", () => {
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /char-%s/);
+  assert.match(actor, /warm" if warm else "pine/);
+  assert.match(actor, /const BODY := 128|Look\.BODY/);
+  assert.match(actor, /Look\.FOOT/);
+  assert.match(actor, /SHADOW_EAST/);
+  assert.doesNotMatch(actor, /Wilson|Don't Starve|Dont Starve|Wanderer/i);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 128/);
+  assert.match(look, /const FOOT := 0\.979/);
+  assert.match(look, /const SHADOW_EAST/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /Net\.send_input/);
+  assert.match(play, /wood_button\("做"/);
+  assert.match(play, /wood_button\("喊"/);
+  assert.match(play, /_valley\.size_px/);
+  assert.match(play, /_valley\.visible = zone == "valley"/);
+  assert.match(play, /_paint_fish/);
+  assert.match(play, /_show_zone/);
+  assert.match(play, /zone_map/);
+  assert.doesNotMatch(play, /prop-cover-|prop-hut|prop-lodge/);
+  const bedPaint = readFileSync("tools/paint_valley_bed.py", "utf8");
+  assert.match(bedPaint, /Hard-replace the pair|landscape corridor|valley-path-fill/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /bed-valley/);
+  }
 });
 
 test("Godot two phones share a shout, a map, and a seat", () => {

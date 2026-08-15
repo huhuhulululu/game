@@ -83,6 +83,12 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	_shot("pair")
+	you.set_moving(false)
+	you.apply({"x": 320, "y": 342, "name": "暖", "side": "left", "facing": 1, "busy": "fish", "fishing": "fight", "fishMark": 0.52, "fishPull": 0.4}, 0.0)
+	pine.apply({"x": 360, "y": 342, "name": "松", "side": "right", "facing": 3}, 0.0)
+	await process_frame
+	await process_frame
+	_shot("fish")
 	cam.zoom = Vector2(1280.0 / sz.x, 1280.0 / sz.x)
 	cam.position = sz * 0.5
 	await process_frame

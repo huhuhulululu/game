@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Rebuild foundation is in. Next: `/team-polish` the packed valley bed (`godot/scenes/valley.tscn` + `bed-valley.png`), then `/code-review` / `/story-done` on `production/epics/r1-painted-valley/story-001-packed-bed.md`. Do not recrop FAIL PNGs. Do not restore sticker `valley_map.gd`.
+Packed bed is Complete. Cover-coats and stick/do/shout are Complete. Next: finish `/dev-story` `production/epics/r1-first-evening/story-001-fish-mine-kitchen.md` (evening/cover loop tokens), then `/story-done` that story. Do not recrop FAIL PNGs. Do not hang props on the bed.
 
 ## Coding Standards
 

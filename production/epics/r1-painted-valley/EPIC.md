@@ -3,7 +3,7 @@
 > **Layer**: Foundation
 > **GDD**: `design/art/art-bible.md`, `design/assets/specs/valley-assets.md`
 > **Architecture Module**: ValleyWorld
-> **Status**: Ready
+> **Status**: Complete
 > **Governing ADRs**: ADR-0001, ADR-0003
 
 ## Overview
@@ -29,7 +29,7 @@ Tear out the sticker `ValleyMap`. Sit a packed `valley.tscn`: one `bed-valley.pn
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | Packed valley, one bed | Visual/Feel | Ready | ADR-0001 |
+| 001 | Packed valley, one bed | Visual/Feel | Complete | ADR-0001 |
 
 ## Definition of Done
 
