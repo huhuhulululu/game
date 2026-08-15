@@ -222,11 +222,11 @@ func _drive_play() -> void:
 					phase = "chop"
 	elif phase == "chop":
 		held = true
-		if _prompt() == "切着":
+		if _prompt() == "切着" or str(_me().get("busy", "")) == "chop":
 			pass
 		elif _held_id() == "" and _prompt() == "切" and _act_once():
 			act = true
-		elif _held_id() != "" or _prompt() != "切":
+		else:
 			phase = "to_pot"
 			_log("CHOP_DONE")
 	elif phase == "to_pot":
@@ -247,6 +247,9 @@ func _drive_play() -> void:
 			if ptxt.find("取 ·") >= 0 and _act_once():
 				act = true
 				phase = "to_window"
+				if not plate_ok:
+					plate_ok = true
+					print("PLATE_OK")
 				_log("DISH")
 			elif ptxt.find("开煮") >= 0 and _act_once():
 				act = true
@@ -277,6 +280,9 @@ func _drive_play() -> void:
 				act = true
 			if p2.find("取 ·") >= 0:
 				phase = "to_window"
+				if not plate_ok:
+					plate_ok = true
+					print("PLATE_OK")
 			elif p2.find("锅还在") >= 0 or str(Net.last_snap.get("potReady", "")) != "":
 				phase = "cook_wait"
 	elif phase == "cook_wait":
@@ -284,6 +290,9 @@ func _drive_play() -> void:
 			if _act_once():
 				act = true
 				phase = "to_window"
+				if not plate_ok:
+					plate_ok = true
+					print("PLATE_OK")
 				_log("COOKED")
 		elif _prompt().find("开煮") >= 0 and _act_once():
 			act = true

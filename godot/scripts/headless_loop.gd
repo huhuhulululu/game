@@ -49,6 +49,7 @@ var unknown_ok := false
 var hold_left := 0
 var act_cool := 0
 var last_log := ""
+var send_acc := 0.0
 
 
 func _initialize() -> void:
@@ -295,8 +296,16 @@ func _act_once() -> bool:
 	return true
 
 
+func _busy() -> String:
+	return str(_me().get("busy", ""))
+
+
 func _process(_dt: float) -> bool:
 	frames += 1
+	send_acc += _dt
+	if send_acc < 0.05:
+		return false
+	send_acc = 0.0
 	if act_cool > 0:
 		act_cool -= 1
 	if hold_left > 0:
@@ -444,11 +453,11 @@ func _process(_dt: float) -> bool:
 					phase = "chop"
 	elif phase == "chop":
 		held = true
-		if _prompt() == "切着":
+		if _prompt() == "切着" or _busy() == "chop":
 			pass
 		elif _held_id() == "" and _prompt() == "切" and _act_once():
 			act = true
-		elif _held_id() != "" or _prompt() != "切":
+		else:
 			phase = "to_pot"
 			_log("CHOP_DONE")
 	elif phase == "to_pot":
@@ -469,6 +478,9 @@ func _process(_dt: float) -> bool:
 			if ptxt.find("取 ·") >= 0 and _act_once():
 				act = true
 				phase = "to_window"
+				if not plate_ok:
+					plate_ok = true
+					print("PLATE_OK")
 				_log("DISH")
 			elif ptxt.find("开煮") >= 0 and _act_once():
 				act = true
@@ -515,6 +527,9 @@ func _process(_dt: float) -> bool:
 			if _act_once():
 				act = true
 				phase = "to_window"
+				if not plate_ok:
+					plate_ok = true
+					print("PLATE_OK")
 				_log("COOKED")
 		elif _prompt().find("开煮") >= 0 and _act_once():
 			act = true
@@ -538,8 +553,6 @@ func _process(_dt: float) -> bool:
 		move = Vector2.ZERO
 	if phase != "unknown":
 		net.send_input(move.x, move.y, act, held or act, false)
-	if frames % 180 == 0 and phase == "to_pot":
-		print("POT_WAIT pos=", _pos(), " held=", _held_id(), " prompt=", _prompt(), " Q=", _find("Q"))
 	if frames > 14000:
 		printerr("TIMEOUT phase=%s fish=%s ore=%s plate=%s held=%s zone=%s prompt=%s" % [phase, fish_ok, ore_ok, plate_ok, _held_id(), _zone(), _prompt()])
 		quit(1)
@@ -563,5 +576,6 @@ func _finish() -> void:
 	if fish_ok and ore_ok and plate_ok and unknown_ok:
 		print("LOOP_OK")
 		quit(0)
+		return
 	printerr("INCOMPLETE fish=%s ore=%s plate=%s unknown=%s" % [fish_ok, ore_ok, plate_ok, unknown_ok])
 	quit(1)
