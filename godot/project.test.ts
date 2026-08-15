@@ -52,6 +52,10 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
     .map((n) => readFileSync(`godot/scripts/${n}`, "utf8"))
     .join("\n");
   assert.doesNotMatch(scripts, /Wanderer|Wilson|Don't Starve|Dont Starve/i);
+  const inn = readFileSync("godot/assets/art/prop-inn.png");
+  assert.ok(!inn.includes("Wanderer") && !inn.includes("WANDERER") && !inn.includes("Good Ale"));
+  assert.ok(existsSync("godot/assets/art/prop-anvil.png"));
+  assert.ok(existsSync("godot/assets/art/prop-altar.png"));
 });
 
 test("Godot client plays fish, mine and kitchen from the same snap", () => {

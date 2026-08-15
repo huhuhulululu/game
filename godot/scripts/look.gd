@@ -20,7 +20,7 @@ static func dusk_mat(fog := 0.08) -> ShaderMaterial:
 	m.set_shader_parameter("dusk", DUSK)
 	m.set_shader_parameter("haze", HAZE)
 	m.set_shader_parameter("fog", fog)
-	m.set_shader_parameter("edge", 0.07)
+	m.set_shader_parameter("edge", 0.10)
 	return m
 
 

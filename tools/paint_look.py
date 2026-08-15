@@ -103,6 +103,67 @@ def nudge(im: Image.Image, dx: int, dy: int) -> Image.Image:
     return out
 
 
+def _remap(tex: np.ndarray, u: np.ndarray, v: np.ndarray) -> np.ndarray:
+    h, w = tex.shape[:2]
+    u = np.mod(u, w)
+    v = np.mod(v, h)
+    u0 = np.floor(u).astype(np.int32)
+    v0 = np.floor(v).astype(np.int32)
+    u1 = (u0 + 1) % w
+    v1 = (v0 + 1) % h
+    fu = (u - u0)[..., None]
+    fv = (v - v0)[..., None]
+    c00 = tex[v0, u0]
+    c10 = tex[v0, u1]
+    c01 = tex[v1, u0]
+    c11 = tex[v1, u1]
+    return c00 * (1 - fu) * (1 - fv) + c10 * fu * (1 - fv) + c01 * (1 - fu) * fv + c11 * fu * fv
+
+
+def cut_prop(im: Image.Image, tol: float = 36.0) -> Image.Image:
+    """Key olive-gray (or any flat corner) and keep a dusk-soft silhouette. No ink ring."""
+    src = im.convert("RGB")
+    seed = np.asarray(src, dtype=np.float32)[2, 2]
+    cut = flood_cut(im, tol)
+    arr = np.asarray(cut.convert("RGBA"), dtype=np.float32)
+    dist = np.linalg.norm(arr[:, :, :3] - seed, axis=2)
+    arr[:, :, 3] = np.where(dist < tol + 8.0, 0, arr[:, :, 3])
+    # leftover fringe is still close to the key; push it out before the dusk grade
+    lum = arr[:, :, :3] @ np.array([0.3, 0.5, 0.2], dtype=np.float32)
+    near = (dist < tol + 18.0) & (arr[:, :, 3] < 140)
+    arr[:, :, 3] = np.where(near, arr[:, :, 3] * 0.15, arr[:, :, 3])
+    # ink rings from the old sheet: dark and already thinning
+    ink = (lum < 22.0) & (arr[:, :, 3] < 200)
+    arr[ink, 3] = 0
+    out = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGBA")
+    bbox = out.getchannel("A").getbbox()
+    if not bbox:
+        return out
+    pad = 18
+    x0, y0, x1, y1 = bbox
+    x0, y0 = max(0, x0 - pad), max(0, y0 - pad)
+    x1, y1 = min(out.size[0], x1 + pad), min(out.size[1], y1 + pad)
+    spr = out.crop((x0, y0, x1, y1))
+    if spr.size[0] > 640:
+        nh = max(8, int(spr.size[1] * 640 / spr.size[0]))
+        spr = spr.resize((640, nh), Image.Resampling.LANCZOS)
+    a = spr.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(2.2))
+    spr.putalpha(a)
+    return spr
+
+
+def finish_anvil_altar() -> None:
+    for dest, src, fade in (
+        ("prop-anvil.png", "anvil-ref.png", 0.14),
+        ("prop-altar.png", "altar-ref.png", 0.14),
+    ):
+        ref = REFS / src
+        if not ref.exists():
+            print("skip", dest, "missing", ref)
+            continue
+        save(process_prop(cut_prop(Image.open(ref)), fade), dest)
+
+
 def process_prop(im: Image.Image, fade=0.22) -> Image.Image:
     buf = np.asarray(im.convert("RGBA"), dtype=np.float32) / 255.0
     h, w = buf.shape[:2]
@@ -165,9 +226,77 @@ def scrub_inn(im: Image.Image) -> Image.Image:
     return out
 
 
+def _load_meadows() -> list[np.ndarray]:
+    names = ("meadow-a.png", "meadow-b.png", "ground-ref.png")
+    texs = []
+    for name in names:
+        p = REFS / name
+        if p.exists():
+            texs.append(np.asarray(Image.open(p).convert("RGB"), dtype=np.float32) / 255.0)
+    if not texs:
+        raise FileNotFoundError("no meadow refs in %s" % REFS)
+    while len(texs) < 3:
+        texs.append(texs[0])
+    return texs
+
+
+def _meadow_stack(W: int, H: int) -> np.ndarray:
+    a, b, c = _load_meadows()
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    # gentle warp only — keep the meadow looking like grass, not a smeared wave
+    w1 = 16.0 * np.sin(xx * 0.0055 + yy * 0.0038) + 10.0 * np.cos(xx * 0.0028 - yy * 0.0064)
+    w2 = 12.0 * np.sin(xx * 0.0078 - yy * 0.0046)
+    pa = _remap(a, xx * (a.shape[1] / W) * 0.92 + w1 + 40, yy * (a.shape[0] / H) * 0.88 + w2 + 28)
+    pb = _remap(b, xx * (b.shape[1] / W) * 0.78 + 70 + w2, yy * (b.shape[0] / H) * 0.74 + 36 + w1)
+    pc = _remap(c, xx * (c.shape[1] / W) * 0.55 + 24 + w1 * 0.4, yy * (c.shape[0] / H) * 0.50 + 18)
+    mix = 0.5 + 0.5 * np.sin(xx * 0.0032 + yy * 0.0024)
+    mix = np.clip(mix, 0.28, 0.72)[..., None]
+    grass = pa * (1.0 - mix) + pb * mix
+    grass = grass * 0.84 + pc * 0.16
+    lum = grass @ np.array([0.3, 0.5, 0.2], dtype=np.float32)
+    hi = np.clip((lum - 0.58) / 0.36, 0, 1)[..., None]
+    mid = np.median(grass.reshape(-1, 3), axis=0)
+    grass = grass * (1.0 - hi * 0.28) + mid * (hi * 0.28)
+    # pull down the same flower/clump landmarks that read as a tile up close
+    blur = np.asarray(
+        Image.fromarray((np.clip(grass, 0, 1) * 255).astype(np.uint8), "RGB").filter(ImageFilter.GaussianBlur(2.2)),
+        dtype=np.float32,
+    ) / 255.0
+    grass = np.clip(blur + (grass - blur) * 0.58, 0, 1)
+    shade = 0.96 + 0.05 * np.sin(xx * 0.0022 + yy * 0.0030)
+    return np.clip(grass * shade[..., None], 0, 1)
+
+
+def _soft_field(kind: np.ndarray, scale: int) -> np.ndarray:
+    """One more stop of blur than the last sheet. Path still has a core."""
+    th, tw = kind.shape
+    res = 12
+    rng = np.random.default_rng(4)
+    fh, fw = th * res, tw * res
+    ys = np.arange(fh)[:, None]
+    xs = np.arange(fw)[None, :]
+    ox = rng.normal(0, 0.30, (fh, fw))
+    oy = rng.normal(0, 0.22, (fh, fw))
+    ix = np.clip(np.rint(xs / res + ox), 0, tw - 1).astype(np.int32)
+    iy = np.clip(np.rint(ys / res + oy), 0, th - 1).astype(np.int32)
+    k = kind[iy, ix]
+    raw = np.zeros((fh, fw, 3), dtype=np.float32)
+    raw[:, :, 0] = k == 0
+    raw[:, :, 1] = k == 1
+    raw[:, :, 2] = k == 2
+    rgb = Image.fromarray((raw * 255).astype(np.uint8), "RGB")
+    # last pass used 5.5; one more stop, not a wash
+    field = np.asarray(rgb.filter(ImageFilter.GaussianBlur(7.2)), dtype=np.float32) / 255.0
+    HW, HH = tw * 36 * scale, th * 36 * scale
+    field = np.asarray(
+        Image.fromarray((np.clip(field, 0, 1) * 255).astype(np.uint8), "RGB").resize((HW, HH), Image.Resampling.LANCZOS),
+        dtype=np.float32,
+    ) / 255.0
+    field = field / np.maximum(field.sum(axis=2, keepdims=True), 1e-5)
+    return field
+
+
 def paint_ground() -> Image.Image:
-    meadow = Image.open(REFS / "ground-ref.png").convert("RGB")
-    src = np.asarray(meadow, dtype=np.float32) / 255.0
     rows = VALLEY
     tw, th = len(rows[0]), len(rows)
     tile = 36
@@ -179,36 +308,24 @@ def paint_ground() -> Image.Image:
                 kind[y, x] = 2
             elif ch in ",P":
                 kind[y, x] = 1
-    res = 8
-    field = np.zeros((th * res, tw * res, 3), dtype=np.float32)
-    rng = np.random.default_rng(4)
-    fh, fw = field.shape[:2]
-    for y in range(fh):
-        for x in range(fw):
-            ox, oy = rng.normal(0, 0.32), rng.normal(0, 0.24)
-            ix = int(np.clip(round(x / res + ox), 0, tw - 1))
-            iy = int(np.clip(round(y / res + oy), 0, th - 1))
-            field[y, x, kind[iy, ix]] = 1.0
-    field = np.asarray(
-        Image.fromarray((field * 255).astype(np.uint8), "RGB").filter(ImageFilter.GaussianBlur(5.5)).resize((W, H), Image.Resampling.LANCZOS),
-        dtype=np.float32,
-    ) / 255.0
-    field = field / np.maximum(field.sum(axis=2, keepdims=True), 1e-5)
-    big = np.asarray(meadow.resize((W + 280, H + 220), Image.Resampling.LANCZOS), dtype=np.float32) / 255.0
-    grass = big[50 : 50 + H, 90 : 90 + W]
-    dirt = np.clip(grass * np.array([1.08, 0.82, 0.58]) * 0.9 + np.array([0.18, 0.12, 0.07]), 0, 1)
-    # dusk water shares the meadow's warmth — not a teal sticker strip
-    water = np.clip(grass * np.array([0.42, 0.48, 0.40]) + np.array([0.22, 0.20, 0.14]), 0, 1)
-    shore = np.clip(field[:, :, 2:3] * (1.0 - field[:, :, 2:3]) * 4.0, 0, 1)
-    mud = np.clip(dirt * 0.7 + np.array([0.28, 0.18, 0.10]), 0, 1)
+    scale = 2
+    HW, HH = W * scale, H * scale
+    field = _soft_field(kind, scale)
+    grass = _meadow_stack(HW, HH)
+    dirt = np.clip(grass * np.array([1.10, 0.80, 0.54]) * 0.82 + np.array([0.24, 0.14, 0.07]), 0, 1)
+    wet = np.asarray(Image.fromarray((grass * 255).astype(np.uint8), "RGB").filter(ImageFilter.GaussianBlur(1.4)), dtype=np.float32) / 255.0
+    water = np.clip(wet * np.array([0.42, 0.46, 0.38]) + np.array([0.20, 0.18, 0.13]), 0, 1)
+    shore = np.clip(field[:, :, 2:3] * (1.0 - field[:, :, 2:3]) * 3.2, 0, 1)
+    mud = np.clip(dirt * 0.62 + np.array([0.26, 0.16, 0.08]), 0, 1)
     col = grass * field[:, :, 0:1] + dirt * field[:, :, 1:2] + water * field[:, :, 2:3]
-    col = col * (1.0 - shore * 0.55) + mud * shore * 0.55
-    yy = np.linspace(0, 1, H)[:, None, None]
+    col = col * (1.0 - shore * 0.48) + mud * shore * 0.48
+    yy = np.linspace(0, 1, HH)[:, None, None]
     col = np.clip(col * DUSK, 0, 1)
-    col = col * (1.0 - (1.0 - yy) * 0.14) + FOG * (1.0 - yy) * 0.14
-    col = col * (1.0 - yy * 0.05) + np.array([0.80, 0.54, 0.32]) * yy * 0.05
-    col = np.clip(col + np.random.default_rng(1).normal(0, 0.01, col.shape), 0, 1)
-    return Image.fromarray((col * 255).astype(np.uint8), "RGB")
+    col = col * (1.0 - (1.0 - yy) * 0.12) + FOG * (1.0 - yy) * 0.12
+    col = col * (1.0 - yy * 0.04) + np.array([0.80, 0.54, 0.32]) * yy * 0.04
+    col = np.clip(col + np.random.default_rng(1).normal(0, 0.008, col.shape), 0, 1)
+    hi = Image.fromarray((col * 255).astype(np.uint8), "RGB")
+    return hi.resize((W, H), Image.Resampling.LANCZOS)
 
 
 def paint_paper() -> Image.Image:
@@ -292,12 +409,11 @@ def main() -> None:
         ("prop-dock-b.png", 0.32),
         ("prop-gate.png", 0.16),
         ("prop-board.png", 0.16),
-        ("prop-anvil.png", 0.16),
-        ("prop-altar.png", 0.16),
     ]:
         p = ART / name
         if p.exists():
             save(process_prop(Image.open(p), fade), name)
+    finish_anvil_altar()
     save(paint_paper(), "tex-paper.png")
     save(paint_plaque(), "tex-plaque.png")
     save(paint_ground(), "ground-valley.png")
