@@ -1117,15 +1117,27 @@ function organicPath(g: Ctx, x: number, y: number, w: number, h: number, seed: n
   g.closePath();
 }
 
+function waveBand(g: Ctx, x: number, y: number, w: number, h: number, seed: number, amp: number): void {
+  g.beginPath();
+  g.moveTo(x, y + Math.sin(seed) * amp);
+  for (let i = 8; i <= w; i += 8) {
+    g.lineTo(x + i, y + Math.sin(seed + i * 0.11) * amp);
+  }
+  for (let i = w; i >= 0; i -= 8) {
+    g.lineTo(x + i, y + h + Math.sin(seed + 2.2 + i * 0.1) * amp);
+  }
+  g.closePath();
+}
+
 export function drawPool(g: Ctx, c: FieldCluster): boolean {
   const x = c.x * TILE;
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
   g.save();
-  organicPath(g, x - 8, y - 10, w + 16, h + 16, c.x * 13 + c.y * 7, 9);
+  waveBand(g, x - 10, y - 8, w + 20, h + 16, c.x * 13 + c.y * 7, 14);
   g.clip();
-  const ok = blitWrap(g, "water", x - 2, y - 2, w + 4, h + 4);
+  const ok = blitWrap(g, "water", x - 4, y - 4, w + 8, h + 8);
   g.restore();
   return ok;
 }
@@ -1136,9 +1148,9 @@ export function drawLane(g: Ctx, c: FieldCluster): boolean {
   const w = c.w * TILE;
   const h = c.h * TILE;
   g.save();
-  organicPath(g, x - 4, y - 6, w + 8, h + 12, c.x * 5 + c.y * 11, 5);
+  waveBand(g, x - 6, y - 8, w + 12, h + 16, c.x * 5 + c.y * 11, 11);
   g.clip();
-  const ok = blitWrap(g, "path", x - 2, y - 2, w + 4, h + 4);
+  const ok = blitWrap(g, "path", x - 4, y - 4, w + 8, h + 8);
   g.restore();
   return ok;
 }
@@ -1149,12 +1161,12 @@ export function drawField(g: Ctx, c: FieldCluster): void {
   const w = c.w * TILE;
   const h = c.h * TILE;
   g.save();
-  organicPath(g, x - 6, y - 4, w + 12, h + 10, c.x * 9 + c.y, 6);
-  g.fillStyle = "rgba(47,90,56,0.22)";
+  organicPath(g, x - 10, y - 8, w + 20, h + 16, c.x * 9 + c.y, 12);
+  g.fillStyle = "rgba(47,90,56,0.28)";
   g.fill();
   g.restore();
   g.save();
-  organicPath(g, x + 3, y + 4, w - 6, h - 8, c.x * 9 + c.y + 2, 7);
+  organicPath(g, x + 2, y + 3, w - 4, h - 6, c.x * 9 + c.y + 2, 13);
   g.clip();
   for (let ty = 0; ty < c.h; ty++) {
     for (let tx = 0; tx < c.w; tx++) plotSoil(g, x + tx * TILE, y + ty * TILE);
@@ -1188,18 +1200,18 @@ export function drawFringe(g: Ctx, ch: string, near: Near, x: number, y: number,
     return;
   }
   if (look === "path" || look === "plot") {
-    if (n === "grass") wash(x, y, x, y + 16, "rgba(47,90,56,0.32)");
-    if (s === "grass") wash(x, y + TILE, x, y + TILE - 16, "rgba(47,90,56,0.32)");
-    if (w === "grass") wash(x, y, x + 14, y, "rgba(47,90,56,0.24)");
-    if (e === "grass") wash(x + TILE, y, x + TILE - 14, y, "rgba(47,90,56,0.24)");
-    if (wet(n)) wash(x, y, x, y + 16, "rgba(26,68,88,0.3)");
-    if (wet(s)) wash(x, y + TILE, x, y + TILE - 16, "rgba(26,68,88,0.3)");
+    if (n === "grass") wash(x, y, x, y + 22, "rgba(47,90,56,0.4)");
+    if (s === "grass") wash(x, y + TILE, x, y + TILE - 22, "rgba(47,90,56,0.4)");
+    if (w === "grass") wash(x, y, x + 18, y, "rgba(47,90,56,0.3)");
+    if (e === "grass") wash(x + TILE, y, x + TILE - 18, y, "rgba(47,90,56,0.3)");
+    if (wet(n)) wash(x, y, x, y + 22, "rgba(26,68,88,0.38)");
+    if (wet(s)) wash(x, y + TILE, x, y + TILE - 22, "rgba(26,68,88,0.38)");
   }
   if (look === "grass" && (wet(n) || wet(s) || wet(e) || wet(w))) {
-    if (wet(s)) wash(x, y + TILE, x, y + TILE - 20, "rgba(26,68,88,0.3)");
-    if (wet(n)) wash(x, y, x, y + 20, "rgba(26,68,88,0.26)");
-    if (wet(e)) wash(x + TILE, y, x + TILE - 18, y, "rgba(26,68,88,0.22)");
-    if (wet(w)) wash(x, y, x + 18, y, "rgba(26,68,88,0.22)");
+    if (wet(s)) wash(x, y + TILE, x, y + TILE - 26, "rgba(26,68,88,0.36)");
+    if (wet(n)) wash(x, y, x, y + 26, "rgba(26,68,88,0.32)");
+    if (wet(e)) wash(x + TILE, y, x + TILE - 22, y, "rgba(26,68,88,0.26)");
+    if (wet(w)) wash(x, y, x + 22, y, "rgba(26,68,88,0.26)");
   }
 }
 
