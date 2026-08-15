@@ -75,6 +75,15 @@ func _prop(name: String, gx: float, gy: float, w: float, h: float, z: int, fog :
 	add_child(Look.hung(_tex(name), Vector2(gx * TILE, gy * TILE), Vector2(w, h), z, fog, sit))
 
 
+func _bend(gx: float, kind: String) -> float:
+	var fx := clampf((gx * TILE) / 1224.0, 0.0, 1.0)
+	var path_y := 308.0 + fx * 82.0 + 15.0 * sin(fx * 1.7 * PI)
+	if kind == "path":
+		return path_y / TILE
+	var raw := 420.0 + 75.0 * sin(fx * 2.0 * PI)
+	return maxf(raw, path_y + 26.0) / TILE
+
+
 func _land() -> void:
 	var tex := _tex("floor-valley.png")
 	var s := Sprite2D.new()
@@ -120,17 +129,17 @@ func _ridge() -> void:
 func _shore() -> void:
 	for i in 8:
 		var x := 2.4 + float(i) * 3.4
-		_prop("prop-tuft.png", x, 10.45 + float(i % 2) * 0.16, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-rock.png", 7.6, 10.55, 32, 28, 6, 0.08, 0.90)
-	_prop("prop-rock.png", 19.8, 10.50, 30, 26, 6, 0.08, 0.90)
-	_prop("prop-tuft.png", 10.4, 8.85, 24, 20, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 14.8, 8.80, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 20.2, 8.90, 24, 20, 4, 0.06, 0.86)
+		_prop("prop-tuft.png", x, _bend(x, "creek") - 0.42 + float(i % 2) * 0.14, 26, 22, 4, 0.06, 0.86)
+	_prop("prop-rock.png", 7.6, _bend(7.6, "creek") - 0.20, 32, 28, 6, 0.08, 0.90)
+	_prop("prop-rock.png", 19.8, _bend(19.8, "creek") - 0.18, 30, 26, 6, 0.08, 0.90)
+	_prop("prop-tuft.png", 10.4, _bend(10.4, "path") - 0.20, 24, 20, 4, 0.06, 0.86)
+	_prop("prop-tuft.png", 14.8, _bend(14.8, "path") + 0.18, 26, 22, 4, 0.06, 0.86)
+	_prop("prop-tuft.png", 20.2, _bend(20.2, "path") - 0.12, 24, 20, 4, 0.06, 0.86)
 
 
 func _docks() -> void:
-	_prop("prop-dock.png", 4.2, 10.35, 56, 36, 4, 0.06, 0.98)
-	_prop("prop-dock-b.png", 11.2, 10.35, 56, 36, 4, 0.06, 0.98)
+	_prop("prop-dock.png", 4.2, _bend(4.2, "creek") - 0.28, 56, 36, 4, 0.06, 0.98)
+	_prop("prop-dock-b.png", 11.2, _bend(11.2, "creek") - 0.28, 56, 36, 4, 0.06, 0.98)
 
 
 func _bits() -> void:

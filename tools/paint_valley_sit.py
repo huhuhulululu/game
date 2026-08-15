@@ -300,9 +300,19 @@ def plant_sit(name: str) -> None:
     save(out, name)
 
 
+def path_center(wx: np.ndarray) -> np.ndarray:
+    fx = wx / 1224.0
+    return 308.0 + fx * 82.0 + 15.0 * np.sin(fx * 1.7 * np.pi)
+
+
+def creek_center(wx: np.ndarray) -> np.ndarray:
+    fx = wx / 1224.0
+    raw = 420.0 + 75.0 * np.sin(fx * 2.0 * np.pi)
+    return np.maximum(raw, path_center(wx) + 26.0)
+
+
 def paint_floor() -> Image.Image:
-    # One playable floor. Grass holds the middle. Path and creek are painted in.
-    # Soft outer fade only — no stacked color rectangles.
+    # One floor. Path slants, creek bends, grass bites the middle.
     pad = 48
     vw, vh = 1224, 612
     w, h = vw + pad * 2, vh + pad * 2
@@ -320,20 +330,22 @@ def paint_floor() -> Image.Image:
     yy, xx = np.indices((h, w))
     wx = xx.astype(np.float32) - pad
     wy = yy.astype(np.float32) - pad
-    wobble = (n - 0.5) * 28.0 + (n2 - 0.5) * 14.0
     span = np.clip((wx + 12.0) / 36.0, 0, 1) * np.clip((vw + 12.0 - wx) / 36.0, 0, 1)
 
-    path_y = 342.0 + wobble * 0.42
-    path_m = np.clip(1.0 - (np.abs(wy - path_y) - 6.0) / 16.0, 0, 1) ** 1.05
+    path_y = path_center(wx)
+    path_half = 7.0 + 5.0 * n + 3.0 * n2
+    path_m = np.clip(1.0 - (np.abs(wy - path_y) - path_half * 0.28) / (path_half + 7.0), 0, 1) ** 1.12
     path_m *= span
+    path_m = np.where((n2 > 0.78) & (np.abs(wy - path_y) > 4.0), path_m * 0.22, path_m)
     path_c = np.clip(d * np.array([1.18, 0.94, 0.56], dtype=np.float32) * (0.96 + 0.10 * n[..., None]), 0, 1)
-    rgb = rgb * (1.0 - path_m * 0.88)[..., None] + path_c * (path_m * 0.88)[..., None]
+    rgb = rgb * (1.0 - path_m * 0.86)[..., None] + path_c * (path_m * 0.86)[..., None]
 
-    creek_y = 400.0 + wobble * 0.58
+    creek_y = creek_center(wx)
     creek_d = np.abs(wy - creek_y)
-    water_m = np.clip(1.0 - (creek_d - 5.0) / 26.0, 0, 1) ** 0.72
+    creek_half = 12.0 + 8.0 * n2 + 4.0 * n
+    water_m = np.clip(1.0 - (creek_d - creek_half * 0.25) / (creek_half + 8.0), 0, 1) ** 0.70
     water_m *= span
-    depth = np.clip(1.0 - creek_d / 24.0, 0, 1)
+    depth = np.clip(1.0 - creek_d / np.maximum(creek_half + 6.0, 1.0), 0, 1)
     ripple = 0.86 + 0.14 * np.sin((wx / 15.0 + n * 3.0) * np.pi)
     spec = np.clip(np.sin((wx / 12.0 + wy / 8.0 + n2 * 3.6) * np.pi) * 0.5 + 0.5, 0, 1)
     spec *= (depth ** 1.35) * (0.22 + 0.78 * n)

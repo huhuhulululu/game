@@ -73,6 +73,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(valley, /ground-valley/);
   assert.match(valley, /prop-hut|prop-lodge/);
   assert.match(valley, /floor-valley/);
+  assert.match(valley, /_bend\(/);
   assert.doesNotMatch(valley, /band-river|band-path|band-meadow/);
   assert.ok(existsSync("godot/assets/art/floor-valley.png"));
   assert.doesNotMatch(valley, /_tile\(/);
