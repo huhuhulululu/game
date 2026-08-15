@@ -14,6 +14,7 @@ var _hud_ink: Label
 var _hud_held: Label
 var _hud_pot: Label
 var _prompt: Label
+var _prompt_bar: Panel
 var _toasts: VBoxContainer
 var _bag: HBoxContainer
 var _orders: VBoxContainer
@@ -124,16 +125,17 @@ func _hud() -> void:
 	_orders.position = Vector2(900, 250)
 	_orders.size = Vector2(360, 160)
 	layer.add_child(_orders)
-	var plaque := Panel.new()
-	plaque.position = Vector2(360, 620)
-	plaque.size = Vector2(560, 44)
-	plaque.add_theme_stylebox_override("panel", Look.plaque_box())
-	layer.add_child(plaque)
-	_prompt = Look.ink_label("", 18)
-	_prompt.position = Vector2(12, 8)
-	_prompt.size = Vector2(536, 28)
+	_prompt_bar = Panel.new()
+	_prompt_bar.position = Vector2(350, 608)
+	_prompt_bar.size = Vector2(580, 54)
+	_prompt_bar.add_theme_stylebox_override("panel", Look.slip_box())
+	layer.add_child(_prompt_bar)
+	_prompt = Look.ink_label("", 20)
+	_prompt.position = Vector2(16, 12)
+	_prompt.size = Vector2(548, 30)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	plaque.add_child(_prompt)
+	_prompt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_prompt_bar.add_child(_prompt)
 	var act := Look.wood_button("做", 88)
 	act.position = Vector2(1160, 600)
 	act.button_down.connect(func() -> void: _act = true; _held = true)
@@ -156,7 +158,7 @@ func _hud() -> void:
 	pad.gui_input.connect(_on_pad)
 	layer.add_child(pad)
 	_fish_hud = Panel.new()
-	_fish_hud.position = Vector2(360, 568)
+	_fish_hud.position = Vector2(350, 548)
 	_fish_hud.size = Vector2(560, 44)
 	_fish_hud.visible = false
 	_fish_hud.add_theme_stylebox_override("panel", Look.paper_box())
@@ -544,9 +546,7 @@ func _paint_bag(raws: Array) -> void:
 		var row: Dictionary = raw
 		var id := str(row.get("id", ""))
 		var label := "%s×%s" % [str(row.get("name", id)), _ink_n(row.get("n", 1))]
-		var b := Look.wood_button(label, 108)
-		b.custom_minimum_size = Vector2(108, 36)
-		b.add_theme_font_size_override("font_size", 14)
+		var b := Look.chip_button(label, 128)
 		b.pressed.connect(func() -> void: _take(id))
 		_bag.add_child(b)
 

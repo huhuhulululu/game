@@ -90,6 +90,21 @@ static func paper_box() -> StyleBoxTexture:
 	return s
 
 
+static func slip_box() -> StyleBoxTexture:
+	# Narrow wood-and-paper slip. The big plaque 9-slice turns chips into beige forms.
+	var s := StyleBoxTexture.new()
+	s.texture = load("res://assets/art/tex-plaque.png") as Texture2D
+	s.texture_margin_left = 12
+	s.texture_margin_top = 10
+	s.texture_margin_right = 12
+	s.texture_margin_bottom = 10
+	s.content_margin_left = 12
+	s.content_margin_top = 8
+	s.content_margin_right = 12
+	s.content_margin_bottom = 8
+	return s
+
+
 static func ink_label(text: String, size: int = 18, color: Color = INK) -> Label:
 	var l := Label.new()
 	l.text = text
@@ -109,6 +124,24 @@ static func wood_button(text: String, wide := 220) -> Button:
 	b.add_theme_color_override("font_hover_color", GOLD)
 	b.add_theme_color_override("font_pressed_color", GOLD)
 	var box := plaque_box()
+	b.add_theme_stylebox_override("normal", box)
+	b.add_theme_stylebox_override("hover", box)
+	b.add_theme_stylebox_override("pressed", box)
+	b.add_theme_stylebox_override("focus", box)
+	return b
+
+
+static func chip_button(text: String, wide := 128) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(wide, 42)
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_override("font", cjk())
+	b.add_theme_font_size_override("font_size", 16)
+	b.add_theme_color_override("font_color", INK)
+	b.add_theme_color_override("font_hover_color", GOLD)
+	b.add_theme_color_override("font_pressed_color", GOLD)
+	var box := slip_box()
 	b.add_theme_stylebox_override("normal", box)
 	b.add_theme_stylebox_override("hover", box)
 	b.add_theme_stylebox_override("pressed", box)

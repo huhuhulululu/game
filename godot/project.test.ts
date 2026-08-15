@@ -54,6 +54,8 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(look, /const BODY := 62/);
   assert.match(look, /const FOOT := 0\.979/);
   assert.match(look, /name_box/);
+  assert.match(look, /func slip_box/);
+  assert.match(look, /func chip_button/);
   assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
   assert.doesNotMatch(look, /SystemFont/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
@@ -72,6 +74,8 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const lookShot = readFileSync("godot/scripts/headless_look.gd", "utf8");
   assert.match(lookShot, /cabin-pair/);
   assert.match(lookShot, /set_moving/);
+  assert.match(lookShot, /chip_button/);
+  assert.match(lookShot, /slip_box/);
   const boot = readFileSync("godot/scripts/boot.gd", "utf8");
   assert.match(boot, /cover-valley/);
   assert.doesNotMatch(boot, /prop-cabin|prop-inn|Wanderer/);
@@ -124,6 +128,10 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(play, /toasts/);
   assert.match(play, /send_take/);
   assert.match(play, /_bag_sig/);
+  assert.match(play, /chip_button/);
+  assert.match(play, /slip_box/);
+  assert.match(play, /_prompt_bar/);
+  assert.doesNotMatch(play, /wood_button\(label/);
   assert.match(play, /_ink_n/);
   assert.match(play, /_paint_fish/);
   assert.match(play, /Look\.MOSS/);
