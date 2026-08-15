@@ -657,7 +657,11 @@ export class World {
         return this.pot.length ? `入锅 · ${this.pot.length}/4` : "入锅";
       }
       if (cell === "window") return this.rushed ? "上菜！堂口在催" : "上菜";
-      if (cell === "ice") return p.held && !p.held.startsWith("dish:") ? "入冰" : this.ice.length ? "取冰" : "冰柜空着";
+      if (cell === "ice") {
+        if (p.held && !p.held.startsWith("dish:")) return "入冰";
+        if (p.held) return "手里满了";
+        return this.ice.length ? "取冰" : "冰柜空着";
+      }
       if (this.near(p, this.other(p)) && p.held && this.other(p) && !this.other(p)!.held) return "递给对方";
       if (this.idleFace(cell) && eatValue(p.held)) return "吃";
       if (cell === "trash") return "丢掉";
@@ -1192,7 +1196,10 @@ export class World {
     const key = `c:${x},${y}`;
     const st = this.stations.get(key);
     if (st?.ready) {
-      if (p.held) return;
+      if (p.held) {
+        this.toast("手里满了，案板上还有");
+        return;
+      }
       p.held = st.item;
       this.stations.delete(key);
       return;
@@ -1225,12 +1232,18 @@ export class World {
     const key = `s:${x},${y}`;
     const st = this.stations.get(key);
     if (st?.ready) {
-      if (p.held) return;
+      if (p.held) {
+        this.toast("手里满了，炉上还热着");
+        return;
+      }
       p.held = st.item;
       this.stations.delete(key);
       return;
     }
-    if (st && !st.ready) return;
+    if (st && !st.ready) {
+      this.toast("炉还在烧");
+      return;
+    }
     if (!p.held) return;
     const held = parseHeld(p.held);
     const need = item(held.id).cook;
@@ -1288,9 +1301,14 @@ export class World {
 
   private potAct(p: Actor): void {
     if (this.potReady) {
-      if (p.held) return;
+      const name = potById(this.potReady).name;
+      if (p.held) {
+        this.toast(`手里满了，${name}还在锅里`);
+        return;
+      }
       p.held = `dish:${this.potReady}`;
       this.potReady = null;
+      this.toast(`${p.name} 取出${name}`);
       return;
     }
     if (this.potCook > 0) {
@@ -1358,9 +1376,8 @@ export class World {
     }
     const match = potById(p.held.slice(5));
     const expected = this.boardOn ? this.boardTickets[this.boardServed] : undefined;
-    const exact =
-      (expected === match.id ? this.orders.find((o) => o.board && o.recipe === match.id) : undefined) ??
-      this.orders.find((o) => o.recipe === match.id);
+    const boardMatch = expected === match.id ? this.orders.find((o) => o.board && o.recipe === match.id) : undefined;
+    const exact = boardMatch ?? this.orders.find((o) => o.recipe === match.id);
     if (this.rushed && !exact) {
       this.toast("堂口不要这道，递给对方或者重做");
       return;
@@ -1389,12 +1406,11 @@ export class World {
       addToBag(this.save.bag, gift);
       extra = `客人留下了${item(gift).name}`;
     }
-    const boardDish = this.boardOn && this.boardTickets.includes(match.id);
-    if (expected && match.id === expected) {
+    if (boardMatch) {
       this.boardServed += 1;
       this.combo = this.boardServed;
       this.comboT = 9;
-    } else if (this.rushed && boardDish && match.id !== expected) {
+    } else if (this.rushed && exact?.board && match.id !== expected) {
       this.combo = 0;
     }
     const streak = this.combo > 1 ? this.combo : 0;
@@ -1860,7 +1876,10 @@ export class World {
       this.toast(`${p.name} 把${item(held.id).name}放进冰柜`);
       return;
     }
-    if (p.held) return;
+    if (p.held) {
+      this.toast("手里满了，冰柜还留着");
+      return;
+    }
     const row = this.ice[0];
     if (!row) {
       this.toast("冰柜空着");
@@ -1876,7 +1895,7 @@ export class World {
     const bagAmt = sleeping ? sleepSpoil(sea, false) : spoilRate(sea, false) * dt;
     const iceAmt = sleeping ? sleepSpoil(sea, true) : spoilRate(sea, true) * dt;
     const notes = [...ageBag(this.save.bag, bagAmt), ...ageBag(this.ice, iceAmt)];
-    if (notes[0]) this.toast(notes[0]);
+    if (notes[0]) this.toast(notes.slice(0, 2).join(" · "));
     for (const p of this.players.values()) {
       if (!p.held || p.held.startsWith("dish:") || p.held.split(":")[0] === "torch") continue;
       const held = parseHeld(p.held);

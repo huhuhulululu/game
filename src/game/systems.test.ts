@@ -1191,6 +1191,138 @@ describe("living systems", () => {
     assert.equal(w.rushed, true);
     assert.ok(w.toasts.some((t) => t.text.includes("堂口热起来") && t.text.includes("端")));
     assert.ok(!w.toasts.some((t) => t.text.includes("两个人得传菜")));
+
+    const far = new World("RUSH1B");
+    far.addPlayer("a", "暖", "left");
+    far.addPlayer("b", "阿右", "right");
+    const fa = far.players.get("a");
+    const fb = far.players.get("b");
+    assert.ok(fa && fb);
+    fa.zone = "kitchen";
+    fb.zone = "valley";
+    far.orders = [
+      { customer: "wander", recipe: "herb-tea", t: 20 },
+      { customer: "wander", recipe: "herb-tea", t: 20 },
+    ];
+    far.tick(0.05);
+    assert.ok(far.toasts.some((t) => t.text.includes("堂口热起来") && t.text.includes("端")));
+    assert.ok(!far.toasts.some((t) => t.text.includes("两个人得传菜")));
+
+    const pair = new World("RUSH2");
+    pair.addPlayer("a", "暖", "left");
+    pair.addPlayer("b", "阿右", "right");
+    const pa = pair.players.get("a");
+    const pb = pair.players.get("b");
+    assert.ok(pa && pb);
+    pa.zone = "kitchen";
+    pb.zone = "kitchen";
+    pair.orders = [
+      { customer: "wander", recipe: "herb-tea", t: 20 },
+      { customer: "wander", recipe: "herb-tea", t: 20 },
+    ];
+    pair.tick(0.05);
+    assert.ok(pair.toasts.some((t) => t.text.includes("两个人得传菜")));
+  });
+
+  it("a random ticket with the same dish as the board does not wipe the combo", () => {
+    const w = new World("COMBO2");
+    w.addPlayer("a", "阿左", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.boardOn = true;
+    w.boardTickets = ["herb-tea", "mushroom-soup"];
+    w.rushed = true;
+    w.orders = [
+      { customer: "wander", recipe: "herb-tea", t: 30, board: true },
+      { customer: "wander", recipe: "mushroom-soup", t: 30, board: true },
+      { customer: "wander", recipe: "herb-tea", t: 30 },
+    ];
+    const win = w.kitchenMap.find("W")[0];
+    const stand = tileCenter(win.x - 1, win.y);
+    p.zone = "kitchen";
+    p.x = stand.x;
+    p.y = stand.y;
+    p.facing = 1;
+    p.held = "dish:herb-tea";
+    tap(w, "a");
+    assert.equal(w.combo, 1);
+    assert.equal(w.boardServed, 1);
+    p.held = "dish:herb-tea";
+    tap(w, "a");
+    assert.equal(w.combo, 1);
+    assert.equal(w.boardServed, 1);
+    p.held = "dish:mushroom-soup";
+    tap(w, "a");
+    assert.equal(w.combo, 2);
+  });
+
+  it("the pot, ice, stove and bag speak when a night kitchen move fails or spoils", () => {
+    const w = new World("KITCH");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.zone = "kitchen";
+    const pot = w.kitchenMap.find("Q")[0];
+    assert.ok(pot);
+    standFacing(p, pot);
+    w.potReady = "herb-tea";
+    tap(w, "a");
+    assert.equal(p.held, "dish:herb-tea");
+    assert.equal(w.potReady, null);
+    assert.ok(w.toasts.some((t) => t.text.includes("取出") && t.text.includes("山草茶")));
+    w.potReady = "herb-tea";
+    p.held = "ore:ready:100";
+    tap(w, "a");
+    assert.equal(p.held, "ore:ready:100");
+    assert.equal(w.potReady, "herb-tea");
+    assert.ok(w.toasts.some((t) => t.text.includes("满") && t.text.includes("锅")));
+
+    const ice = w.kitchenMap.find("R")[0];
+    assert.ok(ice);
+    const iceStand = tileCenter(ice.x, ice.y - 1);
+    p.x = iceStand.x;
+    p.y = iceStand.y;
+    p.facing = 2;
+    p.held = "dish:herb-tea";
+    w.ice = [{ id: "herb", n: 1, fresh: 80 }];
+    assert.ok(w.snapshot("a").prompt.includes("满"));
+    tap(w, "a");
+    assert.equal(p.held, "dish:herb-tea");
+    assert.equal(w.ice[0]?.id, "herb");
+    assert.ok(w.toasts.some((t) => t.text.includes("满") && t.text.includes("冰柜")));
+
+    const stove = w.kitchenMap.find("U")[0];
+    assert.ok(stove);
+    w.orders = [
+      { customer: "wander", recipe: "herb-tea", t: 40 },
+      { customer: "wander", recipe: "herb-tea", t: 40 },
+    ];
+    w.rushed = true;
+    w.stations.set(`s:${stove.x},${stove.y}`, {
+      key: `s:${stove.x},${stove.y}`,
+      item: "meat:cooked:100",
+      t: 5.9,
+      need: 1,
+      ready: true,
+    });
+    for (let i = 0; i < 8; i++) w.tick(0.05);
+    assert.equal(w.stations.get(`s:${stove.x},${stove.y}`)?.item, "mush:ready");
+    assert.ok(w.toasts.some((t) => t.text.includes("糊")));
+    standFacing(p, stove);
+    p.held = "ore:ready:100";
+    tap(w, "a");
+    assert.equal(p.held, "ore:ready:100");
+    assert.equal(w.stations.get(`s:${stove.x},${stove.y}`)?.item, "mush:ready");
+    assert.ok(w.toasts.some((t) => t.text.includes("满") && t.text.includes("炉")));
+
+    p.held = "fish:raw:40.05";
+    w.save.bag = [
+      { id: "herb", n: 1, fresh: 0.05 },
+      { id: "mushroom", n: 1, fresh: 0.05 },
+    ];
+    w.tick(0.5);
+    assert.ok(w.toasts.some((t) => t.text.includes("蔫")), w.toasts.map((t) => t.text).join(" | "));
+    assert.ok(w.toasts.some((t) => t.text.includes("糊涂") && t.text.includes(" · ")));
   });
 
   it("a solo wild night says the dark bites, and Charlie does not bite the valley gate", () => {
