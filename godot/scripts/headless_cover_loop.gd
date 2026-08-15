@@ -210,7 +210,9 @@ func _drive_play() -> void:
 				cut = Vector2i(1, 3)
 			var drive6 := _drive(cut, 3)
 			move = drive6["move"]
-			if bool(drive6["here"]) or _prompt() == "切" or _prompt() == "切着":
+			if _prompt() == "出厨房" or _prompt() == "吃":
+				move = _seek(_center(2, 3))
+			elif bool(drive6["here"]) or _prompt() == "切" or _prompt() == "切着":
 				move = _nudge(int(drive6["facing"])) if _prompt() != "切" and _prompt() != "切着" else Vector2.ZERO
 				if _prompt() == "切" and _act_once():
 					act = true
