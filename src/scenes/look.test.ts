@@ -6,6 +6,7 @@ import {
   cellFill,
   drawActor,
   drawCell,
+  drawMeadow,
   drawPlot,
   houseClusters,
   isTallLook,
@@ -203,6 +204,7 @@ describe("look", () => {
     assert.equal(blitFit(g, "cabin", 0, 0, 144, 108), false);
     assert.equal(blitPatch(g, "grass", 0, 0, 36, 36, 3, 4), false);
     assert.equal(blitWrap(g, "grass", 0, 0, 36, 36), false);
+    assert.equal(drawMeadow(g, 0, 0, 144, 108), false);
     drawCell(g, "T", 0, 0, "#1e2c22", 0, "valley");
     assert.ok(g.fills.some((c) => c.includes("5a3a22") || c.includes("2a4a28")));
   });

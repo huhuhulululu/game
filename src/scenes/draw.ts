@@ -143,7 +143,13 @@ function tuft(g: Ctx, x: number, y: number, s: number, c: string): void {
   tri(g, x, y + s, x + s * 0.45, y, x + s * 0.9, y + s, c);
 }
 
-function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number): void {
+export function drawMeadow(g: Ctx, x: number, y: number, w: number, h: number): boolean {
+  g.imageSmoothingEnabled = true;
+  if ("imageSmoothingQuality" in g) g.imageSmoothingQuality = "high";
+  return blitWrap(g, "grass", x, y, w, h);
+}
+
+function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number, skipGrass = false): void {
   if (zone === "kitchen") {
     if (blitWrap(g, "wood", x, y, TILE, TILE)) {
       g.strokeStyle = "rgba(50,30,18,0.22)";
@@ -186,18 +192,20 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
       tuft(g, x + 18, y + 8, 18, "#7a7a38");
       return;
     }
+    if (skipGrass) return;
     if (blitWrap(g, "grass", x, y, TILE, TILE)) return;
     px(g, x, y, TILE, TILE, "#2e3a28");
     tuft(g, x + 8, y + 14, 12, "#3a4a30");
     return;
   }
   if (ch === ",") {
-    if (blitWrap(g, "path", x, y, TILE, TILE)) return;
+    if (blitWrap(g, "path", x - 1, y - 1, TILE + 2, TILE + 2)) return;
     px(g, x, y, TILE, TILE, "#8a7a58");
     oval(g, x + 18, y + 18, 14, 6, "#7a6a48");
     oval(g, x + 10, y + 10, 4, 3, "#6a5a38");
     return;
   }
+  if (skipGrass) return;
   if (blitWrap(g, "grass", x, y, TILE, TILE)) return;
   px(g, x, y, TILE, TILE, "#3f6d45");
   const n = hash(x, y);
@@ -228,7 +236,7 @@ function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
 }
 
 function water(g: Ctx, x: number, y: number, now: number): void {
-  if (!blitWrap(g, "water", x, y, TILE, TILE)) {
+  if (!blitWrap(g, "water", x - 1, y - 1, TILE + 2, TILE + 2)) {
     px(g, x, y, TILE, TILE, "#1a5470");
     px(g, x, y + 16, TILE, 20, "#143e54");
   }
@@ -607,6 +615,7 @@ export function drawCell(
   zone = "valley",
   near?: Near,
   part: DrawPart = "all",
+  skipGrass = false,
 ): void {
   g.imageSmoothingEnabled = true;
   if ("imageSmoothingQuality" in g) g.imageSmoothingQuality = "high";
@@ -626,7 +635,7 @@ export function drawCell(
     else if (look === "wall") wall(g, x, y, zone);
     else if (look === "ground") px(g, x, y, TILE, TILE, fill || "#3d4a36");
     else if (floor) {
-      ground(g, zone, ch, x, y, now);
+      ground(g, zone, ch, x, y, now, skipGrass);
       if (fill && fill !== cellFill(ch, zone)) {
         g.fillStyle = fill;
         g.globalAlpha = 0.2;
@@ -634,7 +643,7 @@ export function drawCell(
         g.globalAlpha = 1;
       }
     } else {
-      ground(g, zone, look === "plot" ? "," : ".", x, y, now);
+      ground(g, zone, look === "plot" ? "," : ".", x, y, now, skipGrass);
     }
   }
   if (part !== "ground" && !floor && look !== "plot") paintProp(g, look, ch, x, y, now, zone, near);
@@ -1088,29 +1097,56 @@ export function drawFringe(g: Ctx, ch: string, near: Near, x: number, y: number,
   const wash = (x0: number, y0: number, x1: number, y1: number, from: string) => {
     const grd = g.createLinearGradient(x0, y0, x1, y1);
     grd.addColorStop(0, from);
+    grd.addColorStop(0.55, from.replace(/[\d.]+\)$/, "0.12)"));
     grd.addColorStop(1, "rgba(0,0,0,0)");
     g.fillStyle = grd;
     g.fillRect(Math.min(x0, x1), Math.min(y0, y1), x0 === x1 ? TILE : Math.abs(x1 - x0), y0 === y1 ? TILE : Math.abs(y1 - y0));
   };
+  const scallop = (cx: number, cy: number, rx: number, ry: number, c: string) => oval(g, cx, cy, rx, ry, c);
   if (wet(look)) {
-    if (!wet(n)) wash(x, y, x, y + 14, "rgba(47,90,56,0.38)");
-    if (!wet(s)) wash(x, y + TILE, x, y + TILE - 14, "rgba(47,90,56,0.34)");
-    if (!wet(e)) wash(x + TILE, y, x + TILE - 14, y, "rgba(47,90,56,0.3)");
-    if (!wet(w)) wash(x, y, x + 14, y, "rgba(47,90,56,0.3)");
+    if (!wet(n)) {
+      wash(x, y, x, y + 20, "rgba(47,90,56,0.42)");
+      scallop(x + 8, y + 2, 11, 7, "rgba(47,90,56,0.22)");
+      scallop(x + 22, y + 3, 12, 8, "rgba(58,80,48,0.2)");
+    }
+    if (!wet(s)) {
+      wash(x, y + TILE, x, y + TILE - 20, "rgba(47,90,56,0.38)");
+      scallop(x + 10, y + 34, 12, 7, "rgba(47,90,56,0.2)");
+      scallop(x + 26, y + 33, 10, 6, "rgba(58,80,48,0.18)");
+    }
+    if (!wet(e)) wash(x + TILE, y, x + TILE - 18, y, "rgba(47,90,56,0.32)");
+    if (!wet(w)) wash(x, y, x + 18, y, "rgba(47,90,56,0.32)");
     void now;
     return;
   }
   if (look === "path" || look === "plot") {
-    if (n === "grass") wash(x, y, x, y + 10, "rgba(47,90,56,0.28)");
-    if (s === "grass") wash(x, y + TILE, x, y + TILE - 10, "rgba(47,90,56,0.28)");
-    if (w === "grass") wash(x, y, x + 10, y, "rgba(47,90,56,0.24)");
-    if (e === "grass") wash(x + TILE, y, x + TILE - 10, y, "rgba(47,90,56,0.24)");
+    if (n === "grass") wash(x, y, x, y + 14, "rgba(47,90,56,0.36)");
+    if (s === "grass") wash(x, y + TILE, x, y + TILE - 14, "rgba(47,90,56,0.36)");
+    if (w === "grass") wash(x, y, x + 14, y, "rgba(47,90,56,0.3)");
+    if (e === "grass") wash(x + TILE, y, x + TILE - 14, y, "rgba(47,90,56,0.3)");
+    if (wet(n)) {
+      wash(x, y, x, y + 18, "rgba(26,68,88,0.34)");
+      scallop(x + 12, y + 2, 14, 8, "rgba(26,68,88,0.2)");
+      scallop(x + 26, y + 3, 11, 7, "rgba(20,50,70,0.16)");
+    }
+    if (wet(s)) {
+      wash(x, y + TILE, x, y + TILE - 18, "rgba(26,68,88,0.34)");
+      scallop(x + 10, y + 34, 14, 8, "rgba(26,68,88,0.2)");
+      scallop(x + 24, y + 33, 12, 7, "rgba(20,50,70,0.16)");
+    }
   }
   if (look === "grass" && (wet(n) || wet(s) || wet(e) || wet(w))) {
-    if (wet(s)) wash(x, y + TILE, x, y + TILE - 16, "rgba(26,68,88,0.32)");
-    if (wet(n)) wash(x, y, x, y + 16, "rgba(26,68,88,0.28)");
-    if (wet(e)) wash(x + TILE, y, x + TILE - 16, y, "rgba(26,68,88,0.26)");
-    if (wet(w)) wash(x, y, x + 16, y, "rgba(26,68,88,0.26)");
+    if (wet(s)) {
+      wash(x, y + TILE, x, y + TILE - 22, "rgba(26,68,88,0.36)");
+      scallop(x + 8, y + 32, 13, 8, "rgba(26,68,88,0.2)");
+      scallop(x + 22, y + 33, 12, 7, "rgba(20,50,70,0.16)");
+    }
+    if (wet(n)) {
+      wash(x, y, x, y + 22, "rgba(26,68,88,0.32)");
+      scallop(x + 14, y + 4, 13, 8, "rgba(26,68,88,0.18)");
+    }
+    if (wet(e)) wash(x + TILE, y, x + TILE - 20, y, "rgba(26,68,88,0.28)");
+    if (wet(w)) wash(x, y, x + 20, y, "rgba(26,68,88,0.28)");
   }
 }
 

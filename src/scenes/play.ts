@@ -14,6 +14,7 @@ import {
   drawGround,
   drawHouseCluster,
   drawLamp,
+  drawMeadow,
   drawNightVignette,
   drawPlot,
   drawSky,
@@ -130,6 +131,10 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const padCh = snap.zone === "mine" ? "#" : snap.zone === "kitchen" ? "." : ".";
     const at = (tx: number, ty: number) => (ty >= 0 && ty < mh && tx >= 0 && tx < mw ? rows[ty][tx] : padCh);
     const crops: { x: number; y: number; i: number }[] = [];
+    const meadow =
+      snap.zone !== "kitchen" &&
+      snap.zone !== "mine" &&
+      drawMeadow(g, x0 * TILE, y0 * TILE, (x1 - x0 + 1) * TILE, (y1 - y0 + 1) * TILE);
     for (let y = y0; y <= y1; y++) {
       for (let x = x0; x <= x1; x++) {
         const inside = y >= 0 && y < mh && x >= 0 && x < mw;
@@ -138,7 +143,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const py = y * TILE;
         const near = { n: at(x, y - 1), s: at(x, y + 1), e: at(x + 1, y), w: at(x - 1, y) };
         if (!inside) {
-          drawGround(g, padCh, px, py, now, snap.zone);
+          if (!meadow) drawGround(g, padCh, px, py, now, snap.zone);
           continue;
         }
         const key = y * mw + x;
@@ -151,8 +156,10 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const look = tileLook(ch, snap.zone);
         const tall = isTallLook(look);
         const fill = cellFill(ch, snap.zone);
-        if (tall) drawCell(g, ch, px, py, fill, now, snap.zone, near, "ground");
-        else drawCell(g, ch, px, py, fill, now, snap.zone, near, "all");
+        if (look === "grass" && meadow) {
+          /* meadow already covers this cell */
+        } else if (tall) drawCell(g, ch, px, py, fill, now, snap.zone, near, "ground", meadow);
+        else drawCell(g, ch, px, py, fill, now, snap.zone, near, "all", meadow);
         if (!hidden) drawFringe(g, ch, near, px, py, snap.zone, now);
         if (hidden) {
           g.fillStyle = "rgba(6,10,16,0.78)";
