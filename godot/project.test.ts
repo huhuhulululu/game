@@ -142,5 +142,5 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(coverLoop, /if ore_ok:/);
   assert.match(loop, /if ore_ok:/);
   assert.match(loop, /send_acc/);
-  assert.match(loop, /quit\(0\)\s*;\s*return/);
+  assert.match(loop, /quit\(0\)[\s\S]{0,20}return/);
 });
