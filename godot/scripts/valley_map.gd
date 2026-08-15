@@ -138,8 +138,9 @@ func _shore() -> void:
 
 
 func _docks() -> void:
-	_prop("prop-dock.png", 4.2, _bend(4.2, "creek") - 0.28, 56, 36, 4, 0.06, 0.98)
-	_prop("prop-dock-b.png", 11.2, _bend(11.2, "creek") - 0.28, 56, 36, 4, 0.06, 0.98)
+	# hung() puts the node at the sprite top. Deck sits ~0.74 down the 36px dock.
+	_prop("prop-dock.png", 4.2, _bend(4.2, "creek") - 0.82, 56, 36, 4, 0.06, 0.98)
+	_prop("prop-dock-b.png", 11.2, _bend(11.2, "creek") - 0.82, 56, 36, 4, 0.06, 0.98)
 
 
 func _bits() -> void:

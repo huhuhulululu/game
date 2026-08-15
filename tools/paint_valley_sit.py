@@ -343,19 +343,29 @@ def paint_floor() -> Image.Image:
     creek_y = creek_center(wx)
     creek_d = np.abs(wy - creek_y)
     creek_half = 12.0 + 8.0 * n2 + 4.0 * n
-    water_m = np.clip(1.0 - (creek_d - creek_half * 0.25) / (creek_half + 8.0), 0, 1) ** 0.70
+    # Opaque dusk water. No grass multiply — that turned the creek into a stain.
+    water_m = np.clip(1.0 - (creek_d - creek_half * 0.12) / (creek_half + 5.0), 0, 1) ** 0.48
     water_m *= span
-    depth = np.clip(1.0 - creek_d / np.maximum(creek_half + 6.0, 1.0), 0, 1)
-    ripple = 0.86 + 0.14 * np.sin((wx / 15.0 + n * 3.0) * np.pi)
-    spec = np.clip(np.sin((wx / 12.0 + wy / 8.0 + n2 * 3.6) * np.pi) * 0.5 + 0.5, 0, 1)
-    spec *= (depth ** 1.35) * (0.22 + 0.78 * n)
-    body = np.array([0.22, 0.40, 0.34], dtype=np.float32)
-    deep = np.array([0.14, 0.28, 0.26], dtype=np.float32)
-    gloss = np.array([0.80, 0.74, 0.48], dtype=np.float32)
-    wet = body * (0.40 + 0.60 * depth)[..., None] + deep * (0.35 * (1.0 - depth))[..., None]
-    wet = np.clip(wet * (0.62 + 0.38 * (g / np.maximum(g.max(), 1e-5))) * ripple[..., None], 0, 1)
-    wet = np.clip(wet + gloss * spec[..., None] * 0.62, 0, 1)
-    rgb = rgb * (1.0 - water_m * 0.97)[..., None] + wet * (water_m * 0.97)[..., None]
+    depth = np.clip(1.0 - creek_d / np.maximum(creek_half + 2.0, 1.0), 0, 1)
+    bank_m = np.clip(1.0 - np.abs(creek_d - (creek_half + 1.5)) / 6.5, 0, 1) ** 1.05
+    bank_m *= (1.0 - np.clip(water_m, 0, 1) * 0.82) * span * (1.0 - path_m * 0.92)
+    bank_c = np.clip(d * np.array([0.86, 0.62, 0.40], dtype=np.float32) * (0.58 + 0.16 * n[..., None]), 0, 1)
+    rgb = rgb * (1.0 - bank_m * 0.90)[..., None] + bank_c * (bank_m * 0.90)[..., None]
+    north_lip = np.clip(1.0 - np.abs(wy - (creek_y - creek_half * 0.70)) / 3.0, 0, 1) * span
+    rgb = rgb * (1.0 - north_lip * 0.28)[..., None]
+    flow = np.sin((wx * 0.072 + n2 * 1.4) * np.pi)
+    cross = np.sin((wx * 0.038 - wy * 0.09 + n * 0.9) * np.pi)
+    ripple = 0.93 + 0.07 * flow
+    spec = np.clip(0.42 + 0.58 * cross, 0, 1) * (depth ** 1.7) * 0.22
+    shade = np.clip(0.80 + 0.20 * np.clip((wy - creek_y) / np.maximum(creek_half, 1.0), -1.0, 1.0), 0.68, 1.06)
+    body = np.array([0.16, 0.42, 0.52], dtype=np.float32)
+    deep = np.array([0.08, 0.26, 0.38], dtype=np.float32)
+    gloss = np.array([0.72, 0.66, 0.50], dtype=np.float32)
+    wet = body * (0.42 + 0.58 * depth)[..., None] + deep * (0.48 * (1.0 - depth))[..., None]
+    wet = np.clip(wet * ripple[..., None] * shade[..., None], 0, 1)
+    wet = np.clip(wet + gloss * spec[..., None], 0, 1)
+    cover = np.clip(water_m * 1.04, 0, 0.99)
+    rgb = rgb * (1.0 - cover)[..., None] + wet * cover[..., None]
 
     ax = np.clip(xx / float(pad), 0, 1) * np.clip((w - 1 - xx) / float(pad), 0, 1)
     ay = np.clip(yy / float(pad), 0, 1) * np.clip((h - 1 - yy) / float(pad), 0, 1)
