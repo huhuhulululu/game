@@ -139,7 +139,7 @@ export function blitPatch(
   return true;
 }
 
-const TEXEL = 2.15;
+const TEXEL = 1.25;
 
 function wrapBlit(
   g: CanvasRenderingContext2D,
