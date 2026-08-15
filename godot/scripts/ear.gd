@@ -10,6 +10,7 @@ const RATE := 22050
 
 var muted := false
 var last_heard: PackedStringArray = []
+var _unlocked := false
 
 var _zone := ""
 var _x := 0.0
@@ -39,10 +40,22 @@ func _ready() -> void:
 
 func set_muted(v: bool) -> void:
 	muted = v
+	unlock()
 	if not muted:
 		return
 	for p in _voices:
 		p.stop()
+
+
+func unlock() -> void:
+	if _unlocked or _voices.is_empty():
+		return
+	_unlocked = true
+	var p: AudioStreamPlayer = _voices[0]
+	p.stream = _clip.get("step")
+	p.volume_db = -80.0
+	p.play()
+	p.volume_db = 0.0
 
 
 func hear(snap: Dictionary) -> PackedStringArray:

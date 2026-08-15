@@ -227,6 +227,7 @@ test("Godot ear is five thin sounds and one mute that does not change the world"
   assert.match(ear, /door/);
   assert.match(ear, /green/);
   assert.match(ear, /muted/);
+  assert.match(ear, /unlock/);
   assert.match(ear, /0\.38/);
   assert.match(ear, /0\.72/);
   assert.match(ear, /does not touch the world|不改规则|does not change the world/);

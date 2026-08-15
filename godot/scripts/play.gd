@@ -188,6 +188,8 @@ func _on_pad(e: InputEvent) -> void:
 	if e is InputEventMouseButton:
 		_stick_down = e.pressed
 		_stick_origin = e.position
+		if e.pressed and _ear:
+			_ear.unlock()
 		if not e.pressed:
 			_stick_v = Vector2.ZERO
 	elif e is InputEventMouseMotion and _stick_down:
@@ -211,10 +213,14 @@ func _unhandled_input(e: InputEvent) -> void:
 	if e.is_action_pressed("act"):
 		_act = true
 		_held = true
+		if _ear:
+			_ear.unlock()
 	if e.is_action_released("act"):
 		_held = false
 	if e.is_action_pressed("shout"):
 		_ping = true
+		if _ear:
+			_ear.unlock()
 
 
 func _keys() -> Vector2:
