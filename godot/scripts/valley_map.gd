@@ -88,7 +88,7 @@ func _tex(name: String) -> Texture2D:
 
 
 func _paint() -> void:
-	# People, two houses, land, creek.
+	# People, two houses, land, creek. Cover trees, lamps, shore.
 	var sz := size_px()
 	var pad := 420.0
 	var sheet := _tex("ground-valley.png")
@@ -104,6 +104,9 @@ func _paint() -> void:
 	add_child(bed)
 	_land()
 	_houses()
+	_ridge()
+	_shore()
+	_bits()
 
 
 func _prop(name: String, gx: float, gy: float, w: float, h: float, z: int, fog := 0.03, sit := 0.97) -> void:
@@ -136,13 +139,44 @@ func _houses() -> void:
 	_prop("prop-lodge.png", 16.20, 3.85, 220, 168, 8, 0.03, 0.93)
 
 
+func _hang(name: String, gx: float, gy: float, w: float, h: float, z: int, fog := 0.02) -> void:
+	var s := Sprite2D.new()
+	var tex := _tex(name)
+	s.texture = tex
+	s.centered = false
+	s.position = Vector2(gx * TILE, gy * TILE)
+	s.z_index = z
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	if tex:
+		s.scale = Vector2(w / float(tex.get_width()), h / float(tex.get_height()))
+	s.material = Look.prop_mat(fog)
+	add_child(s)
+
+
 func _ridge() -> void:
-	# People, two houses, land, creek. No second tree language.
-	pass
+	# Cover trees from the same painting. Few and large. No pixel balls.
+	_prop("prop-cover-tree.png", 0.35, 1.55, 148, 208, 6, 0.04, 0.94)
+	_prop("prop-cover-tree.png", 1.85, 3.45, 142, 198, 7, 0.03, 0.94)
+	_prop("prop-cover-tree-b.png", 11.70, 0.85, 168, 204, 6, 0.04, 0.93)
+	_prop("prop-cover-tree-b.png", 21.55, 2.55, 158, 196, 7, 0.03, 0.93)
+	_prop("prop-cover-tree.png", 22.60, 1.15, 136, 188, 6, 0.04, 0.94)
 
 
 func _shore() -> void:
-	pass
+	# Cover creek stones and path verge. Same painting.
+	for item in [
+		[3.10, 188.0, 82.0],
+		[8.20, 200.0, 88.0],
+		[14.10, 176.0, 78.0],
+		[20.40, 190.0, 84.0],
+		[25.80, 168.0, 74.0],
+	]:
+		var gx: float = item[0]
+		var gy := _bend(gx, "creek") - 0.40
+		_prop("prop-cover-shore.png", gx, gy, item[1], item[2], 4, 0.03, 0.90)
+	_prop("prop-cover-verge.png", 5.15, _bend(5.15, "path") - 0.10, 118, 56, 3, 0.03, 0.88)
+	_prop("prop-cover-verge.png", 12.55, _bend(12.55, "path") - 0.08, 110, 54, 3, 0.03, 0.88)
+	_prop("prop-cover-verge.png", 18.35, _bend(18.35, "path") - 0.12, 116, 56, 3, 0.03, 0.88)
 
 
 func _docks() -> void:
@@ -152,5 +186,6 @@ func _docks() -> void:
 
 
 func _bits() -> void:
-	# People, two houses, land, creek.
-	pass
+	# Cover lamps on the two cover roofs. No stall, no anvil.
+	_hang("prop-cover-lamp.png", 6.82, 6.52, 38, 50, 11, 0.02)
+	_hang("prop-cover-lamp.png", 17.18, 5.12, 42, 54, 11, 0.02)
