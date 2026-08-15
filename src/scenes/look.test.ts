@@ -165,6 +165,9 @@ describe("look", () => {
     };
     drawActor(g, a, 0, 0, 0);
     assert.ok(g.fills.length >= 6);
+    const yell = mockCtx();
+    drawActor(yell, { ...a, ping: 1.6 }, 0, 0, 0);
+    assert.ok(yell.fills.some((c) => c.includes("244,231,210")));
     const walk = mockCtx();
     drawActor(walk, { ...a, facing: 2 }, 0, 0, 400, true);
     assert.ok(walk.fills.length >= 6);
@@ -247,6 +250,12 @@ describe("look", () => {
     assert.ok(g.fills.length >= 4);
     const tiny = g.rects.filter((r) => r[2] <= 4 && r[3] <= 4).length;
     assert.ok(tiny < 8);
+    const quiet = mockCtx();
+    drawAtlas(quiet, VALLEY, "valley", 8, { x: 40, y: 40 }, { x: 80, y: 80 });
+    const lit = mockCtx();
+    drawAtlas(lit, VALLEY, "valley", 8, { x: 40, y: 40 }, { x: 80, y: 80, ping: 1.6 });
+    assert.ok(lit.fills.some((c) => c.includes("244,231,210")));
+    assert.ok(!quiet.fills.some((c) => c.includes("244,231,210")));
   });
 
   it("does not stamp a bush on every valley wall cell", () => {

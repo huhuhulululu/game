@@ -19,7 +19,7 @@ import { World } from "../sim/world";
 import { buildMap, mineTemplate, TILE, tileCenter, VALLEY } from "../world/maps";
 import { createAudio } from "./audio";
 import { pickAmbient, tickFeel } from "./feel";
-import { generateWild } from "../world/wild";
+import { generateWild, WILD_W } from "../world/wild";
 import type { WorldSnap } from "../sim/net";
 
 function tap(w: World, id: string): void {
@@ -659,7 +659,103 @@ describe("living systems", () => {
     w.setInput("a", { x: 0, y: 0, action: false, held: false, ping: true });
     const snap = w.snapshot("a");
     assert.ok((snap.actors[0]?.ping ?? 0) > 0);
-    assert.ok(w.toasts.some((t) => t.text.includes("喊")));
+    assert.equal(w.toasts.some((t) => t.text.includes("喊")), false);
+  });
+
+  it("a shout lights the other phone, and a solo shout does not invent a second voice", () => {
+    const pair = new World("YELL");
+    pair.addPlayer("a", "暖", "left");
+    pair.addPlayer("b", "松", "right");
+    const a = pair.players.get("a");
+    const b = pair.players.get("b");
+    assert.ok(a && b);
+    a.x = 200;
+    a.y = 200;
+    b.x = 240;
+    b.y = 200;
+    pair.setInput("a", { x: 0, y: 0, action: false, held: false, ping: true });
+    const hers = pair.snapshot("b");
+    const mine = pair.snapshot("a");
+    const voice = hers.actors.find((p) => p.id === "a");
+    assert.ok((voice?.ping ?? 0) > 0);
+    assert.ok((hers.partner?.ping ?? 0) > 0);
+    assert.equal(mine.partner?.name, "松");
+    assert.ok(pair.toasts.some((t) => t.text.includes("暖") && t.text.includes("喊")));
+    assert.equal(pair.toasts.some((t) => t.text.includes("松") && t.text.includes("喊")), false);
+
+    const solo = new World("YELL1");
+    solo.addPlayer("a", "暖", "left");
+    solo.setInput("a", { x: 0, y: 0, action: false, held: false, ping: true });
+    const one = solo.snapshot("a");
+    assert.ok((one.actors[0]?.ping ?? 0) > 0);
+    assert.equal(one.partner?.name, "还没来");
+    assert.equal(one.partner?.online, false);
+    assert.equal(solo.toasts.some((t) => t.text.includes("喊")), false);
+  });
+
+  it("walking near a partner writes the seen path into both maps", () => {
+    const w = new World("FOG2");
+    w.addPlayer("a", "暖", "left");
+    w.addPlayer("b", "松", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    w.wildMap = buildMap(generateWild(7), "wild");
+    const leave = w.wildMap.find("L")[0];
+    assert.ok(leave);
+    a.zone = "wild";
+    b.zone = "wild";
+    a.x = tileCenter(leave.x + 1, leave.y).x;
+    a.y = tileCenter(leave.x + 1, leave.y).y;
+    b.x = tileCenter(Math.min(WILD_W - 4, leave.x + 22), leave.y).x;
+    b.y = tileCenter(Math.min(WILD_W - 4, leave.x + 22), leave.y).y;
+    w.tick(0.05);
+    const farA = w.snapshot("a").revealed;
+    const farB = w.snapshot("b").revealed;
+    assert.ok(farA.length > 4);
+    assert.ok(farB.length > 4);
+    assert.ok(farA.some((k) => !farB.includes(k)));
+    b.x = a.x + 12;
+    b.y = a.y;
+    w.tick(0.05);
+    const nearB = w.snapshot("b").revealed;
+    const nearA = w.snapshot("a").revealed;
+    assert.ok(farA.every((k) => nearB.includes(k)));
+    assert.ok(farB.every((k) => nearA.includes(k)));
+  });
+
+  it("a partner elsewhere keeps a place line, and a solo phone does not pretend someone is out there", () => {
+    const w = new World("WHERE");
+    w.addPlayer("a", "暖", "left");
+    w.addPlayer("b", "松", "right");
+    const a = w.players.get("a");
+    const b = w.players.get("b");
+    assert.ok(a && b);
+    const dock = w.valley.find("D")[0];
+    const plot = w.valley.find("P")[0];
+    assert.ok(dock && plot);
+    a.x = tileCenter(plot.x, plot.y).x;
+    a.y = tileCenter(plot.x, plot.y).y;
+    b.x = tileCenter(dock.x, dock.y).x;
+    b.y = tileCenter(dock.x, dock.y).y;
+    const shore = w.snapshot("a");
+    assert.equal(shore.partner?.online, true);
+    assert.equal(shore.partner?.where, "河边");
+    assert.equal(shore.partner?.name, "松");
+    b.zone = "kitchen";
+    assert.equal(w.snapshot("a").partner?.where, "客栈");
+    w.markAway("b");
+    const gone = w.snapshot("a");
+    assert.equal(gone.partner?.online, false);
+    assert.equal(gone.partner?.name, "松");
+    assert.ok(gone.partner?.where);
+
+    const solo = new World("WHERE1");
+    solo.addPlayer("a", "暖", "left");
+    const one = solo.snapshot("a");
+    assert.equal(one.partner?.name, "还没来");
+    assert.equal(one.partner?.online, false);
+    assert.equal(one.partner?.where, undefined);
   });
 
   it("reclaim only takes away seats and never steals a live one", () => {

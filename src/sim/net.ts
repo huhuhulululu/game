@@ -61,7 +61,7 @@ export interface WorldSnap {
   pot: string[];
   potReady: string;
   plots: { seed?: string; stage: number }[];
-  partner: { name: string; zone: Zone; online: boolean; biome?: string; ping?: number } | null;
+  partner: { name: string; zone: Zone; online: boolean; biome?: string; ping?: number; where?: string } | null;
   zone: Zone;
   tiles: string[];
   floor: number;

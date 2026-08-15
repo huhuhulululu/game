@@ -833,6 +833,7 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
   if (a.torch) drawLamp(g, x, y, 52, 0.42);
   if (a.ping > 0) {
     const r = 16 + (1.6 - Math.min(1.6, a.ping)) * 26;
+    oval(g, x, y, r, r * 0.72, `rgba(244,231,210,${Math.min(0.28, a.ping * 0.18)})`);
     g.strokeStyle = `rgba(244,231,210,${Math.min(0.55, a.ping * 0.38)})`;
     g.lineWidth = 2;
     g.beginPath();
@@ -1484,7 +1485,7 @@ export function drawAtlas(
   zone: string,
   cell: number,
   you: { x: number; y: number },
-  partner: { x: number; y: number } | null,
+  partner: { x: number; y: number; ping?: number } | null,
   fog?: { seen: Set<number>; vis: Set<number> },
   fires: number[] = [],
 ): void {
@@ -1549,7 +1550,14 @@ export function drawAtlas(
     oval(g, mx, my, Math.max(3.2, cell * 0.46), Math.max(2.6, cell * 0.38), color);
   };
   mark(you.x, you.y, "#c45c26");
-  if (partner) mark(partner.x, partner.y, "#3f6d5c");
+  if (partner) {
+    if ((partner.ping ?? 0) > 0) {
+      const mx = (partner.x / TILE) * cell;
+      const my = (partner.y / TILE) * cell;
+      oval(g, mx, my, Math.max(6, cell * 0.9), Math.max(5, cell * 0.75), "rgba(244,231,210,0.5)");
+    }
+    mark(partner.x, partner.y, "#3f6d5c");
+  }
 }
 
 export function plotIndex(tiles: string[], tx: number, ty: number): number {

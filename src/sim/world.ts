@@ -257,8 +257,8 @@ export class World {
     if (input.action && !prev) this.act(p);
     if (input.ping && p.ping <= 0) {
       p.ping = 1.6;
-      const other = this.other(p);
-      this.toast(other ? `${p.name} 在${zoneName(p.zone)}喊了一声` : `${p.name} 喊了一声`);
+      const live = this.present().find((q) => q.id !== p.id);
+      if (live) this.toast(`${p.name} 在${this.whereOf(p)}喊了一声`);
     }
   }
 
@@ -392,6 +392,7 @@ export class World {
             online: !this.away.has(other.id),
             biome: other.zone === "wild" ? this.biomeAt(other) : undefined,
             ping: other.ping,
+            where: this.whereOf(other, you),
           }
         : { name: "还没来", zone: "valley", online: false },
       zone,
@@ -2141,14 +2142,46 @@ export class World {
             this.explored[p.side].add(key);
             if (p.zone === "wild") fresh += 1;
           }
-          if (share) {
-            const o = pair.find((q) => q.id !== p.id);
-            if (o) this.explored[o.side].add(key);
-          }
         }
       }
       if (fresh) this.scoutFind(p, fresh);
     }
+    if (share) this.mergeExplored(pair[0], pair[1]);
+  }
+
+  private mergeExplored(a: Actor, b: Actor): void {
+    if (a.zone !== b.zone) return;
+    const prefix = `${a.zone}:`;
+    for (const key of this.explored[a.side]) {
+      if (key.startsWith(prefix)) this.explored[b.side].add(key);
+    }
+    for (const key of this.explored[b.side]) {
+      if (key.startsWith(prefix)) this.explored[a.side].add(key);
+    }
+  }
+
+  private nearShore(p: Actor): boolean {
+    const map = this.mapFor(p.zone);
+    const t = toTile(p.x, p.y);
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const ch = map.rows[t.y + dy]?.[t.x + dx] ?? "";
+        if (ch === "~" || ch === "D") return true;
+      }
+    }
+    return false;
+  }
+
+  private whereOf(p: Actor, you?: Actor): string {
+    if (you && !this.away.has(p.id) && this.near(you, p)) return "身旁";
+    if (p.zone === "kitchen") return "客栈";
+    if (p.zone === "mine") return "矿里";
+    if (p.zone === "wild") {
+      const b = this.biomeAt(p);
+      return b && b !== "野地" ? `荒野·${b}` : "荒野";
+    }
+    if (this.nearShore(p)) return "河边";
+    return "山谷";
   }
 
   private tickDark(dt: number): void {
@@ -2357,11 +2390,4 @@ export class World {
     p.y = c.y + TILE;
     this.toast(`${p.name} 钻进了洞的另一头`);
   }
-}
-
-function zoneName(z: Zone): string {
-  if (z === "mine") return "矿里";
-  if (z === "kitchen") return "厨房";
-  if (z === "wild") return "荒野";
-  return "山谷";
 }

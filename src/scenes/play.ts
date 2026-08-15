@@ -326,7 +326,9 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       snap.zone,
       cell,
       snap.youAt,
-      snap.partnerAt && snap.partnerAt.zone === snap.zone ? snap.partnerAt : null,
+      snap.partnerAt && snap.partnerAt.zone === snap.zone
+        ? { x: snap.partnerAt.x, y: snap.partnerAt.y, ping: snap.partner?.ping }
+        : null,
       snap.zone === "wild" ? { seen: fogSeen, vis: fogVis } : undefined,
       snap.fires,
     );
@@ -351,8 +353,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
             ? `荒野${snap.biome ? " · " + snap.biome : ""}`
             : "山谷";
     const partnerLine = partner?.online
-      ? `${partner.name} 在${placeOf(partner.zone)}${partner.biome ? "·" + partner.biome : ""}${
-          snap.zone === "wild" && snap.partnerAt?.zone === "wild"
+      ? `${partner.name} 在${partner.where || placeOf(partner.zone)}${
+          snap.zone === "wild" && snap.partnerAt?.zone === "wild" && partner.where !== "身旁"
             ? " · " + compass(snap.partnerAt.x - snap.youAt.x, snap.partnerAt.y - snap.youAt.y)
             : ""
         }`
