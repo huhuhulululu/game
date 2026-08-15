@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { VALLEY } from "../world/maps";
-import { blit, blitFit, blitPatch, blitWrap } from "./art";
+import { blit, blitFit, blitPatch, blitStand, blitWrap } from "./art";
 import {
   cellFill,
   drawActor,
+  drawAtlas,
   drawCell,
   drawMeadow,
   drawPlot,
@@ -13,8 +14,10 @@ import {
   fillClusters,
   plotClusters,
   plotIndex,
+  setLookSeason,
   shade,
   tileLook,
+  treeVariant,
   viewScale,
 } from "./draw";
 import type { ActorSnap } from "../sim/net";
@@ -207,12 +210,28 @@ describe("look", () => {
     assert.ok(viewScale(390, 844) > 1.1);
   });
 
+  it("picks different crowns along a tree row", () => {
+    setLookSeason("春");
+    const names = [0, 36, 72, 108].map((x) => treeVariant(x, 36, false));
+    assert.ok(new Set(names).size >= 2);
+    assert.ok(names.some((n) => n === "tree" || n === "treeWide" || n === "treeTall"));
+  });
+
+  it("paints the atlas as paper washes instead of a cell grid", () => {
+    const g = mockCtx();
+    drawAtlas(g, VALLEY, "valley", 8, { x: 40, y: 40 }, null);
+    assert.ok(g.fills.length >= 4);
+    const tiny = g.rects.filter((r) => r[2] <= 4 && r[3] <= 4).length;
+    assert.ok(tiny < 8);
+  });
+
   it("falls back to constructed shapes when painted sheets are not loaded", () => {
     const g = mockCtx();
     assert.equal(blit(g, "tree", 0, 0, 10, 10), false);
     assert.equal(blitFit(g, "cabin", 0, 0, 144, 108), false);
     assert.equal(blitPatch(g, "grass", 0, 0, 36, 36, 3, 4), false);
     assert.equal(blitWrap(g, "grass", 0, 0, 36, 36), false);
+    assert.equal(blitStand(g, "warmWalk", 0, 0, 46, 70), false);
     assert.equal(drawMeadow(g, 0, 0, 144, 108), false);
     drawCell(g, "T", 0, 0, "#1e2c22", 0, "valley");
     assert.ok(g.fills.some((c) => c.includes("5a3a22") || c.includes("2a4a28")));

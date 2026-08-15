@@ -1,6 +1,6 @@
 import type { ActorSnap, EnemySnap } from "../sim/net";
 import { TILE } from "../world/maps";
-import { blitFit, blitWrap } from "./art";
+import { blitFit, blitStand, blitWrap } from "./art";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -8,7 +8,7 @@ export type Near = { n: string; s: string; e: string; w: string };
 export type DrawPart = "all" | "ground" | "prop";
 export type DrawSkip = { grass?: boolean; water?: boolean; path?: boolean };
 
-const FACE = "'Songti SC', 'STSong', 'PingFang SC', 'Hiragino Mincho ProN', serif";
+const FACE = "'Valley Serif', 'Songti SC', 'STSong', 'PingFang SC', 'Hiragino Mincho ProN', 'Source Han Serif SC', serif";
 
 let lookSeason = "春";
 
@@ -224,31 +224,47 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
   if (n > 780) oval(g, x + 22, y + 10, 3, 3, "#c45c26");
 }
 
-function treeSheet(pine: boolean, x: number, y: number): string {
+export function treeVariant(x: number, y: number, pine: boolean): string {
   const n = hash(x, y);
-  if (pine) return lookSeason === "冬" || n > 740 ? "pineSnow" : "pine";
-  if (lookSeason === "秋") return n > 380 ? "treeGold" : "tree";
-  if (lookSeason === "冬") return n > 500 ? "treeGold" : "treeWide";
-  if (n > 680) return "treeGold";
-  if (n > 340) return "treeWide";
-  return "tree";
+  const slot = (Math.floor(x / TILE) + Math.floor(y / TILE) * 2) % 3;
+  if (pine) return lookSeason === "冬" || n > 780 ? "pineSnow" : "pine";
+  if (lookSeason === "秋") return (["treeGold", "treeWide", "treeTall"] as const)[slot];
+  if (lookSeason === "冬") return (["treeWide", "treeGold", "pineSnow"] as const)[slot];
+  return (["tree", "treeWide", "treeTall"] as const)[slot];
 }
 
 function tree(g: Ctx, x: number, y: number, pine: boolean, now: number): void {
-  const grow = 0.9 + (hash(x, y + 3) % 18) / 100;
-  const ox = (hash(x + 2, y) % 11) - 5;
-  oval(g, x + 18 + ox, y + 32, 14 * grow, 5, "rgba(20,16,10,0.28)");
-  if (blitFit(g, treeSheet(pine, x, y), x - 24 + ox, y - 74, 84 * grow, 114 * grow)) return;
+  const n = hash(x, y);
+  const name = treeVariant(x, y, pine);
+  const grow = 0.76 + (n % 32) / 90;
+  const ox = (hash(x + 2, y) % 19) - 9;
+  const flip = hash(x, y + 11) > 500;
+  const tall = name === "treeTall" || name === "pine" || name === "pineSnow";
+  const wide = name === "treeWide";
+  const bw = (wide ? 98 : tall ? 58 : 84) * grow;
+  const bh = (wide ? 100 : tall ? 136 : 114) * grow;
+  oval(g, x + 18 + ox, y + 32, (wide ? 18 : tall ? 9 : 13) * grow, 5, "rgba(20,16,10,0.28)");
+  g.save();
+  g.translate(x + 18 + ox, y + 36);
+  if (flip) g.scale(-1, 1);
+  const painted = blitFit(g, name, -bw / 2, -bh, bw, bh);
+  g.restore();
+  if (painted) return;
   const sway = Math.sin(now / 860 + x * 0.03) * 1.4;
   oval(g, x + 18, y + 34, 12, 4, "rgba(20,16,10,0.28)");
   px(g, x + 15, y + 10, 7, 24, "#5a3a22");
   px(g, x + 16, y + 10, 2, 24, "#3a2414");
   oval(g, x + 18, y + 34, 6, 3, "#4a2e18");
   const cx = x + 18 + sway;
-  if (pine) {
+  if (pine || name === "pine" || name === "pineSnow") {
     tri(g, cx, y - 16, cx - 14, y + 6, cx + 14, y + 6, "#1e3a24");
     tri(g, cx, y - 6, cx - 16, y + 16, cx + 16, y + 16, "#2a4a30");
     tri(g, cx, y + 4, cx - 13, y + 22, cx + 13, y + 22, "#2a4a28");
+    return;
+  }
+  if (name === "treeTall") {
+    oval(g, cx, y - 4, 9, 16, "#2a4a28");
+    oval(g, cx + 2, y + 8, 8, 12, "#3f6d4a");
     return;
   }
   oval(g, cx - 6, y + 2, 14, 12, "#2a4a28");
@@ -327,9 +343,9 @@ function lanternDoor(g: Ctx, x: number, y: number, now: number): void {
 
 function plotSoil(g: Ctx, x: number, y: number): void {
   if (!blitWrap(g, "path", x, y, TILE, TILE)) px(g, x, y, TILE, TILE, "#6b4a28");
-  px(g, x, y + 10, TILE, 3, "rgba(42,24,16,0.42)");
-  px(g, x, y + 20, TILE, 3, "rgba(42,24,16,0.38)");
-  px(g, x, y + 30, TILE, 2, "rgba(32,18,12,0.4)");
+  const n = hash(x, y);
+  oval(g, x + 8 + (n % 7), y + 12 + (n % 5), 5, 2, "rgba(42,24,16,0.22)");
+  oval(g, x + 20 + (n % 6), y + 22, 6, 2, "rgba(32,18,12,0.2)");
 }
 
 function bush(g: Ctx, x: number, y: number, gold: boolean): void {
@@ -757,7 +773,7 @@ export function drawActor(g: Ctx, a: ActorSnap, ox: number, oy: number, now = 0,
   let drew = false;
   const box = busy === "sit" ? ([-24, -52, 48, 54] as const) : busy === "fish" ? ([-28, -70, 58, 70] as const) : ([-23, -70, 46, 70] as const);
   for (const sheet of actorSheets(warm, a.facing, moving, now, busy)) {
-    if (blitFit(g, sheet, box[0], box[1], box[2], box[3])) {
+    if (blitStand(g, sheet, box[0], box[1], box[2], box[3])) {
       drew = true;
       break;
     }
@@ -1105,27 +1121,47 @@ export function drawSheet(g: Ctx, name: string, c: FieldCluster): boolean {
   return blitWrap(g, name, c.x * TILE - 1, c.y * TILE - 1, c.w * TILE + 2, c.h * TILE + 2);
 }
 
-function organicPath(g: Ctx, x: number, y: number, w: number, h: number, seed: number, amp = 8): void {
-  const bump = (i: number) => Math.sin(seed * 0.19 + i * 1.61) * amp;
+function wander(seed: number, i: number): number {
+  return Math.sin(seed * 0.19 + i * 1.17) * 0.52 + Math.sin(seed * 0.71 + i * 2.53) * 0.31 + Math.sin(seed * 1.4 + i * 0.47) * 0.17;
+}
+
+function organicPath(g: Ctx, x: number, y: number, w: number, h: number, seed: number, amp = 12): void {
+  const p = (t: number, edge: number) => wander(seed + edge, t) * amp;
+  const across = Math.max(6, Math.round(w / 16));
+  const down = Math.max(4, Math.round(h / 18));
   g.beginPath();
-  g.moveTo(x + bump(0), y + bump(1));
-  g.quadraticCurveTo(x + w * 0.28, y - 5 + bump(2), x + w * 0.52, y + bump(3));
-  g.quadraticCurveTo(x + w * 0.78, y - 4 + bump(4), x + w + bump(5), y + bump(6));
-  g.quadraticCurveTo(x + w + 6 + bump(7), y + h * 0.48, x + w + bump(8), y + h + bump(9));
-  g.quadraticCurveTo(x + w * 0.55, y + h + 7 + bump(10), x + bump(11), y + h + bump(12));
-  g.quadraticCurveTo(x - 6 + bump(13), y + h * 0.52, x + bump(0), y + bump(1));
+  g.moveTo(x + p(0, 1), y + p(0, 2));
+  for (let i = 1; i <= across; i++) {
+    const t = i / across;
+    g.lineTo(x + t * w + p(i, 3) * 0.35, y + p(i, 4));
+  }
+  for (let i = 1; i <= down; i++) {
+    const t = i / down;
+    g.lineTo(x + w + p(i, 5) * 0.45, y + t * h + p(i, 6) * 0.35);
+  }
+  for (let i = 1; i <= across; i++) {
+    const t = i / across;
+    g.lineTo(x + w * (1 - t) + p(i, 7) * 0.35, y + h + p(i, 8));
+  }
+  for (let i = 1; i <= down; i++) {
+    const t = i / down;
+    g.lineTo(x + p(i, 9) * 0.45, y + h * (1 - t) + p(i, 10) * 0.35);
+  }
   g.closePath();
 }
 
 function waveBand(g: Ctx, x: number, y: number, w: number, h: number, seed: number, amp: number): void {
+  const step = 6;
   g.beginPath();
-  g.moveTo(x, y + Math.sin(seed) * amp);
-  for (let i = 8; i <= w; i += 8) {
-    g.lineTo(x + i, y + Math.sin(seed + i * 0.11) * amp);
+  g.moveTo(x, y + wander(seed, 0) * amp);
+  for (let i = step; i <= w; i += step) {
+    g.lineTo(x + i, y + wander(seed, i) * amp);
   }
-  for (let i = w; i >= 0; i -= 8) {
-    g.lineTo(x + i, y + h + Math.sin(seed + 2.2 + i * 0.1) * amp);
+  g.lineTo(x + w + wander(seed, 99) * amp * 0.45, y + h * 0.45);
+  for (let i = w; i >= 0; i -= step) {
+    g.lineTo(x + i, y + h + wander(seed + 2.7, i) * amp);
   }
+  g.lineTo(x + wander(seed, 3) * amp * 0.45, y + h * 0.55);
   g.closePath();
 }
 
@@ -1134,10 +1170,14 @@ export function drawPool(g: Ctx, c: FieldCluster): boolean {
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
+  const seed = c.x * 13 + c.y * 7;
   g.save();
-  waveBand(g, x - 10, y - 8, w + 20, h + 16, c.x * 13 + c.y * 7, 14);
+  waveBand(g, x - 12, y - 10, w + 24, h + 20, seed, 16);
+  g.strokeStyle = "rgba(47,90,56,0.38)";
+  g.lineWidth = 11;
+  g.stroke();
   g.clip();
-  const ok = blitWrap(g, "water", x - 4, y - 4, w + 8, h + 8);
+  const ok = blitWrap(g, "water", x - 8, y - 8, w + 16, h + 16);
   g.restore();
   return ok;
 }
@@ -1147,10 +1187,14 @@ export function drawLane(g: Ctx, c: FieldCluster): boolean {
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
+  const seed = c.x * 5 + c.y * 11;
   g.save();
-  waveBand(g, x - 6, y - 8, w + 12, h + 16, c.x * 5 + c.y * 11, 11);
+  waveBand(g, x - 8, y - 10, w + 16, h + 20, seed, 13);
+  g.strokeStyle = "rgba(47,90,56,0.32)";
+  g.lineWidth = 9;
+  g.stroke();
   g.clip();
-  const ok = blitWrap(g, "path", x - 4, y - 4, w + 8, h + 8);
+  const ok = blitWrap(g, "path", x - 6, y - 6, w + 12, h + 12);
   g.restore();
   return ok;
 }
@@ -1160,16 +1204,30 @@ export function drawField(g: Ctx, c: FieldCluster): void {
   const y = c.y * TILE;
   const w = c.w * TILE;
   const h = c.h * TILE;
+  const seed = c.x * 9 + c.y;
   g.save();
-  organicPath(g, x - 10, y - 8, w + 20, h + 16, c.x * 9 + c.y, 12);
-  g.fillStyle = "rgba(47,90,56,0.28)";
+  organicPath(g, x - 16, y - 14, w + 32, h + 28, seed, 16);
+  g.fillStyle = "rgba(47,90,56,0.4)";
   g.fill();
   g.restore();
   g.save();
-  organicPath(g, x + 2, y + 3, w - 4, h - 6, c.x * 9 + c.y + 2, 13);
+  organicPath(g, x + 3, y + 5, w - 6, h - 10, seed + 2, 15);
   g.clip();
-  for (let ty = 0; ty < c.h; ty++) {
-    for (let tx = 0; tx < c.w; tx++) plotSoil(g, x + tx * TILE, y + ty * TILE);
+  if (!blitWrap(g, "path", x - 8, y - 8, w + 16, h + 16)) {
+    g.fillStyle = "#6b4a28";
+    g.fillRect(x - 8, y - 8, w + 16, h + 16);
+  }
+  g.strokeStyle = "rgba(42,24,16,0.28)";
+  g.lineWidth = 2.2;
+  g.lineCap = "round";
+  for (let i = 0; i < 4; i++) {
+    const yy = y + 14 + i * ((h - 20) / 3);
+    g.beginPath();
+    g.moveTo(x - 4, yy);
+    for (let t = 0; t <= w + 8; t += 10) {
+      g.lineTo(x - 4 + t, yy + wander(seed + i * 4, t) * 7);
+    }
+    g.stroke();
   }
   g.restore();
 }
@@ -1180,39 +1238,93 @@ function wet(look: string): boolean {
 
 export function drawFringe(g: Ctx, ch: string, near: Near, x: number, y: number, zone: string, now: number): void {
   const look = tileLook(ch, zone);
+  if (look !== "grass") {
+    void now;
+    return;
+  }
   const n = tileLook(near.n, zone);
   const s = tileLook(near.s, zone);
   const e = tileLook(near.e, zone);
   const w = tileLook(near.w, zone);
-  const wash = (x0: number, y0: number, x1: number, y1: number, from: string) => {
-    const grd = g.createLinearGradient(x0, y0, x1, y1);
-    grd.addColorStop(0, from);
-    grd.addColorStop(1, "rgba(0,0,0,0)");
-    g.fillStyle = grd;
-    g.fillRect(Math.min(x0, x1), Math.min(y0, y1), x0 === x1 ? TILE : Math.abs(x1 - x0), y0 === y1 ? TILE : Math.abs(y1 - y0));
+  const jitter = hash(x, y) % 7;
+  if (wet(n)) oval(g, x + 18, y + 4 + jitter * 0.3, 15, 7, "rgba(26,68,88,0.16)");
+  if (wet(s)) oval(g, x + 18, y + TILE - 4, 15, 7, "rgba(26,68,88,0.16)");
+  if (wet(e)) oval(g, x + TILE - 4, y + 18, 7, 13, "rgba(26,68,88,0.12)");
+  if (wet(w)) oval(g, x + 4, y + 18, 7, 13, "rgba(26,68,88,0.12)");
+}
+
+export function drawAtlas(
+  g: Ctx,
+  rows: string[],
+  zone: string,
+  cell: number,
+  you: { x: number; y: number },
+  partner: { x: number; y: number } | null,
+  fog?: { seen: Set<number>; vis: Set<number> },
+  fires: number[] = [],
+): void {
+  const mw = rows[0]?.length ?? 1;
+  const mh = rows.length;
+  const W = mw * cell;
+  const H = mh * cell;
+  g.imageSmoothingEnabled = true;
+  const paper = g.createLinearGradient(0, 0, W, H);
+  paper.addColorStop(0, "#e6d2ae");
+  paper.addColorStop(0.55, "#d4b888");
+  paper.addColorStop(1, "#c49a68");
+  g.fillStyle = paper;
+  if (typeof g.roundRect === "function") {
+    g.beginPath();
+    g.roundRect(0, 0, W, H, 8);
+    g.fill();
+  } else {
+    g.fillRect(0, 0, W, H);
+  }
+  for (let i = 0; i < 16; i++) {
+    const n = hash(i * 13, i * 29);
+    oval(g, n % W, (n * 3) % H, 10 + (n % 16), 6 + (n % 10), "rgba(90,60,30,0.05)");
+  }
+  g.fillStyle = "rgba(63,109,92,0.16)";
+  g.fillRect(2, 2, W - 4, H - 4);
+  const known = (x: number, y: number) => !fog || fog.seen.has(y * mw + x);
+  const wash = (ok: (ch: string) => boolean, fill: string) => {
+    for (const c of fillClusters(rows, ok)) {
+      if (!known(c.x, c.y)) continue;
+      g.fillStyle = fill;
+      organicPath(g, c.x * cell - 2, c.y * cell - 2, c.w * cell + 4, c.h * cell + 4, c.x * 9 + c.y, Math.max(3, cell * 0.45));
+      g.fill();
+    }
   };
-  if (wet(look)) {
-    if (!wet(n)) wash(x, y, x, y + 18, "rgba(47,90,56,0.36)");
-    if (!wet(s)) wash(x, y + TILE, x, y + TILE - 18, "rgba(47,90,56,0.32)");
-    if (!wet(e)) wash(x + TILE, y, x + TILE - 16, y, "rgba(47,90,56,0.26)");
-    if (!wet(w)) wash(x, y, x + 16, y, "rgba(47,90,56,0.26)");
-    void now;
-    return;
+  wash((ch) => ch === "~" || ch === "D", "rgba(42,84,110,0.55)");
+  wash((ch) => ch === ",", "rgba(138,106,64,0.48)");
+  wash((ch) => ch === "P", "rgba(90,58,36,0.4)");
+  for (let y = 0; y < mh; y++) {
+    for (let x = 0; x < mw; x++) {
+      if (!known(x, y)) continue;
+      const look = tileLook(rows[y][x], zone);
+      const n = hash(x, y);
+      const cx = x * cell + cell / 2 + (n % 5) - 2;
+      const cy = y * cell + cell / 2 + (hash(y, x) % 5) - 2;
+      const faded = fog && !fog.vis.has(y * mw + x);
+      if (look === "tree") {
+        oval(g, cx, cy, cell * 0.26, cell * 0.36, faded ? "rgba(40,70,55,0.32)" : "rgba(47,90,56,0.68)");
+      } else if (look === "cabin" || look === "inn" || look === "lantern") {
+        tri(g, cx, cy - cell * 0.28, cx - cell * 0.3, cy + cell * 0.12, cx + cell * 0.3, cy + cell * 0.12, "#c45c26");
+      } else if (look === "mine-mouth") {
+        oval(g, cx, cy, cell * 0.3, cell * 0.2, "#4a3a4a");
+      }
+    }
   }
-  if (look === "path" || look === "plot") {
-    if (n === "grass") wash(x, y, x, y + 22, "rgba(47,90,56,0.4)");
-    if (s === "grass") wash(x, y + TILE, x, y + TILE - 22, "rgba(47,90,56,0.4)");
-    if (w === "grass") wash(x, y, x + 18, y, "rgba(47,90,56,0.3)");
-    if (e === "grass") wash(x + TILE, y, x + TILE - 18, y, "rgba(47,90,56,0.3)");
-    if (wet(n)) wash(x, y, x, y + 22, "rgba(26,68,88,0.38)");
-    if (wet(s)) wash(x, y + TILE, x, y + TILE - 22, "rgba(26,68,88,0.38)");
+  for (const key of fires) {
+    oval(g, (key % mw) * cell + cell / 2, Math.floor(key / mw) * cell + cell / 2, cell * 0.32, cell * 0.26, "#e08a4f");
   }
-  if (look === "grass" && (wet(n) || wet(s) || wet(e) || wet(w))) {
-    if (wet(s)) wash(x, y + TILE, x, y + TILE - 26, "rgba(26,68,88,0.36)");
-    if (wet(n)) wash(x, y, x, y + 26, "rgba(26,68,88,0.32)");
-    if (wet(e)) wash(x + TILE, y, x + TILE - 22, y, "rgba(26,68,88,0.26)");
-    if (wet(w)) wash(x, y, x + 22, y, "rgba(26,68,88,0.26)");
-  }
+  const mark = (px: number, py: number, color: string) => {
+    const mx = (px / TILE) * cell;
+    const my = (py / TILE) * cell;
+    oval(g, mx, my, Math.max(3.2, cell * 0.46), Math.max(2.6, cell * 0.38), color);
+  };
+  mark(you.x, you.y, "#c45c26");
+  if (partner) mark(partner.x, partner.y, "#3f6d5c");
 }
 
 export function plotIndex(tiles: string[], tx: number, ty: number): number {

@@ -22,12 +22,12 @@ import {
   fillClusters,
   setLookSeason,
   drawSky,
+  drawAtlas,
   houseClusters,
   isHouseLook,
   isTallLook,
   plotClusters,
   plotIndex,
-  shade,
   tileLook,
   viewScale,
 } from "./draw";
@@ -309,42 +309,16 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     atlas.height = mh * cell;
     const g = atlas.getContext("2d");
     if (!g) return;
-    g.imageSmoothingEnabled = true;
-    const paper = g.createLinearGradient(0, 0, atlas.width, atlas.height);
-    paper.addColorStop(0, "#d8c09a");
-    paper.addColorStop(1, "#b88958");
-    g.fillStyle = paper;
-    g.fillRect(0, 0, atlas.width, atlas.height);
-    const wild = snap.zone === "wild";
-    for (let y = 0; y < mh; y++) {
-      for (let x = 0; x < mw; x++) {
-        const key = y * mw + x;
-        if (wild && !fogSeen.has(key)) continue;
-        const ch = rows[y][x];
-        const look = tileLook(ch, snap.zone);
-        let fill = cellFill(ch, snap.zone);
-        if (look === "water" || look === "dock") fill = "#2a5470";
-        else if (look === "grass" || look === "tree") fill = "#3f6d5c";
-        else if (look === "path" || look === "plot") fill = "#8a6a40";
-        else if (look === "cabin" || look === "inn" || look === "lantern") fill = "#c45c26";
-        if (wild && !fogVis.has(key)) fill = shade(fill, 0.55);
-        if (snap.fires.includes(key)) fill = "#e08a4f";
-        g.fillStyle = fill;
-        g.beginPath();
-        g.ellipse(x * cell + cell / 2, y * cell + cell / 2, cell * 0.62, cell * 0.5, 0, 0, Math.PI * 2);
-        g.fill();
-      }
-    }
-    const mark = (px: number, py: number, color: string) => {
-      g.fillStyle = color;
-      g.beginPath();
-      g.arc((px / TILE) * cell, (py / TILE) * cell, Math.max(3, cell * 0.55), 0, Math.PI * 2);
-      g.fill();
-    };
-    mark(snap.youAt.x, snap.youAt.y, "#c45c26");
-    if (snap.partnerAt && snap.partnerAt.zone === snap.zone) {
-      mark(snap.partnerAt.x, snap.partnerAt.y, snap.partner?.ping ? "#f4e7d2" : "#3f6d5c");
-    }
+    drawAtlas(
+      g,
+      rows,
+      snap.zone,
+      cell,
+      snap.youAt,
+      snap.partnerAt && snap.partnerAt.zone === snap.zone ? snap.partnerAt : null,
+      snap.zone === "wild" ? { seen: fogSeen, vis: fogVis } : undefined,
+      snap.fires,
+    );
   };
 
   const paintHud = () => {

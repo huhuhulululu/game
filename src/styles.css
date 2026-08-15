@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Valley Serif";
+  src: url("/fonts/valley-serif.woff2") format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
 :root {
   --ink: #221910;
   --paper: #f4e7d2;
@@ -34,7 +42,7 @@ body,
   overflow: hidden;
   background: var(--dusk);
   color: var(--paper);
-  font-family: "Songti SC", "STSong", "Songti", "PingFang SC", "Hiragino Mincho ProN", "Source Han Serif SC", serif;
+  font-family: "Valley Serif", "Songti SC", "STSong", "Songti", "PingFang SC", "Hiragino Mincho ProN", "Source Han Serif SC", "Noto Serif CJK SC", serif;
   user-select: none;
   touch-action: none;
 }

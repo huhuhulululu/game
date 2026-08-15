@@ -1,5 +1,7 @@
 type Sheet = HTMLCanvasElement;
 
+const ART_REV = "look3";
+
 const SRC: Record<string, { src: string }> = {
   tree: { src: "/art/prop-tree.png" },
   pine: { src: "/art/prop-pine.png" },
@@ -49,6 +51,7 @@ const SRC: Record<string, { src: string }> = {
   pineForge: { src: "/art/char-pine-forge.png" },
   treeGold: { src: "/art/prop-tree-gold.png" },
   treeWide: { src: "/art/prop-tree-wide.png" },
+  treeTall: { src: "/art/prop-tree-tall.png" },
   pineSnow: { src: "/art/prop-pine-snow.png" },
   grass: { src: "/art/tex-grass.png" },
   path: { src: "/art/tex-path.png" },
@@ -77,7 +80,7 @@ export function loadArt(): void {
     if (sheets.has(name)) continue;
     const img = new Image();
     img.onload = () => sheets.set(name, sheetFrom(img));
-    img.src = spec.src;
+    img.src = `${spec.src}?v=${ART_REV}`;
   }
 }
 
@@ -102,6 +105,24 @@ export function blit(
   if (!s) return false;
   smooth(g);
   g.drawImage(s, x, y, w, h);
+  return true;
+}
+
+/** Draw a person so sheet height maps to the box — walk and idle stay the same stature. */
+export function blitStand(
+  g: CanvasRenderingContext2D,
+  name: string,
+  x: number,
+  y: number,
+  boxW: number,
+  boxH: number,
+): boolean {
+  const s = sheets.get(name);
+  if (!s) return false;
+  const h = boxH;
+  const w = h * (s.width / Math.max(1, s.height));
+  smooth(g);
+  g.drawImage(s, x + (boxW - w) / 2, y + boxH - h, w, h);
   return true;
 }
 

@@ -126,8 +126,6 @@ def process(path: Path) -> None:
     else:
         work = shrink(im, max(MAX_SPRITE * 2, 960))
         out = shrink(crop_sprite(feather_alpha(key_magenta(work))), MAX_SPRITE)
-        if name.startswith("char-"):
-            out = normalize_char(out, name)
         out.save(path, "PNG", optimize=True)
     after = path.stat().st_size
     print(f"{name:28} {src} -> {out.size}  {before // 1024}k -> {after // 1024}k")
@@ -136,6 +134,12 @@ def process(path: Path) -> None:
 def main() -> None:
     for path in sorted(ROOT.glob("*.png")):
         process(path)
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from align_chars import main as align_chars
+
+    align_chars()
 
 
 if __name__ == "__main__":
