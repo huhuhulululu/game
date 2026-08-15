@@ -57,6 +57,7 @@ func _initialize() -> void:
 	pad.position = Vector2(36, 560)
 	pad.size = Vector2(120, 120)
 	hud.add_child(pad)
+	root.add_child(Look.air_layer())
 	await process_frame
 	await process_frame
 	await process_frame

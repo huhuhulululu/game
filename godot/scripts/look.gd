@@ -12,6 +12,7 @@ const HAZE := Color(0.78, 0.62, 0.46)
 const VALLEY_DUSK := Color(1.14, 0.78, 0.52)
 const BODY := 62.0
 const FOOT := 0.979
+const SHADOW_EAST := 0.10
 
 
 static func cjk() -> Font:
@@ -47,6 +48,35 @@ static func prop_mat(fog := 0.03) -> ShaderMaterial:
 	m.set_shader_parameter("feet", 0.0)
 	m.set_shader_parameter("edge", 0.08)
 	return m
+
+
+static func air_mat() -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/air.gdshader") as Shader
+	m.set_shader_parameter("grain", 0.028)
+	m.set_shader_parameter("vig", 0.16)
+	m.set_shader_parameter("dusk", Color(0.42, 0.22, 0.10, 1.0))
+	return m
+
+
+static func air_veil() -> ColorRect:
+	var r := ColorRect.new()
+	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.offset_left = 0
+	r.offset_top = 0
+	r.offset_right = 0
+	r.offset_bottom = 0
+	r.size = Vector2(1280, 720)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.material = air_mat()
+	return r
+
+
+static func air_layer(z := 80) -> CanvasLayer:
+	var layer := CanvasLayer.new()
+	layer.layer = z
+	layer.add_child(air_veil())
+	return layer
 
 
 static func plaque_box() -> StyleBoxTexture:
@@ -231,12 +261,12 @@ static func hung(tex: Texture2D, pos: Vector2, size: Vector2, z: int, fog := 0.0
 	var sit_y := size.y * sit
 	var stain := contact(size.x * 1.36)
 	stain.scale.y = (size.x * 0.30) / 40.0
-	stain.position = Vector2(size.x * 0.50, sit_y)
+	stain.position = Vector2(size.x * (0.50 + SHADOW_EAST), sit_y)
 	stain.modulate = Color(1, 1, 1, 0.95)
 	n.add_child(stain)
 	var core := contact(size.x * 0.84)
 	core.scale.y = (size.x * 0.14) / 40.0
-	core.position = Vector2(size.x * 0.50, sit_y - 1.0)
+	core.position = Vector2(size.x * (0.50 + SHADOW_EAST * 0.7), sit_y - 1.0)
 	core.modulate = Color(1, 1, 1, 1.0)
 	n.add_child(core)
 	var s := Sprite2D.new()

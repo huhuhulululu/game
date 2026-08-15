@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""HUD slip only. Valley wood + old paper. Does not touch the floor or cover."""
+"""HUD wood: slip and plaque. Valley wood + old paper. Does not touch the floor or cover."""
 
 from __future__ import annotations
 
@@ -107,16 +107,61 @@ def paint_slip() -> Image.Image:
     return im
 
 
-def save(im: Image.Image) -> Path:
-    dest = ART / "tex-slip.png"
+PW, PH = 360, 180
+PMX, PMY = 18, 16
+
+
+def paint_plaque() -> Image.Image:
+    # Same timber and paper as the slip. Top card and name plates are this world's wood.
+    wood_v = _wood_plank((200, PH), horizontal=False)
+    wood_h = _wood_plank((200, PH), horizontal=True)
+    frame = Image.new("RGB", (PW, PH))
+    for x in range(0, PW, 200):
+        frame.paste(wood_v, (x, 0))
+    top_src = wood_h.crop((PMX, 0, 200 - PMX, PMY))
+    bot_src = wood_h.crop((PMX, PH - PMY, 200 - PMX, PH))
+    x = PMX
+    while x < PW - PMX:
+        piece = min(top_src.size[0], PW - PMX - x)
+        frame.paste(top_src.crop((0, 0, piece, PMY)), (x, 0))
+        frame.paste(bot_src.crop((0, 0, piece, PMY)), (x, PH - PMY))
+        x += piece
+    arr = np.asarray(frame, dtype=np.float32)
+    for y in (5, PMY - 3, PH - PMY + 2, PH - 6):
+        arr[y : y + 1, :] *= 0.62
+        arr[max(0, y - 1) : y, :] *= 0.84
+    frame = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
+
+    im = Image.new("RGBA", (PW, PH), (0, 0, 0, 0))
+    im.paste(frame, (0, 0), _round_mask((PW, PH), 8, 1))
+    paper = _paper_sheet((PW - 2 * PMX, PH - 2 * PMY))
+    im.paste(paper, (PMX, PMY), _round_mask((PW - 2 * PMX, PH - 2 * PMY), 5))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle(
+        (PMX - 1, PMY - 1, PW - PMX, PH - PMY),
+        5,
+        outline=(58, 36, 20, 230),
+        width=2,
+    )
+    d.rounded_rectangle((1, 1, PW - 2, PH - 2), 8, outline=(34, 20, 12, 255), width=2)
+    for px, py in ((9, 8), (PW - 10, 8), (9, PH - 9), (PW - 10, PH - 9)):
+        d.ellipse((px - 2, py - 2, px + 2, py + 2), fill=(52, 38, 28, 255))
+        d.point((px, py), fill=(168, 140, 96, 255))
+    return im
+
+
+def save(im: Image.Image, name: str) -> Path:
+    dest = ART / name
     dest.parent.mkdir(parents=True, exist_ok=True)
     im.save(dest)
     return dest
 
 
 def main() -> None:
-    dest = save(paint_slip())
-    print(f"wrote {dest}")
+    slip = save(paint_slip(), "tex-slip.png")
+    plaque = save(paint_plaque(), "tex-plaque.png")
+    print(f"wrote {slip}")
+    print(f"wrote {plaque}")
 
 
 if __name__ == "__main__":

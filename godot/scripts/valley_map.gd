@@ -147,7 +147,7 @@ func _land() -> void:
 func _houses() -> void:
 	_prop("prop-hut.png", 4.55, 4.72, 176, 132, 8, 0.03, 0.93)
 	_prop("prop-lodge.png", 16.20, 3.85, 220, 168, 8, 0.03, 0.93)
-	_prop("prop-mine.png", 8.4, 3.05, 84, 70, 6, 0.12, 0.94)
+	_prop("prop-mine.png", 8.15, 2.72, 136, 112, 6, 0.08, 0.95)
 
 
 func _ridge() -> void:
@@ -192,11 +192,11 @@ func _docks() -> void:
 
 
 func _bits() -> void:
-	_prop("prop-stall.png", 6.4, 11.55, 64, 68, 7, 0.05, 0.98)
+	_prop("prop-stall.png", 6.15, 11.18, 96, 90, 7, 0.05, 0.96)
 	_prop("prop-altar.png", 12.2, 11.65, 52, 58, 7, 0.05, 0.98)
-	_prop("prop-board.png", 17.2, 11.65, 52, 60, 7, 0.05, 0.98)
+	_prop("prop-board.png", 17.2, 11.55, 58, 68, 7, 0.05, 0.96)
 	_prop("prop-anvil.png", 21.4, 11.55, 56, 60, 7, 0.05, 0.98)
 	_prop("prop-gate.png", 30.2, 13.2, 48, 56, 7, 0.08, 0.94)
-	_prop("prop-tree-gold.png", 29.4, 12.2, 64, 80, 9, 0.08, 0.96)
+	_prop("prop-tree.png", 29.4, 12.2, 70, 94, 9, 0.08, 0.96)
 	_prop("prop-bush.png", 16.6, 4.9, 40, 36, 5, 0.10, 0.88)
 	_prop("prop-bush.png", 18.4, 5.1, 36, 32, 5, 0.10, 0.88)

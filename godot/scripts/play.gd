@@ -65,6 +65,7 @@ func _ready() -> void:
 	add_child(_cam)
 	_cam.make_current()
 	_hud()
+	add_child(Look.air_layer())
 	if not Net.snap_got.is_connected(_on_snap):
 		Net.snap_got.connect(_on_snap)
 	if Net.last_snap.size() > 0:
