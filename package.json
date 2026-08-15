@@ -7,7 +7,7 @@
     "dev": "tsx server/index.ts",
     "build": "tsc --noEmit && vite build",
     "start": "tsx server/index.ts",
-    "test": "tsx --test src/game/systems.test.ts"
+    "test": "tsx --test src/game/systems.test.ts src/scenes/look.test.ts"
   },
   "dependencies": {
     "ws": "^8.18.3"

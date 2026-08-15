@@ -4,7 +4,18 @@ import type { WorldSnap } from "../sim/net";
 import { consume, mountStick } from "../ui/stick";
 import { TILE } from "../world/maps";
 import { compass } from "../world/wild";
-import { cellFill, drawActor, drawCell, drawPlot, plotIndex, shade } from "./draw";
+import {
+  cellFill,
+  drawActor,
+  drawCell,
+  drawEnemy,
+  drawLamp,
+  drawNightVignette,
+  drawPlot,
+  drawSky,
+  plotIndex,
+  shade,
+} from "./draw";
 import { el } from "../ui/dom";
 
 export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
@@ -73,18 +84,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const g = canvas.getContext("2d");
     if (!g || !snap) return;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const bg =
-      snap.zone === "mine"
-        ? "#120e14"
-        : snap.zone === "kitchen"
-          ? "#1a120e"
-          : snap.weather.id === "rain" || snap.weather.id === "storm"
-            ? "#12161c"
-            : snap.weather.id === "fog"
-              ? "#1a1c1a"
-              : "#141810";
-    g.fillStyle = bg;
-    g.fillRect(0, 0, w, h);
+    g.imageSmoothingEnabled = false;
+    drawSky(g, w, h, snap.night, snap.dusk, snap.zone, snap.weather.id);
 
     const me = snap.actors.find((a) => a.id === snap!.you) ?? snap.actors[0];
     if (me) {
@@ -96,25 +97,40 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
     const rows = snap.tiles;
     const mw = rows[0]?.length ?? 1;
     const now = Date.now();
+    const lamps: { x: number; y: number; r: number; a: number }[] = [];
     for (let y = 0; y < rows.length; y++) {
       for (let x = 0; x < rows[y].length; x++) {
         const ch = rows[y][x];
         const key = y * mw + x;
-        let fill = cellFill(ch, snap.zone);
+        const fill = cellFill(ch, snap.zone);
         let hidden = false;
+        let dim = false;
         if (snap.zone === "wild") {
           const seen = fogSeen.has(key);
           const vis = fogVis.has(key);
-          if (!seen) {
-            fill = "#050403";
-            hidden = true;
-          } else if (!vis) fill = shade(fill, 0.42);
+          if (!seen) hidden = true;
+          else if (!vis) dim = true;
         }
-        drawCell(g, hidden ? "#" : ch, ox + x * TILE, oy + y * TILE, fill, now);
-        if (!hidden && ch === "P") {
-          const i = plotIndex(rows, x, y);
-          const plot = snap.plots[i];
-          if (plot) drawPlot(g, ox + x * TILE, oy + y * TILE, plot.stage, plot.seed);
+        const px = ox + x * TILE;
+        const py = oy + y * TILE;
+        if (hidden) {
+          drawCell(g, ch, px, py, fill, now, snap.zone);
+          g.fillStyle = "rgba(6,10,16,0.78)";
+          g.fillRect(px, py, TILE - 1, TILE - 1);
+        } else {
+          drawCell(g, ch, px, py, dim ? shade(fill, 0.55) : fill, now, snap.zone);
+          if (dim) {
+            g.fillStyle = "rgba(10,14,22,0.38)";
+            g.fillRect(px, py, TILE - 1, TILE - 1);
+          }
+          if (ch === "P") {
+            const i = plotIndex(rows, x, y);
+            const plot = snap.plots[i];
+            if (plot) drawPlot(g, px, py, plot.stage, plot.seed);
+          }
+          if (ch === "K" || ch === "A" || ch === "I") {
+            lamps.push({ x: px + TILE / 2, y: py + TILE / 2, r: ch === "K" ? 58 : 44, a: ch === "K" ? 0.4 : 0.28 });
+          }
         }
       }
     }
@@ -122,47 +138,36 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       for (const key of snap.fires) {
         const x = key % mw;
         const y = Math.floor(key / mw);
-        const cx = ox + x * TILE + TILE / 2;
-        const cy = oy + y * TILE + TILE / 2;
-        const glow = g.createRadialGradient(cx, cy, 4, cx, cy, 54);
-        glow.addColorStop(0, "rgba(232,140,60,0.55)");
-        glow.addColorStop(1, "rgba(232,140,60,0)");
-        g.fillStyle = glow;
-        g.beginPath();
-        g.arc(cx, cy, 54, 0, Math.PI * 2);
-        g.fill();
+        lamps.push({ x: ox + x * TILE + TILE / 2, y: oy + y * TILE + TILE / 2, r: 56, a: 0.4 });
       }
     }
+    for (const lamp of lamps) drawLamp(g, lamp.x, lamp.y, lamp.r, lamp.a);
     for (const e of snap.enemies) {
       if (snap.zone === "wild") {
         const tx = Math.floor(e.x / TILE);
         const ty = Math.floor(e.y / TILE);
         if (!fogVis.has(ty * mw + tx)) continue;
       }
-      g.fillStyle = e.flash > 0 ? "#f4e7d2" : e.hue;
-      g.beginPath();
-      g.arc(ox + e.x, oy + e.y, 11, 0, Math.PI * 2);
-      g.fill();
-      g.fillStyle = "#f4e7d2";
-      g.fillRect(ox + e.x - 12, oy + e.y - 18, 24 * (e.hp / e.maxHp), 3);
+      drawEnemy(g, e, ox, oy, now);
     }
     for (const a of snap.actors) {
-      drawActor(g, a, ox, oy);
+      drawActor(g, a, ox, oy, now);
       if (a.fishing === "fight") {
         const x = ox + a.x;
-        const y = oy + a.y + 36;
-        g.fillStyle = "rgba(16,11,8,0.7)";
-        g.fillRect(x - 28, y, 56, 7);
+        const y = oy + a.y + 28;
+        g.fillStyle = "rgba(40,28,16,0.82)";
+        g.fillRect(x - 30, y, 60, 10);
         g.fillStyle = "#3f6d5c";
-        g.fillRect(x - 28 + 56 * 0.38, y, 56 * 0.34, 7);
+        g.fillRect(x - 30 + 60 * 0.38, y + 1, 60 * 0.34, 8);
         g.fillStyle = "#f4e7d2";
-        g.fillRect(x - 28 + 56 * a.fishMark - 1, y - 1, 3, 9);
+        g.fillRect(x - 30 + 60 * a.fishMark - 1, y - 2, 3, 14);
         g.fillStyle = "#c9a06a";
-        g.fillRect(x - 28, y + 9, 56 * Math.max(0, Math.min(1, a.fishPull)), 3);
+        g.fillRect(x - 30, y + 12, 60 * Math.max(0, Math.min(1, a.fishPull)), 3);
       }
     }
     if (snap.weather.id === "rain" || snap.weather.id === "storm") {
-      g.strokeStyle = "rgba(200,220,230,0.35)";
+      g.strokeStyle = "rgba(200,220,230,0.28)";
+      g.lineWidth = 1;
       for (let i = 0; i < 40; i++) {
         const x = (i * 47 + Date.now() / 8) % w;
         const y = (i * 89 + Date.now() / 5) % h;
@@ -173,11 +178,15 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       }
     }
     if (snap.weather.id === "fog") {
-      g.fillStyle = "rgba(210,210,200,0.12)";
+      const mist = g.createLinearGradient(0, 0, 0, h);
+      mist.addColorStop(0, "rgba(210,214,200,0.04)");
+      mist.addColorStop(0.55, "rgba(210,214,200,0.16)");
+      mist.addColorStop(1, "rgba(180,190,176,0.22)");
+      g.fillStyle = mist;
       g.fillRect(0, 0, w, h);
     }
     if (snap.season === "冬" && snap.zone !== "kitchen" && snap.zone !== "mine") {
-      g.fillStyle = "rgba(230,230,235,0.55)";
+      g.fillStyle = "rgba(230,230,235,0.7)";
       for (let i = 0; i < 28; i++) {
         const x = (i * 53 + now / 12) % w;
         const y = (i * 71 + now / 9) % h;
@@ -185,28 +194,16 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       }
     }
     if (snap.weather.id === "storm" && Math.sin(now / 180) > 0.97) {
-      g.fillStyle = "rgba(240,240,255,0.18)";
+      g.fillStyle = "rgba(240,240,255,0.14)";
       g.fillRect(0, 0, w, h);
     }
-    if (snap.dusk) {
-      g.fillStyle = "rgba(80,40,16,0.18)";
+    if (snap.dusk && snap.zone === "valley") {
+      g.fillStyle = "rgba(196,92,38,0.08)";
       g.fillRect(0, 0, w, h);
     }
-    if (snap.night) {
-      g.fillStyle = snap.lit ? "rgba(8,6,12,0.28)" : "rgba(4,2,8,0.62)";
-      g.fillRect(0, 0, w, h);
+    if (snap.night && snap.zone !== "kitchen" && snap.zone !== "mine") {
+      drawNightVignette(g, w, h, snap.lit);
     }
-    const cx = w - 68;
-    const cy = 22;
-    g.strokeStyle = "rgba(201,160,106,0.45)";
-    g.lineWidth = 2;
-    g.beginPath();
-    g.arc(cx, cy, 10, 0, Math.PI * 2);
-    g.stroke();
-    g.strokeStyle = snap.night ? "#8a6a9a" : "#c9a06a";
-    g.beginPath();
-    g.arc(cx, cy, 10, -Math.PI / 2, -Math.PI / 2 + snap.clock * Math.PI * 2);
-    g.stroke();
   };
 
   const paintAtlas = () => {
@@ -251,8 +248,9 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
   const paintHud = () => {
     if (!snap) return;
     const partner = snap.partner;
-    const phase = snap.night ? "夜" : snap.dusk ? "黄昏" : "昼";
-    const vitals = `血 ${snap.hp}/${snap.maxHp} · 饿 ${snap.hunger}`;
+    const phase = snap.night ? "夜里" : snap.dusk ? "黄昏" : "白天";
+    const hp = Math.max(0, Math.min(100, (snap.hp / snap.maxHp) * 100));
+    const hg = Math.max(0, Math.min(100, snap.hunger));
     const place =
       snap.zone === "mine"
         ? `矿 ${snap.floor}层 · ${snap.encounter}`
@@ -275,20 +273,29 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         ? `${partner.name} 断线了，人还在原地`
         : "等另一部手机进来";
     hud.innerHTML = `
-      <div class="live-top">
-        <div>
+      <div class="hud-card">
+        <div class="hud-place">
           <b>${place}</b>
-          <span>房间 ${snap.room}</span>
+          <span class="code-chip">房间 ${snap.room}</span>
         </div>
-        <div class="live-meta">${snap.season} · ${phase} · ${snap.weather.name} · 金 ${snap.gold} · 默契 ${snap.bond}</div>
-        <div class="live-meta">${vitals}${snap.lit || !snap.night ? "" : " · 暗"}</div>
+        <div class="bars">
+          <div class="bar hp" title="血"><i style="width:${hp}%"></i></div>
+          <div class="bar hunger" title="饿"><i style="width:${hg}%"></i></div>
+        </div>
+        <div class="hud-chips">
+          <span>${snap.season}</span>
+          <span>${phase}</span>
+          <span>${snap.weather.name}</span>
+          <span>金 ${snap.gold}</span>
+          <span>默契 ${snap.bond}</span>
+        </div>
+        <div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>
       </div>
-      <div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>
       ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
       ${snap.board.length ? `<div class="fortune-chip">今晚 ${snap.board.join("、")}</div>` : ""}
       ${snap.pot.length || snap.potReady ? `<div class="fortune-chip">锅：${snap.potReady || snap.pot.join("、") || "空"}</div>` : ""}
       ${snap.ice.length ? `<div class="fortune-chip">冰柜 ${snap.ice.map((s) => s.name + "×" + s.n).join("、")}</div>` : ""}
-      <div class="prompt">${snap.prompt}</div>
+      ${snap.prompt ? `<div class="prompt-toast">${snap.prompt}</div>` : ""}
       <div class="toasts">${snap.toasts.map((t) => `<p>${t}</p>`).join("")}</div>
       ${
         snap.orders.length
