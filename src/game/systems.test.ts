@@ -704,6 +704,7 @@ describe("living systems", () => {
     right.x = 333;
     right.y = 219;
     right.zone = "valley";
+    assert.equal(w.reclaim("松", "right"), null);
     w.markAway("b");
     assert.equal(w.present().length, 1);
     assert.equal(roomIsFull(w.present().length), false);
@@ -717,7 +718,6 @@ describe("living systems", () => {
     assert.equal(parked.partner?.online, false);
     assert.equal(parked.partner?.name, "松");
     assert.ok(parked.partner?.name !== "还没来");
-    assert.equal(w.reclaim("丙", "left"), null);
     assert.equal(w.reclaim("松", "right"), "b");
     w.markBack("b");
     assert.equal(right.x, 333);
