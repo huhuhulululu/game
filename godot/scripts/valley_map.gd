@@ -113,6 +113,17 @@ func _prop(name: String, gx: float, gy: float, w: float, h: float, z: int, fog :
 	add_child(Look.hung(_tex(name), Vector2(gx * TILE, gy * TILE), Vector2(w, h), z, fog, sit))
 
 
+func _sit(name: String, gx: float, gy: float, z: int, fog := 0.0, sit := 0.94) -> void:
+	# Native cover crop. Do not stretch a small scrap into mosaic.
+	var tex := _tex(name)
+	var w := 64.0
+	var h := 64.0
+	if tex:
+		w = float(tex.get_width())
+		h = float(tex.get_height())
+	_prop(name, gx, gy, w, h, z, fog, sit)
+
+
 func _bend(gx: float, kind: String) -> float:
 	var fx := clampf((gx * TILE) / 1224.0, 0.0, 1.0)
 	var path_y := 308.0 + fx * 82.0 + 15.0 * sin(fx * 1.7 * PI)
@@ -155,9 +166,9 @@ func _hang(name: String, gx: float, gy: float, w: float, h: float, z: int, fog :
 
 func _ridge() -> void:
 	# Cover trees in the enter frame: behind 暖, left of the lodge, on the creek.
-	_prop("prop-cover-tree.png", 6.35, 5.15, 200, 268, 7, 0.0, 0.94)
-	_prop("prop-cover-tree.png", 12.15, 3.55, 220, 280, 7, 0.0, 0.94)
-	_prop("prop-cover-tree.png", 10.55, 7.20, 188, 252, 9, 0.0, 0.94)
+	_sit("prop-cover-tree.png", 6.35, 5.15, 7, 0.0, 0.94)
+	_sit("prop-cover-tree-b.png", 12.15, 3.55, 7, 0.0, 0.94)
+	_sit("prop-cover-tree.png", 10.55, 7.20, 9, 0.0, 0.94)
 
 
 func _shore() -> void:
@@ -175,5 +186,6 @@ func _docks() -> void:
 
 func _bits() -> void:
 	# Cover lamps in the enter frame. No stall, no anvil.
-	_hang("prop-cover-lamp.png", 8.15, 7.35, 52, 68, 12, 0.0)
-	_hang("prop-cover-lamp.png", 16.85, 5.05, 58, 76, 12, 0.0)
+	# Native sit. Do not stretch a 20px scrap. 8.15, 7.35, 52, 68
+	_sit("prop-cover-lamp.png", 8.15, 7.35, 12, 0.0)
+	_sit("prop-cover-lamp.png", 16.85, 5.05, 12, 0.0)
