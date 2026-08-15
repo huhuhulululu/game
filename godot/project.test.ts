@@ -117,6 +117,7 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(play, /_ink_n/);
   assert.match(play, /_paint_fish/);
   assert.match(play, /Look\.MOSS/);
+  assert.match(play, /_tiles = \[\]/);
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /fishMark|fish_mark/);
   assert.match(actor, /char-%s-fish/);

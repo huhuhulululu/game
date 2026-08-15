@@ -240,6 +240,7 @@ func _on_snap(s: Dictionary) -> void:
 		_tiles = rows
 	if zone != _zone:
 		_cam_locked = false
+		_tiles = []
 	_show_zone(zone, _tiles)
 	var you: Dictionary = s.get("youAt", {})
 	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.58, 1.58)

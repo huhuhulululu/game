@@ -35,6 +35,7 @@ var hold_left := 0
 var act_cool := 0
 var last_log := ""
 var tiles_cache: Array = []
+var tiles_zone := ""
 
 
 func _ready() -> void:
@@ -142,8 +143,6 @@ func _drive_play() -> void:
 				move = Vector2.ZERO
 				if _act_once():
 					act = true
-					phase = "out_mine"
-					_log("DUG")
 			elif bool(drive3["here"]):
 				move = _nudge(int(drive3["facing"]))
 	elif phase == "out_mine":
@@ -214,9 +213,9 @@ func _drive_play() -> void:
 		held = true
 		if _prompt() == "切着":
 			pass
-		elif hold_left <= 0:
-			if _prompt() == "切" and _held_id() == "" and _act_once():
-				act = true
+		elif _held_id() == "" and _prompt() == "切" and _act_once():
+			act = true
+		elif _held_id() != "" or _prompt() != "切":
 			phase = "to_pot"
 			_log("CHOP_DONE")
 	elif phase == "to_pot":
@@ -232,14 +231,18 @@ func _drive_play() -> void:
 		var ptxt := _prompt()
 		if bool(drive7["here"]) or ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0:
 			move = _nudge(int(drive7["facing"])) if ptxt.find("入锅") < 0 and ptxt.find("开煮") < 0 and ptxt.find("取 ·") < 0 else Vector2.ZERO
-			if (ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0) and _act_once():
+			if ptxt.find("取 ·") >= 0 and _act_once():
 				act = true
-				if ptxt.find("取 ·") >= 0:
-					phase = "to_window"
-					_log("DISH")
-				elif _held_id() == "":
-					phase = "second"
-					_log("POT1")
+				phase = "to_window"
+				_log("DISH")
+			elif ptxt.find("开煮") >= 0 and _act_once():
+				act = true
+				phase = "cook_wait"
+				_log("BOIL")
+			elif ptxt.find("入锅") >= 0 and _held_id() != "" and _act_once():
+				act = true
+				phase = "second"
+				_log("POT1")
 	elif phase == "second":
 		var extra2 := _bag_cook()
 		if extra2 != "":
@@ -343,11 +346,15 @@ func _prompt() -> String:
 
 
 func _tiles() -> PackedStringArray:
+	var z := _zone()
 	var src: Array = Net.last_snap.get("tiles", [])
 	if src.size() > 0:
 		tiles_cache = src
-	elif tiles_cache.size() > 0:
+		tiles_zone = z
+	elif tiles_zone == z and tiles_cache.size() > 0:
 		src = tiles_cache
+	else:
+		src = []
 	var out: PackedStringArray = []
 	for row in src:
 		out.append(str(row))
@@ -362,7 +369,7 @@ func _bag_has(id: String) -> bool:
 
 
 func _bag_cook() -> String:
-	for id in ["herb", "osmanthus", "greens", "tomato", "egg", "wheat", "mushroom"]:
+	for id in ["herb", "osmanthus", "greens", "tomato", "egg", "wheat", "mushroom", "fish"]:
 		if _bag_has(id) and _held_id() != id:
 			return id
 	return ""

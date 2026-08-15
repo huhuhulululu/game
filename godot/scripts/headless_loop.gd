@@ -29,6 +29,7 @@ var frames := 0
 var phase := "join"
 var snap: Dictionary = {}
 var tiles_cache: Array = []
+var tiles_zone := ""
 var did_join := false
 var fish_ok := false
 var ore_ok := false
@@ -70,6 +71,7 @@ func _on_snap(s: Dictionary) -> void:
 	snap = s
 	if (s.get("tiles", []) as Array).size() > 0:
 		tiles_cache = s.get("tiles", [])
+		tiles_zone = str(s.get("zone", ""))
 	var held := _held_id()
 	if held.begins_with("fish"):
 		if not fish_ok:
@@ -123,9 +125,15 @@ func _prompt() -> String:
 
 
 func _tiles() -> PackedStringArray:
+	var z := _zone()
 	var src: Array = snap.get("tiles", [])
-	if src.size() == 0:
+	if src.size() > 0:
+		tiles_cache = src
+		tiles_zone = z
+	elif tiles_zone == z and tiles_cache.size() > 0:
 		src = tiles_cache
+	else:
+		src = []
 	var out: PackedStringArray = []
 	for row in src:
 		out.append(str(row))
@@ -140,8 +148,8 @@ func _bag_has(id: String) -> bool:
 
 
 func _bag_cook() -> String:
-	for id in ["herb", "osmanthus", "greens", "tomato", "egg", "wheat", "mushroom"]:
-		if _bag_has(id):
+	for id in ["herb", "osmanthus", "greens", "tomato", "egg", "wheat", "mushroom", "fish"]:
+		if _bag_has(id) and _held_id() != id:
 			return id
 	return ""
 
@@ -353,8 +361,6 @@ func _process(_dt: float) -> bool:
 				move = Vector2.ZERO
 				if _act_once():
 					act = true
-					phase = "out_mine"
-					_log("DUG")
 			elif bool(drive["here"]):
 				move = _nudge(int(drive["facing"]))
 	elif phase == "out_mine":
@@ -384,28 +390,57 @@ func _process(_dt: float) -> bool:
 			move = _nudge(int(drive["facing"])) if _prompt() != "进厨房" else Vector2.ZERO
 			if _prompt() == "进厨房" and _act_once():
 				act = true
-	elif phase == "to_cut":
-		var cut := _find("C")
-		if cut.x < 0:
-			cut = Vector2i(1, 3)
-		drive = _drive(cut, 3)
+	elif phase == "dump":
+		var trash := _find("X")
+		if trash.x < 0:
+			trash = Vector2i(14, 1)
+		drive = _drive(trash, 0)
 		move = drive["move"]
-		if bool(drive["here"]) or _prompt() == "切":
-			move = _nudge(int(drive["facing"])) if _prompt() != "切" else Vector2.ZERO
-			if _prompt() == "切" and _act_once():
+		if bool(drive["here"]) or _prompt() == "丢掉":
+			move = _nudge(int(drive["facing"])) if _prompt() != "丢掉" else Vector2.ZERO
+			if _prompt() == "丢掉" and _act_once():
 				act = true
-				held = true
-				hold_left = 90
-				phase = "chop"
-				_log("CHOP")
+				phase = "to_cut"
+				_log("DUMPED")
+	elif phase == "to_cut":
+		if _held_id() == "ore" or _held_id() == "wood" or _held_id() == "flint":
+			phase = "dump"
+			_log("DUMP")
+		else:
+			if _held_id() == "":
+				var extra := _bag_cook()
+				if extra != "":
+					net.send_take(extra)
+					_log("TAKE " + extra)
+			var cut := _find("C")
+			if cut.x < 0:
+				cut = Vector2i(1, 3)
+			drive = _drive(cut, 3)
+			move = drive["move"]
+			if bool(drive["here"]) or _prompt() == "切" or _prompt() == "切着":
+				move = _nudge(int(drive["facing"])) if _prompt() != "切" and _prompt() != "切着" else Vector2.ZERO
+				if _prompt() == "切" and _act_once():
+					act = true
+					held = true
+					hold_left = 90
+					phase = "chop"
+					_log("CHOP")
+				elif _prompt() == "切着":
+					phase = "chop"
 	elif phase == "chop":
 		held = true
-		if hold_left <= 0:
-			if _act_once():
-				act = true
-				phase = "to_pot"
-				_log("CHOP_DONE")
+		if _prompt() == "切着":
+			pass
+		elif _held_id() == "" and _prompt() == "切" and _act_once():
+			act = true
+		elif _held_id() != "" or _prompt() != "切":
+			phase = "to_pot"
+			_log("CHOP_DONE")
 	elif phase == "to_pot":
+		if _held_id() == "":
+			var more := _bag_cook()
+			if more != "":
+				net.send_take(more)
 		var pot := _find("Q")
 		if pot.x < 0:
 			pot = Vector2i(10, 1)
@@ -414,14 +449,18 @@ func _process(_dt: float) -> bool:
 		var ptxt := _prompt()
 		if bool(drive["here"]) or ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0:
 			move = _nudge(int(drive["facing"])) if ptxt.find("入锅") < 0 and ptxt.find("开煮") < 0 and ptxt.find("取 ·") < 0 else Vector2.ZERO
-			if (ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0) and _act_once():
+			if ptxt.find("取 ·") >= 0 and _act_once():
 				act = true
-				if ptxt.find("取 ·") >= 0:
-					phase = "to_window"
-					_log("DISH")
-				elif _held_id() == "":
-					phase = "second"
-					_log("POT1")
+				phase = "to_window"
+				_log("DISH")
+			elif ptxt.find("开煮") >= 0 and _act_once():
+				act = true
+				phase = "cook_wait"
+				_log("BOIL")
+			elif ptxt.find("入锅") >= 0 and _held_id() != "" and _act_once():
+				act = true
+				phase = "second"
+				_log("POT1")
 	elif phase == "second":
 		var extra := _bag_cook()
 		if extra != "":
