@@ -48,7 +48,7 @@ func _ready() -> void:
 	_zone_map.visible = false
 	_world.add_child(_zone_map)
 	_cam = Camera2D.new()
-	_cam.zoom = Vector2(1.85, 1.85)
+	_cam.zoom = Vector2(1.58, 1.58)
 	_cam.position = _valley.size_px() * 0.5
 	_cam.position_smoothing_enabled = false
 	_cam.position_smoothing_speed = 6
@@ -119,11 +119,10 @@ func _hud() -> void:
 	shout.position = Vector2(1070, 560)
 	shout.pressed.connect(func() -> void: _ping = true)
 	layer.add_child(shout)
-	var pad := Panel.new()
+	var pad := Control.new()
 	pad.position = Vector2(36, 560)
 	pad.size = Vector2(120, 120)
-	pad.modulate = Color(1, 1, 1, 0.55)
-	pad.add_theme_stylebox_override("panel", Look.plaque_box())
+	pad.mouse_filter = Control.MOUSE_FILTER_STOP
 	pad.gui_input.connect(_on_pad)
 	layer.add_child(pad)
 	_fish_hud = Panel.new()
@@ -243,7 +242,7 @@ func _on_snap(s: Dictionary) -> void:
 		_cam_locked = false
 	_show_zone(zone, _tiles)
 	var you: Dictionary = s.get("youAt", {})
-	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.85, 1.85)
+	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.58, 1.58)
 	if you.size() > 0:
 		var target := _clamp_cam(Vector2(float(you.get("x", 0)), float(you.get("y", 0))))
 		if not _cam_locked:

@@ -20,7 +20,7 @@ func _initialize() -> void:
 	var cam := Camera2D.new()
 	root.add_child(cam)
 	cam.make_current()
-	cam.zoom = Vector2(1.85, 1.85)
+	cam.zoom = Vector2(1.58, 1.58)
 	var vp := Vector2(1280, 720)
 	var half := vp / (2.0 * cam.zoom)
 	var sz: Vector2 = valley.size_px()
@@ -28,6 +28,11 @@ func _initialize() -> void:
 	var hud := CanvasLayer.new()
 	hud.layer = 20
 	root.add_child(hud)
+	var card := Panel.new()
+	card.position = Vector2(16, 16)
+	card.size = Vector2(320, 128)
+	card.add_theme_stylebox_override("panel", Look.plaque_box())
+	hud.add_child(card)
 	var bag := Look.wood_button("山草×3", 108)
 	bag.position = Vector2(16, 152)
 	bag.custom_minimum_size = Vector2(108, 36)
@@ -36,6 +41,10 @@ func _initialize() -> void:
 	egg.position = Vector2(132, 152)
 	egg.custom_minimum_size = Vector2(108, 36)
 	hud.add_child(egg)
+	var pad := Control.new()
+	pad.position = Vector2(36, 560)
+	pad.size = Vector2(120, 120)
+	hud.add_child(pad)
 	await process_frame
 	await process_frame
 	await process_frame
@@ -76,18 +85,18 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	_shot("board")
-	cam.position = Vector2(5.0 * 36.0 + 74.0, 4.55 * 36.0 + 54.0)
+	cam.position = Vector2(5.05 * 36.0 + 70.0, 5.55 * 36.0 + 50.0)
 	await process_frame
 	await process_frame
 	_shot("cabin")
 	you.set_moving(false)
-	you.apply({"x": 5.0 * 36.0 + 74.0, "y": 4.55 * 36.0 + 118.0, "name": "暖", "side": "left", "facing": 2}, 0.0)
-	pine.apply({"x": 5.0 * 36.0 + 108.0, "y": 4.55 * 36.0 + 118.0, "name": "松", "side": "right", "facing": 2}, 0.0)
-	cam.position = Vector2(5.0 * 36.0 + 90.0, 4.55 * 36.0 + 90.0)
+	you.apply({"x": 5.05 * 36.0 + 70.0, "y": 5.55 * 36.0 + 110.0, "name": "暖", "side": "left", "facing": 2}, 0.0)
+	pine.apply({"x": 5.05 * 36.0 + 104.0, "y": 5.55 * 36.0 + 110.0, "name": "松", "side": "right", "facing": 2}, 0.0)
+	cam.position = Vector2(5.05 * 36.0 + 86.0, 5.55 * 36.0 + 86.0)
 	await process_frame
 	await process_frame
 	_shot("cabin-pair")
-	cam.position = Vector2(16.9 * 36.0 + 84.0, 4.35 * 36.0 + 58.0)
+	cam.position = Vector2(16.95 * 36.0 + 78.0, 5.40 * 36.0 + 54.0)
 	await process_frame
 	await process_frame
 	_shot("lodge")

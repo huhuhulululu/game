@@ -300,7 +300,77 @@ def plant_sit(name: str) -> None:
     save(out, name)
 
 
+def paint_river() -> Image.Image:
+    # Warm dusk creek. Not the night pond, not a second dirt strip.
+    w, h = 1224, 104
+    ground = load_rgb("ground-valley.png")
+    grass = load_rgb("tex-grass.png")
+    n = fbm(h, w, 61)
+    base = tile_tex(ground, h, w, 40, 180)
+    wet = tile_tex(grass, h, w, 18, 70)
+    yy, xx = np.indices((h, w))
+    fy = yy / float(h)
+    depth = np.clip(1.0 - np.abs(fy - 0.50) * 2.15, 0, 1) ** 0.80
+    ripple = 0.90 + 0.10 * np.sin((xx / 20.0 + n * 2.6) * np.pi)
+    spec = np.clip(np.sin((xx / 15.0 + fy * 5.5 + n * 3.8) * np.pi) * 0.5 + 0.5, 0, 1)
+    spec *= depth * (0.28 + 0.72 * n)
+    grain = 0.62 * base + 0.38 * wet
+    shoal = np.array([0.72, 0.56, 0.30], dtype=np.float32)
+    mid = np.array([0.46, 0.42, 0.24], dtype=np.float32)
+    gloss = np.array([0.90, 0.76, 0.44], dtype=np.float32)
+    rgb = shoal * (1.0 - depth)[..., None] + mid * depth[..., None]
+    rgb = np.clip(rgb * (0.55 + 0.55 * grain) * ripple[..., None] * (0.88 + 0.18 * n[..., None]), 0, 1)
+    rgb = np.clip(rgb + gloss * spec[..., None] * 0.42, 0, 1)
+    a = np.clip(1.0 - np.abs(fy - 0.50) * 1.48, 0, 1) ** 0.48
+    a = np.clip(a * (0.86 + 0.14 * n), 0, 0.95)
+    out = Image.fromarray(np.dstack([np.clip(rgb * 255, 0, 255).astype(np.uint8), (a * 255).astype(np.uint8)]), "RGBA")
+    a = out.getchannel("A").filter(ImageFilter.GaussianBlur(1.4))
+    out.putalpha(a)
+    return out
+
+
+def paint_path() -> Image.Image:
+    w, h = 960, 56
+    ground = load_rgb("ground-valley.png")
+    n = fbm(h, w, 19)
+    base = tile_tex(ground, h, w, 120, 80)
+    rgb = np.clip(base * np.array([1.20, 0.94, 0.58]) * (0.92 + 0.18 * n[..., None]), 0, 1)
+    yy = np.indices((h, w))[0] / float(h)
+    a = np.clip(1.0 - np.abs(yy - 0.50) * 1.72, 0, 1) ** 0.62
+    a = np.clip(a * (0.82 + 0.18 * n), 0, 0.92)
+    out = Image.fromarray(np.dstack([np.clip(rgb * 255, 0, 255).astype(np.uint8), (a * 255).astype(np.uint8)]), "RGBA")
+    a = out.getchannel("A").filter(ImageFilter.GaussianBlur(1.1))
+    out.putalpha(a)
+    return out
+
+
+def paint_meadow() -> Image.Image:
+    w, h = 900, 320
+    ground = load_rgb("ground-valley.png")
+    grass = load_rgb("tex-grass.png")
+    n = fbm(h, w, 33)
+    g = tile_tex(grass, h, w, 10, 20)
+    d = tile_tex(ground, h, w, 60, 40)
+    rgb = np.clip(g * 0.76 + d * 0.24, 0, 1)
+    rgb = np.clip(rgb * np.array([1.18, 1.06, 0.70]) * (0.96 + 0.16 * n[..., None]), 0, 1)
+    lum = np.maximum(rgb.mean(axis=2, keepdims=True), 0.08)
+    rgb = np.clip(rgb * (0.42 / lum) * 0.55 + rgb * 0.62, 0, 1)
+    yy, xx = np.indices((h, w))
+    fx, fy = xx / float(w), yy / float(h)
+    a = np.clip(1.0 - np.abs(fx - 0.50) * 1.18, 0, 1) * np.clip(1.0 - np.abs(fy - 0.50) * 1.28, 0, 1)
+    a = np.clip(a ** 0.62 * (0.74 + 0.20 * n), 0, 0.90)
+    out = Image.fromarray(np.dstack([np.clip(rgb * 255, 0, 255).astype(np.uint8), (a * 255).astype(np.uint8)]), "RGBA")
+    a = out.getchannel("A").filter(ImageFilter.GaussianBlur(1.8))
+    out.putalpha(a)
+    return out
+
+
 def main() -> None:
+    if "--land" in __import__("sys").argv:
+        save(paint_river(), "band-river.png")
+        save(paint_path(), "band-path.png")
+        save(paint_meadow(), "band-meadow.png")
+        return
     save(paint_house("hut"), "prop-hut.png")
     save(paint_house("lodge"), "prop-lodge.png")
     save(paint_verge(), "prop-verge.png")

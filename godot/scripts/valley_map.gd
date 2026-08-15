@@ -1,7 +1,7 @@
 class_name ValleyMap
 extends Node2D
 
-## One painted floor. Houses sit in it. No per-tile wallpaper.
+## One painted floor. Path, river, and roofs sit in it.
 
 const TILE := 36
 
@@ -47,26 +47,26 @@ func _paint() -> void:
 	bed.texture = sheet
 	bed.centered = false
 	bed.position = Vector2(-pad, -pad)
-	bed.texture_filter = TEXTURE_FILTER_LINEAR
+	bed.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	if sheet:
 		bed.scale = Vector2((sz.x + pad * 2.0) / float(sheet.get_width()), (sz.y + pad * 2.0) / float(sheet.get_height()))
 	bed.z_index = -2
-	bed.modulate = Color(0.90, 0.80, 0.64)
+	bed.modulate = Color(0.94, 0.86, 0.70)
 	add_child(bed)
 	var ground := Sprite2D.new()
 	ground.texture = sheet
 	ground.centered = false
 	ground.position = Vector2(-80, -80)
-	ground.texture_filter = TEXTURE_FILTER_LINEAR
+	ground.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	if sheet:
 		ground.scale = Vector2((sz.x + 160.0) / float(sheet.get_width()), (sz.y + 160.0) / float(sheet.get_height()))
 	ground.z_index = 0
 	ground.material = Look.prop_mat(0.0)
 	add_child(ground)
-	_verge()
+	_land()
 	_houses()
-	_trees()
-	_grove()
+	_ridge()
+	_shore()
 	_docks()
 	_bits()
 
@@ -75,12 +75,12 @@ func _prop(name: String, gx: float, gy: float, w: float, h: float, z: int, fog :
 	add_child(Look.hung(_tex(name), Vector2(gx * TILE, gy * TILE), Vector2(w, h), z, fog, sit))
 
 
-func _sheet(name: String, gx: float, gy: float, w: float, h: float, z: int) -> void:
+func _sheet(name: String, x: float, y: float, w: float, h: float, z: int) -> void:
 	var tex := _tex(name)
 	var s := Sprite2D.new()
 	s.texture = tex
 	s.centered = false
-	s.position = Vector2(gx * TILE, gy * TILE)
+	s.position = Vector2(x, y)
 	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	if tex:
 		s.scale = Vector2(w / float(tex.get_width()), h / float(tex.get_height()))
@@ -89,49 +89,52 @@ func _sheet(name: String, gx: float, gy: float, w: float, h: float, z: int) -> v
 	add_child(s)
 
 
-func _verge() -> void:
-	_sheet("prop-verge.png", -0.2, 3.1, 156, 430, 1)
-	_sheet("prop-verge.png", 0.6, 8.4, 132, 280, 1)
+func _land() -> void:
+	_sheet("band-meadow.png", 2.4 * TILE, 4.7 * TILE, 26.8 * TILE, 8.6 * TILE, 1)
+	_sheet("band-meadow.png", 3.0 * TILE, 11.5 * TILE, 22.0 * TILE, 4.2 * TILE, 1)
+	_sheet("band-path.png", 3.6 * TILE, 8.82 * TILE, 25.6 * TILE, 52.0, 2)
+	_sheet("band-river.png", 0.6 * TILE, 9.70 * TILE, 32.6 * TILE, 96.0, 2)
 
 
 func _houses() -> void:
-	_prop("prop-hut.png", 5.0, 4.55, 148, 108, 8, 0.03, 0.93)
-	_prop("prop-lodge.png", 16.9, 4.35, 168, 116, 8, 0.03, 0.93)
-	_prop("prop-mine.png", 8.4, 0.6, 92, 78, 6, 0.12, 0.94)
+	_prop("prop-hut.png", 5.05, 5.55, 140, 100, 8, 0.03, 0.93)
+	_prop("prop-lodge.png", 16.95, 5.40, 156, 108, 8, 0.03, 0.93)
+	_prop("prop-mine.png", 8.4, 3.05, 84, 70, 6, 0.12, 0.94)
 
 
-func _grove() -> void:
-	_prop("prop-tree-tall.png", 0.05, 3.4, 72, 102, 12, 0.10, 0.96)
-	_prop("prop-tree.png", 0.20, 5.7, 80, 106, 14, 0.10, 0.96)
-	_prop("prop-pine.png", -0.10, 8.1, 66, 98, 16, 0.10, 0.96)
-	_prop("prop-tree-wide.png", 0.15, 10.5, 84, 102, 18, 0.10, 0.96)
-	_prop("prop-tree.png", 0.85, 12.8, 70, 94, 20, 0.10, 0.96)
-	_prop("prop-pine.png", 2.35, 6.6, 58, 86, 13, 0.10, 0.96)
-	_prop("prop-bush.png", 1.55, 4.5, 40, 34, 5, 0.08, 0.88)
-	_prop("prop-bush.png", 2.45, 7.0, 38, 32, 5, 0.08, 0.88)
-	_prop("prop-bush.png", 1.70, 9.3, 40, 34, 5, 0.08, 0.88)
-	_prop("prop-bush.png", 2.90, 11.6, 36, 32, 5, 0.08, 0.88)
-	_prop("prop-tuft.png", 2.70, 5.1, 28, 24, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 1.35, 7.7, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 3.10, 8.6, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 2.40, 10.9, 28, 24, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 3.30, 13.5, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-rock.png", 1.15, 3.9, 34, 30, 6, 0.08, 0.90)
-	_prop("prop-rock.png", 2.05, 13.1, 36, 32, 6, 0.08, 0.90)
-
-
-func _trees() -> void:
+func _ridge() -> void:
 	var kinds: Array[String] = ["prop-tree.png", "prop-tree-wide.png", "prop-tree-tall.png", "prop-pine.png"]
-	var h := ROWS.size()
-	var w := ROWS[0].length()
-	for y in h:
-		for x in w:
-			if ROWS[y][x] != "T":
-				continue
-			if (x + y * 3) % 3 != 0:
-				continue
-			var name: String = kinds[(x * 7 + y * 13) % kinds.size()]
-			_prop(name, x - 0.8, y - 2.4, 72, 96, 10 + y, 0.10 + float(y) * 0.008, 0.96)
+	# Crowns sit in the spawn frame, behind the cottages — not a fringe above y=0.
+	var north: Array[Vector2] = [
+		Vector2(1.4, 3.55), Vector2(4.8, 3.35), Vector2(8.6, 3.50),
+		Vector2(12.4, 3.40), Vector2(16.0, 3.55), Vector2(20.2, 3.30),
+		Vector2(23.6, 3.60), Vector2(27.8, 3.45), Vector2(30.6, 3.70),
+	]
+	for i in north.size():
+		var p: Vector2 = north[i]
+		_prop(kinds[i % kinds.size()], p.x, p.y, 74, 98, 5, 0.10, 0.96)
+	var walls: Array[Vector2] = [
+		Vector2(0.5, 6.5), Vector2(0.9, 9.4),
+		Vector2(23.2, 10.35),
+		Vector2(27.4, 6.9), Vector2(29.2, 9.1), Vector2(26.6, 12.0),
+	]
+	for i in walls.size():
+		var p: Vector2 = walls[i]
+		_prop(kinds[(i + 2) % kinds.size()], p.x, p.y, 70, 94, 12 + int(p.y), 0.10, 0.96)
+	_prop("prop-bush.png", 6.8, 4.15, 38, 32, 5, 0.08, 0.88)
+	_prop("prop-bush.png", 12.8, 4.20, 36, 32, 5, 0.08, 0.88)
+	_prop("prop-bush.png", 20.6, 4.05, 38, 32, 5, 0.08, 0.88)
+
+
+func _shore() -> void:
+	for i in 8:
+		var x := 2.4 + float(i) * 3.4
+		_prop("prop-tuft.png", x, 9.55 + float(i % 2) * 0.18, 26, 22, 4, 0.06, 0.86)
+	_prop("prop-rock.png", 7.6, 9.7, 32, 28, 6, 0.08, 0.90)
+	_prop("prop-rock.png", 19.8, 9.65, 30, 26, 6, 0.08, 0.90)
+	_prop("prop-tuft.png", 10.4, 8.2, 24, 20, 4, 0.06, 0.86)
+	_prop("prop-tuft.png", 14.8, 8.15, 26, 22, 4, 0.06, 0.86)
+	_prop("prop-tuft.png", 20.2, 8.25, 24, 20, 4, 0.06, 0.86)
 
 
 func _docks() -> void:
@@ -146,5 +149,5 @@ func _bits() -> void:
 	_prop("prop-anvil.png", 21.4, 11.55, 56, 60, 7, 0.05, 0.98)
 	_prop("prop-gate.png", 30.2, 13.2, 48, 56, 7, 0.08, 0.94)
 	_prop("prop-tree-gold.png", 29.4, 12.2, 64, 80, 9, 0.08, 0.96)
-	_prop("prop-bush.png", 16.6, 2.8, 40, 36, 5, 0.10, 0.88)
-	_prop("prop-bush.png", 18.2, 3.1, 36, 32, 5, 0.10, 0.88)
+	_prop("prop-bush.png", 16.6, 4.9, 40, 36, 5, 0.10, 0.88)
+	_prop("prop-bush.png", 18.4, 5.1, 36, 32, 5, 0.10, 0.88)
