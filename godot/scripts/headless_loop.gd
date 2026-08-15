@@ -4,6 +4,17 @@ extends SceneTree
 
 const TILE := 36
 const DIRS := [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
+const KITCHEN_ROWS: PackedStringArray = [
+	"################",
+	"#12345....Q...X#",
+	"#..............#",
+	"#C..........U..#",
+	"#C..........U..#",
+	"#..............#",
+	"#L.............#",
+	"#6.....R.....W.#",
+	"################",
+]
 const VALLEY_ROWS: PackedStringArray = [
 	"##################################",
 	"#TTTT..........TTTTTTTT..........#",
@@ -203,7 +214,11 @@ func _tile_of(p: Vector2) -> Vector2i:
 
 func _nav_rows() -> PackedStringArray:
 	var rows := _tiles()
-	if rows.is_empty() and _zone() == "valley":
+	if not rows.is_empty():
+		return rows
+	if _zone() == "kitchen":
+		return KITCHEN_ROWS
+	if _zone() == "valley":
 		return VALLEY_ROWS
 	return rows
 
@@ -447,7 +462,9 @@ func _process(_dt: float) -> bool:
 		drive = _drive(pot, 0)
 		move = drive["move"]
 		var ptxt := _prompt()
-		if bool(drive["here"]) or ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0:
+		if ptxt == "切" or ptxt == "切着" or ptxt == "丢掉":
+			move = _seek(_center(10, 2))
+		elif bool(drive["here"]) or ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0:
 			move = _nudge(int(drive["facing"])) if ptxt.find("入锅") < 0 and ptxt.find("开煮") < 0 and ptxt.find("取 ·") < 0 else Vector2.ZERO
 			if ptxt.find("取 ·") >= 0 and _act_once():
 				act = true
@@ -521,6 +538,8 @@ func _process(_dt: float) -> bool:
 		move = Vector2.ZERO
 	if phase != "unknown":
 		net.send_input(move.x, move.y, act, held or act, false)
+	if frames % 180 == 0 and phase == "to_pot":
+		print("POT_WAIT pos=", _pos(), " held=", _held_id(), " prompt=", _prompt(), " Q=", _find("Q"))
 	if frames > 14000:
 		printerr("TIMEOUT phase=%s fish=%s ore=%s plate=%s held=%s zone=%s prompt=%s" % [phase, fish_ok, ore_ok, plate_ok, _held_id(), _zone(), _prompt()])
 		quit(1)
