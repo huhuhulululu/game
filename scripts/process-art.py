@@ -96,45 +96,9 @@ def square_tex(im: Image.Image) -> Image.Image:
     return im.crop((x, y, x + side, y + side))
 
 
-def seam_blend(im: Image.Image, band: int = 56) -> Image.Image:
-    """Crossfade opposite edges so wrap sampling does not flash a tile cut."""
-    im = im.convert("RGB")
-    w, h = im.size
-    band = min(band, w // 4, h // 4)
-    px = im.load()
-    for y in range(h):
-        for i in range(band):
-            t = i / band
-            fade = (1.0 - t) * 0.5
-            r1, g1, b1 = px[i, y]
-            r2, g2, b2 = px[w - 1 - i, y]
-            px[i, y] = (
-                int(r1 * (1 - fade) + r2 * fade),
-                int(g1 * (1 - fade) + g2 * fade),
-                int(b1 * (1 - fade) + b2 * fade),
-            )
-            px[w - 1 - i, y] = (
-                int(r2 * (1 - fade) + r1 * fade),
-                int(g2 * (1 - fade) + g1 * fade),
-                int(b2 * (1 - fade) + b1 * fade),
-            )
-    for x in range(w):
-        for i in range(band):
-            t = i / band
-            fade = (1.0 - t) * 0.5
-            r1, g1, b1 = px[x, i]
-            r2, g2, b2 = px[x, h - 1 - i]
-            px[x, i] = (
-                int(r1 * (1 - fade) + r2 * fade),
-                int(g1 * (1 - fade) + g2 * fade),
-                int(b1 * (1 - fade) + b2 * fade),
-            )
-            px[x, h - 1 - i] = (
-                int(r2 * (1 - fade) + r1 * fade),
-                int(g2 * (1 - fade) + g1 * fade),
-                int(b2 * (1 - fade) + b1 * fade),
-            )
-    return im.filter(ImageFilter.GaussianBlur(radius=0.35))
+def soften_tex(im: Image.Image) -> Image.Image:
+    """Keep the painting, knock off only the hardest generation grain."""
+    return im.convert("RGB").filter(ImageFilter.GaussianBlur(radius=0.28))
 
 
 def process(path: Path) -> None:
@@ -143,7 +107,7 @@ def process(path: Path) -> None:
     before = path.stat().st_size
     src = im.size
     if name.startswith("tex-"):
-        out = shrink(seam_blend(square_tex(im.convert("RGB"))), MAX_TEX)
+        out = shrink(soften_tex(square_tex(im.convert("RGB"))), MAX_TEX)
         out.save(path, "PNG", optimize=True)
     else:
         # Shrink a little first so chroma-key is not a multi-second pixel walk.

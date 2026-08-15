@@ -17,6 +17,8 @@ import {
   drawMeadow,
   drawNightVignette,
   drawPlot,
+  drawSheet,
+  fillClusters,
   drawSky,
   houseClusters,
   isHouseLook,
@@ -135,6 +137,14 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
       snap.zone !== "kitchen" &&
       snap.zone !== "mine" &&
       drawMeadow(g, x0 * TILE, y0 * TILE, (x1 - x0 + 1) * TILE, (y1 - y0 + 1) * TILE);
+    let waterSheet = false;
+    let pathSheet = false;
+    for (const pool of fillClusters(rows, (ch) => ch === "~" || ch === "D")) {
+      if (drawSheet(g, "water", pool)) waterSheet = true;
+    }
+    for (const lane of fillClusters(rows, (ch) => ch === ",")) {
+      if (drawSheet(g, "path", lane)) pathSheet = true;
+    }
     for (let y = y0; y <= y1; y++) {
       for (let x = x0; x <= x1; x++) {
         const inside = y >= 0 && y < mh && x >= 0 && x < mw;
@@ -156,10 +166,11 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const look = tileLook(ch, snap.zone);
         const tall = isTallLook(look);
         const fill = cellFill(ch, snap.zone);
+        const skip = { grass: meadow, water: waterSheet, path: pathSheet };
         if (look === "grass" && meadow) {
           /* meadow already covers this cell */
-        } else if (tall) drawCell(g, ch, px, py, fill, now, snap.zone, near, "ground", meadow);
-        else drawCell(g, ch, px, py, fill, now, snap.zone, near, "all", meadow);
+        } else if (tall) drawCell(g, ch, px, py, fill, now, snap.zone, near, "ground", skip);
+        else drawCell(g, ch, px, py, fill, now, snap.zone, near, "all", skip);
         if (!hidden) drawFringe(g, ch, near, px, py, snap.zone, now);
         if (hidden) {
           g.fillStyle = "rgba(6,10,16,0.78)";
@@ -175,7 +186,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         if (!hidden && tall && !isHouseLook(look)) {
           sprites.push({
             y: py + TILE,
-            draw: () => drawCell(g, ch, px, py, fill, now, world.zone, near, "prop"),
+            draw: () => drawCell(g, ch, px, py, fill, now, world.zone, near, "prop", skip),
           });
         }
       }

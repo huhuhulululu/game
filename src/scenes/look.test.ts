@@ -10,6 +10,7 @@ import {
   drawPlot,
   houseClusters,
   isTallLook,
+  fillClusters,
   plotClusters,
   plotIndex,
   shade,
@@ -176,6 +177,8 @@ describe("look", () => {
   it("joins valley plots into one field", () => {
     const fields = plotClusters(VALLEY);
     assert.ok(fields.some((f) => f.w === 4 && f.h === 3));
+    const water = fillClusters(VALLEY, (ch) => ch === "~" || ch === "D");
+    assert.ok(water.some((p) => p.w >= 8 && p.h >= 2));
   });
 
   it("marks trees and stalls tall so a person can walk behind them", () => {

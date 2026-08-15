@@ -6,6 +6,7 @@ type Ctx = CanvasRenderingContext2D;
 
 export type Near = { n: string; s: string; e: string; w: string };
 export type DrawPart = "all" | "ground" | "prop";
+export type DrawSkip = { grass?: boolean; water?: boolean; path?: boolean };
 
 const FILL: Record<string, string> = {
   "#": "#2a1c16",
@@ -149,7 +150,7 @@ export function drawMeadow(g: Ctx, x: number, y: number, w: number, h: number): 
   return blitWrap(g, "grass", x, y, w, h);
 }
 
-function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number, skipGrass = false): void {
+function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: number, skipGrass = false, skipPath = false): void {
   if (zone === "kitchen") {
     if (blitWrap(g, "wood", x, y, TILE, TILE)) {
       g.strokeStyle = "rgba(50,30,18,0.22)";
@@ -199,6 +200,7 @@ function ground(g: Ctx, zone: string, ch: string, x: number, y: number, now: num
     return;
   }
   if (ch === ",") {
+    if (skipPath) return;
     if (blitWrap(g, "path", x - 1, y - 1, TILE + 2, TILE + 2)) return;
     px(g, x, y, TILE, TILE, "#8a7a58");
     oval(g, x + 18, y + 18, 14, 6, "#7a6a48");
@@ -244,8 +246,8 @@ function water(g: Ctx, x: number, y: number, now: number): void {
   oval(g, x + 18, y + 17, 13, 6, `rgba(190,214,220,${pulse})`);
 }
 
-function dock(g: Ctx, x: number, y: number): void {
-  water(g, x, y, 0);
+function dock(g: Ctx, x: number, y: number, skipWater = false): void {
+  if (!skipWater) water(g, x, y, 0);
   if (blitFit(g, "dock", x - 10, y - 14, TILE + 20, TILE + 18)) return;
   px(g, x, y + 12, TILE, 16, "#6a4a28");
   g.strokeStyle = "#8a6a40";
@@ -570,9 +572,9 @@ export function drawPlot(g: Ctx, px0: number, py0: number, stage: number, seed?:
   oval(g, px0 + 24, py0 + 10, 4, 4, name.includes("姜") ? "#e8d080" : "#d4a24a");
 }
 
-function paintProp(g: Ctx, look: string, ch: string, x: number, y: number, now: number, zone: string, near?: Near): void {
+function paintProp(g: Ctx, look: string, ch: string, x: number, y: number, now: number, zone: string, near?: Near, skipWater = false): void {
   if (look === "tree") tree(g, x, y, ch === "t" || (zone === "wild" && ch === "T"), now);
-  else if (look === "dock") dock(g, x, y);
+  else if (look === "dock") dock(g, x, y, skipWater);
   else if (look === "fire") fire(g, x, y, now);
   else if (look === "cabin") cabin(g, x, y);
   else if (look === "inn") inn(g, x, y, ch === "I");
@@ -615,8 +617,9 @@ export function drawCell(
   zone = "valley",
   near?: Near,
   part: DrawPart = "all",
-  skipGrass = false,
+  skip: DrawSkip | boolean = {},
 ): void {
+  const flags: DrawSkip = typeof skip === "boolean" ? { grass: skip } : skip;
   g.imageSmoothingEnabled = true;
   if ("imageSmoothingQuality" in g) g.imageSmoothingQuality = "high";
   const look = tileLook(ch, zone);
@@ -631,22 +634,25 @@ export function drawCell(
     look === "water" ||
     look === "wall";
   if (part !== "prop") {
-    if (look === "water") water(g, x, y, now);
-    else if (look === "wall") wall(g, x, y, zone);
+    if (look === "water") {
+      if (!flags.water) water(g, x, y, now);
+    } else if (look === "wall") wall(g, x, y, zone);
     else if (look === "ground") px(g, x, y, TILE, TILE, fill || "#3d4a36");
     else if (floor) {
-      ground(g, zone, ch, x, y, now, skipGrass);
+      ground(g, zone, ch, x, y, now, !!flags.grass, !!flags.path);
       if (fill && fill !== cellFill(ch, zone)) {
         g.fillStyle = fill;
         g.globalAlpha = 0.2;
         g.fillRect(x, y, TILE, TILE);
         g.globalAlpha = 1;
       }
+    } else if (look === "dock" && flags.water) {
+      /* river sheet already covers the slip */
     } else {
-      ground(g, zone, look === "plot" ? "," : ".", x, y, now, skipGrass);
+      ground(g, zone, look === "plot" ? "," : ".", x, y, now, !!flags.grass, !!flags.path);
     }
   }
-  if (part !== "ground" && !floor && look !== "plot") paintProp(g, look, ch, x, y, now, zone, near);
+  if (part !== "ground" && !floor && look !== "plot") paintProp(g, look, ch, x, y, now, zone, near, !!flags.water);
 }
 
 function heldChip(name: string): string {
@@ -1023,14 +1029,14 @@ export interface FieldCluster {
   h: number;
 }
 
-export function plotClusters(rows: string[]): FieldCluster[] {
+export function fillClusters(rows: string[], ok: (ch: string) => boolean): FieldCluster[] {
   const seen = new Set<number>();
   const mw = rows[0]?.length ?? 0;
   const out: FieldCluster[] = [];
   for (let y = 0; y < rows.length; y++) {
     for (let x = 0; x < mw; x++) {
       const key = y * mw + x;
-      if (rows[y][x] !== "P" || seen.has(key)) continue;
+      if (!ok(rows[y][x]) || seen.has(key)) continue;
       const stack = [[x, y]];
       seen.add(key);
       let minX = x;
@@ -1052,7 +1058,7 @@ export function plotClusters(rows: string[]): FieldCluster[] {
           const nx = cx + dx;
           const ny = cy + dy;
           const nk = ny * mw + nx;
-          if (rows[ny]?.[nx] === "P" && !seen.has(nk)) {
+          if (ok(rows[ny]?.[nx] ?? "") && !seen.has(nk)) {
             seen.add(nk);
             stack.push([nx, ny]);
           }
@@ -1064,6 +1070,14 @@ export function plotClusters(rows: string[]): FieldCluster[] {
   return out;
 }
 
+export function plotClusters(rows: string[]): FieldCluster[] {
+  return fillClusters(rows, (ch) => ch === "P");
+}
+
+export function drawSheet(g: Ctx, name: string, c: FieldCluster): boolean {
+  return blitWrap(g, name, c.x * TILE - 1, c.y * TILE - 1, c.w * TILE + 2, c.h * TILE + 2);
+}
+
 export function drawField(g: Ctx, c: FieldCluster): void {
   const x = c.x * TILE;
   const y = c.y * TILE;
@@ -1071,16 +1085,16 @@ export function drawField(g: Ctx, c: FieldCluster): void {
   const h = c.h * TILE;
   g.save();
   g.beginPath();
-  g.roundRect(x + 1, y + 2, w - 2, h - 4, 8);
+  g.roundRect(x + 2, y + 3, w - 4, h - 6, 14);
   g.clip();
   for (let ty = 0; ty < c.h; ty++) {
     for (let tx = 0; tx < c.w; tx++) plotSoil(g, x + tx * TILE, y + ty * TILE);
   }
   g.restore();
-  g.strokeStyle = "rgba(30,18,10,0.32)";
+  g.strokeStyle = "rgba(30,18,10,0.22)";
   g.lineWidth = 2;
   g.beginPath();
-  g.roundRect(x + 1, y + 2, w - 2, h - 4, 8);
+  g.roundRect(x + 2, y + 3, w - 4, h - 6, 14);
   g.stroke();
 }
 
@@ -1097,56 +1111,31 @@ export function drawFringe(g: Ctx, ch: string, near: Near, x: number, y: number,
   const wash = (x0: number, y0: number, x1: number, y1: number, from: string) => {
     const grd = g.createLinearGradient(x0, y0, x1, y1);
     grd.addColorStop(0, from);
-    grd.addColorStop(0.55, from.replace(/[\d.]+\)$/, "0.12)"));
     grd.addColorStop(1, "rgba(0,0,0,0)");
     g.fillStyle = grd;
     g.fillRect(Math.min(x0, x1), Math.min(y0, y1), x0 === x1 ? TILE : Math.abs(x1 - x0), y0 === y1 ? TILE : Math.abs(y1 - y0));
   };
-  const scallop = (cx: number, cy: number, rx: number, ry: number, c: string) => oval(g, cx, cy, rx, ry, c);
   if (wet(look)) {
-    if (!wet(n)) {
-      wash(x, y, x, y + 20, "rgba(47,90,56,0.42)");
-      scallop(x + 8, y + 2, 11, 7, "rgba(47,90,56,0.22)");
-      scallop(x + 22, y + 3, 12, 8, "rgba(58,80,48,0.2)");
-    }
-    if (!wet(s)) {
-      wash(x, y + TILE, x, y + TILE - 20, "rgba(47,90,56,0.38)");
-      scallop(x + 10, y + 34, 12, 7, "rgba(47,90,56,0.2)");
-      scallop(x + 26, y + 33, 10, 6, "rgba(58,80,48,0.18)");
-    }
-    if (!wet(e)) wash(x + TILE, y, x + TILE - 18, y, "rgba(47,90,56,0.32)");
-    if (!wet(w)) wash(x, y, x + 18, y, "rgba(47,90,56,0.32)");
+    if (!wet(n)) wash(x, y, x, y + 18, "rgba(47,90,56,0.36)");
+    if (!wet(s)) wash(x, y + TILE, x, y + TILE - 18, "rgba(47,90,56,0.32)");
+    if (!wet(e)) wash(x + TILE, y, x + TILE - 16, y, "rgba(47,90,56,0.26)");
+    if (!wet(w)) wash(x, y, x + 16, y, "rgba(47,90,56,0.26)");
     void now;
     return;
   }
   if (look === "path" || look === "plot") {
-    if (n === "grass") wash(x, y, x, y + 14, "rgba(47,90,56,0.36)");
-    if (s === "grass") wash(x, y + TILE, x, y + TILE - 14, "rgba(47,90,56,0.36)");
-    if (w === "grass") wash(x, y, x + 14, y, "rgba(47,90,56,0.3)");
-    if (e === "grass") wash(x + TILE, y, x + TILE - 14, y, "rgba(47,90,56,0.3)");
-    if (wet(n)) {
-      wash(x, y, x, y + 18, "rgba(26,68,88,0.34)");
-      scallop(x + 12, y + 2, 14, 8, "rgba(26,68,88,0.2)");
-      scallop(x + 26, y + 3, 11, 7, "rgba(20,50,70,0.16)");
-    }
-    if (wet(s)) {
-      wash(x, y + TILE, x, y + TILE - 18, "rgba(26,68,88,0.34)");
-      scallop(x + 10, y + 34, 14, 8, "rgba(26,68,88,0.2)");
-      scallop(x + 24, y + 33, 12, 7, "rgba(20,50,70,0.16)");
-    }
+    if (n === "grass") wash(x, y, x, y + 16, "rgba(47,90,56,0.32)");
+    if (s === "grass") wash(x, y + TILE, x, y + TILE - 16, "rgba(47,90,56,0.32)");
+    if (w === "grass") wash(x, y, x + 14, y, "rgba(47,90,56,0.24)");
+    if (e === "grass") wash(x + TILE, y, x + TILE - 14, y, "rgba(47,90,56,0.24)");
+    if (wet(n)) wash(x, y, x, y + 16, "rgba(26,68,88,0.3)");
+    if (wet(s)) wash(x, y + TILE, x, y + TILE - 16, "rgba(26,68,88,0.3)");
   }
   if (look === "grass" && (wet(n) || wet(s) || wet(e) || wet(w))) {
-    if (wet(s)) {
-      wash(x, y + TILE, x, y + TILE - 22, "rgba(26,68,88,0.36)");
-      scallop(x + 8, y + 32, 13, 8, "rgba(26,68,88,0.2)");
-      scallop(x + 22, y + 33, 12, 7, "rgba(20,50,70,0.16)");
-    }
-    if (wet(n)) {
-      wash(x, y, x, y + 22, "rgba(26,68,88,0.32)");
-      scallop(x + 14, y + 4, 13, 8, "rgba(26,68,88,0.18)");
-    }
-    if (wet(e)) wash(x + TILE, y, x + TILE - 20, y, "rgba(26,68,88,0.28)");
-    if (wet(w)) wash(x, y, x + 20, y, "rgba(26,68,88,0.28)");
+    if (wet(s)) wash(x, y + TILE, x, y + TILE - 20, "rgba(26,68,88,0.3)");
+    if (wet(n)) wash(x, y, x, y + 20, "rgba(26,68,88,0.26)");
+    if (wet(e)) wash(x + TILE, y, x + TILE - 18, y, "rgba(26,68,88,0.22)");
+    if (wet(w)) wash(x, y, x + 18, y, "rgba(26,68,88,0.22)");
   }
 }
 
