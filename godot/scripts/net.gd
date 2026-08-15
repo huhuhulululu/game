@@ -23,7 +23,11 @@ func ws_url() -> String:
 	if env != "":
 		return env
 	if OS.has_feature("web"):
-		return "ws://127.0.0.1:5173/ws"
+		var host := str(JavaScriptBridge.eval("window.location.host", true))
+		var proto := str(JavaScriptBridge.eval("window.location.protocol", true))
+		if host != "" and host != "<null>" and host != "null":
+			var scheme := "wss" if proto.begins_with("https") else "ws"
+			return "%s://%s/ws" % [scheme, host]
 	return "ws://127.0.0.1:5173/ws"
 
 

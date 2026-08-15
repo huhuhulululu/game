@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-mkdir -p "$ROOT/godot/assets/art"
-rsync -a --delete "$ROOT/public/art/" "$ROOT/godot/assets/art/"
-echo "synced $(ls "$ROOT/godot/assets/art" | wc -l) painted files"
+SRC="$ROOT/public/art"
+DST="$ROOT/godot/assets/art"
+mkdir -p "$DST"
+# Keep Godot's painted sheets in sync with public/art without requiring rsync.
+cp -a "$SRC"/. "$DST"/
+echo "synced $(find "$DST" -maxdepth 1 -type f ! -name '*.import' | wc -l) painted files"

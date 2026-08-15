@@ -7,7 +7,8 @@
     "dev": "tsx server/index.ts",
     "build": "tsc --noEmit && vite build",
     "start": "tsx server/index.ts",
-    "test": "tsx --test src/game/systems.test.ts src/scenes/look.test.ts godot/project.test.ts"
+    "export:web": "bash godot/tools/export_web.sh",
+    "test": "tsx --test src/game/systems.test.ts src/scenes/look.test.ts godot/project.test.ts server/godot_web.test.ts"
   },
   "dependencies": {
     "ws": "^8.18.3"

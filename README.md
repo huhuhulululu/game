@@ -8,8 +8,8 @@
 
 ## 两部手机怎么玩
 
-1. 电脑上启动：`npm install && npm run dev`
-2. 两部 iPhone 打开同一个地址（同一 Wi-Fi 下用电脑的局域网 IP，例如 `http://192.168.1.8:5173`）
+1. 电脑上启动：`npm install && npm run dev`（根路径是 Godot 网页端；旧 Vite 画布在 `/legacy`）
+2. 两部 iPhone 打开同一个地址（同一 Wi-Fi 下用电脑的局域网 IP，例如 `http://192.168.1.8:5173`）。进的是 Godot 标题页，不是旧 fillRect。
 3. 一人点「开一间」，进谷后把屏幕上的四位房间码给对方
 4. 另一人输入同一个码，点「进去」（码不存在会提示没有这间山谷）
 5. Safari 里可以「添加到主屏幕」，会更像 App
@@ -37,16 +37,17 @@
 
 可玩的客户端在 `godot/`。插画 / HD-2D，贴图过滤是 linear，不是 nearest 复古点阵。权威模拟仍是这边的 Node / WebSocket 房间；Godot 只进同一间山谷，没有这间山谷不会 new World。
 
-网页 Vite 先留着，等 Godot 能进谷再谈下线。立项见 [docs/CHARTER.md](docs/CHARTER.md)：P2 引擎已定为 Godot 4，不再等网页打磨。
+`npm run dev` 把 `godot/export/web` 挂在根路径，WebSocket 仍是同源 `/ws`。旧 Vite 画布在 `/legacy`。立项见 [docs/CHARTER.md](docs/CHARTER.md)：P2 引擎已定为 Godot 4，不再等网页打磨。
 
 ```bash
+npm run export:web
 npm run dev
 godot --path godot
-# 或走一遍开间 → 进谷 → 能走：
+# 导入 → 导出 → 开间进谷：
 ./godot/run.sh
 ```
 
-电脑：WASD 或方向键，空格 / J 做，H 喊。左摇杆、右下「做」「喊」给触屏。环境变量 `VALLEY_WS` 可改 WebSocket 地址，默认 `ws://127.0.0.1:5173/ws`。
+电脑：WASD 或方向键，空格 / J 做，H 喊。左摇杆、右下「做」「喊」给触屏。网页端自动连当前页的 `/ws`；桌面 / headless 默认 `ws://127.0.0.1:5173/ws`，也可用 `VALLEY_WS`。
 
 ## 命令
 

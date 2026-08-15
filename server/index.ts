@@ -3,6 +3,7 @@ import { WebSocketServer, type WebSocket } from "ws";
 import { createServer as createVite } from "vite";
 import type { ClientMsg } from "../src/sim/net";
 import { World } from "../src/sim/world";
+import { isLegacyPath, serveGodotWeb } from "./godot_web";
 import { makeRoomCode, resolveHelloRoom, roomIsFull, takeRoom } from "./join";
 
 const PORT = Number(process.env.PORT ?? 5173);
@@ -24,10 +25,18 @@ const vite = await createVite({
 });
 
 const http = createServer((req, res) => {
-  vite.middlewares(req, res, () => {
-    res.statusCode = 404;
-    res.end("not found");
-  });
+  const pathname = new URL(req.url ?? "/", "http://local").pathname;
+  if (isLegacyPath(pathname)) {
+    if (pathname === "/legacy" || pathname === "/legacy/") req.url = "/";
+    vite.middlewares(req, res, () => {
+      res.statusCode = 404;
+      res.end("not found");
+    });
+    return;
+  }
+  if (serveGodotWeb(req, res)) return;
+  res.statusCode = 404;
+  res.end("not found");
 });
 
 const wss = new WebSocketServer({ server: http, path: "/ws" });

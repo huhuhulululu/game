@@ -8,6 +8,10 @@ config/description="两部 iPhone，同一座山。Godot 4 客户端进同一间
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.07, 0.08, 0.09, 1)
+boot_splash/image="res://assets/art/prop-cabin.png"
+boot_splash/fullsize=false
+boot_splash/use_filter=true
 
 [autoload]
 

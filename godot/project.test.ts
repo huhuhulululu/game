@@ -18,3 +18,15 @@ test("Godot 4 project is the playable client", () => {
   assert.match(charter, /不用 Unity/);
   assert.doesNotMatch(charter, /Capacitor/);
 });
+
+test("Godot HTML5 export is what phones open", () => {
+  assert.ok(existsSync("godot/export/web/index.html"));
+  const html = readFileSync("godot/export/web/index.html", "utf8");
+  assert.match(html, /并肩山谷/);
+  assert.match(html, /<canvas/);
+  assert.match(html, /Engine/);
+  assert.doesNotMatch(html, /\$GODOT_/);
+  assert.ok(existsSync("godot/export/web/index.wasm"));
+  assert.ok(existsSync("godot/export/web/index.pck"));
+  assert.ok(existsSync("godot/export/web/index.js"));
+});
