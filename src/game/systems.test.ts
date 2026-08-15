@@ -985,7 +985,7 @@ describe("living systems", () => {
     tap(w, "a");
     tap(w, "a");
     tap(w, "a");
-    assert.equal(countOf(w.save.bag, "osmanthus"), 1);
+    assert.equal(countOf(w.save.bag, "osmanthus") + (p.held.startsWith("osmanthus") ? 1 : 0), 1);
     assert.equal(w.save.gear.length, 0);
     assert.ok(!w.toasts.some((t) => t.text.includes("两个人在摊前")));
     assert.ok(!w.save.gear.some((g) => item(g.base).pairId));
@@ -1017,7 +1017,7 @@ describe("living systems", () => {
     tap(w, "a");
     tap(w, "b");
     tap(w, "a");
-    assert.equal(countOf(w.save.bag, "osmanthus"), 1);
+    assert.equal(countOf(w.save.bag, "osmanthus") + (a.held.startsWith("osmanthus") ? 1 : 0), 1);
     assert.ok(w.save.gear.some((g) => g.base === "ring_left"));
     assert.ok(w.save.gear.some((g) => g.base === "ring_right"));
     assert.ok(item("ring_left").pairId);
@@ -1050,7 +1050,7 @@ describe("living systems", () => {
     tap(away, "a");
     tap(away, "a");
     tap(away, "a");
-    assert.equal(countOf(away.save.bag, "osmanthus"), 1);
+    assert.equal(countOf(away.save.bag, "osmanthus") + (aa.held.startsWith("osmanthus") ? 1 : 0), 1);
     assert.equal(away.save.gear.length, 0);
     assert.ok(!away.toasts.some((t) => t.text.includes("两个人在摊前")));
 
@@ -1068,12 +1068,13 @@ describe("living systems", () => {
     tap(miss, "a");
     m.fish!.mark = 0.1;
     tap(miss, "a");
+    assert.ok(miss.toasts.some((t) => t.text.includes("偏了")));
     tap(miss, "a");
     tap(miss, "a");
     assert.equal(countOf(miss.save.bag, "osmanthus"), 0);
     assert.equal(miss.save.gold, 28);
     assert.equal(miss.stall?.goods[0]?.id, "osmanthus");
-    assert.ok(miss.toasts.some((t) => t.text.includes("定金没了")));
+    assert.ok(miss.toasts.some((t) => t.text.includes("定金没了") && t.text.includes("货还在")));
   });
 
   it("lays a thin night of sounds and keeps mute from changing the world", () => {
@@ -1412,5 +1413,37 @@ describe("living systems", () => {
     assert.equal(late.save.gear.length, 0);
     assert.ok(q.held.startsWith("ore"));
     assert.ok(late.toasts.some((t) => t.text.includes("卷刃") && t.text.includes("退")));
+  });
+
+  it("the stall says deposit and three green hits, and a bought flower is held not lost", () => {
+    const w = new World("STALL4");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    w.save.gold = 20;
+    w.stall = {
+      goods: [
+        { id: "osmanthus", price: 18 },
+        { id: "flint", price: 6 },
+      ],
+      pairId: "ring_left",
+      pairMate: "ring_right",
+      pairTaken: false,
+    };
+    standFacing(p, w.valley.find("S")[0]);
+    assert.ok(w.snapshot("a").prompt.includes("定金"));
+    tap(w, "a");
+    assert.ok(w.toasts.some((t) => t.text.includes("定金") && t.text.includes("三下")));
+    assert.ok(w.snapshot("a").prompt.includes("摊") && w.snapshot("a").prompt.includes("还差3下"));
+    p.fish!.mark = 0.45;
+    tap(w, "a");
+    assert.ok(w.snapshot("a").prompt.includes("还差2下"));
+    tap(w, "a");
+    tap(w, "a");
+    assert.ok(p.held.startsWith("osmanthus"));
+    assert.ok(w.toasts.some((t) => t.text.includes("买下") && t.text.includes("桂花") && t.text.includes("手里")));
+    assert.ok(!w.toasts.some((t) => t.text.includes("两个人在摊前")));
+    assert.equal(w.save.gear.length, 0);
+    assert.ok(!w.save.gear.some((g) => item(g.base).pairId));
   });
 });

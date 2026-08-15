@@ -602,6 +602,12 @@ export class World {
       const left = Math.max(1, 3 - (this.forgeJob?.hits ?? 0));
       return `锻 · 绿的时候按 · 还差${left}下`;
     }
+    if (p.fish?.phase === "fight" && p.fish.shop) {
+      const left = Math.max(1, 3 - (this.shopJob?.hits ?? 0));
+      const row = this.stall?.goods[this.shopPick(p.fish.mark)];
+      const name = row ? item(row.id).name : "货";
+      return `摊 · ${name} · 绿的时候按 · 还差${left}下`;
+    }
     if (p.fish?.phase === "fight") return "稳住 · 绿的时候按";
     const map = this.mapFor(p.zone);
     const f = this.facingTile(p);
@@ -1406,7 +1412,7 @@ export class World {
   private shopPrompt(): string {
     this.ensureStall();
     if (!this.stall?.goods.length) return "今日卖完了";
-    if (!this.shopJob) return `看货 · ${this.stall.goods.map((g) => item(g.id).name).join("、")}`;
+    if (!this.shopJob) return `看货 · ${this.stall.goods.map((g) => item(g.id).name).join("、")} · 定金${STALL_DEPOSIT}`;
     const starter = this.players.get(this.shopJob.starter);
     const mark = starter?.fish?.mark ?? 0.2;
     const row = this.stall.goods[this.shopPick(mark)];
@@ -1442,13 +1448,13 @@ export class World {
       return;
     }
     if (this.save.gold < STALL_DEPOSIT) {
-      this.toast("还差定金");
+      this.toast(`还差定金${STALL_DEPOSIT}金`);
       return;
     }
     this.save.gold -= STALL_DEPOSIT;
     this.shopJob = { starter: p.id, hits: 0, good: {}, pick: {} };
     p.fish = { phase: "fight", t: 4, window: 1, mark: 0.2, pull: 1, dir: 1, shop: true };
-    this.toast(`今日摊上：${this.stall.goods.map((g) => item(g.id).name).join("、")}`);
+    this.toast(`今日摊上：${this.stall.goods.map((g) => item(g.id).name).join("、")}。定金${STALL_DEPOSIT}金。绿的时候点三下。`);
   }
 
   private yankShop(p: Actor): void {
@@ -1460,6 +1466,8 @@ export class World {
     if (good) {
       this.shopJob.good[p.id] = (this.shopJob.good[p.id] ?? 0) + 1;
       this.shopJob.pick[p.id] = this.shopPick(mark);
+    } else if (this.shopJob.hits < 3) {
+      this.toast("偏了。");
     }
     if (this.shopJob.hits >= 3) this.finishShop();
   }
@@ -1490,7 +1498,7 @@ export class World {
     if (!starter || !this.stall) return;
     const greens = Object.values(job.good).reduce((s, n) => s + n, 0);
     if (greens < 1) {
-      this.toast("没看清，定金没了");
+      this.toast("没点中。货还在，定金没了。");
       return;
     }
     const idx = job.pick[starter.id] ?? 0;
@@ -1506,6 +1514,7 @@ export class World {
     }
     if (remain > 0) this.save.gold -= remain;
     this.giveShopItem(starter, row.id);
+    const boughtUid = this.save.gear.at(-1)?.uid;
     this.stall.goods.splice(idx, 1);
     const partner = this.other(starter);
     const pairOk =
@@ -1523,7 +1532,15 @@ export class World {
       this.stall.pairTaken = true;
       this.toast(`两个人在摊前点了同一件 · ${item(this.stall.pairId).name}`);
     }
-    this.toast(`${starter.name} 买下${item(row.id).name}`);
+    const got = item(row.id);
+    if (got.kind === "equip") {
+      const f = this.fighter(starter);
+      const worn = !!boughtUid && (f.weaponUid === boughtUid || f.charmUid === boughtUid);
+      this.toast(`${starter.name} 买下${got.name}${worn ? "。佩上了。" : "。在鉴里。"}`);
+    } else {
+      const held = parseHeld(starter.held).id === row.id;
+      this.toast(`${starter.name} 买下${got.name}${held ? "。进手里了。" : "。在袋子里。"}`);
+    }
   }
 
   private giveShopItem(p: Actor, id: string): void {
@@ -1533,6 +1550,7 @@ export class World {
       return;
     }
     addToBag(this.save.bag, id);
+    this.fillHand(p, id);
   }
 
   private askFortune(p: Actor): void {
