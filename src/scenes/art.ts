@@ -1,6 +1,6 @@
 type Sheet = HTMLCanvasElement;
 
-const ART_REV = "look6";
+const ART_REV = "look7";
 
 const SRC: Record<string, { src: string }> = {
   tree: { src: "/art/prop-tree.png" },
@@ -71,7 +71,7 @@ const WRAP = new Set(["grass", "path", "water", "wood", "stone", "marsh"]);
 
 /** Crossfade wrap edges so a field does not show a wallpaper seam. Not a mirror. */
 function softenWrap(g: CanvasRenderingContext2D, w: number, h: number): void {
-  const fade = Math.min(56, Math.floor(w / 10), Math.floor(h / 10));
+  const fade = Math.min(96, Math.floor(w / 6), Math.floor(h / 6));
   if (fade < 8) return;
   const img = g.getImageData(0, 0, w, h);
   const d = img.data;
