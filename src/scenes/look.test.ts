@@ -228,6 +228,13 @@ describe("look", () => {
     assert.ok(tiny < 8);
   });
 
+  it("does not stamp a bush on every valley wall cell", () => {
+    const g = mockCtx();
+    drawCell(g, "#", 0, 0, "#2a1c16", 0, "valley");
+    assert.ok(!g.fills.some((c) => c.includes("5a3a22")));
+    assert.ok(g.rects.filter((r) => r[2] <= 8 && r[3] >= 10).length === 0);
+  });
+
   it("gives the two valley docks different sheets", () => {
     assert.notEqual(dockSheet(5 * 36, 10 * 36), dockSheet(12 * 36, 10 * 36));
     assert.ok(["dock", "dockB"].includes(dockSheet(5 * 36, 10 * 36)));

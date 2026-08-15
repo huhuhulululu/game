@@ -172,6 +172,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         const skip = { grass: meadow, water: waterSheet, path: pathSheet };
         if (look === "grass" && meadow) {
           /* meadow already covers this cell */
+        } else if (look === "wall" && meadow && snap.zone === "valley") {
+          /* meadow already covers the map frame */
         } else if (tall) drawCell(g, ch, px, py, fill, now, snap.zone, near, "ground", skip);
         else drawCell(g, ch, px, py, fill, now, snap.zone, near, "all", skip);
         if (!hidden) drawFringe(g, ch, near, px, py, snap.zone, now);

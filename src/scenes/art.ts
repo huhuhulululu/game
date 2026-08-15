@@ -1,6 +1,6 @@
 type Sheet = HTMLCanvasElement;
 
-const ART_REV = "look5";
+const ART_REV = "look6";
 
 const SRC: Record<string, { src: string }> = {
   tree: { src: "/art/prop-tree.png" },
@@ -67,7 +67,35 @@ const SRC: Record<string, { src: string }> = {
 
 const sheets = new Map<string, Sheet>();
 
-function sheetFrom(img: HTMLImageElement): Sheet {
+const WRAP = new Set(["grass", "path", "water", "wood", "stone", "marsh"]);
+
+/** Crossfade wrap edges so a field does not show a wallpaper seam. Not a mirror. */
+function softenWrap(g: CanvasRenderingContext2D, w: number, h: number): void {
+  const fade = Math.min(56, Math.floor(w / 10), Math.floor(h / 10));
+  if (fade < 8) return;
+  const img = g.getImageData(0, 0, w, h);
+  const d = img.data;
+  const at = (x: number, y: number) => (y * w + x) * 4;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < fade; x++) {
+      const t = x / fade;
+      const iL = at(x, y);
+      const iR = at(w - fade + x, y);
+      for (let c = 0; c < 4; c++) d[iL + c] = d[iR + c] * (1 - t) + d[iL + c] * t;
+    }
+  }
+  for (let x = 0; x < w; x++) {
+    for (let y = 0; y < fade; y++) {
+      const t = y / fade;
+      const iT = at(x, y);
+      const iB = at(x, h - fade + y);
+      for (let c = 0; c < 4; c++) d[iT + c] = d[iB + c] * (1 - t) + d[iT + c] * t;
+    }
+  }
+  g.putImageData(img, 0, 0);
+}
+
+function sheetFrom(img: HTMLImageElement, wrap = false): Sheet {
   const c = document.createElement("canvas");
   c.width = img.width;
   c.height = img.height;
@@ -75,6 +103,7 @@ function sheetFrom(img: HTMLImageElement): Sheet {
   if (!g) return c;
   g.imageSmoothingEnabled = true;
   g.drawImage(img, 0, 0);
+  if (wrap) softenWrap(g, c.width, c.height);
   return c;
 }
 
@@ -83,7 +112,7 @@ export function loadArt(): void {
   for (const [name, spec] of Object.entries(SRC)) {
     if (sheets.has(name)) continue;
     const img = new Image();
-    img.onload = () => sheets.set(name, sheetFrom(img));
+    img.onload = () => sheets.set(name, sheetFrom(img, WRAP.has(name)));
     img.src = `${spec.src}?v=${ART_REV}`;
   }
 }

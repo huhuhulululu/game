@@ -9,6 +9,7 @@ export type DrawPart = "all" | "ground" | "prop";
 export type DrawSkip = { grass?: boolean; water?: boolean; path?: boolean };
 
 const FACE = "'Valley Serif', 'Songti SC', 'STSong', 'PingFang SC', 'Hiragino Mincho ProN', 'Source Han Serif SC', serif";
+const GRASS_ZOOM = 2.6;
 
 let lookSeason = "春";
 
@@ -152,30 +153,42 @@ function tuft(g: Ctx, x: number, y: number, s: number, c: string): void {
   tri(g, x, y + s, x + s * 0.45, y, x + s * 0.9, y + s, c);
 }
 
+function grassAt(g: Ctx, x: number, y: number, w: number, h: number): boolean {
+  return blitWrapZoom(g, "grass", x, y, w, h, GRASS_ZOOM);
+}
+
 export function drawMeadow(g: Ctx, x: number, y: number, w: number, h: number): boolean {
   g.imageSmoothingEnabled = true;
   if ("imageSmoothingQuality" in g) g.imageSmoothingQuality = "high";
-  const base = blitWrapZoom(g, "grass", x, y, w, h, 2.55);
+  const base = grassAt(g, x, y, w, h);
   if (!base) return false;
   g.save();
-  g.globalAlpha = 0.3;
+  g.globalAlpha = 0.28;
   g.translate(x + w, y);
   g.scale(-1, 1);
-  blitWrapZoom(g, "grass", 0, 0, w, h, 1.62, 74, 51);
+  blitWrapZoom(g, "grass", 0, 0, w, h, 1.73, 91, 63);
   g.restore();
   g.save();
-  g.globalAlpha = 0.16;
-  blitWrapZoom(g, "grass", x, y, w, h, 3.1, 118, 86);
+  g.globalAlpha = 0.14;
+  blitWrapZoom(g, "grass", x, y, w, h, 3.35, 141, 97);
   g.restore();
-  const step = 47;
+  for (let py = y - 40; py < y + h + 40; py += 92) {
+    for (let px = x - 40; px < x + w + 40; px += 108) {
+      const n = hash(Math.round(px), Math.round(py));
+      const tint =
+        n > 720 ? "rgba(196,92,38,0.05)" : n > 400 ? "rgba(26,48,32,0.1)" : "rgba(74,120,70,0.08)";
+      oval(g, px + (n % 37) - 18, py + (hash(py, px) % 29) - 14, 38 + (n % 22), 26 + (n % 16), tint);
+    }
+  }
+  const step = 53;
   const x0 = Math.floor(x / step) * step;
   const y0 = Math.floor(y / step) * step;
   for (let py = y0; py < y + h; py += step) {
     for (let px = x0; px < x + w; px += step) {
       const n = hash(px, py);
-      if ((n + hash(py, px + 3)) % 1000 < 560) continue;
-      const ox = px + (n % 23) - 11;
-      const oy = py + (hash(py, px) % 21) - 10;
+      if ((n + hash(py, px + 3)) % 1000 < 540) continue;
+      const ox = px + (n % 27) - 13;
+      const oy = py + (hash(py, px) % 25) - 12;
       if (!blitFit(g, "tuft", ox - 8, oy - 6, 15 + (n % 9), 12 + (n % 6))) {
         if (n > 880) oval(g, ox + 8, oy + 6, 2, 2, "#c45c26");
         else tuft(g, ox, oy, 7 + (n % 5), "#2f5a38");
@@ -318,14 +331,23 @@ function dock(g: Ctx, x: number, y: number, skipWater = false): void {
   if (!skipWater) water(g, x, y, 0);
   const n = hash(x, y);
   const name = dockSheet(x, y);
-  const grow = 0.9 + (n % 14) / 80;
-  oval(g, x + 18, y + 30, 14 * grow, 4, "rgba(20,16,10,0.22)");
+  const wide = name === "dockB";
+  const grow = 0.92 + (n % 10) / 90;
+  oval(g, x + 18, y + 30, (wide ? 18 : 13) * grow, 4, "rgba(20,16,10,0.22)");
   g.save();
   g.translate(x + 18, y + 28);
-  if (n % 2 === 0) g.scale(-1, 1);
-  const painted = blitFit(g, name, -30 * grow, -34 * grow, 60 * grow, 48 * grow);
+  if (wide) g.scale(-1, 1);
+  const bw = (wide ? 74 : 52) * grow;
+  const bh = (wide ? 40 : 58) * grow;
+  const painted = blitFit(g, name, -bw / 2, -bh, bw, bh);
   g.restore();
   if (painted) return;
+  if (wide) {
+    px(g, x - 4, y + 14, TILE + 8, 14, "#5a3e22");
+    oval(g, x + 8, y + 16, 6, 7, "#6a4a28");
+    px(g, x + 22, y + 8, 5, 18, "#3a2414");
+    return;
+  }
   px(g, x, y + 12, TILE, 16, "#6a4a28");
   g.strokeStyle = "#8a6a40";
   g.lineWidth = 2;
@@ -571,9 +593,7 @@ function wall(g: Ctx, x: number, y: number, zone: string): void {
     px(g, x, y, TILE, TILE, "#4a3224");
     return;
   }
-  if (!blitWrap(g, "grass", x, y, TILE, TILE)) px(g, x, y, TILE, TILE, "#2a4a28");
-  oval(g, x + 18, y + 10, 12, 7, "#1e3a24");
-  px(g, x + 16, y + 20, 6, 12, "#5a3a22");
+  /* Valley walls sit under the meadow. A bush per cell is the map frame. */
 }
 
 function hill(g: Ctx, x: number, y: number): void {
@@ -1045,11 +1065,11 @@ export function houseClusters(rows: string[], zone: string): HouseCluster[] {
 }
 
 function drawSmoke(g: Ctx, x: number, y: number, now: number): void {
-  for (let i = 0; i < 6; i++) {
-    const t = (now / 560 + i * 0.17) % 1;
-    const sx = x + Math.sin(now / 280 + i * 1.3) * (3 + t * 6);
-    const sy = y - t * 40;
-    oval(g, sx, sy, 3.6 + t * 8, 3 + t * 7, `rgba(214,206,196,${0.3 * (1 - t)})`);
+  for (let i = 0; i < 7; i++) {
+    const t = (now / 540 + i * 0.15) % 1;
+    const sx = x + Math.sin(now / 260 + i * 1.25) * (4 + t * 8);
+    const sy = y - t * 48;
+    oval(g, sx, sy, 4.5 + t * 9, 3.6 + t * 8, `rgba(226,218,208,${0.42 * (1 - t)})`);
   }
 }
 
@@ -1105,7 +1125,7 @@ export function drawHouseCluster(g: Ctx, c: HouseCluster, now: number): void {
     }
   }
   if (c.kind === "cabin" || c.kind === "inn") {
-    drawSmoke(g, x + w * (c.kind === "inn" ? 0.32 : 0.7), y + 2, now);
+    drawSmoke(g, x + w * (c.kind === "inn" ? 0.28 : 0.78), y - 30, now);
     drawDoorGlow(g, c.doorX * TILE, c.doorY * TILE, now);
   }
 }
@@ -1240,31 +1260,27 @@ function waveBand(g: Ctx, x: number, y: number, w: number, h: number, seed: numb
 }
 
 function nibbleGrass(g: Ctx, x: number, y: number, w: number, seed: number, dir: number): void {
-  for (let i = -8; i <= w + 8; i += 14) {
-    const cx = x + i + wander(seed, i) * 9;
-    const cy = y + wander(seed + 2, i) * 6 * dir;
+  for (let i = -8; i <= w + 8; i += 12) {
+    const cx = x + i + wander(seed, i) * 11;
+    const cy = y + wander(seed + 2, i) * 8 * dir;
     g.save();
     g.beginPath();
-    g.ellipse(cx, cy, 17, 10, wander(seed, i + 3) * 0.4, 0, Math.PI * 2);
+    g.ellipse(cx, cy, 20, 13, wander(seed, i + 3) * 0.45, 0, Math.PI * 2);
     g.clip();
-    if (!blitWrap(g, "grass", cx - 20, cy - 12, 40, 24)) {
-      oval(g, cx, cy, 16, 9, "#3f6d45");
-    }
+    if (!grassAt(g, cx - 22, cy - 14, 44, 28)) oval(g, cx, cy, 18, 11, "#3f6d45");
     g.restore();
   }
 }
 
 function nibbleGrassV(g: Ctx, x: number, y: number, h: number, seed: number, dir: number): void {
-  for (let i = -8; i <= h + 8; i += 14) {
-    const cy = y + i + wander(seed, i) * 9;
-    const cx = x + wander(seed + 2, i) * 6 * dir;
+  for (let i = -8; i <= h + 8; i += 12) {
+    const cy = y + i + wander(seed, i) * 11;
+    const cx = x + wander(seed + 2, i) * 8 * dir;
     g.save();
     g.beginPath();
-    g.ellipse(cx, cy, 10, 16, wander(seed, i + 3) * 0.4, 0, Math.PI * 2);
+    g.ellipse(cx, cy, 13, 20, wander(seed, i + 3) * 0.45, 0, Math.PI * 2);
     g.clip();
-    if (!blitWrap(g, "grass", cx - 12, cy - 20, 24, 40)) {
-      oval(g, cx, cy, 9, 16, "#3f6d45");
-    }
+    if (!grassAt(g, cx - 14, cy - 22, 28, 44)) oval(g, cx, cy, 11, 18, "#3f6d45");
     g.restore();
   }
 }
@@ -1276,9 +1292,9 @@ export function drawPool(g: Ctx, c: FieldCluster): boolean {
   const h = c.h * TILE;
   const seed = c.x * 13 + c.y * 7;
   g.save();
-  waveBand(g, x - 10, y - 8, w + 20, h + 16, seed, 10);
+  waveBand(g, x - 10, y - 8, w + 20, h + 16, seed, 16);
   g.clip();
-  const ok = blitWrap(g, "water", x - 8, y - 8, w + 16, h + 16);
+  const ok = blitWrapZoom(g, "water", x - 8, y - 8, w + 16, h + 16, 2.8);
   g.restore();
   nibbleGrass(g, x - 4, y - 2, w + 8, seed, -1);
   nibbleGrass(g, x - 4, y + h + 2, w + 8, seed + 4, 1);
@@ -1292,38 +1308,36 @@ export function drawLane(g: Ctx, c: FieldCluster): boolean {
   const h = c.h * TILE;
   const seed = c.x * 5 + c.y * 11;
   const mid = y + h / 2;
-  const step = 8;
-  g.save();
-  g.beginPath();
-  g.moveTo(x - 14, mid + wander(seed, -14) * 18 - 16);
-  for (let i = -14; i <= w + 14; i += step) {
-    const half = 15 + wander(seed + 3, i) * 9;
-    g.lineTo(x + i, mid + wander(seed, i) * 18 - half);
-  }
-  for (let i = w + 14; i >= -14; i -= step) {
-    const half = 15 + wander(seed + 3, i) * 9;
-    g.lineTo(x + i, mid + wander(seed, i) * 18 + half);
-  }
-  g.closePath();
-  g.clip();
-  const ok = blitWrapZoom(g, "path", x - 20, mid - 40, w + 40, 80, 2.7, seed * 3, seed);
-  if (!ok) {
-    g.fillStyle = "#8a7a58";
-    g.fill();
-  }
-  g.restore();
-  for (let i = 16; i < w; i += 40) {
-    const cx = x + i + wander(seed + 9, i) * 12;
-    const cy = mid + wander(seed + 11, i) * 16;
+  let ok = false;
+  for (let i = -6; i <= w + 6; i += 15) {
+    if (hash(Math.round(x + i), seed) < 160) continue;
+    const cx = x + i + wander(seed, i) * 8;
+    const cy = mid + wander(seed, i) * 20;
+    const rx = 17 + wander(seed + 1, i) * 7;
+    const ry = 8 + wander(seed + 2, i) * 4;
     g.save();
     g.beginPath();
-    g.ellipse(cx, cy, 10, 7, 0.18, 0, Math.PI * 2);
+    g.ellipse(cx, cy, rx, ry, wander(seed, i + 4) * 0.4, 0, Math.PI * 2);
     g.clip();
-    blitWrapZoom(g, "path", cx - 12, cy - 8, 24, 16, 3.2, i, seed);
+    if (blitWrapZoom(g, "path", cx - rx - 2, cy - ry - 2, rx * 2 + 4, ry * 2 + 4, 2.9, seed * 3, i)) ok = true;
+    else {
+      g.fillStyle = "#7a6a48";
+      g.fill();
+    }
     g.restore();
   }
-  nibbleGrass(g, x - 10, mid - 20, w + 20, seed, -1);
-  nibbleGrass(g, x - 10, mid + 20, w + 20, seed + 6, 1);
+  nibbleGrass(g, x - 10, mid - 18, w + 20, seed, -1);
+  nibbleGrass(g, x - 10, mid + 18, w + 20, seed + 6, 1);
+  for (let i = 20; i < w; i += 34) {
+    const cx = x + i + wander(seed + 8, i) * 10;
+    const cy = mid + wander(seed + 10, i) * 8;
+    g.save();
+    g.beginPath();
+    g.ellipse(cx, cy, 12, 8, wander(seed, i) * 0.3, 0, Math.PI * 2);
+    g.clip();
+    grassAt(g, cx - 14, cy - 10, 28, 20);
+    g.restore();
+  }
   return ok;
 }
 
@@ -1334,7 +1348,7 @@ export function drawField(g: Ctx, c: FieldCluster): void {
   const h = c.h * TILE;
   const seed = c.x * 9 + c.y;
   g.save();
-  organicPath(g, x + 2, y + 4, w - 4, h - 8, seed + 2, 14);
+  organicPath(g, x + 2, y + 4, w - 4, h - 8, seed + 2, 22);
   g.clip();
   if (!blitWrap(g, "path", x - 8, y - 8, w + 16, h + 16)) {
     g.fillStyle = "#6b4a28";
