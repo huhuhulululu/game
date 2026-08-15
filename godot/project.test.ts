@@ -65,6 +65,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(paintSlip, /tex-paper/);
   assert.match(paintSlip, /tex-slip/);
   assert.match(paintSlip, /HUD slip only/);
+  assert.match(paintSlip, /640, 80/);
   assert.doesNotMatch(paintSlip, /floor-valley|cover-valley|ground-valley/);
   assert.doesNotMatch(paintSlip, /Wilson|Don't Starve|Dont Starve/i);
   assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);

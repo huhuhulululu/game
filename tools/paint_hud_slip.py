@@ -11,8 +11,9 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "godot" / "assets" / "art"
 
-# 9-slice wood rim. Keep these in lockstep with Look.slip_box().
-W, H = 240, 80
+# 9-slice wood rim. Wider than the prompt bar so TILE_FIT stays one slip.
+# Keep margins in lockstep with Look.slip_box().
+W, H = 640, 80
 MX, MY = 16, 13
 
 
@@ -62,15 +63,20 @@ def _round_mask(size: tuple[int, int], radius: int, inset: int = 0) -> Image.Ima
 
 def paint_slip() -> Image.Image:
     # Same set as the valley board: wood planks, paper pinned on.
-    wood_v = _wood_plank((W, H), horizontal=False)
-    wood_h = _wood_plank((W, H), horizontal=True)
+    wood_v = _wood_plank((240, H), horizontal=False)
+    wood_h = _wood_plank((240, H), horizontal=True)
     frame = Image.new("RGB", (W, H))
-    frame.paste(wood_v, (0, 0))
-    # Top / bottom rims stretch as long planks. Corners stay vertical.
-    top = wood_h.crop((MX, 0, W - MX, MY))
-    bot = wood_h.crop((MX, H - MY, W - MX, H))
-    frame.paste(top, (MX, 0))
-    frame.paste(bot, (MX, H - MY))
+    for x in range(0, W, 240):
+        frame.paste(wood_v, (x, 0))
+    # Top / bottom rims read as one long plank. Corners stay vertical.
+    top_src = wood_h.crop((MX, 0, 240 - MX, MY))
+    bot_src = wood_h.crop((MX, H - MY, 240 - MX, H))
+    x = MX
+    while x < W - MX:
+        piece = min(top_src.size[0], W - MX - x)
+        frame.paste(top_src.crop((0, 0, piece, MY)), (x, 0))
+        frame.paste(bot_src.crop((0, 0, piece, MY)), (x, H - MY))
+        x += piece
     # Two thin seams so the rim reads as boards, not a brown stroke.
     arr = np.asarray(frame, dtype=np.float32)
     for y in (4, MY - 3, H - MY + 2, H - 5):
