@@ -1,7 +1,7 @@
 class_name ValleyMap
 extends Node2D
 
-## One painted floor. Path, river, and roofs sit in it.
+## One painted floor. Grass, path, and creek are one sheet.
 
 const TILE := 36
 
@@ -75,25 +75,16 @@ func _prop(name: String, gx: float, gy: float, w: float, h: float, z: int, fog :
 	add_child(Look.hung(_tex(name), Vector2(gx * TILE, gy * TILE), Vector2(w, h), z, fog, sit))
 
 
-func _sheet(name: String, x: float, y: float, w: float, h: float, z: int) -> void:
-	var tex := _tex(name)
+func _land() -> void:
+	var tex := _tex("floor-valley.png")
 	var s := Sprite2D.new()
 	s.texture = tex
 	s.centered = false
-	s.position = Vector2(x, y)
+	s.position = Vector2(-48, -48)
 	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	if tex:
-		s.scale = Vector2(w / float(tex.get_width()), h / float(tex.get_height()))
-	s.z_index = z
-	s.material = Look.prop_mat(0.02)
+	s.z_index = 1
+	s.material = Look.prop_mat(0.0)
 	add_child(s)
-
-
-func _land() -> void:
-	_sheet("band-meadow.png", 2.4 * TILE, 4.7 * TILE, 26.8 * TILE, 8.6 * TILE, 1)
-	_sheet("band-meadow.png", 3.0 * TILE, 11.5 * TILE, 22.0 * TILE, 4.2 * TILE, 1)
-	_sheet("band-path.png", 3.6 * TILE, 8.82 * TILE, 25.6 * TILE, 52.0, 2)
-	_sheet("band-river.png", 0.6 * TILE, 9.70 * TILE, 32.6 * TILE, 96.0, 2)
 
 
 func _houses() -> void:
@@ -129,17 +120,17 @@ func _ridge() -> void:
 func _shore() -> void:
 	for i in 8:
 		var x := 2.4 + float(i) * 3.4
-		_prop("prop-tuft.png", x, 9.55 + float(i % 2) * 0.18, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-rock.png", 7.6, 9.7, 32, 28, 6, 0.08, 0.90)
-	_prop("prop-rock.png", 19.8, 9.65, 30, 26, 6, 0.08, 0.90)
-	_prop("prop-tuft.png", 10.4, 8.2, 24, 20, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 14.8, 8.15, 26, 22, 4, 0.06, 0.86)
-	_prop("prop-tuft.png", 20.2, 8.25, 24, 20, 4, 0.06, 0.86)
+		_prop("prop-tuft.png", x, 10.45 + float(i % 2) * 0.16, 26, 22, 4, 0.06, 0.86)
+	_prop("prop-rock.png", 7.6, 10.55, 32, 28, 6, 0.08, 0.90)
+	_prop("prop-rock.png", 19.8, 10.50, 30, 26, 6, 0.08, 0.90)
+	_prop("prop-tuft.png", 10.4, 8.85, 24, 20, 4, 0.06, 0.86)
+	_prop("prop-tuft.png", 14.8, 8.80, 26, 22, 4, 0.06, 0.86)
+	_prop("prop-tuft.png", 20.2, 8.90, 24, 20, 4, 0.06, 0.86)
 
 
 func _docks() -> void:
-	_prop("prop-dock.png", 4.2, 9.25, 56, 36, 4, 0.06, 0.98)
-	_prop("prop-dock-b.png", 11.2, 9.25, 56, 36, 4, 0.06, 0.98)
+	_prop("prop-dock.png", 4.2, 10.35, 56, 36, 4, 0.06, 0.98)
+	_prop("prop-dock-b.png", 11.2, 10.35, 56, 36, 4, 0.06, 0.98)
 
 
 func _bits() -> void:

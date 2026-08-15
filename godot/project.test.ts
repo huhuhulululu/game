@@ -72,10 +72,9 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const valley = readFileSync("godot/scripts/valley_map.gd", "utf8");
   assert.match(valley, /ground-valley/);
   assert.match(valley, /prop-hut|prop-lodge/);
-  assert.match(valley, /band-river|band-path|band-meadow/);
-  assert.ok(existsSync("godot/assets/art/band-river.png"));
-  assert.ok(existsSync("godot/assets/art/band-path.png"));
-  assert.ok(existsSync("godot/assets/art/band-meadow.png"));
+  assert.match(valley, /floor-valley/);
+  assert.doesNotMatch(valley, /band-river|band-path|band-meadow/);
+  assert.ok(existsSync("godot/assets/art/floor-valley.png"));
   assert.doesNotMatch(valley, /_tile\(/);
   assert.doesNotMatch(valley, /prop-cabin|prop-inn/);
   assert.doesNotMatch(play, /modulate = Color\(1, 1, 1, 0\.55\)/);
