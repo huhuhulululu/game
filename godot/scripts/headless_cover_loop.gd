@@ -255,7 +255,10 @@ func _drive_play() -> void:
 			var drive7 := _drive(pot, 0)
 			move = drive7["move"]
 			var ptxt := _prompt()
-			if ptxt == "切" or ptxt == "切着" or ptxt == "丢掉" or ptxt == "出厨房":
+			if ptxt.find("先下炉") >= 0 or ptxt.find("先切") >= 0:
+				phase = "dump"
+				_log("NEED_PREP")
+			elif ptxt == "切" or ptxt == "切着" or ptxt == "丢掉" or ptxt == "出厨房":
 				move = _seek(_center(10, 2))
 			elif bool(drive7["here"]) or ptxt.find("入锅") >= 0 or ptxt.find("开煮") >= 0 or ptxt.find("取 ·") >= 0:
 				move = _nudge(int(drive7["facing"])) if ptxt.find("入锅") < 0 and ptxt.find("开煮") < 0 and ptxt.find("取 ·") < 0 else Vector2.ZERO
@@ -293,7 +296,10 @@ func _drive_play() -> void:
 		var drive8 := _drive(pot2, 0)
 		move = drive8["move"]
 		var p2 := _prompt()
-		if bool(drive8["here"]) or p2.find("入锅") >= 0 or p2.find("开煮") >= 0 or p2.find("取 ·") >= 0 or p2.find("锅还在") >= 0:
+		if p2.find("先下炉") >= 0 or p2.find("先切") >= 0:
+			phase = "dump"
+			_log("NEED_PREP")
+		elif bool(drive8["here"]) or p2.find("入锅") >= 0 or p2.find("开煮") >= 0 or p2.find("取 ·") >= 0 or p2.find("锅还在") >= 0:
 			move = Vector2.ZERO
 			if (p2.find("入锅") >= 0 or p2.find("开煮") >= 0 or p2.find("取 ·") >= 0) and _act_once():
 				act = true
@@ -435,7 +441,8 @@ func _bag_has(id: String) -> bool:
 
 
 func _bag_cook() -> String:
-	for id in ["herb", "osmanthus", "greens", "tomato", "egg", "wheat", "mushroom", "fish"]:
+	# Egg / wheat need the stove. Cover loop plates from the pot, not the furnace.
+	for id in ["herb", "osmanthus", "greens", "tomato", "mushroom", "fish"]:
 		if _bag_has(id) and _held_id() != id:
 			return id
 	return ""
