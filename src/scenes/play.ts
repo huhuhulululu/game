@@ -69,8 +69,8 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         lastToast = top;
         if (top.includes("钓") || top.includes("水")) ctx.audio.tone("water");
         else if (top.includes("砍") || top.includes("砸") || top.includes("挖")) ctx.audio.tone("chop");
-        else if (top.includes("天黑") || top.includes("出锅") || top.includes("写入菜单")) {
-          /* night / pot-ready live on feel */
+        else if (top.includes("天黑") || top.includes("出锅") || top.includes("写入菜单") || top.includes("咬了") || top.includes("咬住")) {
+          /* night / pot-ready / bite live on feel */
         } else if (top.includes("黑暗咬")) ctx.audio.tone("dark");
         else if (top.includes("咬") || top.includes("倒")) ctx.audio.tone("hit");
         else if (top.includes("上了") || top.includes("写入")) ctx.audio.tone("serve");

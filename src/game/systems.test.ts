@@ -1096,6 +1096,12 @@ describe("living systems", () => {
     };
     const ding = tickFeel(first.next, fight, 20);
     assert.ok(ding.sounds.includes("green"));
+    const nibble = {
+      ...snap,
+      actors: snap.actors.map((a) => (a.id === "a" ? { ...a, fishing: "bite" } : a)),
+    };
+    const tug = tickFeel(first.next, nibble, 20);
+    assert.ok(tug.sounds.includes("bite"));
     const still = tickFeel(ding.next, fight, 40);
     assert.equal(still.sounds.includes("green"), false);
     const daySnap = { ...snap, night: false, potReady: "" };
@@ -1115,6 +1121,7 @@ describe("living systems", () => {
     quiet.tone("night");
     quiet.tone("ready");
     quiet.tone("dark");
+    quiet.tone("bite");
     assert.equal(w.players.get("a")!.zone, "valley");
   });
 
@@ -1229,5 +1236,56 @@ describe("living systems", () => {
     assert.equal(p.zone, "valley");
     assert.equal(p.facing, 3);
     assert.ok(w.toasts.some((t) => t.text.includes("回到山谷") && t.text.includes("客栈")));
+  });
+
+  it("a bite speaks up, a wait press reels in, and the fish lands in the hand", () => {
+    const w = new World("ROD");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    const dock = w.valley.find("D")[0];
+    assert.ok(dock);
+    standFacing(p, dock);
+    tap(w, "a");
+    assert.equal(p.fish?.phase, "wait");
+    tap(w, "a");
+    assert.equal(p.fish, null);
+    assert.ok(w.toasts.some((t) => t.text.includes("收了")));
+    p.fish = { phase: "wait", t: 0.01, window: 0.8, mark: 0, pull: 0, dir: 1 };
+    w.tick(0.05);
+    assert.equal(p.fish?.phase, "bite");
+    assert.ok(w.toasts.some((t) => t.text.includes("咬了") && t.text.includes("起竿")));
+    tap(w, "a");
+    assert.equal(p.fish?.phase, "fight");
+    p.fish.mark = 0.5;
+    p.fish.pull = 0.8;
+    w.rand = () => 0;
+    tap(w, "a");
+    assert.equal(p.fish, null);
+    assert.ok(p.held.startsWith("fish"));
+  });
+
+  it("raw fish at the pot says to cut first, and night on the rod points at reeling in", () => {
+    const w = new World("POTF");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.zone = "kitchen";
+    p.held = "fish:raw:100";
+    const pot = w.kitchenMap.find("Q")[0];
+    assert.ok(pot);
+    standFacing(p, pot);
+    assert.ok(w.snapshot("a").prompt.includes("先切"));
+    tap(w, "a");
+    assert.equal(p.held, "fish:raw:100");
+    assert.equal(w.pot.length, 0);
+    p.zone = "valley";
+    const dock = w.valley.find("D")[0];
+    assert.ok(dock);
+    standFacing(p, dock);
+    p.fish = { phase: "wait", t: 8, window: 1, mark: 0, pull: 0, dir: 1 };
+    w.clock = nightAfter(seasonOf(w.save.day)) - 0.01;
+    w.tick(3);
+    assert.ok(w.toasts.some((t) => t.text.includes("天黑") && t.text.includes("收竿")));
   });
 });

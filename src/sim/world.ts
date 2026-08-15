@@ -637,6 +637,7 @@ export class World {
       if (cell === "plate") {
         if (this.potReady) return `取 · ${potById(this.potReady).name}`;
         if (this.potCook > 0) return "锅还在响";
+        if (this.needsPrep(p)) return item(parseHeld(p.held).id).cook === "cook" ? "先下炉" : "先切";
         if (this.pot.length >= 2) return `开煮 · ${this.pot.length}样`;
         return this.pot.length ? `入锅 · ${this.pot.length}/4` : "入锅";
       }
@@ -687,7 +688,11 @@ export class World {
       this.yank(p);
       return;
     }
-    if (p.fish?.phase === "wait") return;
+    if (p.fish?.phase === "wait") {
+      p.fish = null;
+      this.toast("收了");
+      return;
+    }
     const map = this.mapFor(p.zone);
     const f = this.facingTile(p);
     const cell = map.cell(f.x, f.y);
@@ -778,6 +783,7 @@ export class World {
     if (p.fish.phase === "wait" && p.fish.t <= 0) {
       p.fish.phase = "bite";
       p.fish.t = p.fish.window;
+      this.toast("咬了——快起竿");
     } else if (p.fish.phase === "bite" && p.fish.t <= 0) {
       p.fish = null;
       this.toast("走了");
@@ -863,6 +869,10 @@ export class World {
     }
     const caught = rollCatch(hit.id, this.rand, this.save.fishBest[hit.id]);
     addToBag(this.save.bag, caught.bagId);
+    if (!p.held) {
+      const fresh = takeFresh(this.save.bag, caught.bagId) ?? 100;
+      p.held = writeHeld(caught.bagId, "raw", fresh);
+    }
     this.save.fishTotal += 1;
     if (!this.save.fishAlbum.includes(hit.id)) {
       this.save.fishAlbum.push(hit.id);
@@ -1800,7 +1810,10 @@ export class World {
       if (next <= 0) {
         p.held = writeHeld("mush", "ready", 100);
         this.toast(`${p.name} 手里的东西坏了`);
-      } else p.held = writeHeld(held.id, held.state || "raw", next);
+      } else {
+        if (held.fresh >= 40 && next < 40) this.toast(`${heldLabel(p.held)}蔫了，快下锅`);
+        p.held = writeHeld(held.id, held.state || "raw", next);
+      }
     }
   }
 
@@ -1972,7 +1985,10 @@ export class World {
     if (this.clock >= 1) this.clock -= 1;
     if (!wasNight && this.isNight()) {
       const out = this.present().some((a) => a.zone === "wild");
-      this.toast(out ? "天黑了。别停在黑里，靠近火。" : "天黑了。客栈门还亮着。");
+      const fishing = this.present().some((a) => !!a.fish);
+      this.toast(
+        out ? "天黑了。别停在黑里，靠近火。" : fishing ? "天黑了。收竿，客栈门还亮着。" : "天黑了。客栈门还亮着。",
+      );
     }
     if (wasNight && !this.isNight()) {
       this.howled = false;
@@ -2182,6 +2198,14 @@ export class World {
     const held = parseHeld(p.held);
     if (!held.id || held.id === "torch") return false;
     return item(held.id).cook === "chop" && (!held.state || held.state === "raw");
+  }
+
+  private needsPrep(p: Actor): boolean {
+    const held = parseHeld(p.held);
+    if (!held.id || held.id === "torch" || held.id.startsWith("dish")) return false;
+    const need = item(held.id).cook;
+    if (!need || need === "none") return false;
+    return held.state !== "prepped" && held.state !== "cooked" && held.state !== "ready";
   }
 
   private cookAtFire(p: Actor, x: number, y: number): boolean {

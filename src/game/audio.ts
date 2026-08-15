@@ -16,7 +16,8 @@ export type ToneKind =
   | "green"
   | "night"
   | "ready"
-  | "dark";
+  | "dark"
+  | "bite";
 
 export function createAudio() {
   let ctx: AudioContext | null = null;
@@ -86,6 +87,10 @@ export function createAudio() {
       setTimeout(() => beep(523, 0.12, "sine", 0.024), 70);
     }
     if (kind === "dark") beep(64, 0.14, "sawtooth", 0.03);
+    if (kind === "bite") {
+      beep(480, 0.07, "square", 0.028);
+      setTimeout(() => beep(360, 0.08, "sine", 0.02), 50);
+    }
   };
 
   const startDrone = () => {

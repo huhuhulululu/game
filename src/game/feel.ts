@@ -1,7 +1,7 @@
 import { TILE } from "../world/maps";
 import type { ActorSnap, WorldSnap } from "../sim/net";
 
-export type FeelSound = "step" | "shore" | "fire" | "door" | "green" | "night" | "ready";
+export type FeelSound = "step" | "shore" | "fire" | "door" | "green" | "night" | "ready" | "bite";
 
 export type FeelState = {
   zone: string;
@@ -13,6 +13,7 @@ export type FeelState = {
   inGreen: boolean;
   night: boolean;
   potReady: boolean;
+  fishing: string;
 };
 
 const GREEN_LO = 0.38;
@@ -29,6 +30,7 @@ export function emptyFeel(): FeelState {
     inGreen: false,
     night: false,
     potReady: false,
+    fishing: "",
   };
 }
 
@@ -105,12 +107,14 @@ export function tickFeel(prev: FeelState | null, snap: WorldSnap, now: number): 
     fireAt = now;
   }
 
-  const fighting = me?.fishing === "fight";
+  const fishing = me?.fishing ?? "";
+  if (last.zone && fishing === "bite" && last.fishing !== "bite") sounds.push("bite");
+  const fighting = fishing === "fight";
   const green = fighting && inGreenWindow(me?.fishMark ?? 0);
   if (green && !last.inGreen) sounds.push("green");
 
   return {
-    next: { zone: snap.zone, x, y, stepAt, shoreAt, fireAt, inGreen: green, night: snap.night, potReady },
+    next: { zone: snap.zone, x, y, stepAt, shoreAt, fireAt, inGreen: green, night: snap.night, potReady, fishing },
     sounds,
   };
 }

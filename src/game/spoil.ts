@@ -65,8 +65,12 @@ export function ageBag(bag: Stack[], amount: number): string[] {
   const notes: string[] = [];
   for (const s of [...bag]) {
     if (!isPerishable(s.id)) continue;
-    s.fresh = (s.fresh ?? 100) - amount;
-    if ((s.fresh ?? 0) > 0) continue;
+    const before = s.fresh ?? 100;
+    s.fresh = before - amount;
+    if ((s.fresh ?? 0) > 0) {
+      if (before >= 40 && (s.fresh ?? 0) < 40) notes.push(`${item(s.id).name}蔫了，快下锅`);
+      continue;
+    }
     const n = s.n;
     bag.splice(bag.indexOf(s), 1);
     const mush = bag.find((x) => x.id === "mush");
