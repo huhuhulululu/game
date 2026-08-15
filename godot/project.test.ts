@@ -84,7 +84,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.doesNotMatch(valley, /_tile\(/);
   assert.doesNotMatch(valley, /prop-cabin|prop-inn/);
   assert.doesNotMatch(play, /modulate = Color\(1, 1, 1, 0\.55\)/);
-  const scripts = ["boot.gd", "room.gd", "play.gd", "look.gd", "valley_map.gd", "actor_view.gd"]
+  const scripts = ["boot.gd", "room.gd", "play.gd", "look.gd", "valley_map.gd", "actor_view.gd", "ear.gd"]
     .map((n) => readFileSync(`godot/scripts/${n}`, "utf8"))
     .join("\n");
   assert.doesNotMatch(scripts, /Wanderer|Wilson|Don't Starve|Dont Starve/i);
@@ -215,4 +215,41 @@ test("Godot two phones share a shout, a map, and a seat", () => {
   assert.match(world, /present\(\)/);
   assert.match(world, /reclaim\(/);
   assert.match(world, /this\.near\(/);
+});
+
+test("Godot ear is five thin sounds and one mute that does not change the world", () => {
+  assert.ok(existsSync("godot/scripts/ear.gd"));
+  const ear = readFileSync("godot/scripts/ear.gd", "utf8");
+  assert.match(ear, /class_name ValleyEar/);
+  assert.match(ear, /step/);
+  assert.match(ear, /shore/);
+  assert.match(ear, /fire/);
+  assert.match(ear, /door/);
+  assert.match(ear, /green/);
+  assert.match(ear, /muted/);
+  assert.match(ear, /0\.38/);
+  assert.match(ear, /0\.72/);
+  assert.match(ear, /does not touch the world|不改规则|does not change the world/);
+  assert.doesNotMatch(ear, /Net\.send|send_input|send_take/);
+  assert.doesNotMatch(ear, /Wilson|Don't Starve|Dont Starve/i);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /ValleyEar/);
+  assert.match(play, /_ear\.hear/);
+  assert.match(play, /_toggle_mute/);
+  assert.match(play, /"声"/);
+  assert.match(play, /"静"/);
+  assert.doesNotMatch(play, /send_.*mute|muted.*send/);
+  assert.doesNotMatch(play, /Wilson|Don't Starve|Dont Starve/i);
+});
+
+test("Godot evening walk is fish, pot, then a night rest", () => {
+  assert.ok(existsSync("godot/scripts/headless_evening_loop.gd"));
+  const evening = readFileSync("godot/scripts/headless_evening_loop.gd", "utf8");
+  assert.match(evening, /FISH_OK/);
+  assert.match(evening, /COOK_OK/);
+  assert.match(evening, /DAY_REST_NO/);
+  assert.match(evening, /SLEEP_OK/);
+  assert.match(evening, /EVENING_OK/);
+  assert.match(evening, /get_ticks_msec/);
+  assert.doesNotMatch(evening, /Wilson|Don't Starve|Dont Starve/i);
 });

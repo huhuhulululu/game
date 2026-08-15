@@ -42,6 +42,8 @@ var _hud_sign: Label
 var _sign_card: Panel
 var _hud_mate: Label
 var _plot_sig := ""
+var _ear: ValleyEar
+var _mute_btn: Button
 
 
 func _ready() -> void:
@@ -141,6 +143,12 @@ func _hud() -> void:
 	shout.position = Vector2(1070, 560)
 	shout.pressed.connect(func() -> void: _ping = true)
 	layer.add_child(shout)
+	_ear = ValleyEar.new()
+	add_child(_ear)
+	_mute_btn = Look.wood_button("声", 72)
+	_mute_btn.position = Vector2(1070, 500)
+	_mute_btn.pressed.connect(_toggle_mute)
+	layer.add_child(_mute_btn)
 	var pad := Control.new()
 	pad.position = Vector2(36, 560)
 	pad.size = Vector2(120, 120)
@@ -301,6 +309,15 @@ func _on_snap(s: Dictionary) -> void:
 		_world.modulate = Color(1.0, 1.0, 1.0)
 	_paint_people(s)
 	_paint_foes(s.get("enemies", []))
+	if _ear:
+		_ear.hear(s)
+
+
+func _toggle_mute() -> void:
+	if _ear == null or _mute_btn == null:
+		return
+	_ear.set_muted(not _ear.muted)
+	_mute_btn.text = "静" if _ear.muted else "声"
 
 
 func _paint_signs(s: Dictionary) -> void:
