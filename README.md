@@ -33,6 +33,21 @@
 - **卦棚**：两部手机都按过「问今日」，才揭签。旁边看板在睡过一夜后挂今晚要做的菜，两个人揭开后进厨房，单已经在。
 - **查理**：村里的田和路夜里有灯。没火没火把会被咬的，是荒野和出谷门口。
 
+## Godot 4 客户端
+
+可玩的客户端在 `godot/`。插画 / HD-2D，贴图过滤是 linear，不是 nearest 复古点阵。权威模拟仍是这边的 Node / WebSocket 房间；Godot 只进同一间山谷，没有这间山谷不会 new World。
+
+网页 Vite 先留着，等 Godot 能进谷再谈下线。立项见 [docs/CHARTER.md](docs/CHARTER.md)：P2 引擎已定为 Godot 4，不再等网页打磨。
+
+```bash
+npm run dev
+godot --path godot
+# 或走一遍开间 → 进谷 → 能走：
+./godot/run.sh
+```
+
+电脑：WASD 或方向键，空格 / J 做，H 喊。左摇杆、右下「做」「喊」给触屏。环境变量 `VALLEY_WS` 可改 WebSocket 地址，默认 `ws://127.0.0.1:5173/ws`。
+
 ## 命令
 
 ```bash

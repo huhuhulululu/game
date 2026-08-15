@@ -1,0 +1,6 @@
+[gd_resource type="SystemFont" format=3]
+
+[resource]
+font_names = PackedStringArray("WenQuanYi Micro Hei", "Noto Sans CJK SC", "Droid Sans Fallback", "Noto Sans SC")
+antialiasing = 1
+generate_mipmaps = false
