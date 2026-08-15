@@ -4,7 +4,7 @@
 - Status: Polish implemented — enter camera must be one painting + people + HUD
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `valley_logic.gd`, `play.gd`, `actor_view.gd`, `look.gd`, `tools/paint_valley_bed.py`, `bed-valley.png`
-- Next: `/story-done production/epics/r1-painted-valley/story-001-packed-bed.md` only if the enter shot is clean
+- Next: wait for Brainbird. `/story-done` only after they confirm the enter frame is one painting + people + HUD
 
 ## Session Extract — /team-polish 2026-08-15
 
