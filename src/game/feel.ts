@@ -1,7 +1,7 @@
 import { TILE } from "../world/maps";
 import type { ActorSnap, WorldSnap } from "../sim/net";
 
-export type FeelSound = "step" | "shore" | "fire" | "door" | "green";
+export type FeelSound = "step" | "shore" | "fire" | "door" | "green" | "night" | "ready";
 
 export type FeelState = {
   zone: string;
@@ -11,13 +11,25 @@ export type FeelState = {
   shoreAt: number;
   fireAt: number;
   inGreen: boolean;
+  night: boolean;
+  potReady: boolean;
 };
 
 const GREEN_LO = 0.38;
 const GREEN_HI = 0.72;
 
 export function emptyFeel(): FeelState {
-  return { zone: "", x: 0, y: 0, stepAt: -999, shoreAt: -999, fireAt: -999, inGreen: false };
+  return {
+    zone: "",
+    x: 0,
+    y: 0,
+    stepAt: -999,
+    shoreAt: -999,
+    fireAt: -999,
+    inGreen: false,
+    night: false,
+    potReady: false,
+  };
 }
 
 function meOf(snap: WorldSnap): ActorSnap | undefined {
@@ -71,6 +83,9 @@ export function tickFeel(prev: FeelState | null, snap: WorldSnap, now: number): 
   const busy = me?.busy ?? "";
 
   if (last.zone && snap.zone === "kitchen" && last.zone !== "kitchen") sounds.push("door");
+  if (last.zone && !last.night && snap.night) sounds.push("night");
+  const potReady = !!(snap.potReady && snap.potReady !== "在煮");
+  if (last.zone && !last.potReady && potReady) sounds.push("ready");
 
   let stepAt = last.stepAt;
   if (moved && !busy && now - stepAt >= 280) {
@@ -95,7 +110,7 @@ export function tickFeel(prev: FeelState | null, snap: WorldSnap, now: number): 
   if (green && !last.inGreen) sounds.push("green");
 
   return {
-    next: { zone: snap.zone, x, y, stepAt, shoreAt, fireAt, inGreen: green },
+    next: { zone: snap.zone, x, y, stepAt, shoreAt, fireAt, inGreen: green, night: snap.night, potReady },
     sounds,
   };
 }

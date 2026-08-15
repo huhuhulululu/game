@@ -10,7 +10,7 @@ import { rollLootTable } from "./loot";
 import { LOOT_TABLES } from "./lootTables";
 import { pickWeighted } from "./rng";
 import { eatValue } from "./eat";
-import { seasonOf } from "./season";
+import { nightAfter, seasonOf } from "./season";
 import { ageBag, freshMul, isPerishable, sleepSpoil } from "./spoil";
 import { mergeSnap } from "../net/client";
 import { resolveHelloRoom, roomIsFull } from "../../server/join";
@@ -1098,12 +1098,63 @@ describe("living systems", () => {
     assert.ok(ding.sounds.includes("green"));
     const still = tickFeel(ding.next, fight, 40);
     assert.equal(still.sounds.includes("green"), false);
+    const daySnap = { ...snap, night: false, potReady: "" };
+    const nightSnap = { ...snap, night: true, potReady: "" };
+    const dusk = tickFeel(tickFeel(null, daySnap, 0).next, nightSnap, 20);
+    assert.ok(dusk.sounds.includes("night"));
+    const cooking = { ...snap, potReady: "在煮" };
+    const done = { ...snap, potReady: "山草茶" };
+    const lid = tickFeel(tickFeel(null, cooking, 0).next, done, 20);
+    assert.ok(lid.sounds.includes("ready"));
     const quiet = createAudio();
     quiet.setMuted(true);
     assert.equal(quiet.muted, true);
     quiet.tone("step");
     quiet.tone("green");
     quiet.tone("door");
+    quiet.tone("night");
+    quiet.tone("ready");
+    quiet.tone("dark");
     assert.equal(w.players.get("a")!.zone, "valley");
+  });
+
+  it("a solo night points at the river and the inn, and does not skip the day at the cabin", () => {
+    const w = new World("SOLO");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    assert.ok(w.toasts.some((t) => t.text.includes("白天捞") && t.text.includes("客栈")));
+    const bed = w.valley.find("A")[0];
+    assert.ok(bed);
+    standFacing(p, bed);
+    assert.ok(w.snapshot("a").prompt.includes("还早"));
+    const day = w.save.day;
+    tap(w, "a");
+    assert.equal(w.save.day, day);
+    assert.ok(w.toasts.some((t) => t.text.includes("还早")));
+    w.clock = nightAfter(seasonOf(w.save.day)) - 0.01;
+    w.tick(3);
+    const night = w.snapshot("a");
+    assert.equal(night.night, true);
+    assert.ok(w.toasts.some((t) => t.text.includes("天黑") && t.text.includes("客栈")));
+    assert.ok(night.prompt.includes("歇一夜"));
+    tap(w, "a");
+    assert.equal(w.save.day, day + 1);
+  });
+
+  it("solo kitchen rush asks to plate, not for a second pair of hands", () => {
+    const w = new World("RUSH1");
+    w.addPlayer("a", "暖", "left");
+    const p = w.players.get("a");
+    assert.ok(p);
+    p.zone = "kitchen";
+    w.orders = [
+      { customer: "wander", recipe: "herb-tea", t: 20 },
+      { customer: "wander", recipe: "herb-tea", t: 20 },
+    ];
+    w.tick(0.05);
+    assert.equal(w.rushed, true);
+    assert.ok(w.toasts.some((t) => t.text.includes("堂口热起来") && t.text.includes("端")));
+    assert.ok(!w.toasts.some((t) => t.text.includes("两个人得传菜")));
   });
 });

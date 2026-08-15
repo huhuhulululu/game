@@ -178,7 +178,7 @@ export class World {
       torch: 0,
       poseFlash: 0,
     });
-    this.toast(`${name} 进了山谷`);
+    this.toast(`${name} 进了谷。白天捞，天黑进客栈做饭。`);
     return side;
   }
 
@@ -262,6 +262,10 @@ export class World {
 
   sleep(fromId?: string): void {
     const online = this.present();
+    if (fromId && online.length < 2 && !this.isNight()) {
+      this.toast("还早。天黑再歇。");
+      return;
+    }
     if (online.length === 2 && fromId) {
       this.readySleep.add(fromId);
       if (this.readySleep.size < 2) {
@@ -608,6 +612,7 @@ export class World {
       if (ch === "A") {
         if (this.present().length === 2 && this.readySleep.size === 1 && !this.readySleep.has(p.id)) return "也躺下，一起歇一夜";
         if (this.present().length === 2 && this.readySleep.has(p.id)) return "等她也躺下";
+        if (this.present().length < 2 && !this.isNight()) return "还早。天黑再歇。";
         return "歇一夜（田会自己长）";
       }
       if (ch === "V" || cell === "gate") return "出谷 · 荒野";
@@ -1201,7 +1206,7 @@ export class World {
     const rush = this.orders.length >= 2;
     if (rush && !this.rushed) {
       this.rushed = true;
-      this.toast("堂口热起来了——两个人得传菜");
+      this.toast(cooks.length >= 2 ? "堂口热起来了——两个人得传菜" : "堂口热起来了——把菜端上去。");
     }
     if (!this.orders.length) this.rushed = false;
     const maxOrders = rush ? 4 : 3;
@@ -1952,6 +1957,7 @@ export class World {
     const wasNight = this.isNight();
     this.clock += dt / 200;
     if (this.clock >= 1) this.clock -= 1;
+    if (!wasNight && this.isNight()) this.toast("天黑了。客栈门还亮着。");
     if (wasNight && !this.isNight()) {
       this.howled = false;
       this.hearthDone = false;

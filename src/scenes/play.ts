@@ -69,8 +69,11 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         lastToast = top;
         if (top.includes("钓") || top.includes("水")) ctx.audio.tone("water");
         else if (top.includes("砍") || top.includes("砸") || top.includes("挖")) ctx.audio.tone("chop");
+        else if (top.includes("天黑") || top.includes("出锅") || top.includes("写入菜单")) {
+          /* night / pot-ready live on feel */
+        } else if (top.includes("黑暗咬")) ctx.audio.tone("dark");
         else if (top.includes("咬") || top.includes("倒")) ctx.audio.tone("hit");
-        else if (top.includes("上了") || top.includes("出锅") || top.includes("写入")) ctx.audio.tone("serve");
+        else if (top.includes("上了") || top.includes("写入")) ctx.audio.tone("serve");
         else if (top.includes("糊") || top.includes("堂口") || top.includes("烤")) ctx.audio.tone("sizzle");
         else if (top.includes("火") || top.includes("旧营") || top.includes("喊") || top.includes("躺") || top.includes("雨"))
           ctx.audio.tone("soft");
@@ -354,7 +357,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
         }`
       : partner?.name && partner.name !== "还没来"
         ? `${partner.name} 断线了，人还在原地`
-        : "等另一部手机进来";
+        : "";
     hud.innerHTML = `
       <div class="hud-card">
         <div class="hud-place">
@@ -372,7 +375,7 @@ export function mountPlay(root: HTMLElement, ctx: GameContext): () => void {
           <span>金 ${snap.gold}</span>
           <span>默契 ${snap.bond}</span>
         </div>
-        <div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>
+        ${partnerLine ? `<div class="partner ${partner?.online ? "on" : ""}">${partnerLine}</div>` : ""}
       </div>
       <div class="hud-stack">
         ${snap.fortune ? `<div class="fortune-chip">${snap.fortune.title} · ${snap.fortune.life}</div>` : ""}
