@@ -781,6 +781,8 @@ func _enter_line() -> String:
 		return "出谷 · 荒野"
 	if kind == "water":
 		return "下竿"
+	if kind == "sleep":
+		return "歇一夜"
 	return ""
 
 

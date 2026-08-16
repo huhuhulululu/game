@@ -2539,3 +2539,54 @@ test("Play lets 做 on the pot cook and 做 on the vein dig", () => {
     assert.doesNotMatch(src, /play_cook|PLAY_COOK_OK|_place_line/);
   }
 });
+
+test("Play lets 做 on the house tile sleep and the hearth sit", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-024-sleep-sit.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-024-sleep-sit.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-023-cook-dig.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_rest.gd"));
+  assert.ok(existsSync("godot/scenes/play_rest.tscn"));
+  const restPlay = readFileSync("godot/scripts/headless_play_rest.gd", "utf8");
+  assert.match(restPlay, /scenes\/play\.tscn/);
+  assert.match(restPlay, /PLAY_SLEEP/);
+  assert.match(restPlay, /PLAY_SIT/);
+  assert.match(restPlay, /PLAY_REST_OK/);
+  assert.match(restPlay, /歇一夜/);
+  assert.match(restPlay, /char-warm-sit/);
+  assert.match(restPlay, /BED_OR_FIRE/);
+  assert.match(restPlay, /prop-bed/);
+  assert.match(restPlay, /prop-fire/);
+  assert.doesNotMatch(restPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_rest.tscn", "utf8");
+  assert.match(scene, /headless_play_rest\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_enter_line/);
+  assert.match(play, /歇一夜/);
+  assert.match(play, /2\.18/);
+  assert.match(play, /hand_chip\("做"/);
+  assert.doesNotMatch(play, /prop-bed|prop-fire|魂/);
+  const logic = readFileSync("godot/scripts/valley_logic.gd", "utf8");
+  assert.match(logic, /func enter_kind/);
+  assert.match(logic, /tile == "A"/);
+  const world = readFileSync("src/sim/world.ts", "utf8");
+  assert.match(world, /reachAt/);
+  assert.doesNotMatch(world, /play_rest|PLAY_REST_OK|_enter_line/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 240/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /做到铺上就歇一夜/);
+  assert.match(art, /不要另贴床和火/);
+  assert.match(art, /大衣真透明/);
+  const srcFiles = ["src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_rest|PLAY_REST_OK|_enter_line/);
+  }
+});

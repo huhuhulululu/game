@@ -83,6 +83,8 @@ func enter_kind(px: float, py: float) -> String:
 			var tile := here[tx]
 			if tile == "D" or tile == "~":
 				return "water"
+			if tile == "A":
+				return "sleep"
 	return ""
 
 

@@ -657,7 +657,7 @@ export class World {
       if (cell === "bush" || cell === "osmanthus") return "采";
       if (reach === "E") return "进矿";
       if (reach === "I") return "进厨房";
-      if (ch === "A") {
+      if (this.reachAt(p, "spawn")) {
         if (!this.isNight()) return "还早。天黑再歇。";
         if (this.present().length === 2 && this.readySleep.size === 1 && !this.readySleep.has(p.id)) return "也躺下，一起歇一夜";
         if (this.present().length === 2 && this.readySleep.has(p.id)) return "等她也躺下";
@@ -750,11 +750,11 @@ export class World {
     const map = this.mapFor(p.zone);
     const f = this.facingTile(p);
     const cell = map.cell(f.x, f.y);
-    const ch = map.rows[f.y]?.[f.x];
     const reach = this.reachCh(p);
     if (p.zone === "kitchen" && this.reachAt(p, "plate")) return this.potAct(p);
     const ore = p.zone === "mine" ? this.reachAt(p, "ore") : null;
     if (ore) return this.dig(p, ore.x, ore.y);
+    if (p.zone === "valley" && this.reachAt(p, "spawn")) return this.sleep(p.id);
     if (this.idleFace(cell) && !this.canPass(p) && this.tryEat(p)) return;
 
     if (p.zone === "valley") {
@@ -764,7 +764,7 @@ export class World {
       if (cell === "osmanthus") return this.forage(p, "osmanthus", 0.35, f.x, f.y);
       if (reach === "E") return this.enterMine(p);
       if (reach === "I") return this.enterKitchen(p);
-      if (ch === "A") return this.sleep(p.id);
+      if (this.reachAt(p, "spawn")) return this.sleep(p.id);
       if (cell === "cabin") {
         this.toast(this.isNight() ? "也得对着铺" : "还早。天黑再歇。");
         return;

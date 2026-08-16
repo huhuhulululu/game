@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, quiet chrome, one paint, the warm step, the warm sit, the painted room card, the painted join face, quiet hands, the quiet log, the quiet name, the place-bed judgment, the coat-in-paint, the coat dusk, and the path frame hold. Cover-coats sit at `Look.BODY = 240` with real a=0, a contact shadow, and a warm dusk grade on the existing sheets. The camera sits them in the painted path, not a mural stamp. HTML5 hands walk and 做 without a joystick ring. 做 at a painted door changes the existing kitchen / mine bed. No door sticker. 做 on the stream fishes. 做 on the out-gate enters `bed-wild`. 做 on the pot cooks. 做 on the vein digs. Warm walk is the same tan coat taking a step, not a sliding idle. A smeared sit is thrown away — the painted sit stays. The 开一间 card is dusk wood, not a parchment form. The 房间码 face is the same dusk wood slip. In-valley 做 / 喊 / 声 are small wood slips, not a stacked plaque box. The bottom prompt bar stays hidden until there is a real line. Your name is hidden; mate is quiet ink, not a boxed nametag. Kitchen / mine / wild already match the valley dusk — nothing replaced. The HUD is a small top-left plaque plus one short bag slip under the plaque. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
+Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, quiet chrome, one paint, the warm step, the warm sit, the painted room card, the painted join face, quiet hands, the quiet log, the quiet name, the place-bed judgment, the coat-in-paint, the coat dusk, and the path frame hold. Cover-coats sit at `Look.BODY = 240` with real a=0, a contact shadow, and a warm dusk grade on the existing sheets. The camera sits them in the painted path, not a mural stamp. HTML5 hands walk and 做 without a joystick ring. 做 at a painted door changes the existing kitchen / mine bed. No door sticker. 做 on the stream fishes. 做 on the out-gate enters `bed-wild`. 做 on the pot cooks. 做 on the vein digs. 做 on the house tile sleeps. Hearth sit uses the existing pose. Warm walk is the same tan coat taking a step, not a sliding idle. A smeared sit is thrown away — the painted sit stays. The 开一间 card is dusk wood, not a parchment form. The 房间码 face is the same dusk wood slip. In-valley 做 / 喊 / 声 are small wood slips, not a stacked plaque box. The bottom prompt bar stays hidden until there is a real line. Your name is hidden; mate is quiet ink, not a boxed nametag. Kitchen / mine / wild already match the valley dusk — nothing replaced. The HUD is a small top-left plaque plus one short bag slip under the plaque. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
 
 ## Governing ADRs
 
@@ -49,3 +49,4 @@ Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat 
 | 021 | Enter place | Integration | Complete | ADR-0003 |
 | 022 | Water and wild | Integration | Complete | ADR-0003 |
 | 023 | Cook and dig | Integration | Complete | ADR-0003 |
+| 024 | Sleep and sit | Integration | In progress | ADR-0003 |

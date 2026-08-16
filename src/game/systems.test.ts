@@ -1846,6 +1846,40 @@ describe("living systems", () => {
     assert.ok(miner.held.startsWith("ore"));
   });
 
+  it("doing on the house tile sleeps, and night still at the hearth sits", () => {
+    const rest = new World("COT");
+    rest.addPlayer("a", "暖", "left");
+    const p = rest.players.get("a");
+    assert.ok(p);
+    const bed = rest.valley.find("A")[0];
+    assert.ok(bed);
+    const at = tileCenter(bed.x, bed.y);
+    p.x = at.x;
+    p.y = at.y;
+    p.facing = 2;
+    p.held = "dish:herb-tea";
+    rest.clock = nightAfter(seasonOf(rest.save.day)) + 0.01;
+    assert.ok(rest.snapshot("a").prompt.includes("歇一夜"));
+    const day0 = rest.save.day;
+    tap(rest, "a");
+    assert.equal(rest.save.day, day0 + 1);
+    assert.equal(p.held, "dish:herb-tea");
+    const glow = new World("GLOW");
+    glow.addPlayer("a", "暖", "left");
+    const sitter = glow.players.get("a");
+    assert.ok(sitter);
+    const hearth = glow.valley.find("A")[0];
+    assert.ok(hearth);
+    const near = tileCenter(hearth.x + 1, hearth.y);
+    sitter.x = near.x;
+    sitter.y = near.y;
+    sitter.facing = 2;
+    glow.clock = nightAfter(seasonOf(glow.save.day)) + 0.01;
+    const me = glow.snapshot("a").actors.find((row) => row.id === "a");
+    assert.ok(me);
+    assert.equal(me.busy, "sit");
+  });
+
   it("dug ore goes in the hand, the forge counts it, and the pot sends it to the workshop", () => {
     const w = new World("ORE2");
     w.addPlayer("a", "暖", "left");

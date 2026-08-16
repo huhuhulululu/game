@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` cook and dig
-- Status: r1-coat-feel 001–023 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` sleep and sit
+- Status: r1-coat-feel 001–023 Complete; 024 In progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-023-cook-dig.md`
-- Next: none. Stop. Do not generate a new face. Do not hang a pot or a pick. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Files: `story-024-sleep-sit.md`
+- Next: `/story-done` after tokens hold. Existing sleep / sit. Existing valley bed. No bed or fire sticker. 023 stays Complete. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-024-sleep-sit.md` — Sleep and sit
+- Files changed: story, `world.ts` reachAt spawn, `valley_logic.gd` bed here-tile, `play.gd` 歇一夜 slip, `play_rest.tscn`, `headless_play_rest.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (sleep-sit lock) + `play_rest.tscn`
+- Tokens: `PLAY_SLEEP` `PLAY_SIT` `PLAY_REST_OK`
+- Next: `/story-done` after tokens hold. Existing sleep rules. Existing sit sheet. No bed or fire sticker. 023 stays Complete. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-023-cook-dig.md` — Cook and dig
