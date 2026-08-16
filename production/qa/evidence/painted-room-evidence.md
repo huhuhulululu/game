@@ -10,7 +10,7 @@
 - Room card is a cabin-wood slip, not a stretched parchment plaque
 - 暖 / 松 and 开一间 / 我有房间码 use the HUD wood slip
 - Title stays the painted cover
-- Clip-art panel is thrown away
+- A door-tiled clip-art panel was thrown away
 
 ## Runtime tokens
 
@@ -35,4 +35,4 @@ PLAY_ROOM_OK
 
 ## Sign-off
 
-`/dev-story` lean. Room card is dusk wood. Chips are wood slips. Cover stays. No 魂.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. Room card is dusk wood. Chips are wood slips. Cover stays. No 魂. `npm test`: 146 pass. `PLAY_ROOM_OK`. `PLAY_SIT_OK` and `PLAY_STEP_OK` still hold. HTML5 re-exported.

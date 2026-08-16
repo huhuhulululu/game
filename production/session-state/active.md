@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` painted room
-- Status: r1-coat-feel 001–010 Complete; 011 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` painted room
+- Status: r1-coat-feel 001–011 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-011-painted-room.md`
-- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-011-painted-room.md` — Painted room
+- Criteria: 5/5. Room card is cabin boards, not a stretched parchment plaque. Chips are wood slips. Cover stays. Door-tile clip-art thrown away.
+- Tests: `godot/project.test.ts` painted-room lock + `PLAY_ROOM_OK`. npm test 146 pass. `PLAY_SIT_OK` and `PLAY_STEP_OK` still hold.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Wait unless leftover geom remains. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-011-painted-room.md` — Painted room

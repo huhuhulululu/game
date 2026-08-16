@@ -1,7 +1,7 @@
 # Story 011: Painted room
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,15 +18,15 @@ Live leftover after the warm sit: the 开一间 / 房间码 card is a cheap parc
 
 ## Acceptance Criteria
 
-- [ ] Room card is dusk wood-ink, not a stretched parchment plaque; 暖 / 松 and 开一间 / 我有房间码 feel like the wood HUD
-- [ ] Title stays the painted cover; no title-couple paste into the valley; BODY stays 192
-- [ ] A clip-art panel is thrown away — keep a simple wood slip; torn props stay off
-- [ ] `bed-valley.png` not replaced; HUD stays plaque + one bag slip; no 魂; no look names in `src/`
-- [ ] Play-path + test locks
+- [x] Room card is dusk wood-ink, not a stretched parchment plaque; 暖 / 松 and 开一间 / 我有房间码 feel like the wood HUD
+- [x] Title stays the painted cover; no title-couple paste into the valley; BODY stays 192
+- [x] A clip-art panel is thrown away — keep a simple wood slip; torn props stay off
+- [x] `bed-valley.png` not replaced; HUD stays plaque + one bag slip; no 魂; no look names in `src/`
+- [x] Play-path + test locks
 
 ## Implementation Notes
 
-Godot look only. Do not stretch `tex-plaque` into a tall form card. Paint a simple cabin-wood slip for the room card, same timber as the HUD. Name chips and the two buttons use the wood slip, not a parchment field. If the panel looks like clip-art, throw it away and keep a simple wood slip. Do not recrop FAIL. Do not hang hole / silk / torch / smith. Do not replace `bed-valley.png`. Two-phone stays Blocked / human. Do not start a WORLD system.
+Godot look only. Do not stretch `tex-plaque` into a tall form card. Painted a simple cabin-board slip for the room card. A first crop tiled the cabin door and lantern — that was thrown away. Name chips and the two buttons use the HUD wood slip. Do not recrop FAIL. Do not hang hole / silk / torch / smith. Do not replace `bed-valley.png`. Two-phone stays Blocked / human. Do not start a WORLD system.
 
 ## Out of Scope
 
@@ -51,7 +51,7 @@ Godot look only. Do not stretch `tex-plaque` into a tall form card. Paint a simp
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_room.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 
