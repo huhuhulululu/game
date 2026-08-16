@@ -7,6 +7,20 @@
 - Next: `/story-done` spoil-icebox after tokens hold. Do not `/dev-story` two-phone.
 
 ## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-006-spoil-icebox.md` — Spoil and icebox
+- Files changed: story, `play.gd` chip ticks + kitchen ice row, `play_spoil.tscn`
+- Test written: `godot/project.test.ts` (spoil / icebox lock)
+- Tokens: `PLAY_SPOIL_COOL` `PLAY_SPOIL_WILT` `PLAY_SPOIL_ICE` `PLAY_SPOIL_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-coat-feel/story-004-painted-night.md` — Painted night
+- Tech debt logged: None
+- Next recommended: spoil / icebox (`r1-evening-places/story-006-spoil-icebox.md`)
+
+## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-004-painted-night.md` — Painted night
 - Files changed: story, `night.gdshader`, `play.gd` / valley / zone_map night grade, `play_night.tscn` (+ mine hearth token)
 - Test written: `godot/project.test.ts` (painted-night lock)
