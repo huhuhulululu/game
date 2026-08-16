@@ -8,7 +8,7 @@
 
 ## Overview
 
-Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain, and painted fog sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Wild cook is haul → pot on the fire. Rain and fog sit on the outdoor beds; the server still rolls weather.
+Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain, painted fog, and a painted wild path sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Wild cook is haul → pot on the fire. Rain and fog sit on the outdoor beds. Unread wild is a dusk wash that lifts as you walk. Weather look is closed.
 
 ## Governing ADRs
 
@@ -34,4 +34,5 @@ Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain
 | 006 | Spoil and icebox | Integration | Complete | ADR-0002 |
 | 007 | Campfire pot | Visual/Feel | Complete | ADR-0003 |
 | 008 | Painted rain | Visual/Feel | Complete | ADR-0003 |
-| 009 | Painted fog | Visual/Feel | In progress | ADR-0003 |
+| 009 | Painted fog | Visual/Feel | Complete | ADR-0003 |
+| 010 | Painted path | Visual/Feel | In progress | ADR-0003 |

@@ -12,6 +12,7 @@ var _zone := ""
 var _fog: Sprite2D
 var _glow: Node2D
 var _fog_sig := ""
+var _wash: Image
 
 
 func size_px() -> Vector2:
@@ -38,7 +39,7 @@ func show_map(zone: String, rows: Array) -> void:
 	_fog = Sprite2D.new()
 	_fog.centered = false
 	_fog.z_index = 28
-	_fog.texture_filter = TEXTURE_FILTER_NEAREST
+	_fog.texture_filter = TEXTURE_FILTER_LINEAR
 	add_child(_fog)
 	_glow = Node2D.new()
 	_glow.z_index = 8
@@ -67,6 +68,7 @@ func show_fog(revealed: Array, visible: Array, fires: Array) -> void:
 	var vis := {}
 	for k in visible:
 		vis[int(k)] = true
+	# Unread wild is a heavier dusk wash. The painted bed stays. Not a black ring.
 	var img := Image.create(_w, _h, false, Image.FORMAT_RGBA8)
 	for y in _h:
 		for x in _w:
@@ -74,14 +76,21 @@ func show_fog(revealed: Array, visible: Array, fires: Array) -> void:
 			if _zone != "wild":
 				img.set_pixel(x, y, Color(0, 0, 0, 0))
 			elif not seen.has(key):
-				img.set_pixel(x, y, Color(0.12, 0.08, 0.05, 0.90))
+				img.set_pixel(x, y, Look.PATH_UNREAD)
 			elif not vis.has(key):
-				img.set_pixel(x, y, Color(0.30, 0.22, 0.14, 0.36))
+				img.set_pixel(x, y, Look.PATH_MEMORY)
 			else:
 				img.set_pixel(x, y, Color(0, 0, 0, 0))
+	_wash = img
 	_fog.texture = ImageTexture.create_from_image(img)
 	_fog.scale = Vector2(TILE, TILE)
 	_paint_fires(fires)
+
+
+func wash_at(x: int, y: int) -> Color:
+	if _wash == null or x < 0 or y < 0 or x >= _w or y >= _h:
+		return Color(0, 0, 0, 0)
+	return _wash.get_pixel(x, y)
 
 
 func _paint_fires(fires: Array) -> void:

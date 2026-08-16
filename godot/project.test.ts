@@ -919,6 +919,44 @@ test("Play sits dusk rain on valley and wild, not a weather ring", () => {
   }
 });
 
+test("Play lifts a dusk wash as the wild path is written", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_path.gd"));
+  assert.ok(existsSync("godot/scenes/play_path.tscn"));
+  const pathPlay = readFileSync("godot/scripts/headless_play_path.gd", "utf8");
+  assert.match(pathPlay, /scenes\/play\.tscn/);
+  assert.match(pathPlay, /PLAY_PATH_DARK/);
+  assert.match(pathPlay, /PLAY_PATH_WALK/);
+  assert.match(pathPlay, /PLAY_PATH_SHARE/);
+  assert.match(pathPlay, /PLAY_PATH_KNOWN/);
+  assert.match(pathPlay, /PLAY_PATH_OK/);
+  assert.match(pathPlay, /bed-wild\.png/);
+  assert.match(pathPlay, /wash_at/);
+  assert.doesNotMatch(pathPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_path.tscn", "utf8");
+  assert.match(scene, /headless_play_path\.gd/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /PATH_UNREAD := Color\(0\.56, 0\.42, 0\.28, 0\.58\)/);
+  assert.match(look, /PATH_MEMORY := Color\(0\.68, 0\.54, 0\.36, 0\.20\)/);
+  assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /Look\.PATH_UNREAD/);
+  assert.match(zone, /Look\.PATH_MEMORY/);
+  assert.match(zone, /func wash_at/);
+  assert.match(zone, /heavier dusk wash/);
+  assert.match(zone, /TEXTURE_FILTER_LINEAR/);
+  assert.doesNotMatch(zone, /0\.12, 0\.08, 0\.05/);
+  assert.doesNotMatch(zone, /TEXTURE_FILTER_NEAREST/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /show_fog/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_path|PLAY_PATH_WALK|PATH_UNREAD|wash_at/);
+  }
+});
+
 test("Play sits dusk haze on valley and wild, not a fear veil", () => {
   assert.ok(existsSync("godot/scripts/headless_play_fog.gd"));
   assert.ok(existsSync("godot/scenes/play_fog.tscn"));

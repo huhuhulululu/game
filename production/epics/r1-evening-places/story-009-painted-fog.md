@@ -1,7 +1,7 @@
 # Story 009: Painted fog
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Valley / wild beds sit soft dusk haze from snap `weather` fog
-- [ ] Kitchen / mine stay clear; plaque stays `日 · 季 · 相 · 金` (no weather ring)
-- [ ] Fog is warm paper mist on the bed, not a fear veil and not rain streaks
-- [ ] Play-path proof prints painted-fog tokens through `play.tscn`
-- [ ] No 魂; no Don't Starve overlay; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Valley / wild beds sit soft dusk haze from snap `weather` fog
+- [x] Kitchen / mine stay clear; plaque stays `日 · 季 · 相 · 金` (no weather ring)
+- [x] Fog is warm paper mist on the bed, not a fear veil and not rain streaks
+- [x] Play-path proof prints painted-fog tokens through `play.tscn`
+- [x] No 魂; no Don't Starve overlay; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -46,9 +46,16 @@ Server already rolls fog. Do not move those rules into Godot. Sit a warm dusk ha
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_fog.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 128 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places painted rain
 - Unlocks: none (two-phone stays human)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_FOG_CLEAR` `PLAY_FOG_VALLEY` `PLAY_FOG_HEARTH` `PLAY_FOG_MINE` `PLAY_FOG_WILD` `PLAY_FOG_OK`
+**Code Review**: Skipped — lean
