@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` painted dusk nest on wild silk
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–012 Complete; 013 In progress. Two-phone Blocked (human). Weather look closed.
+- Task: `/dev-story` old-camp search on wild `J`
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–013 Complete; 014 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces closed.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-013-painted-silk.md`; `prop-silk.png`; `zone_map` dusk nest; `play_silk.tscn`
-- Next: `/story-done` painted-silk after tokens hold. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+- Files: `story-014-old-camp.md`; `play_camp.tscn`; prompt gold for 搜 / 并肩
+- Next: `/story-done` old-camp after tokens hold. Next Ready: 探路脚下绊到草石. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-014-old-camp.md` — Old camp
+- Files changed: story, `play_camp.tscn`, `zone_map` camp lock, `play.gd` 搜 / 并肩 gold
+- Test written: `godot/project.test.ts` (old-camp lock)
+- Tokens: `PLAY_CAMP_WILD` `PLAY_CAMP_LOOT` `PLAY_CAMP_PAIR` `PLAY_CAMP_HEARTH` `PLAY_CAMP_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Next Ready: 探路脚下绊到草石. Weather stays closed. Two-phone stays Blocked (human). Do not invent more wild props.
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-013-painted-silk.md` — Painted silk
+- Tech debt logged: None
+- Next recommended: old camp (`r1-evening-places/story-014-old-camp.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-013-painted-silk.md` — Painted silk

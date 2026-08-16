@@ -1039,6 +1039,44 @@ test("Play sits two dusk wells on the wild bed", () => {
   }
 });
 
+test("Play sits an old camp search on the wild bed", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_camp.gd"));
+  assert.ok(existsSync("godot/scenes/play_camp.tscn"));
+  assert.ok(!existsSync("godot/assets/art/prop-camp-loot.png"));
+  assert.ok(!existsSync("tools/paint_old_camp_look.py"));
+  const campPlay = readFileSync("godot/scripts/headless_play_camp.gd", "utf8");
+  assert.match(campPlay, /scenes\/play\.tscn/);
+  assert.match(campPlay, /PLAY_CAMP_WILD/);
+  assert.match(campPlay, /PLAY_CAMP_LOOT/);
+  assert.match(campPlay, /PLAY_CAMP_PAIR/);
+  assert.match(campPlay, /PLAY_CAMP_HEARTH/);
+  assert.match(campPlay, /PLAY_CAMP_OK/);
+  assert.match(campPlay, /搜旧营/);
+  assert.match(campPlay, /并肩搜旧营/);
+  assert.match(campPlay, /翻出一点存货/);
+  assert.match(campPlay, /两个人的东西/);
+  assert.match(campPlay, /旧营被翻过了/);
+  assert.match(campPlay, /prop-fire\.png/);
+  assert.match(campPlay, /prop-rock\.png/);
+  assert.doesNotMatch(campPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity|chest/i);
+  const scene = readFileSync("godot/scenes/play_camp.tscn", "utf8");
+  assert.match(scene, /headless_play_camp\.gd/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /Old camp is fire and rock/);
+  assert.match(zone, /Not a chest/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.match(play, /prompt\.find\("搜"\)/);
+  assert.match(play, /prompt\.find\("并肩"\)/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_camp|PLAY_CAMP_WILD|prop-camp-loot|paint_old_camp/);
+  }
+});
+
 test("Play sits one dusk nest on the wild bed", () => {
   assert.ok(existsSync("godot/scripts/headless_play_silk.gd"));
   assert.ok(existsSync("godot/scenes/play_silk.tscn"));

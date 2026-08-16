@@ -324,6 +324,7 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 	elif ch == "R":
 		_prop(_tex("prop-ore.png"), x - 0.1, y - 0.12, 36, 32, 5)
 	elif ch == "J":
+		# Old camp is fire and rock. Search stays in the snap. Not a chest.
 		_prop(_tex("prop-fire.png"), x - 0.2, y - 0.3, 44, 40, 6)
 		_prop(_tex("prop-rock.png"), x + 0.35, y - 0.05, 22, 20, 5)
 	elif ch == "H":

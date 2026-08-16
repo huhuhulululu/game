@@ -8,7 +8,7 @@
 
 ## Overview
 
-Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain, painted fog, a painted wild path, a lantern-stick, a pair of dusk wells, and a silk nest sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Wild cook is haul → pot on the fire. Rain and fog sit on the outdoor beds. Unread wild is a dusk wash that lifts as you walk. Held light is a small lantern-stick on the night path. Two earth mouths and one dusk nest sit on the wild bed. Weather look is closed. Wild set pieces close with silk.
+Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain, painted fog, a painted wild path, a lantern-stick, a pair of dusk wells, a silk nest, and an old-camp search sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Wild cook is haul → pot on the fire. Rain and fog sit on the outdoor beds. Unread wild is a dusk wash that lifts as you walk. Held light is a small lantern-stick on the night path. Two earth mouths and one dusk nest sit on the wild bed. Old camp keeps fire and rock; search stays in the snap. Weather look is closed. Wild set pieces stay closed.
 
 ## Governing ADRs
 
@@ -38,4 +38,5 @@ Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain
 | 010 | Painted path | Visual/Feel | Complete | ADR-0003 |
 | 011 | Painted torch | Visual/Feel | Complete | ADR-0003 |
 | 012 | Painted wormhole | Visual/Feel | Complete | ADR-0003 |
-| 013 | Painted silk | Visual/Feel | In progress | ADR-0003 |
+| 013 | Painted silk | Visual/Feel | Complete | ADR-0003 |
+| 014 | Old camp | Integration | In progress | ADR-0002 |

@@ -1,7 +1,7 @@
 # Story 013: Painted silk
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] One magenta-key dusk nest sits on wild `n`; the painted `bed-wild` stays
-- [ ] Prompt `挥` can show from the snap; harvest stays in the server; no cartoon bugs
-- [ ] Kitchen / mine / village stay clear of the nest; plaque unchanged
-- [ ] Play-path proof prints painted-silk tokens through `play.tscn`
-- [ ] No 魂; no spider den; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] One magenta-key dusk nest sits on wild `n`; the painted `bed-wild` stays
+- [x] Prompt `挥` can show from the snap; harvest stays in the server; no cartoon bugs
+- [x] Kitchen / mine / village stay clear of the nest; plaque unchanged
+- [x] Play-path proof prints painted-silk tokens through `play.tscn`
+- [x] No 魂; no spider den; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -46,9 +46,16 @@ Server already marks nest tiles and handles 挥. Do not move those rules into Go
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_silk.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 132 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places painted wormhole
 - Unlocks: none in this epic (wild set pieces close)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_SILK_WILD` `PLAY_SILK_SWING` `PLAY_SILK_HEARTH` `PLAY_SILK_OK`
+**Code Review**: Skipped — lean
