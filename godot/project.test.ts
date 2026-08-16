@@ -545,6 +545,52 @@ test("Mine sits one dusk bed and veins through Play", () => {
   }
 });
 
+test("Forge and stall sit one dusk language through Play", () => {
+  for (const name of ["prop-smith.png", "prop-booth.png"]) {
+    assert.ok(existsSync(`godot/assets/art/${name}`));
+  }
+  const paint = readFileSync("tools/paint_forge_look.py", "utf8");
+  assert.match(paint, /Does not touch the cover/);
+  assert.match(paint, /key_magenta/);
+  assert.match(paint, /real a=0/);
+  assert.match(paint, /prop-smith/);
+  assert.match(paint, /prop-booth/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
+  assert.doesNotMatch(paint, /Wilson|Don't Starve|Dont Starve|魂/i);
+  const logic = readFileSync("godot/scripts/valley_logic.gd", "utf8");
+  assert.match(logic, /prop-smith\.png/);
+  assert.match(logic, /prop-booth\.png/);
+  assert.match(logic, /_first_tile\("Y"\)/);
+  assert.match(logic, /_first_tile\("S"\)/);
+  assert.match(logic, /_first_tile\("G"\)/);
+  assert.match(logic, /prop-fortune\.png/);
+  assert.match(logic, /_sit_plot/);
+  assert.doesNotMatch(logic, /Look\.hung/);
+  assert.doesNotMatch(logic, /prop-anvil\.png/);
+  assert.doesNotMatch(logic, /prop-stall\.png/);
+  assert.doesNotMatch(logic, /prop-cover-|prop-hut|prop-lodge/);
+  const valley = readFileSync("godot/scripts/valley_world.gd", "utf8");
+  assert.doesNotMatch(valley, /prop-anvil\.png/);
+  assert.doesNotMatch(valley, /prop-stall\.png/);
+  assert.ok(existsSync("godot/scripts/headless_play_forge.gd"));
+  assert.ok(existsSync("godot/scenes/play_forge.tscn"));
+  const playForge = readFileSync("godot/scripts/headless_play_forge.gd", "utf8");
+  assert.match(playForge, /scenes\/play\.tscn/);
+  assert.match(playForge, /PLAY_FORGE_SIT/);
+  assert.match(playForge, /PLAY_STALL_SIT/);
+  assert.match(playForge, /PLAY_FORGE_OK/);
+  assert.match(playForge, /prop-smith\.png/);
+  assert.match(playForge, /prop-booth\.png/);
+  assert.doesNotMatch(playForge, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const playForgeScene = readFileSync("godot/scenes/play_forge.tscn", "utf8");
+  assert.match(playForgeScene, /headless_play_forge\.gd/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /prop-smith|prop-booth/);
+  }
+});
+
 test("Cover-coat people walk and act on the painted bed", () => {
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /char-%s/);

@@ -33,6 +33,8 @@ const PLOT_YOUNG := "prop-sprout.png"
 const PLOT_RIPE := "prop-ripe.png"
 const MARK_FORTUNE := "prop-fortune.png"
 const MARK_DAWN := "prop-dawn.png"
+const MARK_FORGE := "prop-smith.png"
+const MARK_STALL := "prop-booth.png"
 
 var _crops: Node2D
 var _marks: Node2D
@@ -91,11 +93,17 @@ func _sit_marks() -> void:
 	for child in _marks.get_children():
 		child.queue_free()
 	var dawn := _first_tile("B")
-	var fortune := _first_tile("Y")
+	var fortune := _first_tile("G")
+	var forge := _first_tile("Y")
+	var stall := _first_tile("S")
 	if dawn != Vector2i.ZERO:
 		_sit_plot(_marks, MARK_DAWN, dawn.x, dawn.y, 56, 68)
 	if fortune != Vector2i.ZERO:
 		_sit_plot(_marks, MARK_FORTUNE, fortune.x, fortune.y, 64, 72)
+	if forge != Vector2i.ZERO:
+		_sit_plot(_marks, MARK_FORGE, forge.x, forge.y, 52, 48)
+	if stall != Vector2i.ZERO:
+		_sit_plot(_marks, MARK_STALL, stall.x, stall.y, 64, 68)
 
 
 func _first_tile(ch: String) -> Vector2i:
