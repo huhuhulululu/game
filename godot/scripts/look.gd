@@ -42,6 +42,13 @@ static func season_paper(sea: String) -> Color:
 	return VALLEY_DUSK
 
 
+static func mine_paper(floor: int) -> Color:
+	# One mine painting. Lower floors a deeper dusk. Not a new bed.
+	if floor >= 2:
+		return Color(0.90, 0.86, 0.80)
+	return Color(1, 1, 1)
+
+
 static func dusk_mat(fog := 0.08) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/dusk.gdshader") as Shader

@@ -191,6 +191,16 @@ func set_season(sea: String) -> void:
 	bed.modulate = Look.season_paper(sea) if sea != "" else Color(1, 1, 1)
 
 
+func set_mine_depth(floor: int) -> void:
+	if _zone != "mine":
+		return
+	var bed := get_node_or_null("MineBed") as Sprite2D
+	if bed == null or bed.material != null:
+		return
+	# One mine painting. Lower floors a deeper dusk. Not a new bed.
+	bed.modulate = Look.mine_paper(floor)
+
+
 func set_night(amount: float, shade := Look.NIGHT) -> void:
 	var bed := get_node_or_null("WildBed") as Sprite2D
 	if bed == null:

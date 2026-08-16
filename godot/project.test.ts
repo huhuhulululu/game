@@ -1039,6 +1039,49 @@ test("Play sits two dusk wells on the wild bed", () => {
   }
 });
 
+test("Play sits mine floor 1 then floor 2 on one mine bed", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_floor.gd"));
+  assert.ok(existsSync("godot/scenes/play_floor.tscn"));
+  assert.ok(existsSync("godot/assets/art/bed-mine.png"));
+  assert.ok(!existsSync("godot/assets/art/bed-mine-2.png"));
+  assert.ok(!existsSync("tools/paint_floor_look.py"));
+  const floorPlay = readFileSync("godot/scripts/headless_play_floor.gd", "utf8");
+  assert.match(floorPlay, /scenes\/play\.tscn/);
+  assert.match(floorPlay, /PLAY_FLOOR_ONE/);
+  assert.match(floorPlay, /PLAY_FLOOR_TWO/);
+  assert.match(floorPlay, /PLAY_FLOOR_HEARTH/);
+  assert.match(floorPlay, /PLAY_FLOOR_OK/);
+  assert.match(floorPlay, /矿 1层/);
+  assert.match(floorPlay, /矿 2层/);
+  assert.match(floorPlay, /bed-mine\.png/);
+  assert.match(floorPlay, /bed-valley\.png/);
+  assert.match(floorPlay, /这一层矿脉很响/);
+  assert.doesNotMatch(floorPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_floor.tscn", "utf8");
+  assert.match(scene, /headless_play_floor\.gd/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /func mine_paper/);
+  assert.match(look, /One mine painting\. Lower floors a deeper dusk\. Not a new bed\./);
+  assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /func set_mine_depth/);
+  assert.match(zone, /bed-mine\.png/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /set_mine_depth/);
+  assert.match(play, /矿 %s层/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /_hud_season/);
+  assert.doesNotMatch(play, /魂/);
+  const story = readFileSync("production/epics/r1-evening-places/story-018-mine-floors.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts", "src/world/maps.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_floor|PLAY_FLOOR_ONE|mine_paper|paint_floor/);
+  }
+});
+
 test("Play turns 春夏秋冬 on one dusk bed, not four beds", () => {
   assert.ok(existsSync("godot/scripts/headless_play_sea.gd"));
   assert.ok(existsSync("godot/scenes/play_sea.tscn"));
@@ -1073,7 +1116,7 @@ test("Play turns 春夏秋冬 on one dusk bed, not four beds", () => {
   assert.doesNotMatch(play, /_hud_season/);
   assert.doesNotMatch(play, /魂/);
   const story = readFileSync("production/epics/r1-evening-places/story-017-seasons.md", "utf8");
-  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  assert.match(story, /\*\*Status\*\*:\s*Complete/);
   const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts", "src/game/season.ts"];
   for (const p of srcFiles) {
     const src = readFileSync(p, "utf8");

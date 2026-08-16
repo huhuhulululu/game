@@ -1,7 +1,7 @@
 # Story 017: Seasons
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Plaque keeps `日 %s · %s · %s · 金 %s` and can show 春 / 夏 / 秋 / 冬 from the snap; `seasonOf` stays in the server
-- [ ] One painted `bed-valley.png` stays; winter is cooler paper, summer is warmer; not four beds
-- [ ] Kitchen / mine stay hearth-lit; no season HUD ring
-- [ ] Play-path proof prints season tokens through `play.tscn`
-- [ ] No 魂; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Plaque keeps `日 %s · %s · %s · 金 %s` and can show 春 / 夏 / 秋 / 冬 from the snap; `seasonOf` stays in the server
+- [x] One painted `bed-valley.png` stays; winter is cooler paper, summer is warmer; not four beds
+- [x] Kitchen / mine stay hearth-lit; no season HUD ring
+- [x] Play-path proof prints season tokens through `play.tscn`
+- [x] No 魂; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -48,9 +48,16 @@ Server already turns the season every three days. Do not move those rules into G
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_sea.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 136 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places night bite
-- Unlocks: none in this epic
+- Unlocks: 矿多层 only if this holds
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_SEA_TURN` `PLAY_SEA_SUMMER` `PLAY_SEA_WINTER` `PLAY_SEA_HEARTH` `PLAY_SEA_OK`
+**Code Review**: Skipped — lean

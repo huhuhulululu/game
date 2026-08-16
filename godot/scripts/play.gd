@@ -360,6 +360,7 @@ func _on_snap(s: Dictionary) -> void:
 		_zone_map.set_night(0.0)
 		_valley.set_season(sea)
 		_zone_map.set_season(sea)
+	_zone_map.set_mine_depth(int(s.get("floor", 0)) if zone == "mine" else 0)
 	# Soft dusk rain / haze sit on the bed. Never a weather ring.
 	var wet := _wet(s)
 	var mist := _mist(s)

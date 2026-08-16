@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` seasons on one dusk bed
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–016 Complete; 017 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed.
+- Task: `/dev-story` mine floors on one mine bed
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–017 Complete; 018 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-017-seasons.md`; `play_sea.tscn`
-- Next: `/story-done` seasons after tokens hold. Next Ready: 矿多层. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+- Files: `story-018-mine-floors.md`; `play_floor.tscn`
+- Next: `/story-done` mine-floors after tokens hold. Next Ready: 火边. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-018-mine-floors.md` — Mine floors
+- Files changed: story, `play_floor.tscn`, `look.gd` mine_paper, zone_map `set_mine_depth`
+- Test written: `godot/project.test.ts` (mine-floors lock)
+- Tokens: `PLAY_FLOOR_ONE` `PLAY_FLOOR_TWO` `PLAY_FLOOR_HEARTH` `PLAY_FLOOR_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Next Ready: 火边. Weather stays closed. Two-phone stays Blocked (human). Do not invent more wild props.
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-017-seasons.md` — Seasons
+- Tech debt logged: None
+- Next recommended: mine floors (`r1-evening-places/story-018-mine-floors.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-017-seasons.md` — Seasons
