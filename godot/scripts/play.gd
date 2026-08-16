@@ -491,7 +491,8 @@ func _paint_fish(s: Dictionary) -> void:
 	if _fish_hud == null:
 		return
 	var me := _me(s)
-	var fight := str(me.get("fishing", "off")) == "fight"
+	# Sit / sleep stays on the valley. Do not reuse the timing bar as a bed HUD.
+	var fight := str(me.get("fishing", "off")) == "fight" and str(me.get("busy", "")) != "sit"
 	_fish_hud.visible = fight
 	if not fight:
 		return

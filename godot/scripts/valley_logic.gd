@@ -101,9 +101,9 @@ func _sit_marks() -> void:
 	if fortune != Vector2i.ZERO:
 		_sit_plot(_marks, MARK_FORTUNE, fortune.x, fortune.y, 64, 72)
 	if forge != Vector2i.ZERO:
-		_sit_plot(_marks, MARK_FORGE, forge.x, forge.y, 52, 48)
+		_sit_plot(_marks, MARK_FORGE, forge.x, forge.y, 36, 32)
 	if stall != Vector2i.ZERO:
-		_sit_plot(_marks, MARK_STALL, stall.x, stall.y, 64, 68)
+		_sit_plot(_marks, MARK_STALL, stall.x, stall.y, 40, 42)
 
 
 func _first_tile(ch: String) -> Vector2i:

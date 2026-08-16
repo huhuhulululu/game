@@ -1,7 +1,7 @@
 # Story 004: Sleep
 
 > **Epic**: Evening places look
-> **Status**: Ready
+> **Status**: In progress
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,17 +16,34 @@
 
 ## Acceptance Criteria
 
-- [ ] Sleep / lie-down reads as the same dusk language (bed or sit pose, not a second room)
-- [ ] No 魂; no Don't Starve face; no FAIL restick
+- [ ] Sleep / lie-down uses the cover-coat sit pose on `bed-valley.png`, not a second indoor room
+- [ ] Timing bar stays off while `busy == sit` (no bed HUD)
+- [ ] Smith / booth stay small and grounded on the valley
+- [ ] Play-path proof prints sleep tokens through `play.tscn`
+- [ ] No 魂; no Don't Starve face; no FAIL restick; no look names in `src/`
 
 ## Implementation Notes
 
-Cabin is already on `bed-valley.png`. Prefer the existing cover-coat sit pose over a new indoor sleep zone. Do not invent a DST bed HUD.
+Cabin is already on `bed-valley.png`. Prefer the existing cover-coat sit pose over a new indoor sleep zone. Do not invent a DST bed HUD. Do not recrop FAIL. Do not restyle kitchen / mine.
 
 ## Out of Scope
 
-- Kitchen / mine / forge restyle
+- Kitchen / mine restyle
 - Recrop FAIL PNGs
+- New indoor sleep map
+
+## QA Test Cases
+
+- **AC-1**: Play sits the cover-coat sleep pose on the valley
+  - Setup: `play_sleep.tscn` feeds a night valley snap with `busy: sit`
+  - Verify: `char-warm-sit`, `bed-valley`, valley visible, fish HUD off
+  - Pass condition: `PLAY_SLEEP_OK` and test locks
+
+## Test Evidence
+
+**Story Type**: Visual/Feel
+**Required evidence**: `godot/project.test.ts` + `play_sleep.tscn` tokens + `production/qa/evidence/sleep-look-evidence.md`
+**Status**: [ ] In progress
 
 ## Dependencies
 

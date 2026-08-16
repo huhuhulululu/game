@@ -168,7 +168,7 @@ func _apply() -> void:
 	if _shadow:
 		_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST * 0.22, 7)
 		_shadow.modulate.a = 1.0
-	var fight := fishing == "fight"
+	var fight := fishing == "fight" and busy != "sit"
 	if _bar_bg:
 		_bar_bg.visible = fight
 		_bar_ok.visible = fight

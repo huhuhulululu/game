@@ -591,6 +591,41 @@ test("Forge and stall sit one dusk language through Play", () => {
   }
 });
 
+test("Sleep sits the cover-coat pose on the valley bed through Play", () => {
+  assert.ok(existsSync("godot/assets/art/char-warm-sit.png"));
+  assert.ok(existsSync("godot/assets/art/char-pine-sit.png"));
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /busy == "sit"/);
+  assert.match(actor, /char-%s-sit/);
+  assert.doesNotMatch(actor, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /busy.*sit|_fish_hud\.visible = fight/);
+  assert.doesNotMatch(play, /zone == "sleep"|bed-sleep|prop-bed/);
+  assert.doesNotMatch(play, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const logic = readFileSync("godot/scripts/valley_logic.gd", "utf8");
+  assert.match(logic, /36, 32/);
+  assert.match(logic, /40, 42/);
+  assert.doesNotMatch(logic, /Look\.hung/);
+  assert.ok(existsSync("godot/scripts/headless_play_sleep.gd"));
+  assert.ok(existsSync("godot/scenes/play_sleep.tscn"));
+  const playSleep = readFileSync("godot/scripts/headless_play_sleep.gd", "utf8");
+  assert.match(playSleep, /scenes\/play\.tscn/);
+  assert.match(playSleep, /PLAY_SLEEP_SIT/);
+  assert.match(playSleep, /PLAY_SLEEP_VALLEY/);
+  assert.match(playSleep, /PLAY_SLEEP_OK/);
+  assert.match(playSleep, /char-warm-sit\.png/);
+  assert.match(playSleep, /bed-valley\.png/);
+  assert.match(playSleep, /busy": "sit"/);
+  assert.doesNotMatch(playSleep, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const playSleepScene = readFileSync("godot/scenes/play_sleep.tscn", "utf8");
+  assert.match(playSleepScene, /headless_play_sleep\.gd/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /bed-sleep|prop-bed|char-warm-sit/);
+  }
+});
+
 test("Cover-coat people walk and act on the painted bed", () => {
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /char-%s/);
