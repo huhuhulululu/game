@@ -133,6 +133,7 @@ func _no_fail(n: Node) -> bool:
 
 func _assert_sleep() -> bool:
 	await _feed(_snap({}))
+	await get_tree().create_timer(0.28).timeout
 	var valley: Node2D = play.get("_valley")
 	var zone_map: Node2D = play.get("_zone_map")
 	var fish_hud: CanvasItem = play.get("_fish_hud")

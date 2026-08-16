@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Look rebuild epics are Complete. Next: `production/epics/r1-togetherness/story-001-shared-valley.md` — show pair rules already on the Node server (both coats, 喊, reclaim) without a two-iPhone playtest. One painted dusk language. Do not recrop FAIL PNGs. Do not restick FAIL cover props. No 魂.
+Look rebuild and r1-togetherness are Complete. Onboarding already holds (cover → 开一间 → bed + 做 / 喊). Next: `production/epics/r1-coat-feel/story-001-walk-sit.md`. One painted dusk language. Do not recrop FAIL PNGs. Do not restick FAIL cover props. No 魂.
 
 ## Coding Standards
 

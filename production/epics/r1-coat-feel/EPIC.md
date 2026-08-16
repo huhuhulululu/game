@@ -1,0 +1,29 @@
+# Epic: Coat walk and sit feel
+
+> **Layer**: Feature
+> **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
+> **Architecture Module**: ActorView
+> **Status**: In progress
+> **Governing ADRs**: ADR-0003
+
+## Overview
+
+Onboarding already holds: cover → 开一间 → painted bed with 做 / 喊. Do not write a lecture. Thin walk-cycle and sit-to-stand on the existing cover-coat sheets. No new pack.
+
+## Governing ADRs
+
+| ADR | Decision Summary | Engine Risk |
+|-----|-----------------|-------------|
+| ADR-0003 | One painted dusk language; cover is the title lock | LOW |
+
+## GDD Requirements
+
+| TR-ID | Requirement | ADR Coverage |
+|-------|-------------|--------------|
+| TR-look-003 | Players are cover-coat people. No Wilson / Don't Starve face. | ADR-0003 ✅ |
+
+## Stories
+
+| # | Story | Type | Status | ADR |
+|---|-------|------|--------|-----|
+| 001 | Walk and sit-to-stand | Visual/Feel | In progress | ADR-0003 |

@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: `docs/WORLD.md` + `godot/docs/ART.md`
 > **Architecture Module**: Play + Net + ValleyEar
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0002
 
 ## Overview
@@ -26,4 +26,4 @@ Shared vision, pair distance, shout, and room reclaim already live on the Node s
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | Shared valley | Integration | In progress | ADR-0002 |
+| 001 | Shared valley | Integration | Complete | ADR-0002 |

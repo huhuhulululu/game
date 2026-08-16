@@ -14,6 +14,9 @@ var fishing := "off"
 var fish_mark := 0.0
 var fish_pull := 0.0
 var _t := 0.0
+var _stride := 0.0
+var _sit := 0.0
+var _was_moving := false
 var _sprite: Sprite2D
 var _shadow: Sprite2D
 var _glow: Sprite2D
@@ -101,15 +104,24 @@ func apply(data: Dictionary, now: float) -> void:
 	_apply()
 
 
-func _process(_dt: float) -> void:
+func _process(dt: float) -> void:
+	var want_sit := busy == "sit"
+	_sit = move_toward(_sit, 1.0 if want_sit else 0.0, dt / 0.22)
+	var can_walk := moving and not want_sit and _sit < 0.2
+	if can_walk:
+		if not _was_moving:
+			_stride = 0.0
+		_stride += dt
+	_was_moving = can_walk
 	_place_name()
+	_apply()
 
 
 func _place_name() -> void:
 	if _name_card == null:
 		return
 	var p := get_global_transform_with_canvas().origin
-	_name_card.position = Vector2(p.x - 36, p.y - Look.BODY - 28)
+	_name_card.position = Vector2(p.x - 36, p.y - Look.BODY * (1.0 - 0.10 * _sit) - 28)
 	_name_card.visible = _name.text != ""
 
 
@@ -124,15 +136,15 @@ func _tex(path: String) -> Texture2D:
 
 func _sheet() -> Texture2D:
 	var w := "warm" if warm else "pine"
+	if _sit > 0.45:
+		return _tex("char-%s-sit.png" % w)
 	if busy == "fish":
 		return _tex("char-%s-fish.png" % w)
 	if busy == "chop":
 		return _tex("char-%s-chop.png" % w)
 	if busy == "forge":
 		return _tex("char-%s-forge.png" % w)
-	if busy == "sit":
-		return _tex("char-%s-sit.png" % w)
-	var step := int(_t / 0.21) % 2 == 0
+	var step := int(floor(_stride / 0.18)) % 2 == 0
 	if facing == 0:
 		if not moving:
 			return _tex("char-%s-back.png" % w)
@@ -154,7 +166,12 @@ func _apply() -> void:
 	if tex:
 		var s := Look.BODY / float(tex.get_height())
 		_sprite.scale = Vector2(s, s)
-		_sprite.position = Vector2(0.0, -Look.BODY * (Look.FOOT - 0.5))
+		var plant := -Look.BODY * (Look.FOOT - 0.5)
+		var drop := Look.BODY * 0.035 * _sit
+		var bob := 0.0
+		if moving and _sit < 0.2:
+			bob = -abs(sin(_stride / 0.36 * TAU)) * 2.0
+		_sprite.position = Vector2(0.0, plant + drop + bob)
 	_sprite.flip_h = facing == 3
 	modulate = Color(0.70, 0.64, 0.56) if away else Color(1, 1, 1)
 	if _glow:

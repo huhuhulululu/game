@@ -1,10 +1,16 @@
 # Session state
 
-- Task: `/dev-story` shared valley
-- Status: r1-evening-places Complete. r1-togetherness In progress.
+- Task: `/dev-story` coat walk / sit
+- Status: r1-togetherness Complete. Onboarding already holds. Coat-feel In progress.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path together scene + thin 做 / 喊 / sit
-- Next: `production/epics/r1-togetherness/story-001-shared-valley.md`
+- Files: ActorView stride + sit ease + play_coats
+- Next: `production/epics/r1-coat-feel/story-001-walk-sit.md`
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-togetherness/story-001-shared-valley.md` — Shared valley
+- Tech debt logged: None
+- Next recommended: coat walk / sit (`r1-coat-feel/story-001-walk-sit.md`). Onboarding already holds.
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

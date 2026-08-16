@@ -626,6 +626,32 @@ test("Sleep sits the cover-coat pose on the valley bed through Play", () => {
   }
 });
 
+test("Cover-coats ease a walk stride and sit-to-stand", () => {
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /_stride/);
+  assert.match(actor, /_sit/);
+  assert.match(actor, /move_toward/);
+  assert.match(actor, /0\.18/);
+  assert.match(actor, /0\.22/);
+  assert.match(actor, /Look\.FOOT/);
+  assert.doesNotMatch(actor, /Wilson|Don't Starve|Dont Starve|Wanderer/i);
+  assert.ok(existsSync("godot/scripts/headless_play_coats.gd"));
+  assert.ok(existsSync("godot/scenes/play_coats.tscn"));
+  const coats = readFileSync("godot/scripts/headless_play_coats.gd", "utf8");
+  assert.match(coats, /scenes\/play\.tscn/);
+  assert.match(coats, /PLAY_COAT_WALK/);
+  assert.match(coats, /PLAY_COAT_SIT/);
+  assert.match(coats, /PLAY_COAT_OK/);
+  assert.match(coats, /char-warm-walk/);
+  assert.match(coats, /char-warm-sit/);
+  assert.doesNotMatch(coats, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const scene = readFileSync("godot/scenes/play_coats.tscn", "utf8");
+  assert.match(scene, /headless_play_coats\.gd/);
+  const sit = readFileSync("tools/sit_chars.py", "utf8");
+  assert.match(sit, /BAN/);
+  assert.doesNotMatch(sit, /SRCS\[.*= .*walk-raw/);
+});
+
 test("Cover-coat people walk and act on the painted bed", () => {
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /char-%s/);
