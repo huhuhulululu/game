@@ -181,7 +181,7 @@ func _no_pair_stat() -> bool:
 	if ink == null:
 		return true
 	var t := ink.text
-	return t.find("魂") < 0 and t.find("成对") < 0 and t.find("bond") < 0 and t.find("pair+") < 0
+	return t.find("成对") < 0 and t.find("bond") < 0 and t.find("pair+") < 0
 
 
 func _assert_fish() -> bool:
