@@ -1,7 +1,7 @@
 # Story 008: One paint
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,11 +18,11 @@ Live leftover after quiet chrome: coat sheets still sit on a black / dusk plate,
 
 ## Acceptance Criteria
 
-- [ ] `char-warm` / `char-pine` walk and sit sheets have true a=0 outside the figure; no black or dusk-RGB quad
-- [ ] A blob walk sheet is dropped back to the last painted idle; no new face; BODY stays 192
-- [ ] `bed-kitchen` / `bed-mine` / `bed-wild` read as one cover-language painting; `bed-valley.png` not replaced unless broken
-- [ ] hole / silk / torch / smith / booth / camp-pot / beast stay off the play; quiet HUD and four-beat walk stay
-- [ ] Play-path + test locks; no look names in `src/`; no 魂
+- [x] `char-warm` / `char-pine` walk and sit sheets have true a=0 outside the figure; no black or dusk-RGB quad
+- [x] A blob walk sheet is dropped back to the last painted idle; no new face; BODY stays 192
+- [x] `bed-kitchen` / `bed-mine` / `bed-wild` read as one cover-language painting; `bed-valley.png` not replaced unless broken
+- [x] hole / silk / torch / smith / booth / camp-pot / beast stay off the play; quiet HUD and four-beat walk stay
+- [x] Play-path + test locks; no look names in `src/`; no 魂
 
 ## Implementation Notes
 
@@ -50,7 +50,7 @@ Godot look only. Cut plates to a=0 (magenta-key or a true alpha pass). Reuse exi
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_paint.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 

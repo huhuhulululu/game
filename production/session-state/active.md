@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` one paint
-- Status: r1-coat-feel 001–007 Complete; 008 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` one paint
+- Status: r1-coat-feel 001–008 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-008-one-paint.md`
-- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-008-one-paint.md` — One paint
+- Criteria: 5/5. Coat sheets have real a=0. Warm walk dusk-slab dropped to idle. Kitchen / mine / wild are one valley painting. Valley bed untouched. Torn props stay off.
+- Tests: `godot/project.test.ts` one-paint lock + `PLAY_PAINT_OK`. npm test 143 pass.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Wait unless leftover geom remains. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-008-one-paint.md` — One paint

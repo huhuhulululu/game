@@ -18,7 +18,7 @@ ART = ROOT / "godot" / "assets" / "art"
 COVER = ART / "cover-valley.png"
 VALLEY = ART / "bed-valley.png"
 
-# Wilson / DST scratch. Do not open.
+# Banned raw scratch. Do not open.
 BAN = {
     "char-warm-walk-raw.png",
     "char-warm-walk2-raw.png",
@@ -419,7 +419,7 @@ def paint_coats() -> None:
     idle_cache: dict[str, Image.Image] = {}
     for name in idle_names + rest:
         if name in BAN:
-            raise SystemExit(f"banned Wilson sheet {name}")
+            raise SystemExit(f"banned raw sheet {name}")
         src = ART / name
         if not src.exists():
             continue

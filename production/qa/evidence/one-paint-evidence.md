@@ -36,4 +36,4 @@ PLAY_PAINT_OK
 
 ## Sign-off
 
-`/dev-story` lean. Tokens pending play-path. 019 parked. Two-phone Blocked / human.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. One painted language. Real coat a=0. No dusk-slab walk. No empty-fill beds. No 魂. `npm test`: 143 pass. `PLAY_PAINT_OK`. HTML5 re-exported.
