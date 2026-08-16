@@ -26,6 +26,11 @@ requirements:
     system: hud
     requirement: No sanity / 魂 / 精神值 HUD. Copy like 日 · 春 · 白天 · 金.
     adr: ADR-0003
+  - id: TR-look-005
+    gdd: docs/WORLD.md
+    system: painted-world
+    requirement: Farm, fortune, dawn board, and wilderness use the same painted dusk language. New beds or magenta-key props with real a=0. No FAIL restick. No 魂.
+    adr: ADR-0003
   - id: TR-graph-001
     gdd: design/gdd/systems-index.md
     system: painted-world

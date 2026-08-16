@@ -395,6 +395,11 @@ test("Godot village shows crops, fortune and the dawn board from the same snap",
   const valley = readFileSync("godot/scripts/valley_logic.gd", "utf8");
   assert.match(valley, /show_crops/);
   assert.match(valley, /prop-tuft|prop-bush/);
+  assert.match(valley, /_sit_plot/);
+  assert.match(valley, /prop-sprout\.png/);
+  assert.match(valley, /prop-ripe\.png/);
+  assert.match(valley, /prop-fortune\.png/);
+  assert.match(valley, /prop-dawn\.png/);
   assert.doesNotMatch(valley, /Look\.hung/);
   assert.doesNotMatch(valley, /add_child\(_crop_at/);
   assert.doesNotMatch(valley, /prop-cabin|prop-inn/);
@@ -405,6 +410,49 @@ test("Godot village shows crops, fortune and the dawn board from the same snap",
   assert.match(world, /也得对着铺/);
   assert.match(world, /还早。天黑再歇/);
   assert.match(world, /一个人能问|问今日/);
+});
+
+test("Village and wild sit one dusk language through Play", () => {
+  for (const name of ["prop-sprout.png", "prop-ripe.png", "prop-fortune.png", "prop-dawn.png", "bed-wild.png"]) {
+    assert.ok(existsSync(`godot/assets/art/${name}`));
+  }
+  const paint = readFileSync("tools/paint_village_look.py", "utf8");
+  assert.match(paint, /Does not touch the cover/);
+  assert.match(paint, /key_magenta/);
+  assert.match(paint, /real a=0/);
+  assert.match(paint, /prop-sprout/);
+  assert.match(paint, /prop-ripe/);
+  assert.match(paint, /prop-fortune/);
+  assert.match(paint, /prop-dawn/);
+  assert.match(paint, /bed-wild/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
+  assert.doesNotMatch(paint, /Wilson|Don't Starve|Dont Starve|魂/i);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /bed-wild\.png/);
+  assert.match(zone, /_sit_wild_bed/);
+  assert.match(zone, /ch == "F"/);
+  assert.match(zone, /ch == "J"/);
+  assert.doesNotMatch(zone, /prop-tree\.png/);
+  assert.doesNotMatch(zone, /prop-cover-|prop-hut|prop-lodge/);
+  assert.ok(existsSync("godot/scripts/headless_play_village.gd"));
+  assert.ok(existsSync("godot/scenes/play_village.tscn"));
+  const playVillage = readFileSync("godot/scripts/headless_play_village.gd", "utf8");
+  assert.match(playVillage, /scenes\/play\.tscn/);
+  assert.match(playVillage, /PLAY_CROP_SIT/);
+  assert.match(playVillage, /PLAY_FORTUNE_SIT/);
+  assert.match(playVillage, /PLAY_DAWN_SIT/);
+  assert.match(playVillage, /PLAY_WILD_BED/);
+  assert.match(playVillage, /PLAY_VILLAGE_OK/);
+  assert.match(playVillage, /prop-sprout\.png/);
+  assert.match(playVillage, /bed-wild\.png/);
+  assert.doesNotMatch(playVillage, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const playVillageScene = readFileSync("godot/scenes/play_village.tscn", "utf8");
+  assert.match(playVillageScene, /headless_play_village\.gd/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /bed-wild|prop-sprout|prop-fortune|prop-dawn/);
+  }
 });
 
 test("Cover-coat people walk and act on the painted bed", () => {

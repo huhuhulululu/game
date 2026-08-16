@@ -14,4 +14,5 @@ Rebuild epics (CHARTER P1 look). Old `p1-look/story-001-valley-painted-bed.md` i
 | r1-two-players | Core | Two actors | ART + WORLD | 1 | Complete |
 | r1-move-do-shout | Core | Move / do / shout | WORLD | 1 | Complete |
 | r1-first-evening | Feature | Fish / mine / kitchen | WORLD | 1 | Complete |
+| r1-village-wild | Feature | Farm / fortune / board / wild | WORLD + ART | 1 | Ready |
 | p1-look (old) | — | sticker bed | — | 1 | Superseded |

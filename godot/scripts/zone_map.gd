@@ -138,16 +138,34 @@ func _wash(x: int, y: int, color: Color) -> void:
 
 
 func _paint(zone: String, rows: PackedStringArray) -> void:
-	var floor := _tex("tex-wood.png") if zone == "kitchen" else _tex("tex-stone.png" if zone == "mine" else "tex-grass.png")
 	var h := rows.size()
 	var w := rows[0].length()
 	_w = w
 	_h = h
 	_zone = zone
-	_floor(floor, w, h)
+	if zone == "wild":
+		_sit_wild_bed()
+	else:
+		var floor := _tex("tex-wood.png") if zone == "kitchen" else _tex("tex-stone.png")
+		_floor(floor, w, h)
 	for y in h:
 		for x in w:
 			_bit(zone, rows[y][x], x, y)
+
+
+func _sit_wild_bed() -> void:
+	var tex := _tex("bed-wild.png")
+	if tex == null:
+		return
+	var s := Sprite2D.new()
+	s.name = "WildBed"
+	s.texture = tex
+	s.centered = false
+	s.z_index = 0
+	s.texture_filter = TEXTURE_FILTER_LINEAR
+	var sz := size_px()
+	s.scale = Vector2(sz.x / float(tex.get_width()), sz.y / float(tex.get_height()))
+	add_child(s)
 
 
 func _wall(zone: String, x: int, y: int) -> void:
@@ -214,9 +232,9 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 	if ch == "D":
 		_prop(_tex("prop-dock.png"), x - 0.2, y - 0.1, 48, 36, 4)
 	elif ch == "t" or ch == "T":
-		_prop(_tex("prop-tree.png"), x - 0.7, y - 2.1, 64, 88, 10)
+		pass
 	elif ch == "F":
-		_prop(_tex("prop-bush.png"), x - 0.15, y - 0.2, 40, 36, 5)
+		pass
 	elif ch == "b" or ch == "^":
 		_prop(_tex("prop-rock.png"), x - 0.1, y - 0.15, 36, 32, 5)
 	elif ch == "K":
@@ -231,4 +249,4 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 	elif ch == "L":
 		_prop(_tex("prop-gate.png"), x - 0.2, y - 0.55, 48, 56, 8)
 	elif ch == "n":
-		_prop(_tex("prop-bush.png"), x - 0.2, y - 0.25, 42, 38, 6)
+		pass
