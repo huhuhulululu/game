@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` enter place
-- Status: r1-coat-feel 001–021 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` water and wild
+- Status: r1-coat-feel 001–021 Complete; 022 water-wild in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-021-enter-place.md`
-- Next: Stop. 做 at a painted door changes the bed. No door sticker. Do not generate a new face. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Files: `story-022-water-wild.md`
+- Next: `/story-done` after `PLAY_WATER_OK`. 做 on water fishes. 做 on the out-gate enters wild. No rod or gate sticker. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-022-water-wild.md` — Water and wild
+- Files changed: story, `world.ts` reachWater, `valley_logic.gd` water here-tile, `play.gd` 下竿 slip, `play_water.tscn`, `headless_play_water.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (water-wild lock) + `play_water.tscn`
+- Tokens: `PLAY_WATER_FISH` `PLAY_ENTER_WILD` `PLAY_WATER_OK`
+- Next: `/story-done` after tokens hold. Existing fish pull. Existing `bed-wild`. No rod or gate sticker. 021 stays Complete. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-021-enter-place.md` — Enter place

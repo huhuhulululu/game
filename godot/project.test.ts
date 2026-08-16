@@ -2442,3 +2442,53 @@ test("Play enters a painted place with 做, not a door sticker", () => {
     assert.doesNotMatch(src, /play_enter|PLAY_ENTER_OK|_enter_line/);
   }
 });
+
+test("Play lets 做 on water start the fish pull and 做 on the out-gate enter the wild", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-022-water-wild.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-022-water-wild.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-021-enter-place.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_water.gd"));
+  assert.ok(existsSync("godot/scenes/play_water.tscn"));
+  const waterPlay = readFileSync("godot/scripts/headless_play_water.gd", "utf8");
+  assert.match(waterPlay, /scenes\/play\.tscn/);
+  assert.match(waterPlay, /PLAY_WATER_FISH/);
+  assert.match(waterPlay, /PLAY_ENTER_WILD/);
+  assert.match(waterPlay, /PLAY_WATER_OK/);
+  assert.match(waterPlay, /下竿/);
+  assert.match(waterPlay, /bed-wild\.png/);
+  assert.match(waterPlay, /ROD_OR_GATE/);
+  assert.doesNotMatch(waterPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_water.tscn", "utf8");
+  assert.match(scene, /headless_play_water\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_enter_line/);
+  assert.match(play, /下竿/);
+  assert.match(play, /2\.18/);
+  assert.match(play, /hand_chip\("做"/);
+  assert.doesNotMatch(play, /prop-dock|prop-gate|魂/);
+  const logic = readFileSync("godot/scripts/valley_logic.gd", "utf8");
+  assert.match(logic, /func enter_kind/);
+  assert.match(logic, /return "water"/);
+  assert.doesNotMatch(logic, /prop-dock|prop-gate/);
+  const world = readFileSync("src/sim/world.ts", "utf8");
+  assert.match(world, /reachWater/);
+  assert.doesNotMatch(world, /play_water|PLAY_WATER_OK|_enter_line/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 240/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /做到溪上就下竿/);
+  assert.match(art, /不要另贴竿和门/);
+  assert.match(art, /大衣真透明/);
+  const srcFiles = ["src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_water|PLAY_WATER_OK|_enter_line/);
+  }
+});

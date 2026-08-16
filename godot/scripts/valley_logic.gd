@@ -77,6 +77,12 @@ func enter_kind(px: float, py: float) -> String:
 				return "mine"
 			if ch == "V":
 				return "wild"
+	if ty >= 0 and ty < ROWS.size():
+		var here := ROWS[ty]
+		if tx >= 0 and tx < here.length():
+			var tile := here[tx]
+			if tile == "D" or tile == "~":
+				return "water"
 	return ""
 
 

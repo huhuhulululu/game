@@ -540,6 +540,12 @@ export class World {
     return cell === "dock" || cell === "water" || ch === "~" || ch === "D";
   }
 
+  private reachWater(p: Actor): boolean {
+    const f = this.facingTile(p);
+    const h = toTile(p.x, p.y);
+    return this.waterTile(p.zone, f.x, f.y) || this.waterTile(p.zone, h.x, h.y);
+  }
+
   private holdingTorch(p: Actor): boolean {
     return p.torch > 0 || parseHeld(p.held).id === "torch";
   }
@@ -633,7 +639,7 @@ export class World {
     const ch = map.rows[f.y]?.[f.x];
     const reach = this.reachCh(p);
     if (p.zone === "valley") {
-      if (cell === "dock") return "下竿";
+      if (this.reachWater(p)) return "下竿";
       if (cell === "plot") return this.plotPrompt(f.x, f.y);
       if (cell === "bush" || cell === "osmanthus") return "采";
       if (reach === "E") return "进矿";
@@ -736,7 +742,7 @@ export class World {
     if (this.idleFace(cell) && !this.canPass(p) && this.tryEat(p)) return;
 
     if (p.zone === "valley") {
-      if (cell === "dock") return this.cast(p);
+      if (this.reachWater(p)) return this.cast(p);
       if (cell === "plot") return this.plot(p, f.x, f.y);
       if (cell === "bush") return this.forage(p, "herb", 0.7, f.x, f.y);
       if (cell === "osmanthus") return this.forage(p, "osmanthus", 0.35, f.x, f.y);

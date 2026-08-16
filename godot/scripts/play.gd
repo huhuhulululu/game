@@ -776,6 +776,8 @@ func _enter_line() -> String:
 		return "进矿"
 	if kind == "wild":
 		return "出谷 · 荒野"
+	if kind == "water":
+		return "下竿"
 	return ""
 
 

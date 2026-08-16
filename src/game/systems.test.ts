@@ -1782,6 +1782,35 @@ describe("living systems", () => {
     assert.equal(miner.zone, "mine");
   });
 
+  it("doing on the dock tile casts, and doing on the out-gate enters the wild", () => {
+    const rod = new World("STREAM");
+    rod.addPlayer("a", "暖", "left");
+    const fisher = rod.players.get("a");
+    assert.ok(fisher);
+    const dock = rod.valley.find("D")[0];
+    assert.ok(dock);
+    const dockAt = tileCenter(dock.x, dock.y);
+    fisher.x = dockAt.x;
+    fisher.y = dockAt.y;
+    fisher.facing = 0;
+    assert.ok(rod.snapshot("a").prompt.includes("下竿"));
+    tap(rod, "a");
+    assert.equal(fisher.fish?.phase, "wait");
+    const edge = new World("EDGE");
+    edge.addPlayer("a", "暖", "left");
+    const walker = edge.players.get("a");
+    assert.ok(walker);
+    const gate = edge.valley.find("V")[0];
+    assert.ok(gate);
+    const gateAt = tileCenter(gate.x, gate.y);
+    walker.x = gateAt.x;
+    walker.y = gateAt.y;
+    walker.facing = 3;
+    assert.ok(edge.snapshot("a").prompt.includes("出谷"));
+    tap(edge, "a");
+    assert.equal(walker.zone, "wild");
+  });
+
   it("dug ore goes in the hand, the forge counts it, and the pot sends it to the workshop", () => {
     const w = new World("ORE2");
     w.addPlayer("a", "暖", "left");
