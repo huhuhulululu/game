@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Packed bed, cover-coats, stick/do/shout, first-evening, title, room, and village/wild are Complete. One painted dusk language. Do not recrop FAIL PNGs. Do not restick FAIL cover props. No 魂.
+Packed bed, cover-coats, stick/do/shout, first-evening, title, room, and village/wild are Complete. In progress: `production/epics/r1-evening-places/story-001-kitchen-bed.md`. Mine / forge / stall / sleep remain Ready. One painted dusk language. Do not recrop FAIL PNGs. Do not restick FAIL cover props. No 魂.
 
 ## Coding Standards
 

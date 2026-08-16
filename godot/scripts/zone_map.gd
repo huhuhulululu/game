@@ -145,20 +145,29 @@ func _paint(zone: String, rows: PackedStringArray) -> void:
 	_zone = zone
 	if zone == "wild":
 		_sit_wild_bed()
+	elif zone == "kitchen":
+		_sit_kitchen_bed()
 	else:
-		var floor := _tex("tex-wood.png") if zone == "kitchen" else _tex("tex-stone.png")
-		_floor(floor, w, h)
+		_floor(_tex("tex-stone.png"), w, h)
 	for y in h:
 		for x in w:
 			_bit(zone, rows[y][x], x, y)
 
 
 func _sit_wild_bed() -> void:
-	var tex := _tex("bed-wild.png")
+	_sit_bed("bed-wild.png", "WildBed")
+
+
+func _sit_kitchen_bed() -> void:
+	_sit_bed("bed-kitchen.png", "KitchenBed")
+
+
+func _sit_bed(name: String, node: String) -> void:
+	var tex := _tex(name)
 	if tex == null:
 		return
 	var s := Sprite2D.new()
-	s.name = "WildBed"
+	s.name = node
 	s.texture = tex
 	s.centered = false
 	s.z_index = 0
@@ -193,21 +202,21 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 		return
 	if zone == "kitchen":
 		if ch == "C":
-			_prop(_tex("prop-cut.png"), x - 0.15, y - 0.35, 42, 48, 6)
+			_prop(_tex("prop-chop.png"), x - 0.15, y - 0.35, 42, 40, 6)
 		elif ch == "U":
-			_prop(_tex("prop-stove.png"), x - 0.1, y - 0.35, 40, 48, 6)
+			_prop(_tex("prop-oven.png"), x - 0.1, y - 0.40, 44, 50, 6)
 		elif ch == "Q":
-			_prop(_tex("prop-pot.png"), x - 0.2, y - 0.45, 48, 52, 7)
+			_prop(_tex("prop-hearth.png"), x - 0.25, y - 0.50, 52, 56, 7)
 		elif ch == "W":
-			_prop(_tex("prop-pass.png"), x - 0.1, y - 0.4, 44, 52, 7)
+			_prop(_tex("prop-serve.png"), x - 0.15, y - 0.40, 48, 52, 7)
 		elif ch == "R":
-			_prop(_tex("prop-icebox.png"), x - 0.15, y - 0.35, 44, 48, 6)
+			_prop(_tex("prop-cool.png"), x - 0.15, y - 0.40, 44, 52, 6)
 		elif ch == "X":
-			_prop(_tex("prop-trash.png"), x - 0.05, y - 0.2, 36, 40, 5)
+			_prop(_tex("prop-bin.png"), x - 0.05, y - 0.20, 36, 40, 5)
 		elif ch == "L":
-			_prop(_tex("prop-door-open.png"), x - 0.2, y - 0.55, 48, 56, 8)
+			_prop(_tex("prop-way.png"), x - 0.20, y - 0.55, 48, 56, 8)
 		elif "123456".find(ch) >= 0:
-			_prop(_tex("prop-pantry.png"), x - 0.1, y - 0.45, 40, 52, 6)
+			_prop(_tex("prop-shelf.png"), x - 0.10, y - 0.45, 40, 52, 6)
 		return
 	if zone == "mine":
 		if ch == "o":

@@ -1,10 +1,10 @@
 # Session state
 
-- Task: `/story-done` village / wild look
-- Status: packed-bed, cover-coats, stick-do-shout, first-evening, title, room, village-wild Complete.
+- Task: `/dev-story` kitchen bed (first evening-places slice)
+- Status: village-wild Complete. Evening-places stories created; kitchen in play.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path village scene + wild bed + HTML5
-- Next: later rest / stall look (not opened)
+- Files: `production/epics/r1-evening-places/story-001-kitchen-bed.md`
+- Next: Play-path kitchen tokens + tests + HTML5, then `/story-done` kitchen
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

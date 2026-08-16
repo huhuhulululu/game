@@ -455,6 +455,56 @@ test("Village and wild sit one dusk language through Play", () => {
   }
 });
 
+test("Kitchen sits one dusk bed and stations through Play", () => {
+  for (const name of [
+    "bed-kitchen.png",
+    "prop-hearth.png",
+    "prop-chop.png",
+    "prop-oven.png",
+    "prop-serve.png",
+    "prop-cool.png",
+    "prop-bin.png",
+    "prop-shelf.png",
+    "prop-way.png",
+  ]) {
+    assert.ok(existsSync(`godot/assets/art/${name}`));
+  }
+  const paint = readFileSync("tools/paint_kitchen_look.py", "utf8");
+  assert.match(paint, /Does not touch the cover/);
+  assert.match(paint, /key_magenta/);
+  assert.match(paint, /real a=0/);
+  assert.match(paint, /bed-kitchen/);
+  assert.match(paint, /prop-hearth/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
+  assert.doesNotMatch(paint, /Wilson|Don't Starve|Dont Starve|魂/i);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /bed-kitchen\.png/);
+  assert.match(zone, /_sit_kitchen_bed/);
+  assert.match(zone, /prop-hearth\.png/);
+  assert.match(zone, /prop-chop\.png/);
+  assert.match(zone, /tex-wood\.png/);
+  assert.doesNotMatch(zone, /prop-pot\.png/);
+  assert.doesNotMatch(zone, /prop-cut\.png/);
+  assert.doesNotMatch(zone, /prop-cover-|prop-hut|prop-lodge/);
+  assert.ok(existsSync("godot/scripts/headless_play_kitchen.gd"));
+  assert.ok(existsSync("godot/scenes/play_kitchen.tscn"));
+  const playKitchen = readFileSync("godot/scripts/headless_play_kitchen.gd", "utf8");
+  assert.match(playKitchen, /scenes\/play\.tscn/);
+  assert.match(playKitchen, /PLAY_KITCHEN_BED/);
+  assert.match(playKitchen, /PLAY_KITCHEN_POT/);
+  assert.match(playKitchen, /PLAY_KITCHEN_OK/);
+  assert.match(playKitchen, /bed-kitchen\.png/);
+  assert.match(playKitchen, /prop-hearth\.png/);
+  assert.doesNotMatch(playKitchen, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const playKitchenScene = readFileSync("godot/scenes/play_kitchen.tscn", "utf8");
+  assert.match(playKitchenScene, /headless_play_kitchen\.gd/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /bed-kitchen|prop-hearth|prop-chop|prop-oven/);
+  }
+});
+
 test("Cover-coat people walk and act on the painted bed", () => {
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /char-%s/);

@@ -31,6 +31,11 @@ requirements:
     system: painted-world
     requirement: Farm, fortune, dawn board, and wilderness use the same painted dusk language. New beds or magenta-key props with real a=0. No FAIL restick. No 魂.
     adr: ADR-0003
+  - id: TR-look-006
+    gdd: docs/WORLD.md
+    system: painted-world
+    requirement: Kitchen, mine, forge, stall, and sleep use the same painted dusk language. New beds or magenta-key props with real a=0. No FAIL restick. No 魂.
+    adr: ADR-0003
   - id: TR-graph-001
     gdd: design/gdd/systems-index.md
     system: painted-world
