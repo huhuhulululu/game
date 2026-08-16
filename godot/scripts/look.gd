@@ -190,6 +190,23 @@ static func slip_box() -> StyleBoxTexture:
 	return s
 
 
+static func room_box() -> StyleBoxTexture:
+	# Tall room card. Cabin boards, tiled. Not a stretched parchment plaque.
+	var s := StyleBoxTexture.new()
+	s.texture = load("res://assets/art/tex-room.png") as Texture2D
+	s.texture_margin_left = 22
+	s.texture_margin_top = 22
+	s.texture_margin_right = 22
+	s.texture_margin_bottom = 22
+	s.content_margin_left = 20
+	s.content_margin_top = 16
+	s.content_margin_right = 20
+	s.content_margin_bottom = 16
+	s.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	s.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	return s
+
+
 static func ink_label(text: String, size: int = 18, color: Color = INK) -> Label:
 	var l := Label.new()
 	l.text = text
@@ -245,6 +262,14 @@ static func field(placeholder: String) -> LineEdit:
 	e.add_theme_color_override("font_placeholder_color", Color(INK, 0.45))
 	e.add_theme_stylebox_override("normal", paper_box())
 	e.add_theme_stylebox_override("focus", paper_box())
+	return e
+
+
+static func wood_field(placeholder: String) -> LineEdit:
+	var e := field(placeholder)
+	var box := slip_box()
+	e.add_theme_stylebox_override("normal", box)
+	e.add_theme_stylebox_override("focus", box)
 	return e
 
 

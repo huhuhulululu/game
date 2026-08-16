@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` warm sit
-- Status: r1-coat-feel 001–010 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` painted room
+- Status: r1-coat-feel 001–010 Complete; 011 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-010-warm-sit.md`
-- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-011-painted-room.md`
+- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-011-painted-room.md` — Painted room
+- Files changed: story, `paint_room_card.py`, `tex-room.png`, `room.gd`, `look.gd`, `play_room.tscn`, `headless_play_room.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (painted-room lock) + `play_room.tscn`
+- Tokens: `PLAY_ROOM_COVER` `PLAY_ROOM_WOOD` `PLAY_ROOM_OK`
+- Next: `/story-done` after tokens hold. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-010-warm-sit.md` — Warm sit
