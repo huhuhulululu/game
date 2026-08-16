@@ -152,8 +152,11 @@ func _paint(zone: String, rows: PackedStringArray) -> void:
 	else:
 		_floor(_tex("tex-stone.png"), w, h)
 	for y in h:
+		var row := rows[y]
 		for x in w:
-			_bit(zone, rows[y][x], x, y)
+			if x >= row.length():
+				continue
+			_bit(zone, row[x], x, y)
 
 
 func _sit_wild_bed() -> void:

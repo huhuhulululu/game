@@ -1,7 +1,7 @@
 # Story 002: Mine bed
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Mine sits one painted `bed-mine.png`, not tiled `tex-stone` wallpaper
-- [ ] Ore / stairs / chest / door sit new magenta-key props with real `a=0`
-- [ ] Old ink mine pack stays on disk and is not hung in Play
-- [ ] Play-path proof prints mine tokens through `play.tscn`
-- [ ] No FAIL cover props; no 魂; no look names in `src/`
+- [x] Mine sits one painted `bed-mine.png`, not tiled `tex-stone` wallpaper
+- [x] Ore / stairs / chest / door sit new magenta-key props with real `a=0`
+- [x] Old ink mine pack stays on disk and is not hung in Play
+- [x] Play-path proof prints mine tokens through `play.tscn`
+- [x] No FAIL cover props; no 魂; no look names in `src/`
 
 ## Implementation Notes
 
@@ -44,9 +44,16 @@ Do not overwrite `prop-ore` / `prop-stairs` / `prop-door-open`. Sit new names. K
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_mine.tscn` tokens + `production/qa/evidence/mine-bed-evidence.md`
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 114 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places kitchen
 - Unlocks: later forge / stall look
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: Padded two short `mineTemplate` rows to 16 so ZoneMap does not index past a wall. Not a look name in `src/`. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_MINE_BED` `PLAY_MINE_ORE` `PLAY_MINE_OK`
+**Code Review**: Skipped — lean

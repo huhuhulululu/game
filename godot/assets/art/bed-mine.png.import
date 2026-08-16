@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvminebed0001"
-path="res://.godot/imported/bed-mine.png-pending.ctex"
+path="res://.godot/imported/bed-mine.png-2d426472a85963bbcf68c181cc03b3c8.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/bed-mine.png"
-dest_files=["res://.godot/imported/bed-mine.png-pending.ctex"]
+dest_files=["res://.godot/imported/bed-mine.png-2d426472a85963bbcf68c181cc03b3c8.ctex"]
 
 [params]
 

@@ -1,10 +1,16 @@
 # Session state
 
-- Task: `/dev-story` mine bed
-- Status: kitchen Complete. Mine In progress. Forge / stall / sleep Ready.
+- Task: `/story-done` mine bed
+- Status: kitchen + mine Complete. Forge / stall / sleep Ready.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path mine scene + mine bed
-- Next: `production/epics/r1-evening-places/story-002-mine-bed.md`
+- Files: Play-path mine scene + mine bed + HTML5
+- Next: `production/epics/r1-evening-places/story-003-forge-stall.md`
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-002-mine-bed.md` — Mine bed
+- Tech debt logged: None
+- Next recommended: forge / stall (`story-003-forge-stall.md`)
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE
