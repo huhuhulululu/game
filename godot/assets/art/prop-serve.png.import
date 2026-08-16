@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvservedusk004"
-path="res://.godot/imported/prop-serve.png-k5servedusk00004.ctex"
+uid="uid://boolmlicvqrff"
+path="res://.godot/imported/prop-serve.png-f8e5bd1061f339cb3da67d3282805dd6.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/prop-serve.png"
-dest_files=["res://.godot/imported/prop-serve.png-k5servedusk00004.ctex"]
+dest_files=["res://.godot/imported/prop-serve.png-f8e5bd1061f339cb3da67d3282805dd6.ctex"]
 
 [params]
 

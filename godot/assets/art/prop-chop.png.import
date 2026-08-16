@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvchopdusk0002"
-path="res://.godot/imported/prop-chop.png-k3chopdusk000002.ctex"
+uid="uid://7rigk0an6rfd"
+path="res://.godot/imported/prop-chop.png-044c0106134fcec5a6eca6a24ad2cb7f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/prop-chop.png"
-dest_files=["res://.godot/imported/prop-chop.png-k3chopdusk000002.ctex"]
+dest_files=["res://.godot/imported/prop-chop.png-044c0106134fcec5a6eca6a24ad2cb7f.ctex"]
 
 [params]
 

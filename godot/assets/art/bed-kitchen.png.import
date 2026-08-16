@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvkitchbed001"
-path="res://.godot/imported/bed-kitchen.png-k1bedkitchen0001.ctex"
+path="res://.godot/imported/bed-kitchen.png-8e4db3e9bf62f370b8bb9a21dd549185.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/bed-kitchen.png"
-dest_files=["res://.godot/imported/bed-kitchen.png-k1bedkitchen0001.ctex"]
+dest_files=["res://.godot/imported/bed-kitchen.png-8e4db3e9bf62f370b8bb9a21dd549185.ctex"]
 
 [params]
 

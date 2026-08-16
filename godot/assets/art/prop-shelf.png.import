@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvshelfdusk007"
-path="res://.godot/imported/prop-shelf.png-k8shelfdusk00007.ctex"
+uid="uid://boq7cmicvqrfi"
+path="res://.godot/imported/prop-shelf.png-a70a4d95368b166b4729ed62fb89534b.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/prop-shelf.png"
-dest_files=["res://.godot/imported/prop-shelf.png-k8shelfdusk00007.ctex"]
+dest_files=["res://.godot/imported/prop-shelf.png-a70a4d95368b166b4729ed62fb89534b.ctex"]
 
 [params]
 

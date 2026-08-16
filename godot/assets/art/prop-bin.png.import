@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvbindusk00006"
-path="res://.godot/imported/prop-bin.png-k7bindusk0000006.ctex"
+uid="uid://6sg32w136rfh"
+path="res://.godot/imported/prop-bin.png-24f2b544269abcbe96edb6ddfb7d3424.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/prop-bin.png"
-dest_files=["res://.godot/imported/prop-bin.png-k7bindusk0000006.ctex"]
+dest_files=["res://.godot/imported/prop-bin.png-24f2b544269abcbe96edb6ddfb7d3424.ctex"]
 
 [params]
 

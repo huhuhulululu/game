@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvcooldusk0005"
-path="res://.godot/imported/prop-cool.png-k6cooldusk000005.ctex"
+uid="uid://7yick0an6rfg"
+path="res://.godot/imported/prop-cool.png-fbc517c637719caf3e9ae9c319d9d407.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/prop-cool.png"
-dest_files=["res://.godot/imported/prop-cool.png-k6cooldusk000005.ctex"]
+dest_files=["res://.godot/imported/prop-cool.png-fbc517c637719caf3e9ae9c319d9d407.ctex"]
 
 [params]
 

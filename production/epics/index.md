@@ -15,5 +15,5 @@ Rebuild epics (CHARTER P1 look). Old `p1-look/story-001-valley-painted-bed.md` i
 | r1-move-do-shout | Core | Move / do / shout | WORLD | 1 | Complete |
 | r1-first-evening | Feature | Fish / mine / kitchen | WORLD | 1 | Complete |
 | r1-village-wild | Feature | Farm / fortune / board / wild | WORLD + ART | 1 | Complete |
-| r1-evening-places | Feature | Kitchen / mine / forge / stall / sleep | WORLD + ART | 4 | Ready |
+| r1-evening-places | Feature | Kitchen / mine / forge / stall / sleep | WORLD + ART | 4 | Kitchen Complete; mine / forge / sleep Ready |
 | p1-look (old) | — | sticker bed | — | 1 | Superseded |

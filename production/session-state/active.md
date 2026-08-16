@@ -1,10 +1,16 @@
 # Session state
 
-- Task: `/dev-story` kitchen bed (first evening-places slice)
-- Status: village-wild Complete. Evening-places stories created; kitchen in play.
+- Task: `/story-done` kitchen bed
+- Status: kitchen Complete. Mine / forge / stall / sleep Ready.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `production/epics/r1-evening-places/story-001-kitchen-bed.md`
-- Next: Play-path kitchen tokens + tests + HTML5, then `/story-done` kitchen
+- Files: Play-path kitchen scene + kitchen bed + HTML5
+- Next: `production/epics/r1-evening-places/story-002-mine-bed.md`
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-001-kitchen-bed.md` — Kitchen bed
+- Tech debt logged: None
+- Next recommended: mine bed (`story-002-mine-bed.md`)
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

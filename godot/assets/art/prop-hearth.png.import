@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvhearthdusk01"
-path="res://.godot/imported/prop-hearth.png-k2hearthdusk0001.ctex"
+uid="uid://bdn3i1ltxycfc"
+path="res://.godot/imported/prop-hearth.png-44206abb016b71451c7c1a21ff79bb36.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/prop-hearth.png"
-dest_files=["res://.godot/imported/prop-hearth.png-k2hearthdusk0001.ctex"]
+dest_files=["res://.godot/imported/prop-hearth.png-44206abb016b71451c7c1a21ff79bb36.ctex"]
 
 [params]
 
