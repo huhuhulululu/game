@@ -1,5 +1,5 @@
 extends Node
-## Play.tscn turns the plaque through four seasons. One painted bed stays.
+## Play.tscn turns the plaque through 春夏秋冬. One painted bed stays.
 
 const YOU := "p1"
 const FAIL := [

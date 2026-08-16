@@ -1073,7 +1073,7 @@ test("Play turns 春夏秋冬 on one dusk bed, not four beds", () => {
   assert.doesNotMatch(play, /_hud_season/);
   assert.doesNotMatch(play, /魂/);
   const story = readFileSync("production/epics/r1-evening-places/story-017-seasons.md", "utf8");
-  assert.match(story, /Status:\s*In progress/);
+  assert.match(story, /\*\*Status\*\*:\s*In progress/);
   const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts", "src/game/season.ts"];
   for (const p of srcFiles) {
     const src = readFileSync(p, "utf8");
