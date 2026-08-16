@@ -16,4 +16,5 @@ Rebuild epics (CHARTER P1 look). Old `p1-look/story-001-valley-painted-bed.md` i
 | r1-first-evening | Feature | Fish / mine / kitchen | WORLD | 1 | Complete |
 | r1-village-wild | Feature | Farm / fortune / board / wild | WORLD + ART | 1 | Complete |
 | r1-evening-places | Feature | Kitchen / mine / forge / stall / sleep | WORLD + ART | 4 | Complete |
+| r1-togetherness | Feature | Shared valley / shout / seat | WORLD + ART | 1 | Shared valley In progress |
 | p1-look (old) | — | sticker bed | — | 1 | Superseded |

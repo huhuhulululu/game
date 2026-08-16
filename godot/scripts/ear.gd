@@ -1,7 +1,7 @@
 class_name ValleyEar
 extends Node
 
-## Five thin sounds. Mute only stops the ear. It does not touch the world.
+## Thin sounds. Mute only stops the ear. It does not touch the world.
 
 const TILE := 36
 const GREEN_LO := 0.38
@@ -19,6 +19,8 @@ var _step_at := -999999
 var _shore_at := -999999
 var _fire_at := -999999
 var _in_green := false
+var _last_busy := ""
+var _last_ping: Dictionary = {}
 var _voices: Array[AudioStreamPlayer] = []
 var _cursor := 0
 var _clip: Dictionary = {}
@@ -36,6 +38,9 @@ func _ready() -> void:
 	_clip["door_a"] = _beep(170.0, 0.12, "tri", 0.020)
 	_clip["door_b"] = _beep(128.0, 0.14, "sine", 0.016)
 	_clip["green"] = _beep(698.0, 0.07, "sine", 0.022)
+	_clip["act"] = _beep(420.0, 0.055, "tri", 0.018)
+	_clip["shout"] = _beep(520.0, 0.11, "sine", 0.020)
+	_clip["sit"] = _beep(196.0, 0.14, "sine", 0.012)
 
 
 func set_muted(v: bool) -> void:
@@ -93,10 +98,30 @@ func hear(snap: Dictionary) -> PackedStringArray:
 	if green and not _in_green:
 		sounds.append("green")
 
+	if busy == "sit" and _last_busy != "sit":
+		sounds.append("sit")
+	elif (busy == "chop" or busy == "forge" or busy == "fish") and _last_busy != busy:
+		sounds.append("act")
+
+	var you := str(snap.get("you", ""))
+	for raw in snap.get("actors", []):
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var a: Dictionary = raw
+		var id := str(a.get("id", ""))
+		if id == "" or id == you:
+			continue
+		var ping := float(a.get("ping", 0))
+		var prev := float(_last_ping.get(id, 0))
+		if ping > 0.04 and prev <= 0.04:
+			sounds.append("shout")
+		_last_ping[id] = ping
+
 	_zone = zone
 	_x = x
 	_y = y
 	_in_green = green
+	_last_busy = busy
 	last_heard = sounds
 	if not muted:
 		for kind in sounds:
@@ -119,6 +144,12 @@ func tone(kind: String) -> void:
 		_later("door_b", 0.09)
 	elif kind == "green":
 		_play(_clip.get("green"))
+	elif kind == "act":
+		_play(_clip.get("act"))
+	elif kind == "shout":
+		_play(_clip.get("shout"))
+	elif kind == "sit":
+		_play(_clip.get("sit"))
 
 
 func _me(snap: Dictionary) -> Dictionary:

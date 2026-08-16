@@ -1,10 +1,10 @@
 # Session state
 
-- Task: `/story-done` sleep
-- Status: r1-evening-places Complete (kitchen, mine, forge/stall, sleep).
+- Task: `/dev-story` shared valley
+- Status: r1-evening-places Complete. r1-togetherness In progress.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path sleep scene + cover-coat sit + HTML5 re-export
-- Next: none in this epic. P1 leftover is two-phone play (no Ready story file).
+- Files: Play-path together scene + thin 做 / 喊 / sit
+- Next: `production/epics/r1-togetherness/story-001-shared-valley.md`
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

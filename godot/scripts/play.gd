@@ -139,12 +139,21 @@ func _hud() -> void:
 	_prompt_bar.add_child(_prompt)
 	var act := Look.wood_button("做", 88)
 	act.position = Vector2(1160, 600)
-	act.button_down.connect(func() -> void: _act = true; _held = true)
+	act.button_down.connect(func() -> void:
+		_act = true
+		_held = true
+		if _ear:
+			_ear.tone("act")
+	)
 	act.button_up.connect(func() -> void: _held = false)
 	layer.add_child(act)
 	var shout := Look.wood_button("喊", 72)
 	shout.position = Vector2(1070, 560)
-	shout.pressed.connect(func() -> void: _ping = true)
+	shout.pressed.connect(func() -> void:
+		_ping = true
+		if _ear:
+			_ear.tone("shout")
+	)
 	layer.add_child(shout)
 	_ear = ValleyEar.new()
 	add_child(_ear)
@@ -218,12 +227,14 @@ func _unhandled_input(e: InputEvent) -> void:
 		_held = true
 		if _ear:
 			_ear.unlock()
+			_ear.tone("act")
 	if e.is_action_released("act"):
 		_held = false
 	if e.is_action_pressed("shout"):
 		_ping = true
 		if _ear:
 			_ear.unlock()
+			_ear.tone("shout")
 
 
 func _keys() -> Vector2:
