@@ -1,7 +1,7 @@
 # Story 002: Thin audio
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,10 +16,10 @@
 
 ## Acceptance Criteria
 
-- [ ] 做 / 喊 / sit still fire the existing thin tones through `play.tscn`
-- [ ] Valley dusk plays a thin looping bed; mute stops the ear, not the world
-- [ ] Play-path proof prints thin-audio tokens through `play.tscn`
-- [ ] No new art / sample pack; no 魂; no Don't Starve chrome; no FAIL restick; `bed-valley.png` untouched
+- [x] 做 / 喊 / sit still fire the existing thin tones through `play.tscn`
+- [x] Valley dusk plays a thin looping bed; mute stops the ear, not the world
+- [x] Play-path proof prints thin-audio tokens through `play.tscn`
+- [x] No new art / sample pack; no 魂; no Don't Starve chrome; no FAIL restick; `bed-valley.png` untouched
 
 ## Implementation Notes
 
@@ -43,10 +43,17 @@
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `godot/project.test.ts` + `play_ear.tscn` tokens
-**Status**: [ ] In progress
+**Required evidence**: `godot/project.test.ts` + `play_ear.tscn` tokens + `production/qa/evidence/thin-audio-evidence.md`
+**Status**: [x] Complete — Play-path tokens + 121 tests
 
 ## Dependencies
 
 - Depends on: r1-coat-feel walk/sit, r1-move-do-shout
-- Unlocks: none (two-phone stays human)
+- Unlocks: kitchen / mine place ear
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 4/4 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_EAR_DUSK` `PLAY_EAR_ACT` `PLAY_EAR_SHOUT` `PLAY_EAR_SIT` `PLAY_EAR_OK`
+**Code Review**: Skipped — lean

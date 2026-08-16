@@ -1,10 +1,23 @@
 # Session state
 
-- Task: `/dev-story` thin audio (做 / 喊 / sit + dusk bed)
-- Status: r1-coat-feel story-002 In progress. Two-phone Blocked (human).
+- Task: `/story-done` thin-audio; `/dev-story` place-ear (hearth / chop / vein)
+- Status: r1-coat-feel 002 Complete; 003 In progress. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-002-thin-audio.md`; `ear.gd` dusk bed; `play_ear.tscn`
-- Next: keep `/dev-story` on thin-audio until tokens hold. Do not `/dev-story` two-phone.
+- Files: thin-audio evidence; `story-003-place-ear.md`; `ear.gd` hearth/chop/vein; `play_place.tscn`
+- Next: keep `/dev-story` on place-ear until tokens hold. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-003-place-ear.md` — Place ear
+- Files changed: story, `ear.gd` hearth/chop/vein, `play_place.tscn`
+- Test written: `godot/project.test.ts` (hearth / chop / vein lock)
+- Blockers: None
+- Next: `/story-done` after tokens hold. Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-coat-feel/story-002-thin-audio.md` — Thin audio
+- Tech debt logged: None
+- Next recommended: place ear (`r1-coat-feel/story-003-place-ear.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-002-thin-audio.md` — Thin audio

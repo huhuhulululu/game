@@ -204,8 +204,8 @@ func _assert_dusk() -> bool:
 		printerr("UNMUTE_BED")
 		return false
 	await _feed(_snap({"zone": "kitchen"}))
-	if str(ear.get("ambient")) != "" or bool(ear.get("bed_on")):
-		printerr("KITCHEN_BED")
+	if str(ear.get("ambient")) == "dusk":
+		printerr("DUSK_IN_KITCHEN")
 		return false
 	await _feed(_snap({}))
 	if str(ear.get("ambient")) != "dusk" or not bool(ear.get("bed_on")):

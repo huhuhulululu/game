@@ -20,6 +20,7 @@ var _y := 0.0
 var _step_at := -999999
 var _shore_at := -999999
 var _fire_at := -999999
+var _vein_at := -999999
 var _in_green := false
 var _last_busy := ""
 var _last_ping: Dictionary = {}
@@ -47,7 +48,10 @@ func _ready() -> void:
 	_clip["act"] = _beep(420.0, 0.055, "tri", 0.018)
 	_clip["shout"] = _beep(520.0, 0.11, "sine", 0.020)
 	_clip["sit"] = _beep(196.0, 0.14, "sine", 0.012)
+	_clip["chop"] = _beep(180.0, 0.08, "square", 0.035)
+	_clip["vein"] = _beep(140.0, 0.07, "square", 0.040)
 	_clip["dusk"] = _make_bed(196.0, 330.0, 0.50, 2.4)
+	_clip["hearth"] = _make_bed(130.0, 196.0, 0.40, 2.0)
 
 
 func set_muted(v: bool) -> void:
@@ -98,6 +102,9 @@ func hear(snap: Dictionary) -> PackedStringArray:
 		if _near_fire(snap, rows, tx, ty) and now - _fire_at >= 900:
 			sounds.append("fire")
 			_fire_at = now
+		if _near_vein(rows, tx, ty) and now - _vein_at >= 900:
+			sounds.append("vein")
+			_vein_at = now
 
 	var fishing := str(me.get("fishing", ""))
 	var mark := float(me.get("fishMark", 0))
@@ -107,7 +114,14 @@ func hear(snap: Dictionary) -> PackedStringArray:
 
 	if busy == "sit" and _last_busy != "sit":
 		sounds.append("sit")
-	elif (busy == "chop" or busy == "forge" or busy == "fish") and _last_busy != busy:
+	elif busy == "chop" and _last_busy != "chop":
+		if zone == "kitchen":
+			sounds.append("chop")
+		elif zone == "mine":
+			sounds.append("vein")
+		else:
+			sounds.append("act")
+	elif (busy == "forge" or busy == "fish") and _last_busy != busy:
 		sounds.append("act")
 
 	var you := str(snap.get("you", ""))
@@ -139,6 +153,8 @@ func hear(snap: Dictionary) -> PackedStringArray:
 
 func pick_ambient(s: Dictionary) -> String:
 	var zone := str(s.get("zone", ""))
+	if zone == "kitchen":
+		return "hearth"
 	if zone == "valley" or zone == "wild":
 		return "dusk"
 	return ""
@@ -188,6 +204,10 @@ func tone(kind: String) -> void:
 		_play(_clip.get("shout"))
 	elif kind == "sit":
 		_play(_clip.get("sit"))
+	elif kind == "chop":
+		_play(_clip.get("chop"))
+	elif kind == "vein":
+		_play(_clip.get("vein"))
 
 
 func _me(snap: Dictionary) -> Dictionary:
@@ -230,7 +250,15 @@ func _near_fire(snap: Dictionary, rows: Array, tx: int, ty: int) -> bool:
 	for dy in range(-1, 2):
 		for dx in range(-1, 2):
 			var ch := _tile(rows, tx + dx, ty + dy)
-			if ch == "K" or ch == "J":
+			if ch == "K" or ch == "J" or ch == "Q":
+				return true
+	return false
+
+
+func _near_vein(rows: Array, tx: int, ty: int) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			if _tile(rows, tx + dx, ty + dy) == "o":
 				return true
 	return false
 
@@ -280,6 +308,8 @@ func _beep(freq: float, dur: float, kind: String, gain: float) -> AudioStreamWAV
 			s = 2.0 * abs(2.0 * fmod(freq * t + 0.25, 1.0) - 1.0) - 1.0
 		elif kind == "saw":
 			s = 2.0 * fmod(freq * t, 1.0) - 1.0
+		elif kind == "square":
+			s = 1.0 if fmod(freq * t, 1.0) < 0.5 else -1.0
 		var v := int(clampf(s * env * gain * 32767.0, -32767.0, 32767.0))
 		data.encode_s16(i * 2, v)
 	var wav := AudioStreamWAV.new()

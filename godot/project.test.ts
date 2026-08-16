@@ -801,6 +801,40 @@ test("Play shows a shared valley without a second phone", () => {
   }
 });
 
+test("Play hears kitchen hearth, chop, and a mine vein", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_place.gd"));
+  assert.ok(existsSync("godot/scenes/play_place.tscn"));
+  const place = readFileSync("godot/scripts/headless_play_place.gd", "utf8");
+  assert.match(place, /scenes\/play\.tscn/);
+  assert.match(place, /PLAY_PLACE_HEARTH/);
+  assert.match(place, /PLAY_PLACE_CHOP/);
+  assert.match(place, /PLAY_PLACE_VEIN/);
+  assert.match(place, /PLAY_PLACE_OK/);
+  assert.match(place, /bed-kitchen\.png/);
+  assert.match(place, /bed-mine\.png/);
+  assert.match(place, /bed-valley\.png/);
+  assert.match(place, /set_muted/);
+  assert.doesNotMatch(place, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const scene = readFileSync("godot/scenes/play_place.tscn", "utf8");
+  assert.match(scene, /headless_play_place\.gd/);
+  const ear = readFileSync("godot/scripts/ear.gd", "utf8");
+  assert.match(ear, /hearth/);
+  assert.match(ear, /"chop"/);
+  assert.match(ear, /"vein"/);
+  assert.match(ear, /_near_vein/);
+  assert.match(ear, /square/);
+  assert.doesNotMatch(ear, /Net\.send|send_input|send_take/);
+  assert.doesNotMatch(ear, /魂|Wilson|Don't Starve|Dont Starve/i);
+  assert.ok(!existsSync("godot/assets/art/hearth.wav"));
+  assert.ok(!existsSync("godot/assets/art/chop.wav"));
+  assert.ok(!existsSync("godot/assets/art/vein.wav"));
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_place|PLAY_PLACE_HEARTH|_near_vein/);
+  }
+});
+
 test("Play hears thin act, shout, sit, and a dusk bed", () => {
   assert.ok(existsSync("godot/scripts/headless_play_ear.gd"));
   assert.ok(existsSync("godot/scenes/play_ear.tscn"));
