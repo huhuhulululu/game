@@ -3,7 +3,7 @@
 > **Layer**: Foundation
 > **GDD**: `godot/docs/ART.md` + `docs/CHARTER.md`
 > **Architecture Module**: App / boot
-> **Status**: Ready
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
@@ -26,8 +26,4 @@ Boot is one cover (`cover-valley.png`), not a collage. Tap enters the room. P0 a
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | Title is the cover | UI | Ready | ADR-0003 |
-
-## Next Step
-
-`/dev-story production/epics/r1-title/story-001-cover-boot.md`
+| 001 | Title is the cover | UI | Complete | ADR-0003 |

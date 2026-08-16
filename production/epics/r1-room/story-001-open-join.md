@@ -1,11 +1,11 @@
 # Story 001: Open / join room
 
 > **Epic**: Room code
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
-> **Last Updated**: 2026-08-15
+> **Last Updated**: 2026-08-16
 
 ## Context
 
@@ -15,14 +15,14 @@
 
 ## Acceptance Criteria
 
-- [ ] Room UI sits on the cover with a wood plaque
-- [ ] Open room / join by four-digit code through `Net`
-- [ ] 暖 / 松 side pick
-- [ ] No 魂, no Wilson
+- [x] Room UI sits on the cover with a wood plaque
+- [x] Open room / join by four-digit code through `Net`
+- [x] 暖 / 松 side pick
+- [x] No 魂, no Wilson
 
 ## Implementation Notes
 
-Keep `room.gd` + `net.gd`. Do not rewrite the protocol.
+Keep `room.gd` + `net.gd`. Do not rewrite the protocol. Plaque and 开一间 stay dusk/wood. No character stickers on the room.
 
 ## Out of Scope
 
@@ -38,10 +38,17 @@ Keep `room.gd` + `net.gd`. Do not rewrite the protocol.
 
 ## Test Evidence
 
-existing `godot/project.test.ts` + CHARTER locks
-**Status**: [x] P0
+`godot/project.test.ts` + CHARTER locks + `production/qa/evidence/room-open-join-evidence.md`
+**Status**: [x] Complete — cover + wood plaque + 开一间 already held
 
 ## Dependencies
 
 - Depends on: r1-title
 - Unlocks: r1-painted-valley, r1-two-players
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 4/4 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — room loads `cover-valley`, wood 开一间 / 暖 / 松, no 魂 / Wilson
+**Code Review**: Skipped — lean

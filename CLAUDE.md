@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Packed bed, cover-coats, stick/do/shout, and first-evening are Complete. Next Ready leftovers: `r1-title` / cover-boot, then `r1-room` / open-join (P0 already ships both). The feature this story unlocks is later village / wild look — no story file yet. Do not recrop FAIL PNGs. Do not hang props on the bed.
+Packed bed, cover-coats, stick/do/shout, first-evening, title, and room are Complete. Next: create + `/dev-story` village / wild look (farm, fortune, board, wilderness). One painted dusk language. Do not recrop FAIL PNGs. Do not restick FAIL cover props. No 魂.
 
 ## Coding Standards
 

@@ -1,11 +1,11 @@
 # Story 001: Title is the cover
 
 > **Epic**: Title cover
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: UI
 > **Manifest Version**: 2026-08-15
-> **Last Updated**: 2026-08-15
+> **Last Updated**: 2026-08-16
 
 ## Context
 
@@ -16,14 +16,14 @@
 
 ## Acceptance Criteria
 
-- [ ] Boot shows `cover-valley.png` only (no character sticker collage)
-- [ ] Cover file is not written by play tools
-- [ ] Tap / click goes to room
-- [ ] No 魂 on the title
+- [x] Boot shows `cover-valley.png` only (no character sticker collage)
+- [x] Cover file is not written by play tools
+- [x] Tap / click goes to room
+- [x] No 魂 on the title
 
 ## Implementation Notes
 
-Keep `boot.gd`. Do not sit FAIL props on the title.
+Keep `boot.gd`. Do not sit FAIL props on the title. `tools/paint_look.py` reads the locked cover and does not write `cover-valley.png`.
 
 ## Out of Scope
 
@@ -40,10 +40,17 @@ Keep `boot.gd`. Do not sit FAIL props on the title.
 ## Test Evidence
 
 **Story Type**: UI
-**Required evidence**: existing `godot/project.test.ts` boot locks
-**Status**: [x] P0 already green; keep locks
+**Required evidence**: `godot/project.test.ts` boot locks + `production/qa/evidence/title-cover-boot-evidence.md`
+**Status**: [x] Complete — cover + tap already held; play tools no longer write the plate
 
 ## Dependencies
 
 - Depends on: None
 - Unlocks: r1-room
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 4/4 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: UI — boot loads `cover-valley` only; `paint_look.py` does not `save` the cover
+**Code Review**: Skipped — lean

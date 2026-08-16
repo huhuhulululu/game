@@ -1,10 +1,22 @@
 # Session state
 
-- Task: `/story-done` first-evening (same snap, three places)
-- Status: packed-bed, cover-coats, stick-do-shout, first-evening Complete.
+- Task: `/dev-story` village / wild look (farm, fortune, board, wilderness)
+- Status: packed-bed, cover-coats, stick-do-shout, first-evening, title, room Complete.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path evening scene + cover loop Play tokens + live loops + HTML5
-- Next: village / wild look (unlocked, no story yet). Ready leftovers: r1-title, r1-room.
+- Files: cover write guard + title/room close
+- Next: create + implement `r1-village-wild`
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-title/story-001-cover-boot.md` — Title is the cover
+- Tech debt logged: None
+- Next recommended: r1-room (closed in the same lean pass)
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-room/story-001-open-join.md` — Open / join room
+- Tech debt logged: None
+- Next recommended: village / wild look (unlocked; create story then `/dev-story`)
 
 ## Session Extract — /story-done 2026-08-15
 - Verdict: COMPLETE

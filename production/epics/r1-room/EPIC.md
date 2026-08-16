@@ -3,7 +3,7 @@
 > **Layer**: Foundation
 > **GDD**: `docs/WORLD.md`
 > **Architecture Module**: Net + room
-> **Status**: Ready
+> **Status**: Complete
 > **Governing ADRs**: ADR-0002
 
 ## Overview
@@ -27,4 +27,4 @@ One person opens a room. The other types the four-digit code. Everyday names. Wo
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | Open / join room | Integration | Ready | ADR-0002 |
+| 001 | Open / join room | Integration | Complete | ADR-0002 |

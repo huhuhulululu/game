@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Finish the dusk valley look from painted refs. No DST faces, no English inn."""
+"""Finish the dusk valley look from painted refs. No DST faces, no English inn.
+Does not write cover-valley.png — the title plate is read-only."""
 
 from __future__ import annotations
 
@@ -399,14 +400,8 @@ def paint_plaque() -> Image.Image:
 
 
 def finish_cover() -> Image.Image:
-    cover = Image.open(REFS / "cover-ref.png").convert("RGBA").resize((1280, 720), Image.Resampling.LANCZOS)
-    d = ImageDraw.Draw(cover)
-    hint = "点灯进谷"
-    f = font(22)
-    tw = d.textbbox((0, 0), hint, font=f)[2]
-    d.text(((1280 - tw) / 2 + 1, 676), hint, font=f, fill=(40, 24, 14, 160))
-    d.text(((1280 - tw) / 2, 674), hint, font=f, fill=(252, 236, 208, 230))
-    return cover.convert("RGB")
+    """Read the locked title plate. Play tools do not rewrite cover-valley.png."""
+    return Image.open(ART / "cover-valley.png")
 
 
 def chars() -> None:
@@ -469,7 +464,6 @@ def main() -> None:
     save(paint_paper(), "tex-paper.png")
     save(paint_plaque(), "tex-plaque.png")
     save(paint_ground(), "ground-valley.png")
-    save(finish_cover(), "cover-valley.png")
     chars()
     raw = (ART / "prop-inn.png").read_bytes()
     if b"Wanderer" in raw or b"WANDERER" in raw or b"Good Ale" in raw:

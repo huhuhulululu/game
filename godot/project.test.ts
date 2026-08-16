@@ -266,6 +266,8 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   const paint = readFileSync("tools/paint_look.py", "utf8");
   assert.match(paint, /trim_empty_feet/);
   assert.match(paint, /def finish_sit_props/);
+  assert.match(paint, /Does not write cover-valley/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
   const sit = readFileSync("tools/sit_chars.py", "utf8");
   assert.match(sit, /char-warm-ref/);
   assert.match(sit, /FOOT_Y/);
