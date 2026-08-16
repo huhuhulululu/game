@@ -28,5 +28,5 @@ First-evening rules already work. Kitchen, mine, forge, stall, and sleep still r
 |---|-------|------|--------|-----|
 | 001 | Kitchen bed | Visual/Feel | Complete | ADR-0003 |
 | 002 | Mine bed | Visual/Feel | Complete | ADR-0003 |
-| 003 | Forge and stall | Visual/Feel | In progress | ADR-0003 |
+| 003 | Forge and stall | Visual/Feel | Complete | ADR-0003 |
 | 004 | Sleep | Visual/Feel | Ready | ADR-0003 |

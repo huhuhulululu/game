@@ -1,7 +1,7 @@
 # Story 003: Forge and stall
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,12 +16,12 @@
 
 ## Acceptance Criteria
 
-- [ ] 砧 sits `prop-smith.png` on valley `Y`; 摊 sits `prop-booth.png` on valley `S`
-- [ ] New names (not `prop-anvil.png` / `prop-stall.png` on valley scripts)
-- [ ] Magenta-key with real `a=0`
-- [ ] 卦棚 stays on `G` (not stacked on the forge); dawn stays on `B`
-- [ ] Play-path proof prints forge / stall tokens through `play.tscn`
-- [ ] No FAIL restick; no 魂; no Don't Starve face; no look names in `src/`
+- [x] 砧 sits `prop-smith.png` on valley `Y`; 摊 sits `prop-booth.png` on valley `S`
+- [x] New names (not `prop-anvil.png` / `prop-stall.png` on valley scripts)
+- [x] Magenta-key with real `a=0`
+- [x] 卦棚 stays on `G` (not stacked on the forge); dawn stays on `B`
+- [x] Play-path proof prints forge / stall tokens through `play.tscn`
+- [x] No FAIL restick; no 魂; no Don't Starve face; no look names in `src/`
 
 ## Implementation Notes
 
@@ -44,9 +44,16 @@ Packed-bed tests forbid `prop-anvil.png` / `prop-stall.png` on valley scripts. S
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_forge.tscn` tokens + `production/qa/evidence/forge-stall-evidence.md`
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 115 tests
 
 ## Dependencies
 
 - Depends on: r1-village-wild
 - Unlocks: sleep look
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 6/6 passing
+**Deviations**: Fortune sit moved from `Y` to `G` so the forge can occupy `Y`. Dawn stays on `B`. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_FORGE_SIT` `PLAY_STALL_SIT` `PLAY_FORGE_OK`
+**Code Review**: Skipped — lean

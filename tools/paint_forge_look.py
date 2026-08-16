@@ -72,7 +72,7 @@ def plank_box(one: object, size: tuple[int, int], horizontal: bool = True) -> Im
 
 
 def paint_smith(one: object) -> Image.Image:
-    """Quiet dusk work stone. Not a Don't Starve anvil silhouette."""
+    """Quiet dusk work stone. Not an ink anvil horn."""
     W, H = 240, 200
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     im.alpha_composite(one._stone((W, H), 118, 168, 70, 28, 0.92, 61))
