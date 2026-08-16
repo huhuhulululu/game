@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Look rebuild, evening places, pair hands, and thin audio are Complete. Next: `production/epics/r1-coat-feel/story-003-place-ear.md` — kitchen hearth / chop and mine vein. Two-phone stays Blocked / human. Do not recrop FAIL PNGs. Do not touch `bed-valley.png`. No 魂.
+Look rebuild, evening places, pair hands, thin audio, and place ear are Complete. Painted-evening smoke is the studio gate. Two-phone stays Blocked / human. Do not recrop FAIL PNGs. Do not touch `bed-valley.png`. No 魂.
 
 ## Coding Standards
 

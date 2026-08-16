@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Onboarding already holds. Walk / sit and thin 做 / 喊 / sit / dusk are Complete. This pass gives kitchen and mine the same thin ear: hearth, chop, vein. Generated tones only. Mute does not send. No new pack.
+Onboarding already holds. Walk / sit, thin 做 / 喊 / sit / dusk, and kitchen / mine place ear are Complete. Mute does not send. No new pack.
 
 ## Governing ADRs
 
@@ -28,4 +28,4 @@ Onboarding already holds. Walk / sit and thin 做 / 喊 / sit / dusk are Complet
 |---|-------|------|--------|-----|
 | 001 | Walk and sit-to-stand | Visual/Feel | Complete | ADR-0003 |
 | 002 | Thin audio | Integration | Complete | ADR-0002 |
-| 003 | Place ear | Integration | In progress | ADR-0002 |
+| 003 | Place ear | Integration | Complete | ADR-0002 |

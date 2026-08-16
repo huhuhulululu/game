@@ -801,6 +801,33 @@ test("Play shows a shared valley without a second phone", () => {
   }
 });
 
+test("Play smokes title, room, valley, do, shout, kitchen, mine, sit", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_smoke.gd"));
+  assert.ok(existsSync("godot/scenes/play_smoke.tscn"));
+  assert.ok(existsSync("production/qa/evidence/smoke-evening.md"));
+  const smoke = readFileSync("godot/scripts/headless_play_smoke.gd", "utf8");
+  assert.match(smoke, /SMOKE_TITLE/);
+  assert.match(smoke, /SMOKE_ROOM/);
+  assert.match(smoke, /SMOKE_VALLEY/);
+  assert.match(smoke, /SMOKE_DO/);
+  assert.match(smoke, /SMOKE_SHOUT/);
+  assert.match(smoke, /SMOKE_KITCHEN/);
+  assert.match(smoke, /SMOKE_MINE/);
+  assert.match(smoke, /SMOKE_SIT/);
+  assert.match(smoke, /SMOKE_EVENING_OK/);
+  assert.match(smoke, /开一间/);
+  assert.match(smoke, /bed-valley\.png/);
+  assert.match(smoke, /cover-valley\.png/);
+  assert.doesNotMatch(smoke, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const scene = readFileSync("godot/scenes/play_smoke.tscn", "utf8");
+  assert.match(scene, /headless_play_smoke\.gd/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_smoke|SMOKE_EVENING_OK/);
+  }
+});
+
 test("Play hears kitchen hearth, chop, and a mine vein", () => {
   assert.ok(existsSync("godot/scripts/headless_play_place.gd"));
   assert.ok(existsSync("godot/scenes/play_place.tscn"));

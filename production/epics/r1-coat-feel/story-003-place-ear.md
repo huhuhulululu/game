@@ -1,7 +1,7 @@
 # Story 003: Place ear
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,10 +16,10 @@
 
 ## Acceptance Criteria
 
-- [ ] Kitchen hears a thin hearth bed and a chop tone through `play.tscn`
-- [ ] Mine hears a thin vein tone through `play.tscn`
-- [ ] Play-path proof prints place-ear tokens through `play.tscn`
-- [ ] Generated tones only; no sample pack; no 魂; no Don't Starve chrome; no FAIL restick; `bed-valley.png` untouched
+- [x] Kitchen hears a thin hearth bed and a chop tone through `play.tscn`
+- [x] Mine hears a thin vein tone through `play.tscn`
+- [x] Play-path proof prints place-ear tokens through `play.tscn`
+- [x] Generated tones only; no sample pack; no 魂; no Don't Starve chrome; no FAIL restick; `bed-valley.png` untouched
 
 ## Implementation Notes
 
@@ -43,10 +43,17 @@ Same `ValleyEar`. Kitchen hearth is a generated loop. Chop and vein are generate
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `godot/project.test.ts` + `play_place.tscn` tokens
-**Status**: [ ] In progress
+**Required evidence**: `godot/project.test.ts` + `play_place.tscn` tokens + `production/qa/evidence/place-ear-evidence.md`
+**Status**: [x] Complete — Play-path tokens + 122 tests
 
 ## Dependencies
 
 - Depends on: r1-coat-feel thin-audio, r1-evening-places kitchen / mine
 - Unlocks: none (two-phone stays human)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 4/4 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_PLACE_HEARTH` `PLAY_PLACE_CHOP` `PLAY_PLACE_VEIN` `PLAY_PLACE_OK`
+**Code Review**: Skipped — lean

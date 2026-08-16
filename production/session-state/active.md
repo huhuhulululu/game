@@ -1,10 +1,23 @@
 # Session state
 
-- Task: `/story-done` thin-audio; `/dev-story` place-ear (hearth / chop / vein)
-- Status: r1-coat-feel 002 Complete; 003 In progress. Two-phone Blocked (human).
+- Task: `/story-done` place-ear; `/smoke-check` painted evening
+- Status: r1-coat-feel Complete. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: thin-audio evidence; `story-003-place-ear.md`; `ear.gd` hearth/chop/vein; `play_place.tscn`
-- Next: keep `/dev-story` on place-ear until tokens hold. Do not `/dev-story` two-phone.
+- Files: place-ear evidence; `play_smoke.tscn`; `production/qa/evidence/smoke-evening.md`
+- Next: none Ready. Two-phone stays Blocked — do not `/dev-story`.
+
+## Session Extract — /smoke-check 2026-08-16
+- Verdict: PASS
+- Path: title → 开一间 → valley bed → 做/喊 → kitchen → mine → sit
+- Evidence: `production/qa/evidence/smoke-evening.md`
+- Fixes: none
+- Next: none Ready. Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-coat-feel/story-003-place-ear.md` — Place ear
+- Tech debt logged: None
+- Next recommended: painted-evening smoke (not more beeps)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-003-place-ear.md` — Place ear
