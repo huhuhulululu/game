@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: WORLD
 > **Architecture Module**: Play + ZoneMap + sim
-> **Status**: In Progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0002
 
 ## Overview
@@ -14,4 +14,4 @@ The first evening is still fish, mine, kitchen from the same snap. Rebuild must 
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | Same snap, three places | Integration | In Progress | ADR-0002 |
+| 001 | Same snap, three places | Integration | Complete | ADR-0002 |

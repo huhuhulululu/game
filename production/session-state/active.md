@@ -1,10 +1,16 @@
 # Session state
 
-- Task: `/dev-story` first-evening bed slice (fish / walk+do)
-- Status: packed-bed, cover-coats, stick-do-shout Complete. first-evening In Progress.
+- Task: `/story-done` first-evening (same snap, three places)
+- Status: packed-bed, cover-coats, stick-do-shout, first-evening Complete.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: stories + evidence + `godot/project.test.ts` + `headless_look.gd` fish shot
-- Next: finish first-evening evening/cover loop tokens, then `/story-done` that story
+- Files: Play-path evening scene + cover loop Play tokens + live loops + HTML5
+- Next: village / wild look (unlocked, no story yet). Ready leftovers: r1-title, r1-room.
+
+## Session Extract — /story-done 2026-08-15
+- Verdict: COMPLETE
+- Story: `production/epics/r1-first-evening/story-001-fish-mine-kitchen.md` — Same snap, three places
+- Tech debt logged: None
+- Next recommended: village / wild look (unlocked; no story file). Ready leftovers: `r1-title/story-001-cover-boot.md`, `r1-room/story-001-open-join.md`
 
 ## Session Extract — /story-done 2026-08-15
 - Verdict: COMPLETE

@@ -10,8 +10,8 @@ Rebuild epics (CHARTER P1 look). Old `p1-look/story-001-valley-painted-bed.md` i
 |------|-------|--------|-----|---------|--------|
 | r1-title | Foundation | Painted world / boot | ART + CHARTER | 1 | Ready (P0 exists) |
 | r1-room | Foundation | Room / net | WORLD | 1 | Ready (P0 exists) |
-| r1-painted-valley | Foundation | Painted world | ART + ADR-0001/0003 | 1 | Ready — implement |
-| r1-two-players | Core | Two actors | ART + WORLD | 1 | Ready (P0 exists) |
-| r1-move-do-shout | Core | Move / do / shout | WORLD | 1 | Ready (P0 exists) |
-| r1-first-evening | Feature | Fish / mine / kitchen | WORLD | 1 | Ready (P0 exists) |
+| r1-painted-valley | Foundation | Painted world | ART + ADR-0001/0003 | 1 | Complete |
+| r1-two-players | Core | Two actors | ART + WORLD | 1 | Complete |
+| r1-move-do-shout | Core | Move / do / shout | WORLD | 1 | Complete |
+| r1-first-evening | Feature | Fish / mine / kitchen | WORLD | 1 | Complete |
 | p1-look (old) | — | sticker bed | — | 1 | Superseded |

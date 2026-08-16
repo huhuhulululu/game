@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Packed bed is Complete. Cover-coats and stick/do/shout are Complete. Next: finish `/dev-story` `production/epics/r1-first-evening/story-001-fish-mine-kitchen.md` (evening/cover loop tokens), then `/story-done` that story. Do not recrop FAIL PNGs. Do not hang props on the bed.
+Packed bed, cover-coats, stick/do/shout, and first-evening are Complete. Next Ready leftovers: `r1-title` / cover-boot, then `r1-room` / open-join (P0 already ships both). The feature this story unlocks is later village / wild look — no story file yet. Do not recrop FAIL PNGs. Do not hang props on the bed.
 
 ## Coding Standards
 
