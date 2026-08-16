@@ -1,7 +1,7 @@
 # Story 004: Painted night
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Server snap `night` / `dusk` still drives the plaque and the bed
-- [ ] Valley / wild beds dim toward a warm night; painted lanterns stay the light
-- [ ] Kitchen / mine stay hearth-lit at night
-- [ ] Play-path proof prints painted-night tokens through `play.tscn`
-- [ ] No new art pack; no 魂; no fear chrome; no FAIL restick; `bed-valley.png` not replaced
+- [x] Server snap `night` / `dusk` still drives the plaque and the bed
+- [x] Valley / wild beds dim toward a warm night; painted lanterns stay the light
+- [x] Kitchen / mine stay hearth-lit at night
+- [x] Play-path proof prints painted-night tokens through `play.tscn`
+- [x] No new art pack; no 魂; no fear chrome; no FAIL restick; `bed-valley.png` not replaced
 
 ## Implementation Notes
 
@@ -45,9 +45,16 @@ Dusk becomes night on the existing beds. Do not hang a second lamp pack. Do not 
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_night.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 124 tests
 
 ## Dependencies
 
 - Depends on: r1-coat-feel place-ear, r1-painted-valley
 - Unlocks: none (two-phone stays human)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_NIGHT_DUSK` `PLAY_NIGHT_VALLEY` `PLAY_NIGHT_HEARTH` `PLAY_NIGHT_MINE` `PLAY_NIGHT_WILD` `PLAY_NIGHT_OK`
+**Code Review**: Skipped — lean

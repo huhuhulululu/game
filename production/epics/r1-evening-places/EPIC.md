@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `docs/WORLD.md` + `godot/docs/ART.md`
 > **Architecture Module**: ZoneMap + ValleyLogic + Play
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Kitchen, mine, forge, stall, and sleep sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Server already has `rushed` and pair pass.
+Kitchen, mine, forge, stall, and sleep sit one painted dusk language. Kitchen rush is two coats at the existing stations. This pass shows server spoil / icebox on the painted kitchen: cool box already there, ticks on food chips. Overcooked stays in the kitchen.
 
 ## Governing ADRs
 
@@ -31,3 +31,4 @@ Kitchen, mine, forge, stall, and sleep sit one painted dusk language. Kitchen ru
 | 003 | Forge and stall | Visual/Feel | Complete | ADR-0003 |
 | 004 | Sleep | Visual/Feel | Complete | ADR-0003 |
 | 005 | Kitchen rush | Integration | Complete | ADR-0002 |
+| 006 | Spoil and icebox | Integration | In progress | ADR-0002 |

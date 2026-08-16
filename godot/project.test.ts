@@ -801,6 +801,41 @@ test("Play shows a shared valley without a second phone", () => {
   }
 });
 
+test("Play shows spoil ticks and the kitchen icebox", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_spoil.gd"));
+  assert.ok(existsSync("godot/scenes/play_spoil.tscn"));
+  assert.ok(existsSync("godot/assets/art/prop-cool.png"));
+  const spoil = readFileSync("godot/scripts/headless_play_spoil.gd", "utf8");
+  assert.match(spoil, /scenes\/play\.tscn/);
+  assert.match(spoil, /PLAY_SPOIL_COOL/);
+  assert.match(spoil, /PLAY_SPOIL_WILT/);
+  assert.match(spoil, /PLAY_SPOIL_ICE/);
+  assert.match(spoil, /PLAY_SPOIL_OK/);
+  assert.match(spoil, /prop-cool\.png/);
+  assert.match(spoil, /蔫了/);
+  assert.match(spoil, /还行/);
+  assert.match(spoil, /冰柜/);
+  assert.doesNotMatch(spoil, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_spoil.tscn", "utf8");
+  assert.match(scene, /headless_play_spoil\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_spoil_word/);
+  assert.match(play, /_paint_ice/);
+  assert.match(play, /蔫了/);
+  assert.match(play, /还行/);
+  assert.match(play, /坏了/);
+  assert.match(play, /冰柜/);
+  assert.doesNotMatch(play, /魂/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /prop-cool\.png/);
+  assert.doesNotMatch(zone, /prop-icebox\.png/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_spoil|PLAY_SPOIL_WILT|_spoil_word|_paint_ice/);
+  }
+});
+
 test("Play dims the painted bed at night and keeps indoor hearths", () => {
   assert.ok(existsSync("godot/scripts/headless_play_night.gd"));
   assert.ok(existsSync("godot/scenes/play_night.tscn"));

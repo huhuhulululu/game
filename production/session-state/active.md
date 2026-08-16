@@ -1,10 +1,10 @@
 # Session state
 
-- Task: `/dev-story` painted night (dusk → night on the bed)
-- Status: r1-coat-feel 001–003 Complete; 004 In progress. Two-phone Blocked (human).
+- Task: `/dev-story` spoil / icebox on the painted kitchen
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 006 In progress. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-004-painted-night.md`; `night.gdshader`; `play_night.tscn`
-- Next: `/story-done` painted-night after tokens hold. Do not `/dev-story` two-phone.
+- Files: `story-006-spoil-icebox.md`; `play.gd` spoil ticks + kitchen ice chips; `play_spoil.tscn`
+- Next: `/story-done` spoil-icebox after tokens hold. Do not `/dev-story` two-phone.
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-004-painted-night.md` — Painted night

@@ -17,6 +17,7 @@ var _prompt: Label
 var _prompt_bar: Panel
 var _toasts: VBoxContainer
 var _bag: HBoxContainer
+var _ice: HBoxContainer
 var _orders: VBoxContainer
 var _stick_v := Vector2.ZERO
 var _act := false
@@ -30,6 +31,7 @@ var _zone := "valley"
 var _you_held := ""
 var _cam_locked := false
 var _bag_sig := ""
+var _ice_sig := ""
 var _toast_sig := ""
 var _order_sig := ""
 var _fish_hud: Panel
@@ -117,6 +119,10 @@ func _hud() -> void:
 	_bag.position = Vector2(16, 172)
 	_bag.add_theme_constant_override("separation", 10)
 	layer.add_child(_bag)
+	_ice = HBoxContainer.new()
+	_ice.position = Vector2(16, 228)
+	_ice.add_theme_constant_override("separation", 10)
+	layer.add_child(_ice)
 	_toasts = VBoxContainer.new()
 	_toasts.position = Vector2(900, 16)
 	_toasts.size = Vector2(360, 220)
@@ -293,6 +299,7 @@ func _on_snap(s: Dictionary) -> void:
 		_hud_pot.text = ""
 	_paint_toasts(s.get("toasts", []))
 	_paint_bag(s.get("bag", []))
+	_paint_ice(s.get("ice", []), zone)
 	_paint_orders(s.get("orders", []), zone)
 	_paint_fish(s)
 	var rows: Array = s.get("tiles", [])
@@ -550,13 +557,37 @@ func _paint_toasts(raws: Array) -> void:
 		n += 1
 
 
+func _spoil_word(fresh: float) -> String:
+	if fresh >= 70.0:
+		return ""
+	if fresh >= 40.0:
+		return "还行"
+	if fresh > 0.0:
+		return "蔫了"
+	return "坏了"
+
+
+func _food_chip(row: Dictionary) -> String:
+	var id := str(row.get("id", ""))
+	var base := str(row.get("name", id))
+	for mark in ["·鲜", "·还行", "·蔫了", "·坏了"]:
+		base = base.replace(mark, "")
+	var tick := ""
+	if row.has("fresh"):
+		tick = _spoil_word(float(row.get("fresh", 100)))
+	var n := _ink_n(row.get("n", 1))
+	if tick != "":
+		return "%s·%s×%s" % [base, tick, n]
+	return "%s×%s" % [base, n]
+
+
 func _paint_bag(raws: Array) -> void:
 	var bits: PackedStringArray = []
 	for raw in raws:
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
 		var row: Dictionary = raw
-		bits.append("%s:%s" % [str(row.get("id", "")), _ink_n(row.get("n", 1))])
+		bits.append("%s:%s:%s" % [str(row.get("id", "")), _ink_n(row.get("n", 1)), _food_chip(row)])
 	var sig := "|".join(bits)
 	if sig == _bag_sig:
 		return
@@ -568,10 +599,39 @@ func _paint_bag(raws: Array) -> void:
 			continue
 		var row: Dictionary = raw
 		var id := str(row.get("id", ""))
-		var label := "%s×%s" % [str(row.get("name", id)), _ink_n(row.get("n", 1))]
-		var b := Look.chip_button(label, 128)
+		var b := Look.chip_button(_food_chip(row), 148)
 		b.pressed.connect(func() -> void: _take(id))
 		_bag.add_child(b)
+
+
+func _paint_ice(raws: Array, zone: String) -> void:
+	# Ice chips stay in the kitchen. Do not hang them on the valley.
+	if zone != "kitchen":
+		if _ice_sig != "":
+			_ice_sig = ""
+			for child in _ice.get_children():
+				child.queue_free()
+		return
+	var bits: PackedStringArray = []
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		bits.append("%s:%s:%s" % [str(row.get("id", "")), _ink_n(row.get("n", 1)), _food_chip(row)])
+	var sig := "|".join(bits)
+	if sig == _ice_sig:
+		return
+	_ice_sig = sig
+	for child in _ice.get_children():
+		child.queue_free()
+	if bits.is_empty():
+		return
+	_ice.add_child(Look.ink_label("冰柜", 14, Look.GOLD))
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		_ice.add_child(Look.chip_button(_food_chip(row), 148))
 
 
 func _paint_orders(raws: Array, zone: String) -> void:

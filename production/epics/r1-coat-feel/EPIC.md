@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Onboarding, walk / sit, thin ear, and place ear already hold. This pass turns dusk into night on the painted beds. Lamps already in the paint stay the light. Kitchen / mine stay hearth-lit. No new pack.
+Onboarding, walk / sit, thin ear, place ear, and painted night hold. Night is a warm grade on the existing beds. Lamps already in the paint stay the light. Kitchen / mine stay hearth-lit. No new pack.
 
 ## Governing ADRs
 
@@ -29,4 +29,4 @@ Onboarding, walk / sit, thin ear, and place ear already hold. This pass turns du
 | 001 | Walk and sit-to-stand | Visual/Feel | Complete | ADR-0003 |
 | 002 | Thin audio | Integration | Complete | ADR-0002 |
 | 003 | Place ear | Integration | Complete | ADR-0002 |
-| 004 | Painted night | Visual/Feel | In progress | ADR-0003 |
+| 004 | Painted night | Visual/Feel | Complete | ADR-0003 |
