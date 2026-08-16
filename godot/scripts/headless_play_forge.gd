@@ -154,17 +154,17 @@ func _assert_forge() -> bool:
 	if str(play.get("_zone")) != "valley":
 		printerr("ZONE_NOT_VALLEY ", play.get("_zone"))
 		return false
-	if not _has_tex(valley, "prop-smith.png"):
-		printerr("NO_SMITH")
+	if _has_tex(valley, "prop-smith.png"):
+		printerr("HUNG_SMITH")
 		return false
-	if not _has_tex(valley, "prop-booth.png"):
-		printerr("NO_BOOTH")
+	if _has_tex(valley, "prop-booth.png"):
+		printerr("HUNG_BOOTH")
 		return false
-	if not _has_tex(valley, "prop-fortune.png"):
-		printerr("NO_FORTUNE")
+	if _has_tex(valley, "prop-fortune.png"):
+		printerr("HUNG_FORTUNE")
 		return false
-	if not _has_tex(valley, "prop-dawn.png"):
-		printerr("NO_DAWN")
+	if _has_tex(valley, "prop-dawn.png"):
+		printerr("HUNG_DAWN")
 		return false
 	if not _no_fail(valley):
 		return false

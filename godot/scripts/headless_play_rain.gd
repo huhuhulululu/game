@@ -336,8 +336,8 @@ func _assert_wild() -> bool:
 	if not _has_rain(zone_map):
 		printerr("WILD_DRY")
 		return false
-	if not _has_tex(zone_map, "prop-fire.png"):
-		printerr("LOST_COLD_FIRE")
+	if _has_tex(zone_map, "prop-fire.png"):
+		printerr("HUNG_FIRE")
 		return false
 	if _has_tex(zone_map, "prop-camp-pot.png"):
 		printerr("POT_IN_RAIN")

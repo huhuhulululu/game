@@ -172,17 +172,17 @@ func _assert_mine() -> bool:
 	if not _has_tex(zone_map, "bed-mine.png"):
 		printerr("NO_MINE_BED")
 		return false
-	if not _has_tex(zone_map, "prop-vein.png"):
-		printerr("NO_VEIN")
+	if _has_tex(zone_map, "prop-vein.png"):
+		printerr("HUNG_VEIN")
 		return false
-	if not _has_tex(zone_map, "prop-steps.png"):
-		printerr("NO_STEPS")
+	if _has_tex(zone_map, "prop-steps.png"):
+		printerr("HUNG_STEPS")
 		return false
-	if not _has_tex(zone_map, "prop-mouth.png"):
-		printerr("NO_MOUTH")
+	if _has_tex(zone_map, "prop-mouth.png"):
+		printerr("HUNG_MOUTH")
 		return false
-	if not _has_tex(zone_map, "prop-cache.png"):
-		printerr("NO_CACHE")
+	if _has_tex(zone_map, "prop-cache.png"):
+		printerr("HUNG_CACHE")
 		return false
 	if not _no_fail(zone_map):
 		return false

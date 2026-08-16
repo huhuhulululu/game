@@ -513,38 +513,11 @@ func _paint_people(s: Dictionary) -> void:
 			_actors.erase(id)
 
 
-func _paint_foes(raws: Array) -> void:
-	while _foes.size() > raws.size():
+func _paint_foes(_raws: Array) -> void:
+	while _foes.size() > 0:
 		var old: Node2D = _foes.pop_back()
 		old.queue_free()
-	while _foes.size() < raws.size():
-		var n := Sprite2D.new()
-		n.texture = load("res://assets/art/prop-beast.png") as Texture2D
-		n.centered = true
-		n.texture_filter = TEXTURE_FILTER_LINEAR
-		n.material = Look.dusk_mat(0.08)
-		_world.add_child(n)
-		_foes.append(n)
-	for i in raws.size():
-		if typeof(raws[i]) != TYPE_DICTIONARY:
-			continue
-		var e: Dictionary = raws[i]
-		var n: Sprite2D = _foes[i]
-		n.position = Vector2(float(e.get("x", 0)), float(e.get("y", 0)))
-		n.z_index = 18 + int(n.position.y / 8.0)
-		var tex := n.texture
-		if tex:
-			n.scale = Vector2(40.0 / float(tex.get_width()), 40.0 / float(tex.get_height()))
-		var hue := str(e.get("hue", ""))
-		var tint := Color(1, 1, 1, 1)
-		if hue.begins_with("#") and hue.length() >= 7:
-			tint = Color.from_string(hue, Color(0.28, 0.24, 0.22))
-		n.modulate = Color(1.2, 0.8, 0.7) if float(e.get("flash", 0)) > 0.0 else tint
-		if _zone == "wild" and _map_w > 0:
-			var key := int(n.position.y / 36.0) * _map_w + int(n.position.x / 36.0)
-			n.visible = _visible.has(key)
-		else:
-			n.visible = true
+	# Encounter stays in the snap. Do not hang a beast sticker.
 
 
 func _ink_n(v: Variant) -> String:

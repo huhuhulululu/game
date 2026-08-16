@@ -181,8 +181,8 @@ func _assert_wild() -> bool:
 	if not _has_tex(zone_map, "bed-wild.png"):
 		printerr("NO_WILD_BED")
 		return false
-	if _count_tex(zone_map, "prop-silk.png") != 1:
-		printerr("NEST_COUNT ", _count_tex(zone_map, "prop-silk.png"))
+	if _count_tex(zone_map, "prop-silk.png") != 0:
+		printerr("HUNG_NEST ", _count_tex(zone_map, "prop-silk.png"))
 		return false
 	if _has_tex(zone_map, "prop-beast.png"):
 		printerr("BEAST_ON_NEST")
@@ -204,8 +204,8 @@ func _assert_swing() -> bool:
 	if prompt == null or str(prompt.text).find("挥") < 0:
 		printerr("SILK_PROMPT ", prompt.text if prompt else "")
 		return false
-	if zone_map == null or _count_tex(zone_map, "prop-silk.png") != 1:
-		printerr("NEST_GONE_SWING")
+	if zone_map == null or _count_tex(zone_map, "prop-silk.png") != 0:
+		printerr("HUNG_NEST_SWING")
 		return false
 	if _has_tex(zone_map, "prop-beast.png") or (world != null and _has_tex(world, "prop-beast.png")):
 		printerr("BEAST_ON_SWING")
@@ -236,8 +236,11 @@ func _assert_hearth() -> bool:
 	if zone_map == null or not zone_map.visible:
 		printerr("KITCHEN_HIDDEN_SILK")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if not _has_tex(zone_map, "bed-kitchen.png"):
+		printerr("NO_KITCHEN_BED")
+		return false
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
 	if _has_tex(zone_map, "prop-silk.png"):
 		printerr("NEST_IN_KITCHEN")

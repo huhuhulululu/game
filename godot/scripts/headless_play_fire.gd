@@ -168,11 +168,11 @@ func _assert_fire() -> bool:
 	if not _has_tex(zone_map, "bed-wild.png"):
 		printerr("NO_WILD_BED")
 		return false
-	if not _has_tex(zone_map, "prop-fire.png"):
-		printerr("NO_FIRE")
+	if _has_tex(zone_map, "prop-fire.png"):
+		printerr("HUNG_FIRE")
 		return false
 	if _has_tex(zone_map, "prop-camp-pot.png"):
-		printerr("POT_ON_COLD")
+		printerr("HUNG_CAMP_POT")
 		return false
 	if _has_tex(zone_map, "prop-pot.png"):
 		printerr("HUNG_OLD_POT")
@@ -189,14 +189,14 @@ func _assert_pot() -> bool:
 		"prompt": "烤",
 	}))
 	var zone_map: Node2D = play.get("_zone_map")
-	if zone_map == null or not _has_tex(zone_map, "prop-camp-pot.png"):
-		printerr("NO_CAMP_POT")
+	if zone_map == null or _has_tex(zone_map, "prop-camp-pot.png"):
+		printerr("HUNG_CAMP_POT")
 		return false
 	if _has_tex(zone_map, "prop-pot.png"):
 		printerr("HUNG_OLD_POT_LIT")
 		return false
-	if not _has_tex(zone_map, "prop-fire.png"):
-		printerr("LOST_FIRE")
+	if _has_tex(zone_map, "prop-fire.png"):
+		printerr("HUNG_FIRE")
 		return false
 	if not _no_fail(zone_map):
 		return false
@@ -223,8 +223,8 @@ func _assert_cook() -> bool:
 	if ink == null or str(ink.text).find("烤鱼") < 0:
 		printerr("COOK_HELD ", ink.text if ink else "")
 		return false
-	if zone_map == null or not _has_tex(zone_map, "prop-camp-pot.png"):
-		printerr("POT_GONE_COOK")
+	if zone_map == null or _has_tex(zone_map, "prop-camp-pot.png"):
+		printerr("HUNG_CAMP_POT_COOK")
 		return false
 	if _has_tex(zone_map, "prop-pot.png"):
 		printerr("HUNG_OLD_POT_COOK")

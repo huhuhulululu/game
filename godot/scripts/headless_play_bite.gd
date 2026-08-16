@@ -328,8 +328,11 @@ func _assert_hearth() -> bool:
 	if zone_map == null or not zone_map.visible:
 		printerr("KITCHEN_HIDDEN_BITE")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if not _has_tex(zone_map, "bed-kitchen.png"):
+		printerr("NO_KITCHEN_BED")
+		return false
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
 	if kitchen != null and _bed_night(kitchen):
 		printerr("KITCHEN_NIGHT_GRADE")

@@ -235,8 +235,8 @@ func _assert_do() -> bool:
 	if not _near_pair():
 		printerr("FORGE_FAR")
 		return false
-	if valley == null or not _has_tex(valley, "prop-smith.png"):
-		printerr("NO_SMITH")
+	if valley == null or _has_tex(valley, "prop-smith.png"):
+		printerr("HUNG_SMITH")
 		return false
 	print("PLAY_PAIR_FORGE")
 	await _feed(_snap({
@@ -257,8 +257,8 @@ func _assert_do() -> bool:
 	if not _near_pair():
 		printerr("STALL_FAR")
 		return false
-	if valley == null or not _has_tex(valley, "prop-booth.png"):
-		printerr("NO_BOOTH")
+	if valley == null or _has_tex(valley, "prop-booth.png"):
+		printerr("HUNG_BOOTH")
 		return false
 	if not _no_pair_stat() or not _no_fail(valley):
 		return false

@@ -187,8 +187,8 @@ func _assert_cool() -> bool:
 	if not _has_tex(zone_map, "bed-kitchen.png"):
 		printerr("NO_KITCHEN_BED")
 		return false
-	if not _has_tex(zone_map, "prop-cool.png"):
-		printerr("NO_COOL")
+	if _has_tex(zone_map, "prop-cool.png"):
+		printerr("HUNG_COOL")
 		return false
 	if _has_tex(zone_map, "prop-icebox.png"):
 		printerr("HUNG_OLD_ICEBOX")

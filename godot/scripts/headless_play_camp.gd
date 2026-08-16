@@ -187,11 +187,11 @@ func _camp_sit(zone_map: Node2D) -> bool:
 	if not _has_tex(zone_map, "bed-wild.png"):
 		printerr("NO_WILD_BED")
 		return false
-	if _count_tex(zone_map, "prop-fire.png") != 1:
-		printerr("FIRE_COUNT ", _count_tex(zone_map, "prop-fire.png"))
+	if _count_tex(zone_map, "prop-fire.png") != 0:
+		printerr("HUNG_FIRE ", _count_tex(zone_map, "prop-fire.png"))
 		return false
-	if _count_tex(zone_map, "prop-rock.png") != 1:
-		printerr("ROCK_COUNT ", _count_tex(zone_map, "prop-rock.png"))
+	if _count_tex(zone_map, "prop-rock.png") != 0:
+		printerr("HUNG_ROCK ", _count_tex(zone_map, "prop-rock.png"))
 		return false
 	if _has_tex(zone_map, "prop-camp-pot.png"):
 		printerr("POT_ON_COLD_CAMP")
@@ -330,8 +330,11 @@ func _assert_hearth() -> bool:
 	if zone_map == null or not zone_map.visible:
 		printerr("KITCHEN_HIDDEN_CAMP")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if not _has_tex(zone_map, "bed-kitchen.png"):
+		printerr("NO_KITCHEN_BED")
+		return false
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
 	if _has_tex(zone_map, "bed-wild.png"):
 		printerr("WILD_BED_IN_KITCHEN")

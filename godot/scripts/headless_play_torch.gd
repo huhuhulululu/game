@@ -222,8 +222,11 @@ func _assert_hand() -> bool:
 	if _has_visible_tex(zone_map, "prop-torch.png"):
 		printerr("STICK_ON_BED")
 		return false
-	if world == null or not _has_visible_tex(world, "prop-torch.png"):
-		printerr("NO_LAMP_STICK")
+	if world == null or not _has_tex(world, "char-warm"):
+		printerr("NO_COAT")
+		return false
+	if _has_visible_tex(world, "prop-torch.png"):
+		printerr("HUNG_LAMP_STICK")
 		return false
 	if ink == null or str(ink.text).find("火把") < 0:
 		printerr("HELD_INK ", ink.text if ink else "")
@@ -263,8 +266,8 @@ func _assert_path() -> bool:
 	if shade.r < 0.70 or shade.g < 0.60:
 		printerr("PATH_WILD_SHADE ", shade)
 		return false
-	if world == null or not _has_visible_tex(world, "prop-torch.png"):
-		printerr("LAMP_GONE_NIGHT")
+	if world != null and _has_visible_tex(world, "prop-torch.png"):
+		printerr("HUNG_LAMP_NIGHT")
 		return false
 	if ink == null or str(ink.text).find("夜里") < 0:
 		printerr("NIGHT_PLAQUE ", ink.text if ink else "")
@@ -313,8 +316,11 @@ func _assert_hearth() -> bool:
 	if _bed_night(kitchen):
 		printerr("KITCHEN_NIGHT_GRADE")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if not _has_tex(zone_map, "bed-kitchen.png"):
+		printerr("NO_KITCHEN_BED")
+		return false
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
 	if _has_visible_tex(zone_map, "prop-torch.png"):
 		printerr("STICK_ON_HEARTH")

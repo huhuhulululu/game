@@ -228,11 +228,11 @@ func _assert_one() -> bool:
 	if ink == null or ink.text.find("日") < 0 or ink.text.find("金") < 0:
 		printerr("FLOOR1_PLAQUE ", ink.text if ink else "")
 		return false
-	if not _has_tex(zone_map, "prop-vein.png"):
-		printerr("NO_VEIN")
+	if _has_tex(zone_map, "prop-vein.png"):
+		printerr("HUNG_VEIN")
 		return false
-	if not _has_tex(zone_map, "prop-steps.png"):
-		printerr("NO_STEPS")
+	if _has_tex(zone_map, "prop-steps.png"):
+		printerr("HUNG_STEPS")
 		return false
 	if not _no_fail(zone_map):
 		return false
@@ -304,8 +304,11 @@ func _assert_hearth() -> bool:
 	if zone_map == null or not zone_map.visible:
 		printerr("KITCHEN_HIDDEN_FLOOR")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if not _has_tex(zone_map, "bed-kitchen.png"):
+		printerr("NO_KITCHEN_BED")
+		return false
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
 	if kitchen != null and kitchen.modulate.r < 0.98:
 		printerr("KITCHEN_MINE_TINT ", kitchen.modulate)

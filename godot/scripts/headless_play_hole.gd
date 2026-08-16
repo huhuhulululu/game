@@ -183,8 +183,8 @@ func _assert_wild() -> bool:
 	if not _has_tex(zone_map, "bed-wild.png"):
 		printerr("NO_WILD_BED")
 		return false
-	if _count_tex(zone_map, "prop-hole.png") != 2:
-		printerr("WELL_COUNT ", _count_tex(zone_map, "prop-hole.png"))
+	if _count_tex(zone_map, "prop-hole.png") != 0:
+		printerr("HUNG_WELL ", _count_tex(zone_map, "prop-hole.png"))
 		return false
 	if prompt == null or str(prompt.text).find("钻洞") < 0:
 		printerr("HOLE_PROMPT ", prompt.text if prompt else "")
@@ -221,8 +221,8 @@ func _assert_pair() -> bool:
 	var zone_map: Node2D = play.get("_zone_map")
 	var world: Node2D = play.get("_world")
 	var prompt: Label = play.get("_prompt")
-	if zone_map == null or _count_tex(zone_map, "prop-hole.png") != 2:
-		printerr("PAIR_WELLS ", _count_tex(zone_map, "prop-hole.png") if zone_map else -1)
+	if zone_map == null or _count_tex(zone_map, "prop-hole.png") != 0:
+		printerr("HUNG_PAIR_WELLS ", _count_tex(zone_map, "prop-hole.png") if zone_map else -1)
 		return false
 	if world == null or not _has_tex(world, "char-warm") or not _has_tex(world, "char-pine"):
 		printerr("PAIR_COATS")
@@ -256,8 +256,11 @@ func _assert_hearth() -> bool:
 	if zone_map == null or not zone_map.visible:
 		printerr("KITCHEN_HIDDEN_HOLE")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if not _has_tex(zone_map, "bed-kitchen.png"):
+		printerr("NO_KITCHEN_BED")
+		return false
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
 	if _has_tex(zone_map, "prop-hole.png"):
 		printerr("WELL_IN_KITCHEN")

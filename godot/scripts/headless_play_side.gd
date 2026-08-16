@@ -248,8 +248,8 @@ func _assert_fire() -> bool:
 	if not _has_tex(zone_map, "bed-wild.png"):
 		printerr("NO_WILD_BED")
 		return false
-	if not _has_tex(zone_map, "prop-fire.png"):
-		printerr("NO_FIRE")
+	if _has_tex(zone_map, "prop-fire.png"):
+		printerr("HUNG_FIRE")
 		return false
 	if not _has_tex(play, "char-warm-sit"):
 		printerr("NO_WARM_SIT")
@@ -302,8 +302,11 @@ func _assert_lamp() -> bool:
 	if zone_map == null or not zone_map.visible:
 		printerr("KITCHEN_HIDDEN_SIDE")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if not _has_tex(zone_map, "bed-kitchen.png"):
+		printerr("NO_KITCHEN_BED")
+		return false
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
 	if kitchen != null and kitchen.material != null:
 		printerr("KITCHEN_NIGHT_GRADE")
@@ -340,8 +343,11 @@ func _assert_alone() -> bool:
 	if toasts != null and _has_label(toasts, "火边坐了一会儿"):
 		printerr("SIDE_TOAST_ALONE")
 		return false
-	if zone_map == null or not _has_tex(zone_map, "prop-fire.png"):
-		printerr("FIRE_GONE_ALONE")
+	if zone_map == null or not _has_tex(zone_map, "bed-wild.png"):
+		printerr("NO_WILD_BED_ALONE")
+		return false
+	if _has_tex(zone_map, "prop-fire.png"):
+		printerr("HUNG_FIRE")
 		return false
 	if not _has_tex(play, "char-warm-sit"):
 		printerr("NO_SIT_ALONE")

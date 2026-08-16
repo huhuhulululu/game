@@ -480,8 +480,8 @@ test("Kitchen sits one dusk bed and stations through Play", () => {
   const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
   assert.match(zone, /bed-kitchen\.png/);
   assert.match(zone, /_sit_kitchen_bed/);
-  assert.match(zone, /prop-hearth\.png/);
-  assert.match(zone, /prop-chop\.png/);
+  assert.doesNotMatch(zone, /prop-hearth\.png/);
+  assert.doesNotMatch(zone, /prop-chop\.png/);
   assert.match(zone, /tex-wood\.png/);
   assert.doesNotMatch(zone, /prop-pot\.png/);
   assert.doesNotMatch(zone, /prop-cut\.png/);
@@ -520,8 +520,8 @@ test("Mine sits one dusk bed and veins through Play", () => {
   const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
   assert.match(zone, /bed-mine\.png/);
   assert.match(zone, /_sit_mine_bed/);
-  assert.match(zone, /prop-vein\.png/);
-  assert.match(zone, /prop-steps\.png/);
+  assert.doesNotMatch(zone, /prop-vein\.png/);
+  assert.doesNotMatch(zone, /prop-steps\.png/);
   assert.match(zone, /tex-stone\.png/);
   assert.doesNotMatch(zone, /prop-stairs\.png/);
   assert.doesNotMatch(zone, /prop-door-open\.png/);
@@ -827,7 +827,7 @@ test("Play shows spoil ticks and the kitchen icebox", () => {
   assert.match(play, /冰柜/);
   assert.doesNotMatch(play, /魂/);
   const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
-  assert.match(zone, /prop-cool\.png/);
+  assert.doesNotMatch(zone, /prop-cool\.png/);
   assert.doesNotMatch(zone, /prop-icebox\.png/);
   const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
   for (const p of srcFiles) {
@@ -862,8 +862,8 @@ test("Play sits a camp pot on a lit wild fire", () => {
   const scene = readFileSync("godot/scenes/play_fire.tscn", "utf8");
   assert.match(scene, /headless_play_fire\.gd/);
   const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
-  assert.match(zone, /prop-camp-pot\.png/);
-  assert.match(zone, /prop-fire\.png/);
+  assert.doesNotMatch(zone, /prop-camp-pot\.png/);
+  assert.doesNotMatch(zone, /prop-fire\.png/);
   assert.doesNotMatch(zone, /lamp := ColorRect/);
   const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
   for (const p of srcFiles) {
@@ -983,7 +983,7 @@ test("Play sits a lantern-stick in the coat hand on the night path", () => {
   const scene = readFileSync("godot/scenes/play_torch.tscn", "utf8");
   assert.match(scene, /headless_play_torch\.gd/);
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
-  assert.match(actor, /prop-torch\.png/);
+  assert.doesNotMatch(actor, /prop-torch\.png/);
   assert.match(actor, /LampStick/);
   assert.match(actor, /Look\.BODY - 28/);
   assert.doesNotMatch(actor, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
@@ -1024,9 +1024,9 @@ test("Play sits two dusk wells on the wild bed", () => {
   const scene = readFileSync("godot/scenes/play_hole.tscn", "utf8");
   assert.match(scene, /headless_play_hole\.gd/);
   const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
-  assert.match(zone, /prop-hole\.png/);
-  assert.match(zone, /EarthMouth/);
-  assert.match(zone, /Warm umber mouth/);
+  assert.doesNotMatch(zone, /prop-hole\.png/);
+  assert.doesNotMatch(zone, /EarthMouth/);
+  assert.doesNotMatch(zone, /Warm umber mouth/);
   assert.doesNotMatch(zone, /0\.08, 0\.06, 0\.04/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
   assert.match(play, /日 %s · %s · %s · 金 %s/);
@@ -1281,9 +1281,9 @@ test("Play sits one dusk nest on the wild bed", () => {
   const scene = readFileSync("godot/scenes/play_silk.tscn", "utf8");
   assert.match(scene, /headless_play_silk\.gd/);
   const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
-  assert.match(zone, /prop-silk\.png/);
-  assert.match(zone, /SilkNest/);
-  assert.match(zone, /Paper silk and umber twigs/);
+  assert.doesNotMatch(zone, /prop-silk\.png/);
+  assert.doesNotMatch(zone, /SilkNest/);
+  assert.doesNotMatch(zone, /Paper silk and umber twigs/);
   assert.doesNotMatch(zone, /prop-beast\.png/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
   assert.match(play, /日 %s · %s · %s · 金 %s/);
@@ -1528,4 +1528,68 @@ test("Godot evening walk is fish, pot, then a night rest", () => {
   assert.match(evening, /EVENING_OK/);
   assert.match(evening, /get_ticks_msec/);
   assert.doesNotMatch(evening, /Wilson|Don't Starve|Dont Starve/i);
+});
+
+test("Play tears generated stickers off the painted beds", () => {
+  assert.ok(existsSync("production/epics/r1-evening-places/story-020-strip-stickers.md"));
+  const story = readFileSync("production/epics/r1-evening-places/story-020-strip-stickers.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  assert.doesNotMatch(story, /魂/);
+  for (const name of [
+    "bed-valley.png",
+    "bed-wild.png",
+    "bed-kitchen.png",
+    "bed-mine.png",
+    "prop-hole.png",
+    "prop-silk.png",
+    "prop-torch.png",
+    "prop-camp-pot.png",
+    "prop-smith.png",
+    "prop-booth.png",
+  ]) {
+    assert.ok(existsSync(`godot/assets/art/${name}`));
+  }
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /bed-wild\.png/);
+  assert.match(zone, /bed-kitchen\.png/);
+  assert.match(zone, /bed-mine\.png/);
+  assert.match(zone, /Do not hang/);
+  for (const needle of [
+    "prop-hole.png",
+    "prop-silk.png",
+    "prop-camp-pot.png",
+    "prop-hearth.png",
+    "prop-chop.png",
+    "prop-vein.png",
+    "prop-fire.png",
+    "prop-smith.png",
+    "EarthMouth",
+    "SilkNest",
+    "CampPot",
+  ]) {
+    assert.doesNotMatch(zone, new RegExp(needle.replace(".", "\\.")));
+  }
+  const logic = readFileSync("godot/scripts/valley_logic.gd", "utf8");
+  assert.match(logic, /_sit_plot/);
+  assert.match(logic, /Do not hang/);
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.doesNotMatch(actor, /prop-torch\.png/);
+  assert.match(actor, /LampStick/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.doesNotMatch(play, /prop-beast\.png/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /魂/);
+  const kitchen = readFileSync("godot/scripts/headless_play_kitchen.gd", "utf8");
+  assert.match(kitchen, /HUNG_HEARTH/);
+  const hole = readFileSync("godot/scripts/headless_play_hole.gd", "utf8");
+  assert.match(hole, /HUNG_WELL/);
+  const silk = readFileSync("godot/scripts/headless_play_silk.gd", "utf8");
+  assert.match(silk, /HUNG_NEST/);
+  const torch = readFileSync("godot/scripts/headless_play_torch.gd", "utf8");
+  assert.match(torch, /HUNG_LAMP_STICK/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_strip|HUNG_HEARTH|prop-hole|paint_strip/);
+  }
 });

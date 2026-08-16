@@ -229,17 +229,17 @@ func _assert_hot() -> bool:
 	if not _has_tex(zone_map, "bed-kitchen.png"):
 		printerr("NO_KITCHEN_BED")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
-	if not _has_tex(zone_map, "prop-chop.png"):
-		printerr("NO_CHOP")
+	if _has_tex(zone_map, "prop-chop.png"):
+		printerr("HUNG_CHOP")
 		return false
-	if not _has_tex(zone_map, "prop-oven.png"):
-		printerr("NO_OVEN")
+	if _has_tex(zone_map, "prop-oven.png"):
+		printerr("HUNG_OVEN")
 		return false
-	if not _has_tex(zone_map, "prop-serve.png"):
-		printerr("NO_SERVE")
+	if _has_tex(zone_map, "prop-serve.png"):
+		printerr("HUNG_SERVE")
 		return false
 	if not _has_tex(play, "char-warm"):
 		printerr("NO_WARM_COAT")
@@ -279,8 +279,8 @@ func _assert_do() -> bool:
 	if not _has_tex(play, "char-pine-chop"):
 		printerr("NO_PINE_CHOP")
 		return false
-	if zone_map == null or not _has_tex(zone_map, "prop-hearth.png") or not _has_tex(zone_map, "prop-chop.png"):
-		printerr("NO_CHOP_STATIONS")
+	if zone_map == null or _has_tex(zone_map, "prop-hearth.png") or _has_tex(zone_map, "prop-chop.png"):
+		printerr("HUNG_CHOP_STATIONS")
 		return false
 	await _feed(_snap({
 		"actors": [
@@ -297,8 +297,8 @@ func _assert_do() -> bool:
 	if not _has_tex(play, "char-pine-chop"):
 		printerr("NO_PINE_SERVE")
 		return false
-	if zone_map == null or not _has_tex(zone_map, "prop-oven.png") or not _has_tex(zone_map, "prop-serve.png"):
-		printerr("NO_SERVE_STATIONS")
+	if zone_map == null or _has_tex(zone_map, "prop-oven.png") or _has_tex(zone_map, "prop-serve.png"):
+		printerr("HUNG_SERVE_STATIONS")
 		return false
 	if not _no_pair_stat() or not _no_fail(zone_map):
 		return false

@@ -1,10 +1,18 @@
 # Session state
 
-- Task: `/dev-story` fireside on existing sit and fire
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–018 Complete; 019 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed. Stop new WORLD systems after fireside.
+- Task: `/dev-story` strip stickers off painted beds
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–018 Complete; 019 parked; 020 In progress. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-019-fireside.md`; `play_side.tscn`
-- Next: `/story-done` fireside after tokens hold. Next Ready: walk cycle (P1 coat-feel only). No more WORLD systems. Do not `/dev-story` two-phone.
+- Files: `story-020-strip-stickers.md`
+- Next: `/story-done` strip-stickers after tokens hold. 019 stays parked. Next Ready: walk cycle (P1 coat-feel only). Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-020-strip-stickers.md` — Strip stickers
+- Files changed: story, `zone_map.gd`, `valley_logic.gd`, `actor_view.gd`, `play.gd`, play-paths, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (strip-stickers lock)
+- Tokens: existing `PLAY_*_OK` inverted to require absence
+- Blockers: None
+- Next: `/story-done` after tokens hold. 019 stays parked. Stop new WORLD systems. Next Ready: walk cycle (P1 coat-feel only). Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-019-fireside.md` — Fireside

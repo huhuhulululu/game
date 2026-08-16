@@ -178,20 +178,20 @@ func _assert_kitchen() -> bool:
 	if not _has_tex(zone_map, "bed-kitchen.png"):
 		printerr("NO_KITCHEN_BED")
 		return false
-	if not _has_tex(zone_map, "prop-hearth.png"):
-		printerr("NO_HEARTH")
+	if _has_tex(zone_map, "prop-hearth.png"):
+		printerr("HUNG_HEARTH")
 		return false
-	if not _has_tex(zone_map, "prop-chop.png"):
-		printerr("NO_CHOP")
+	if _has_tex(zone_map, "prop-chop.png"):
+		printerr("HUNG_CHOP")
 		return false
-	if not _has_tex(zone_map, "prop-oven.png"):
-		printerr("NO_OVEN")
+	if _has_tex(zone_map, "prop-oven.png"):
+		printerr("HUNG_OVEN")
 		return false
-	if not _has_tex(zone_map, "prop-serve.png"):
-		printerr("NO_SERVE")
+	if _has_tex(zone_map, "prop-serve.png"):
+		printerr("HUNG_SERVE")
 		return false
-	if not _has_tex(zone_map, "prop-cool.png"):
-		printerr("NO_COOL")
+	if _has_tex(zone_map, "prop-cool.png"):
+		printerr("HUNG_COOL")
 		return false
 	if not _no_fail(zone_map):
 		return false

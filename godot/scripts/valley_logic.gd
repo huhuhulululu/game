@@ -26,7 +26,7 @@ const ROWS: PackedStringArray = [
 ]
 
 const SIZE_PX := Vector2(34 * TILE, 17 * TILE)
-## Crop language stays on disk. Valley sits sprout / ripe, not tuft mounds.
+## Crop language stays on disk. Valley does not sit sprout / ripe stickers.
 const CROP_YOUNG := "prop-tuft.png"
 const CROP_RIPE := "prop-bush.png"
 const PLOT_YOUNG := "prop-sprout.png"
@@ -115,21 +115,6 @@ func _first_tile(ch: String) -> Vector2i:
 	return Vector2i.ZERO
 
 
-func _sit_plot(into: Node2D, sheet: String, gx: int, gy: int, wide: float, tall: float) -> void:
-	var tex := load("res://assets/art/%s" % sheet) as Texture2D
-	if tex == null or into == null:
-		return
-	var n := Node2D.new()
-	n.position = Vector2((gx + 0.5) * TILE - wide * 0.5, (gy + 0.94) * TILE - tall)
-	n.z_index = 6
-	var stain := Look.contact(wide * 0.92)
-	stain.position = Vector2(wide * (0.50 + Look.SHADOW_EAST), tall * 0.92)
-	n.add_child(stain)
-	var s := Sprite2D.new()
-	s.texture = tex
-	s.centered = false
-	s.texture_filter = TEXTURE_FILTER_LINEAR
-	s.scale = Vector2(wide / float(tex.get_width()), tall / float(tex.get_height()))
-	s.position = Vector2.ZERO
-	n.add_child(s)
-	into.add_child(n)
+func _sit_plot(_into: Node2D, _sheet: String, _gx: int, _gy: int, _wide: float, _tall: float) -> void:
+	# Stickers stay on disk. Painted bed stays. Do not hang.
+	return

@@ -94,24 +94,12 @@ func wash_at(x: int, y: int) -> Color:
 	return _path_img.get_pixel(x, y)
 
 
-func _paint_fires(fires: Array) -> void:
+func _paint_fires(_fires: Array) -> void:
 	if _glow == null:
 		return
 	for child in _glow.get_children():
 		child.queue_free()
-	if _zone != "wild":
-		return
-	var tex := _tex("prop-camp-pot.png")
-	if tex == null:
-		return
-	for raw in fires:
-		var key := int(raw)
-		var fx := key % _w
-		var fy := int(key / _w)
-		# Haul sits in a pot on the lit fire. Not the old kitchen pot sheet.
-		var pot := Look.hung(tex, Vector2(fx * TILE + 4.0, fy * TILE - 12.0), Vector2(28, 32), 9, 0.04)
-		pot.name = "CampPot"
-		_glow.add_child(pot)
+	# Lit fire stays in the snap. Do not hang a pot sticker.
 
 
 func _tex(name: String) -> Texture2D:
@@ -131,12 +119,6 @@ func _floor(tex: Texture2D, w: int, h: int) -> void:
 	s.material = Look.dusk_mat(0.05)
 	s.z_index = 0
 	add_child(s)
-
-
-func _prop(tex: Texture2D, gx: float, gy: float, w: float, h: float, z: int) -> void:
-	if tex == null:
-		return
-	add_child(Look.hung(tex, Vector2(gx * TILE, gy * TILE), Vector2(w, h), z, 0.05))
 
 
 func _wash(x: int, y: int, color: Color) -> void:
@@ -294,33 +276,8 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 	if ch == "#":
 		_wall(zone, x, y)
 		return
-	if zone == "kitchen":
-		if ch == "C":
-			_prop(_tex("prop-chop.png"), x - 0.15, y - 0.35, 42, 40, 6)
-		elif ch == "U":
-			_prop(_tex("prop-oven.png"), x - 0.1, y - 0.40, 44, 50, 6)
-		elif ch == "Q":
-			_prop(_tex("prop-hearth.png"), x - 0.25, y - 0.50, 52, 56, 7)
-		elif ch == "W":
-			_prop(_tex("prop-serve.png"), x - 0.15, y - 0.40, 48, 52, 7)
-		elif ch == "R":
-			_prop(_tex("prop-cool.png"), x - 0.15, y - 0.40, 44, 52, 6)
-		elif ch == "X":
-			_prop(_tex("prop-bin.png"), x - 0.05, y - 0.20, 36, 40, 5)
-		elif ch == "L":
-			_prop(_tex("prop-way.png"), x - 0.20, y - 0.55, 48, 56, 8)
-		elif "123456".find(ch) >= 0:
-			_prop(_tex("prop-shelf.png"), x - 0.10, y - 0.45, 40, 52, 6)
-		return
-	if zone == "mine":
-		if ch == "o":
-			_prop(_tex("prop-vein.png"), x - 0.1, y - 0.15, 40, 36, 5)
-		elif ch == "Z":
-			_prop(_tex("prop-steps.png"), x - 0.1, y - 0.2, 40, 40, 5)
-		elif ch == "Y":
-			_prop(_tex("prop-cache.png"), x - 0.05, y - 0.1, 36, 34, 5)
-		elif ch == "L":
-			_prop(_tex("prop-mouth.png"), x - 0.2, y - 0.5, 46, 54, 8)
+	if zone == "kitchen" or zone == "mine":
+		# Stations stay in the snap. Painted bed stays. Do not hang stickers.
 		return
 	if zone != "wild":
 		return
@@ -332,35 +289,10 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 		_wash(x, y, Color(0.22, 0.32, 0.22, 0.55))
 	elif ch == "s":
 		_wash(x, y, Color(0.62, 0.52, 0.28, 0.28))
-	if ch == "D":
-		_prop(_tex("prop-dock.png"), x - 0.2, y - 0.1, 48, 36, 4)
-	elif ch == "t" or ch == "T":
+	if ch == "F":
 		pass
-	elif ch == "F":
-		pass
-	elif ch == "b" or ch == "^":
-		_prop(_tex("prop-rock.png"), x - 0.1, y - 0.15, 36, 32, 5)
-	elif ch == "K":
-		_prop(_tex("prop-fire.png"), x - 0.15, y - 0.25, 40, 40, 6)
-	elif ch == "R":
-		_prop(_tex("prop-ore.png"), x - 0.1, y - 0.12, 36, 32, 5)
 	elif ch == "J":
 		# Old camp is fire and rock. Search stays in the snap. Not a chest.
-		_prop(_tex("prop-fire.png"), x - 0.2, y - 0.3, 44, 40, 6)
-		_prop(_tex("prop-rock.png"), x + 0.35, y - 0.05, 22, 20, 5)
-	elif ch == "H":
-		# Two dusk wells on the wild bed. Warm umber mouth, not a black ring.
-		var tex := _tex("prop-hole.png")
-		if tex:
-			var well := Look.hung(tex, Vector2((x - 0.22) * TILE, (y - 0.20) * TILE), Vector2(46, 34), 5, 0.05)
-			well.name = "EarthMouth"
-			add_child(well)
-	elif ch == "L":
-		_prop(_tex("prop-gate.png"), x - 0.2, y - 0.55, 48, 56, 8)
-	elif ch == "n":
-		# One dusk nest on the wild bed. Paper silk and umber twigs. Not a den.
-		var silk := _tex("prop-silk.png")
-		if silk:
-			var nest := Look.hung(silk, Vector2((x - 0.18) * TILE, (y - 0.22) * TILE), Vector2(40, 32), 5, 0.05)
-			nest.name = "SilkNest"
-			add_child(nest)
+		pass
+	elif ch == "t" or ch == "T":
+		pass

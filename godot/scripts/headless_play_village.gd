@@ -164,17 +164,17 @@ func _assert_village() -> bool:
 		return false
 	if not _no_fail(valley):
 		return false
-	if not _has_tex(valley, "prop-sprout.png"):
-		printerr("NO_SPROUT")
+	if _has_tex(valley, "prop-sprout.png"):
+		printerr("HUNG_SPROUT")
 		return false
-	if not _has_tex(valley, "prop-ripe.png"):
-		printerr("NO_RIPE")
+	if _has_tex(valley, "prop-ripe.png"):
+		printerr("HUNG_RIPE")
 		return false
-	if not _has_tex(valley, "prop-fortune.png"):
-		printerr("NO_FORTUNE")
+	if _has_tex(valley, "prop-fortune.png"):
+		printerr("HUNG_FORTUNE")
 		return false
-	if not _has_tex(valley, "prop-dawn.png"):
-		printerr("NO_DAWN")
+	if _has_tex(valley, "prop-dawn.png"):
+		printerr("HUNG_DAWN")
 		return false
 	if _has_tex(valley, "prop-tuft.png") or _has_tex(valley, "prop-bush.png"):
 		printerr("OLD_CROP_MOUND")

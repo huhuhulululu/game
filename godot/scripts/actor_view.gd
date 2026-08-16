@@ -50,10 +50,6 @@ func _ready() -> void:
 	_lamp = Sprite2D.new()
 	_lamp.name = "LampStick"
 	_lamp.centered = true
-	_lamp.texture = _tex("prop-torch.png")
-	_lamp.material = Look.prop_mat(0.02)
-	_lamp.texture_filter = TEXTURE_FILTER_LINEAR
-	_lamp.z_index = 2
 	_lamp.visible = false
 	add_child(_lamp)
 	var layer := CanvasLayer.new()
@@ -149,22 +145,8 @@ func set_moving(v: bool) -> void:
 func _sit_lamp() -> void:
 	if _lamp == null:
 		return
-	_lamp.visible = _torch
-	if not _torch or _lamp.texture == null:
-		return
-	var s := 44.0 / float(_lamp.texture.get_height())
-	_lamp.scale = Vector2(s, s)
-	var hand := Vector2(22.0, -20.0)
-	if _sit > 0.45:
-		hand = Vector2(32.0, -_sprite.position.y + 6.0)
-	elif facing == 0:
-		hand = Vector2(-16.0, -26.0)
-	elif facing == 1:
-		hand = Vector2(28.0, -18.0)
-	elif facing == 3:
-		hand = Vector2(-28.0, -18.0)
-	_lamp.position = _sprite.position + hand
-	_lamp.flip_h = facing == 3
+	# Held light stays in the snap. Do not hang a torch sticker.
+	_lamp.visible = false
 
 
 func _tex(path: String) -> Texture2D:
