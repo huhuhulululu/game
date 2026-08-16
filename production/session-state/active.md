@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` kitchen rush; asset-audit beds/props; two-phone story
-- Status: r1-evening-places Complete. No Ready. Two-phone Blocked (human).
+- Task: `/dev-story` thin audio (做 / 喊 / sit + dusk bed)
+- Status: r1-coat-feel story-002 In progress. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: kitchen-rush evidence; beds-props audit PASS; story-003 Blocked
-- Next: `production/epics/r1-togetherness/story-003-two-phone.md` (human — do not `/dev-story`)
+- Files: `story-002-thin-audio.md`; `ear.gd` dusk bed; `play_ear.tscn`
+- Next: keep `/dev-story` on thin-audio until tokens hold. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-002-thin-audio.md` — Thin audio
+- Files changed: story, `ear.gd` dusk bed, `play_ear.tscn`
+- Test written: `godot/project.test.ts` (thin act / shout / sit / dusk lock)
+- Blockers: None
+- Next: `/story-done` after tokens hold. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

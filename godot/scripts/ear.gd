@@ -10,6 +10,8 @@ const RATE := 22050
 
 var muted := false
 var last_heard: PackedStringArray = []
+var ambient := ""
+var bed_on := false
 var _unlocked := false
 
 var _zone := ""
@@ -24,6 +26,8 @@ var _last_ping: Dictionary = {}
 var _voices: Array[AudioStreamPlayer] = []
 var _cursor := 0
 var _clip: Dictionary = {}
+var _bed: AudioStreamPlayer
+var _wanted := ""
 
 
 func _ready() -> void:
@@ -31,6 +35,8 @@ func _ready() -> void:
 		var p := AudioStreamPlayer.new()
 		add_child(p)
 		_voices.append(p)
+	_bed = AudioStreamPlayer.new()
+	add_child(_bed)
 	_clip["step"] = _beep(96.0, 0.045, "sine", 0.016)
 	_clip["shore_a"] = _beep(260.0, 0.20, "sine", 0.012)
 	_clip["shore_b"] = _beep(190.0, 0.16, "sine", 0.010)
@@ -41,15 +47,16 @@ func _ready() -> void:
 	_clip["act"] = _beep(420.0, 0.055, "tri", 0.018)
 	_clip["shout"] = _beep(520.0, 0.11, "sine", 0.020)
 	_clip["sit"] = _beep(196.0, 0.14, "sine", 0.012)
+	_clip["dusk"] = _make_bed(196.0, 330.0, 0.50, 2.4)
 
 
 func set_muted(v: bool) -> void:
 	muted = v
 	unlock()
-	if not muted:
-		return
-	for p in _voices:
-		p.stop()
+	if muted:
+		for p in _voices:
+			p.stop()
+	_apply_bed()
 
 
 func unlock() -> void:
@@ -123,10 +130,41 @@ func hear(snap: Dictionary) -> PackedStringArray:
 	_in_green = green
 	_last_busy = busy
 	last_heard = sounds
+	set_ambient(pick_ambient(snap))
 	if not muted:
 		for kind in sounds:
 			tone(kind)
 	return sounds
+
+
+func pick_ambient(s: Dictionary) -> String:
+	var zone := str(s.get("zone", ""))
+	if zone == "valley" or zone == "wild":
+		return "dusk"
+	return ""
+
+
+func set_ambient(kind: String) -> void:
+	_wanted = kind
+	ambient = kind
+	_apply_bed()
+
+
+func _apply_bed() -> void:
+	var next := "" if muted else _wanted
+	if next == "" or not _clip.has(next):
+		bed_on = false
+		if _bed:
+			_bed.stop()
+		return
+	if bed_on and _bed and _bed.playing and _bed.stream == _clip.get(next):
+		return
+	if _bed == null:
+		return
+	_bed.stream = _clip.get(next)
+	_bed.volume_db = -22.0
+	_bed.play()
+	bed_on = true
 
 
 func tone(kind: String) -> void:
@@ -195,6 +233,36 @@ func _near_fire(snap: Dictionary, rows: Array, tx: int, ty: int) -> bool:
 			if ch == "K" or ch == "J":
 				return true
 	return false
+
+
+func _make_bed(tone_a: float, tone_b: float, noise_gain: float, seconds: float) -> AudioStreamWAV:
+	var n := maxi(64, int(RATE * seconds))
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	var last := 0.0
+	var fade := mini(2048, n / 8)
+	for i in n:
+		var t := float(i) / float(RATE)
+		last = last * 0.97 + (randf() * 2.0 - 1.0) * 0.03
+		var s := last * noise_gain
+		s += sin(TAU * tone_a * t) * 0.08
+		s += sin(TAU * tone_b * t) * 0.04
+		var env := 1.0
+		if i < fade:
+			env = float(i) / float(fade)
+		elif i > n - 1 - fade:
+			env = float(n - 1 - i) / float(fade)
+		var v := int(clampf(s * env * 0.20 * 32767.0, -32767.0, 32767.0))
+		data.encode_s16(i * 2, v)
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = RATE
+	wav.stereo = false
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_begin = 0
+	wav.loop_end = n
+	wav.data = data
+	return wav
 
 
 func _beep(freq: float, dur: float, kind: String, gain: float) -> AudioStreamWAV:

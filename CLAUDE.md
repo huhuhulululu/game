@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Look rebuild, evening places, pair hands, and coat-feel are Complete. No Ready story. Next is human: `production/epics/r1-togetherness/story-003-two-phone.md` (Blocked — Brainbird two-iPhone playtest). Do not `/dev-story` it. Do not recrop FAIL PNGs. Do not pile props on the valley bed. No 魂.
+Look rebuild, evening places, and pair hands are Complete. Next: `production/epics/r1-coat-feel/story-002-thin-audio.md` — 做 / 喊 / sit plus a dusk bed. Two-phone stays Blocked / human. Do not recrop FAIL PNGs. Do not touch `bed-valley.png`. No 魂.
 
 ## Coding Standards
 

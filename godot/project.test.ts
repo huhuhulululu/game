@@ -801,6 +801,42 @@ test("Play shows a shared valley without a second phone", () => {
   }
 });
 
+test("Play hears thin act, shout, sit, and a dusk bed", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_ear.gd"));
+  assert.ok(existsSync("godot/scenes/play_ear.tscn"));
+  const earPlay = readFileSync("godot/scripts/headless_play_ear.gd", "utf8");
+  assert.match(earPlay, /scenes\/play\.tscn/);
+  assert.match(earPlay, /PLAY_EAR_DUSK/);
+  assert.match(earPlay, /PLAY_EAR_ACT/);
+  assert.match(earPlay, /PLAY_EAR_SHOUT/);
+  assert.match(earPlay, /PLAY_EAR_SIT/);
+  assert.match(earPlay, /PLAY_EAR_OK/);
+  assert.match(earPlay, /bed-valley\.png/);
+  assert.match(earPlay, /set_muted/);
+  assert.doesNotMatch(earPlay, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const scene = readFileSync("godot/scenes/play_ear.tscn", "utf8");
+  assert.match(scene, /headless_play_ear\.gd/);
+  const ear = readFileSync("godot/scripts/ear.gd", "utf8");
+  assert.match(ear, /pick_ambient/);
+  assert.match(ear, /dusk/);
+  assert.match(ear, /_make_bed/);
+  assert.match(ear, /bed_on/);
+  assert.match(ear, /"act"/);
+  assert.match(ear, /"shout"/);
+  assert.match(ear, /"sit"/);
+  assert.doesNotMatch(ear, /Net\.send|send_input|send_take/);
+  assert.doesNotMatch(ear, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /tone\("act"\)/);
+  assert.match(play, /tone\("shout"\)/);
+  assert.doesNotMatch(play, /send_.*mute|muted.*send/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_ear|PLAY_EAR_DUSK|_make_bed/);
+  }
+});
+
 test("Godot ear is five thin sounds and one mute that does not change the world", () => {
   assert.ok(existsSync("godot/scripts/ear.gd"));
   const ear = readFileSync("godot/scripts/ear.gd", "utf8");
@@ -813,6 +849,7 @@ test("Godot ear is five thin sounds and one mute that does not change the world"
   assert.match(ear, /act/);
   assert.match(ear, /shout/);
   assert.match(ear, /sit/);
+  assert.match(ear, /dusk/);
   assert.match(ear, /muted/);
   assert.match(ear, /unlock/);
   assert.match(ear, /0\.38/);

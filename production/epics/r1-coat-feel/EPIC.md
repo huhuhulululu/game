@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Onboarding already holds: cover → 开一间 → painted bed with 做 / 喊. Do not write a lecture. Thin walk-cycle and sit-to-stand on the existing cover-coat sheets. No new pack.
+Onboarding already holds. Walk / sit-to-stand is Complete. Thin 做 / 喊 / sit tones are already wired. This pass adds a dusk bed if missing. Mute does not send. No new pack.
 
 ## Governing ADRs
 
@@ -27,3 +27,4 @@ Onboarding already holds: cover → 开一间 → painted bed with 做 / 喊. Do
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
 | 001 | Walk and sit-to-stand | Visual/Feel | Complete | ADR-0003 |
+| 002 | Thin audio | Integration | In progress | ADR-0002 |
