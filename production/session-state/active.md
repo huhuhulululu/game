@@ -1,10 +1,16 @@
 # Session state
 
-- Task: `/dev-story` village / wild look (farm, fortune, board, wilderness)
-- Status: packed-bed, cover-coats, stick-do-shout, first-evening, title, room Complete. Village story Ready.
+- Task: `/story-done` village / wild look
+- Status: packed-bed, cover-coats, stick-do-shout, first-evening, title, room, village-wild Complete.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `production/epics/r1-village-wild/story-001-farm-fortune-board-wild.md`
-- Next: Play-path tokens + tests + HTML5, then `/story-done` village
+- Files: Play-path village scene + wild bed + HTML5
+- Next: later rest / stall look (not opened)
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-village-wild/story-001-farm-fortune-board-wild.md` — Farm, fortune, board, wild
+- Tech debt logged: None
+- Next recommended: later rest / stall look (not this slice)
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

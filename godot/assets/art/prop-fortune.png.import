@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvfortunedusk3"
-path="res://.godot/imported/prop-fortune.png-a3fortunedusk003.ctex"
+uid="uid://bbylk2rug1jye"
+path="res://.godot/imported/prop-fortune.png-cf7d256a2fb43ce1f5052441da94b338.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/art/prop-fortune.png"
-dest_files=["res://.godot/imported/prop-fortune.png-a3fortunedusk003.ctex"]
+dest_files=["res://.godot/imported/prop-fortune.png-cf7d256a2fb43ce1f5052441da94b338.ctex"]
 
 [params]
 
