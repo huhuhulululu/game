@@ -49,6 +49,7 @@ var tiles_cache: Array = []
 var tiles_zone := ""
 var play_seen: Dictionary = {}
 var room_shown := false
+var take_cool := 0
 
 
 func _ready() -> void:
@@ -68,6 +69,8 @@ func _process(_dt: float) -> void:
 	frames += 1
 	if act_cool > 0:
 		act_cool -= 1
+	if take_cool > 0:
+		take_cool -= 1
 	if hold_left > 0:
 		hold_left -= 1
 	if phase == "boot" and frames == 4:
@@ -209,10 +212,7 @@ func _drive_play() -> void:
 			_log("DUMP")
 		else:
 			if _held_id() == "":
-				var extra := _bag_cook()
-				if extra != "":
-					Net.send_take(extra)
-					_log("TAKE " + extra)
+				_take_cook()
 			var cut := _find("C")
 			if cut.x < 0:
 				cut = Vector2i(1, 3)
@@ -246,9 +246,7 @@ func _drive_play() -> void:
 			_log("REENTER")
 		else:
 			if _held_id() == "":
-				var more := _bag_cook()
-				if more != "":
-					Net.send_take(more)
+				_take_cook()
 			var pot := _find("Q")
 			if pot.x < 0:
 				pot = Vector2i(10, 1)
@@ -281,14 +279,11 @@ func _drive_play() -> void:
 		if _zone() != "kitchen":
 			phase = "go_inn"
 			_log("REENTER")
+		elif _held_id() != "":
+			pass
 		else:
-			var extra2 := _bag_cook()
-			if extra2 != "":
-				Net.send_take(extra2)
-				phase = "pot2"
-				_log("TAKE " + extra2)
-			else:
-				phase = "pot2"
+			_take_cook()
+			phase = "pot2"
 	elif phase == "pot2":
 		var pot2 := _find("Q")
 		if pot2.x < 0:
@@ -296,12 +291,16 @@ func _drive_play() -> void:
 		var drive8 := _drive(pot2, 0)
 		move = drive8["move"]
 		var p2 := _prompt()
+		if _held_id() == "":
+			_take_cook()
 		if p2.find("先下炉") >= 0 or p2.find("先切") >= 0:
 			phase = "dump"
 			_log("NEED_PREP")
 		elif bool(drive8["here"]) or p2.find("入锅") >= 0 or p2.find("开煮") >= 0 or p2.find("取 ·") >= 0 or p2.find("锅还在") >= 0:
 			move = Vector2.ZERO
-			if (p2.find("入锅") >= 0 or p2.find("开煮") >= 0 or p2.find("取 ·") >= 0) and _act_once():
+			if _held_id() == "" and p2.find("入锅") >= 0 and p2.find("开煮") < 0:
+				pass
+			elif (p2.find("入锅") >= 0 or p2.find("开煮") >= 0 or p2.find("取 ·") >= 0) and _act_once():
 				act = true
 			if p2.find("取 ·") >= 0:
 				phase = "to_window"
@@ -438,6 +437,17 @@ func _bag_has(id: String) -> bool:
 		if typeof(raw) == TYPE_DICTIONARY and str((raw as Dictionary).get("id", "")) == id:
 			return int((raw as Dictionary).get("n", 0)) > 0
 	return false
+
+
+func _take_cook() -> void:
+	if take_cool > 0 or _held_id() != "":
+		return
+	var extra := _bag_cook()
+	if extra == "":
+		return
+	take_cool = 16
+	Net.send_take(extra)
+	_log("TAKE " + extra)
 
 
 func _bag_cook() -> String:
