@@ -1,7 +1,7 @@
 # Story 023: Cook and dig
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -20,12 +20,12 @@ This is coat-feel 023. Evening-places fireside 019 stays parked.
 
 ## Acceptance Criteria
 
-- [ ] 做 on the kitchen pot tile uses the existing pot / cook rules; wood slip prompt; no pot sticker
-- [ ] 做 on the mine vein tile uses the existing dig / vein rules; wood slip prompt; no pick sticker
-- [ ] Existing beds and existing cook / dig rules; no new art
-- [ ] Play-path prints `PLAY_COOK` / `PLAY_DIG` / `PLAY_COOK_OK`
-- [ ] BODY 240; camera 2.18; same idle face; stickers off; no 魂
-- [ ] 022 water-wild Complete; fireside 019 parked; two-phone Blocked
+- [x] 做 on the kitchen pot tile uses the existing pot / cook rules; wood slip prompt; no pot sticker
+- [x] 做 on the mine vein tile uses the existing dig / vein rules; wood slip prompt; no pick sticker
+- [x] Existing beds and existing cook / dig rules; no new art
+- [x] Play-path prints `PLAY_COOK` / `PLAY_DIG` / `PLAY_COOK_OK`
+- [x] BODY 240; camera 2.18; same idle face; stickers off; no 魂
+- [x] 022 water-wild Complete; fireside 019 parked; two-phone Blocked
 
 ## Implementation Notes
 
@@ -53,9 +53,16 @@ Godot look + the existing kitchen / mine tiles. 做 on the pot or the vein must 
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_cook.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 
 - Depends on: r1-coat-feel 001–022 Complete
 - Unlocks: none. Stop new WORLD systems.
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 6/6. 做 on the pot tile uses the existing pot. 做 on the vein tile digs. Wood slip prompt. No pot or pick sticker.
+**Deviations**: None. Lean: no new bed, no pot prop, no pick prop.
+**Test Evidence**: Integration — `godot/project.test.ts` cook-dig lock + `PLAY_COOK_OK`. `PLAY_WATER_OK` still holds.
+**Code Review**: Skipped — lean

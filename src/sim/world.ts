@@ -752,6 +752,9 @@ export class World {
     const cell = map.cell(f.x, f.y);
     const ch = map.rows[f.y]?.[f.x];
     const reach = this.reachCh(p);
+    if (p.zone === "kitchen" && this.reachAt(p, "plate")) return this.potAct(p);
+    const ore = p.zone === "mine" ? this.reachAt(p, "ore") : null;
+    if (ore) return this.dig(p, ore.x, ore.y);
     if (this.idleFace(cell) && !this.canPass(p) && this.tryEat(p)) return;
 
     if (p.zone === "valley") {
@@ -778,8 +781,6 @@ export class World {
     if (p.zone === "mine") {
       if (cell === "leave" || reach === "L") return this.leaveToValley(p);
       if (cell === "stairs") return this.downFloor();
-      const ore = this.reachAt(p, "ore");
-      if (ore) return this.dig(p, ore.x, ore.y);
       if (cell === "chest") return this.chest(p, f.x, f.y);
       return this.swing(p);
     }

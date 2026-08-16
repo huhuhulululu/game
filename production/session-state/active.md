@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` cook and dig
-- Status: r1-coat-feel 001–022 Complete; 023 cook-dig in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` cook and dig
+- Status: r1-coat-feel 001–023 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-023-cook-dig.md`
-- Next: `/story-done` after `PLAY_COOK_OK`. 做 on the pot cooks. 做 on the vein digs. No pot or pick sticker. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Next: none. Stop. Do not generate a new face. Do not hang a pot or a pick. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-023-cook-dig.md` — Cook and dig
+- Criteria: 6/6. 做 on the pot tile uses the existing pot. 做 on the vein tile digs. No pot or pick sticker.
+- Tests: `godot/project.test.ts` cook-dig lock + `PLAY_COOK_OK`. `PLAY_WATER_OK` still holds.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Do not generate a new face. Fireside 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-023-cook-dig.md` — Cook and dig
