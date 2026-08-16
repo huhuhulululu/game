@@ -484,8 +484,11 @@ func _paint_people(s: Dictionary) -> void:
 		var node: ActorView = _actors[id]
 		var prev: Vector2 = _last_pos.get(id, node.position)
 		var next := Vector2(float(a.get("x", 0)), float(a.get("y", 0)))
+		var row := a.duplicate()
+		if str(row.get("zone", "")) == "":
+			row["zone"] = str(s.get("zone", _zone))
 		node.set_moving(prev.distance_to(next) > 0.4)
-		node.apply(a, Time.get_ticks_msec() / 1000.0)
+		node.apply(row, Time.get_ticks_msec() / 1000.0)
 		_last_pos[id] = next
 	for id in _actors.keys():
 		if not seen.has(id):

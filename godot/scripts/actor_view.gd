@@ -26,6 +26,9 @@ var _bar_bg: Panel
 var _bar_ok: ColorRect
 var _bar_mark: ColorRect
 var _bar_pull: ColorRect
+var _lamp: Sprite2D
+var _torch := false
+var _place := ""
 
 
 func _ready() -> void:
@@ -44,6 +47,15 @@ func _ready() -> void:
 	_sprite.material = Look.person_mat()
 	_sprite.texture_filter = TEXTURE_FILTER_LINEAR
 	add_child(_sprite)
+	_lamp = Sprite2D.new()
+	_lamp.name = "LampStick"
+	_lamp.centered = true
+	_lamp.texture = _tex("prop-torch.png")
+	_lamp.material = Look.prop_mat(0.02)
+	_lamp.texture_filter = TEXTURE_FILTER_LINEAR
+	_lamp.z_index = 2
+	_lamp.visible = false
+	add_child(_lamp)
 	var layer := CanvasLayer.new()
 	layer.layer = 8
 	add_child(layer)
@@ -97,6 +109,10 @@ func apply(data: Dictionary, now: float) -> void:
 	fishing = str(data.get("fishing", "off"))
 	fish_mark = float(data.get("fishMark", 0))
 	fish_pull = float(data.get("fishPull", 0))
+	_place = str(data.get("zone", ""))
+	var held := str(data.get("held", "")).split(":")[0]
+	var has := bool(data.get("torch", false)) or held == "torch"
+	_torch = has and _place != "kitchen" and _place != "mine"
 	_name.text = str(data.get("name", ""))
 	z_index = 20 + int(position.y / 8.0)
 	_t = now
@@ -128,6 +144,27 @@ func _place_name() -> void:
 func set_moving(v: bool) -> void:
 	moving = v
 	_apply()
+
+
+func _sit_lamp() -> void:
+	if _lamp == null:
+		return
+	_lamp.visible = _torch
+	if not _torch or _lamp.texture == null:
+		return
+	var s := 44.0 / float(_lamp.texture.get_height())
+	_lamp.scale = Vector2(s, s)
+	var hand := Vector2(22.0, -20.0)
+	if _sit > 0.45:
+		hand = Vector2(32.0, -_sprite.position.y + 6.0)
+	elif facing == 0:
+		hand = Vector2(-16.0, -26.0)
+	elif facing == 1:
+		hand = Vector2(28.0, -18.0)
+	elif facing == 3:
+		hand = Vector2(-28.0, -18.0)
+	_lamp.position = _sprite.position + hand
+	_lamp.flip_h = facing == 3
 
 
 func _tex(path: String) -> Texture2D:
@@ -173,6 +210,7 @@ func _apply() -> void:
 			bob = -abs(sin(_stride / 0.36 * TAU)) * 2.0
 		_sprite.position = Vector2(0.0, plant + drop + bob)
 	_sprite.flip_h = facing == 3
+	_sit_lamp()
 	modulate = Color(0.70, 0.64, 0.56) if away else Color(1, 1, 1)
 	if _glow:
 		var lit := ping > 0.04

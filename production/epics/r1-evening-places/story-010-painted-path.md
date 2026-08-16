@@ -1,7 +1,7 @@
 # Story 010: Painted path
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Unread wild sits a heavier dusk wash on the painted `bed-wild`; walking lifts tiles from snap `revealed` / `visible`
-- [ ] Mate-shared tiles from the snap sit as written path (server already merges vision)
-- [ ] Kitchen / mine / village stay fully painted; no black ring; plaque unchanged
-- [ ] Play-path proof prints painted-path tokens through `play.tscn`
-- [ ] No 魂; no Wilson map chrome; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Unread wild sits a heavier dusk wash on the painted `bed-wild`; walking lifts tiles from snap `revealed` / `visible`
+- [x] Mate-shared tiles from the snap sit as written path (server already merges vision)
+- [x] Kitchen / mine / village stay fully painted; no black ring; plaque unchanged
+- [x] Play-path proof prints painted-path tokens through `play.tscn`
+- [x] No 魂; no Wilson map chrome; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -46,9 +46,16 @@ Server already writes explored tiles and shares them when mates are near. Do not
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_path.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 129 tests
 
 ## Dependencies
 
 - Depends on: r1-village-wild, r1-evening-places painted fog
 - Unlocks: wild set pieces only if this holds
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_PATH_DARK` `PLAY_PATH_WALK` `PLAY_PATH_SHARE` `PLAY_PATH_KNOWN` `PLAY_PATH_OK`
+**Code Review**: Skipped — lean

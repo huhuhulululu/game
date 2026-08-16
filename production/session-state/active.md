@@ -1,18 +1,24 @@
 # Session state
 
-- Task: `/dev-story` painted path-fill on unread wild
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–009 Complete; 010 In progress. Two-phone Blocked (human). Weather look closed.
+- Task: `/dev-story` painted lantern-stick on the night path
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–010 Complete; 011 In progress. Two-phone Blocked (human). Weather look closed.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-010-painted-path.md`; `Look.PATH_UNREAD` / `PATH_MEMORY`; `zone_map` dusk wash; `play_path.tscn`
-- Next: `/story-done` painted-path after tokens hold. No more weather. Do not `/dev-story` two-phone.
+- Files: `story-011-painted-torch.md`; `prop-torch.png`; ActorView lantern-stick; `play_torch.tscn`
+- Next: `/story-done` painted-torch after tokens hold. No more weather. Do not `/dev-story` two-phone.
 
 ## Session Extract — /dev-story 2026-08-16
-- Story: `production/epics/r1-evening-places/story-010-painted-path.md` — Painted path
-- Files changed: story, `look.gd` path wash colors, `zone_map.gd` dusk wash, `play_path.tscn`
-- Test written: `godot/project.test.ts` (painted-path lock)
-- Tokens: `PLAY_PATH_DARK` `PLAY_PATH_WALK` `PLAY_PATH_SHARE` `PLAY_PATH_KNOWN` `PLAY_PATH_OK`
+- Story: `production/epics/r1-evening-places/story-011-painted-torch.md` — Painted torch
+- Files changed: story, `prop-torch.png`, ActorView lantern-stick, `play_torch.tscn`
+- Test written: `godot/project.test.ts` (painted-torch lock)
+- Tokens: `PLAY_TORCH_HAND` `PLAY_TORCH_PATH` `PLAY_TORCH_HEARTH` `PLAY_TORCH_OK`
 - Blockers: None
-- Next: `/story-done` after tokens hold. Weather stays closed. Two-phone stays Blocked (human).
+- Next: `/story-done` after tokens hold. Weather stays closed. Two-phone stays Blocked (human). 虫洞 next only if torch holds.
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-010-painted-path.md` — Painted path
+- Tech debt logged: None
+- Next recommended: painted torch (`r1-evening-places/story-011-painted-torch.md`)
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

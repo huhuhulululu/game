@@ -957,6 +957,47 @@ test("Play lifts a dusk wash as the wild path is written", () => {
   }
 });
 
+test("Play sits a lantern-stick in the coat hand on the night path", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_torch.gd"));
+  assert.ok(existsSync("godot/scenes/play_torch.tscn"));
+  assert.ok(existsSync("godot/assets/art/prop-torch.png"));
+  assert.ok(existsSync("tools/paint_torch_look.py"));
+  const paint = readFileSync("tools/paint_torch_look.py", "utf8");
+  assert.match(paint, /Does not touch the cover/);
+  assert.match(paint, /key_magenta/);
+  assert.match(paint, /real a=0/);
+  assert.match(paint, /prop-torch/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
+  assert.doesNotMatch(paint, /bed-valley/);
+  assert.doesNotMatch(paint, /Wilson|Don't Starve|Dont Starve|魂/i);
+  const torchPlay = readFileSync("godot/scripts/headless_play_torch.gd", "utf8");
+  assert.match(torchPlay, /scenes\/play\.tscn/);
+  assert.match(torchPlay, /PLAY_TORCH_HAND/);
+  assert.match(torchPlay, /PLAY_TORCH_PATH/);
+  assert.match(torchPlay, /PLAY_TORCH_HEARTH/);
+  assert.match(torchPlay, /PLAY_TORCH_OK/);
+  assert.match(torchPlay, /prop-torch\.png/);
+  assert.match(torchPlay, /搓火把/);
+  assert.match(torchPlay, /火把/);
+  assert.doesNotMatch(torchPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_torch.tscn", "utf8");
+  assert.match(scene, /headless_play_torch\.gd/);
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /prop-torch\.png/);
+  assert.match(actor, /LampStick/);
+  assert.match(actor, /Look\.BODY - 28/);
+  assert.doesNotMatch(actor, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_torch|PLAY_TORCH_HAND|prop-torch|paint_torch/);
+  }
+});
+
 test("Play sits dusk haze on valley and wild, not a fear veil", () => {
   assert.ok(existsSync("godot/scripts/headless_play_fog.gd"));
   assert.ok(existsSync("godot/scenes/play_fog.tscn"));
