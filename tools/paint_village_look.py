@@ -127,41 +127,11 @@ def _soft_paste(dst: np.ndarray, src: Image.Image, xy: tuple[int, int], mask: np
 
 
 def paint_wild_bed() -> Image.Image:
-    """One opaque dusk wilderness plate. Reads valley bed + cover; writes neither."""
-    if not COVER.exists():
-        raise SystemExit("cover-valley.png missing; read-only lock")
-    bed = Image.open(BED).convert("RGB")
-    w, h = 864, 576
-    meadow = bed.crop((340, 200, 900, 560)).resize((w, h), Image.Resampling.LANCZOS)
-    arr = np.asarray(meadow, dtype=np.float32)
-    trees = bed.crop((0, 0, 360, 220)).resize((320, 220), Image.Resampling.LANCZOS)
-    far = bed.crop((400, 0, 900, 180)).resize((w, 200), Image.Resampling.LANCZOS)
-    path = bed.crop((420, 240, 780, 520)).resize((160, 420), Image.Resampling.LANCZOS)
-    water = bed.crop((180, 400, 620, 580)).resize((w, 140), Image.Resampling.LANCZOS)
-    yy = np.linspace(0, 1, 200, dtype=np.float32)[:, None]
-    xx = np.linspace(0, 1, w, dtype=np.float32)[None, :]
-    ridge = np.clip(1.0 - yy / 0.85, 0, 1) * (0.55 + 0.45 * np.exp(-((xx - 0.5) ** 2) / 0.40))
-    _soft_paste(arr, far, (0, 0), ridge)
-    th, tw = 220, 320
-    ty = np.linspace(0, 1, th, dtype=np.float32)[:, None]
-    tx = np.linspace(0, 1, tw, dtype=np.float32)[None, :]
-    left = (1.0 - tx) * (1.0 - 0.25 * ty)
-    right = tx * (1.0 - 0.25 * ty)
-    _soft_paste(arr, trees, (0, 40), left * 0.85)
-    _soft_paste(arr, trees.transpose(Image.FLIP_LEFT_RIGHT), (w - tw, 50), right * 0.80)
-    ph, pw = 420, 160
-    py = np.linspace(0, 1, ph, dtype=np.float32)[:, None]
-    px = np.linspace(-1, 1, pw, dtype=np.float32)[None, :]
-    pmask = np.clip(1.0 - np.abs(px) ** 1.6, 0, 1) * np.clip(1.0 - (py - 0.82) / 0.18, 0, 1)
-    _soft_paste(arr, path, ((w - pw) // 2, 120), pmask * 0.70)
-    wh, ww = 140, w
-    wy = np.linspace(0, 1, wh, dtype=np.float32)[:, None]
-    wx = np.linspace(0, 1, ww, dtype=np.float32)[None, :]
-    wmask = np.clip(wy / 0.55, 0, 1) * (0.40 + 0.60 * (1.0 - np.exp(-((wx - 0.50) ** 2) / 0.22)))
-    _soft_paste(arr, water, (0, h - wh), wmask * 0.75)
-    west = np.linspace(1.06, 0.88, w, dtype=np.float32)[None, :, None]
-    arr = np.clip(arr * west * np.array([1.03, 0.96, 0.80], dtype=np.float32), 0, 255)
-    return Image.fromarray(arr.astype(np.uint8), "RGB")
+    """One opaque dusk wilderness plate. Reads valley bed; writes neither cover nor valley."""
+    spec = importlib.util.spec_from_file_location("paint_one_paint", ROOT / "tools" / "paint_one_paint.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.paint_wild_bed()
 
 
 def save_prop(im: Image.Image, name: str, fade: float) -> None:

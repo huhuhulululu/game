@@ -82,27 +82,11 @@ def stone_tile(size: tuple[int, int]) -> Image.Image:
 
 
 def paint_mine_bed(one: object) -> Image.Image:
-    """Opaque dusk mine floor. Valley dirt + warmed stone. Does not write the cover."""
-    w, h = 576, 324
-    rng = np.random.default_rng(11)
-    floor = Image.open(ART / "floor-valley.png").convert("RGB")
-    dirt = floor.crop((420, 240, 780, 520)).resize((w, h), Image.Resampling.LANCZOS)
-    stone = stone_tile((w, h))
-    arr = np.asarray(dirt, dtype=np.float32) * 0.68 + np.asarray(stone, dtype=np.float32) * 0.32
-    arr = arr * np.array([1.10, 0.98, 0.78], dtype=np.float32) + np.array([10.0, 8.0, 2.0], dtype=np.float32)
-    arr *= 0.90
-    yy = np.linspace(0, 1, h, dtype=np.float32)[:, None]
-    xx = np.linspace(0, 1, w, dtype=np.float32)[None, :]
-    seam = 0.93 + 0.07 * np.sin(yy * h / 20.0 * np.pi) * np.sin(xx * w / 26.0 * np.pi)
-    arr *= seam[:, :, None]
-    arr += rng.normal(0, 3.2, arr.shape)
-    west = np.linspace(1.12, 0.80, w, dtype=np.float32)[None, :, None]
-    warm = np.array([1.08, 0.94, 0.72], dtype=np.float32)
-    edge_x = 0.74 + 0.26 * np.clip(np.minimum(xx, 1.0 - xx) / 0.10, 0, 1)
-    edge_y = 0.70 + 0.30 * np.clip(np.minimum(yy, 1.0 - yy) / 0.12, 0, 1)
-    ceil = 0.84 + 0.16 * yy
-    arr = np.clip(arr * west * warm * edge_x[:, :, None] * edge_y[:, :, None] * ceil[:, :, None], 0, 255)
-    return Image.fromarray(arr.astype(np.uint8), "RGB")
+    """One painted mine. Delegates to one-paint. Does not write the cover."""
+    spec = importlib.util.spec_from_file_location("paint_one_paint", ROOT / "tools" / "paint_one_paint.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.paint_mine_bed()
 
 
 def paint_vein(one: object) -> Image.Image:

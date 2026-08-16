@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` quiet chrome
-- Status: r1-coat-feel 001–007 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` one paint
+- Status: r1-coat-feel 001–007 Complete; 008 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-007-quiet-chrome.md`
-- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-008-one-paint.md`
+- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-008-one-paint.md` — One paint
+- Files changed: story, `paint_one_paint.py`, coat sheets, `bed-kitchen` / `bed-mine` / `bed-wild`, kitchen/mine/village painters, `play_paint.tscn`, `headless_play_paint.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (one-paint lock) + `play_paint.tscn`
+- Tokens: `PLAY_PAINT_COAT` `PLAY_PAINT_BED` `PLAY_PAINT_OK`
+- Next: `/story-done` after tokens hold. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-007-quiet-chrome.md` — Quiet chrome

@@ -25,6 +25,6 @@
 
 ## Presentation
 
-- Required: Wood slip / plaque HUD. 做 / 喊. Mute does not send.
-- Forbidden: Sanity rings, Wilson face, second beige form kit, orange full-screen grade. DOM title/subtitle under the canvas. Empty toast/order geom.
+- Required: Wood slip / plaque HUD. 做 / 喊. Mute does not send. Coat sheets have real a=0. Kitchen / mine / wild are one valley-language painting.
+- Forbidden: Sanity rings, Wilson face, second beige form kit, orange full-screen grade. DOM title/subtitle under the canvas. Empty toast/order geom. Black / dusk plates behind coats. Empty-fill or collage place beds.
 - Guardrail: HUD words, not hue-only bars.

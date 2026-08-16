@@ -73,24 +73,11 @@ def plank_box(one: object, size: tuple[int, int], horizontal: bool = True) -> Im
 
 
 def paint_kitchen_bed(one: object) -> Image.Image:
-    """Opaque dusk kitchen floor. Valley dirt + timber seams. Does not write the cover."""
-    w, h = 576, 324
-    rng = np.random.default_rng(9)
-    floor = Image.open(ART / "floor-valley.png").convert("RGB")
-    dirt = floor.crop((420, 240, 780, 520)).resize((w, h), Image.Resampling.LANCZOS)
-    wood = grain(one, (w, h), horizontal=True)
-    arr = np.asarray(dirt, dtype=np.float32) * 0.55 + np.asarray(wood, dtype=np.float32) * 0.45
-    yy = np.linspace(0, 1, h, dtype=np.float32)[:, None]
-    xx = np.linspace(0, 1, w, dtype=np.float32)[None, :]
-    seam = 0.94 + 0.06 * np.sin(yy * h / 22.0 * np.pi)
-    arr *= seam[:, :, None]
-    arr += rng.normal(0, 3.0, arr.shape)
-    west = np.linspace(1.08, 0.86, w, dtype=np.float32)[None, :, None]
-    warm = np.array([1.05, 0.95, 0.80], dtype=np.float32)
-    edge_x = 0.80 + 0.20 * np.clip(np.minimum(xx, 1.0 - xx) / 0.08, 0, 1)
-    edge_y = 0.84 + 0.16 * np.clip(np.minimum(yy, 1.0 - yy) / 0.10, 0, 1)
-    arr = np.clip(arr * west * warm * edge_x[:, :, None] * edge_y[:, :, None], 0, 255)
-    return Image.fromarray(arr.astype(np.uint8), "RGB")
+    """One painted kitchen. Delegates to one-paint. Does not write the cover."""
+    spec = importlib.util.spec_from_file_location("paint_one_paint", ROOT / "tools" / "paint_one_paint.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.paint_kitchen_bed()
 
 
 def paint_chop(one: object) -> Image.Image:

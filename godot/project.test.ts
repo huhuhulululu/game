@@ -1716,3 +1716,55 @@ test("Play kills leftover load text and empty toast chrome", () => {
     assert.doesNotMatch(src, /play_chrome|PLAY_CHROME_OK|status-title/);
   }
 });
+
+test("Play sits real coat alpha and one painted place language", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-008-one-paint.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-008-one-paint.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-007-quiet-chrome.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_paint.gd"));
+  assert.ok(existsSync("godot/scenes/play_paint.tscn"));
+  const paintPlay = readFileSync("godot/scripts/headless_play_paint.gd", "utf8");
+  assert.match(paintPlay, /scenes\/play\.tscn/);
+  assert.match(paintPlay, /PLAY_PAINT_COAT/);
+  assert.match(paintPlay, /PLAY_PAINT_BED/);
+  assert.match(paintPlay, /PLAY_PAINT_OK/);
+  assert.match(paintPlay, /char-warm-walk\.png/);
+  assert.match(paintPlay, /char-pine-walk\.png/);
+  assert.match(paintPlay, /bed-kitchen\.png/);
+  assert.match(paintPlay, /bed-mine\.png/);
+  assert.match(paintPlay, /bed-wild\.png/);
+  assert.match(paintPlay, /Look\.BODY/);
+  assert.doesNotMatch(paintPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_paint.tscn", "utf8");
+  assert.match(scene, /headless_play_paint\.gd/);
+  const painter = readFileSync("tools/paint_one_paint.py", "utf8");
+  assert.match(painter, /Does not write cover-valley\.png or bed-valley\.png/);
+  assert.match(painter, /refuses to write/);
+  assert.match(painter, /bed-valley\.png/);
+  assert.match(painter, /blob/);
+  assert.doesNotMatch(painter, /cover\.crop/);
+  assert.doesNotMatch(painter, /save\(.*cover-valley/);
+  assert.doesNotMatch(painter, /save\(.*bed-valley/);
+  assert.doesNotMatch(painter, /Wilson|Don't Starve|Dont Starve|魂/i);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 192/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /魂/);
+  assert.doesNotMatch(play, /prop-beast\.png/);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /大衣真透明/);
+  assert.match(art, /厨 \/ 矿 \/ 荒野/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_paint|PLAY_PAINT_OK|paint_one_paint/);
+  }
+});
