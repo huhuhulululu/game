@@ -70,7 +70,7 @@ test("Valley look is one dusk illustration, not DST stickers", () => {
   assert.match(look, /contact\(/);
   assert.match(look, /sit_frac/);
   assert.match(look, /person_mat/);
-  assert.match(look, /const BODY := 128/);
+  assert.match(look, /const BODY := 192/);
   assert.match(look, /const FOOT := 0\.979/);
   assert.match(look, /SHADOW_EAST/);
   assert.match(look, /func air_mat/);
@@ -661,7 +661,7 @@ test("Cover-coat people walk and act on the painted bed", () => {
   assert.match(actor, /SHADOW_EAST/);
   assert.doesNotMatch(actor, /Wilson|Don't Starve|Dont Starve|Wanderer/i);
   const look = readFileSync("godot/scripts/look.gd", "utf8");
-  assert.match(look, /const BODY := 128/);
+  assert.match(look, /const BODY := 192/);
   assert.match(look, /const FOOT := 0\.979/);
   assert.match(look, /const SHADOW_EAST/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
@@ -1533,7 +1533,7 @@ test("Godot evening walk is fish, pot, then a night rest", () => {
 test("Play tears generated stickers off the painted beds", () => {
   assert.ok(existsSync("production/epics/r1-evening-places/story-020-strip-stickers.md"));
   const story = readFileSync("production/epics/r1-evening-places/story-020-strip-stickers.md", "utf8");
-  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  assert.match(story, /\*\*Status\*\*:\s*Complete/);
   for (const name of [
     "bed-valley.png",
     "bed-wild.png",
@@ -1590,5 +1590,42 @@ test("Play tears generated stickers off the painted beds", () => {
   for (const p of srcFiles) {
     const src = readFileSync(p, "utf8");
     assert.doesNotMatch(src, /play_strip|HUNG_HEARTH|prop-hole|paint_strip/);
+  }
+});
+
+test("Play sits a quiet plaque and one bag line", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-005-quiet-hud.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-005-quiet-hud.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_hud.gd"));
+  assert.ok(existsSync("godot/scenes/play_hud.tscn"));
+  const hud = readFileSync("godot/scripts/headless_play_hud.gd", "utf8");
+  assert.match(hud, /scenes\/play\.tscn/);
+  assert.match(hud, /PLAY_HUD_PLAQUE/);
+  assert.match(hud, /PLAY_HUD_BAG/);
+  assert.match(hud, /PLAY_HUD_COAT/);
+  assert.match(hud, /PLAY_HUD_OK/);
+  assert.match(hud, /BAG_EIGHT/);
+  assert.match(hud, /Look\.BODY/);
+  assert.doesNotMatch(hud, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_hud.tscn", "utf8");
+  assert.match(scene, /headless_play_hud\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /268, 62/);
+  assert.match(play, /袋 · /);
+  assert.match(play, /冰柜 · /);
+  assert.match(play, /chip_button/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /魂/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 192/);
+  assert.match(look, /const FOOT := 0\.979/);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /Look\.BODY = 192/);
+  assert.match(art, /一行木签/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_hud|PLAY_HUD_OK|Look\.BODY/);
   }
 });

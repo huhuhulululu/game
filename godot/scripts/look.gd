@@ -18,7 +18,7 @@ const FOG_MIST := Color(0.86, 0.78, 0.64)
 const FOG_SHADE := Color(0.62, 0.54, 0.40)
 const PATH_UNREAD := Color(0.56, 0.42, 0.28, 0.58)
 const PATH_MEMORY := Color(0.68, 0.54, 0.36, 0.20)
-const BODY := 128.0
+const BODY := 192.0
 const FOOT := 0.979
 const SHADOW_EAST := 0.10
 

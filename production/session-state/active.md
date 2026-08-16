@@ -1,10 +1,25 @@
 # Session state
 
-- Task: `/dev-story` strip stickers off painted beds
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–018 Complete; 019 parked; 020 In progress. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` quiet HUD and larger cover-coats
+- Status: r1-coat-feel 001–004 Complete; 005 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-020-strip-stickers.md`
-- Next: `/story-done` strip-stickers after tokens hold. 019 stays parked. Next Ready: walk cycle (P1 coat-feel only). Do not `/dev-story` two-phone.
+- Files: `story-005-quiet-hud.md`, `play.gd`, `look.gd`, `play_hud.tscn`
+- Next: `/story-done` quiet-hud after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-005-quiet-hud.md` — Quiet HUD
+- Files changed: story, `play.gd`, `look.gd`, `headless_look.gd`, `play_hud.tscn`, `headless_play_hud.gd`, `godot/project.test.ts`, ART, control-manifest
+- Test written: `godot/project.test.ts` (quiet-hud lock) + `play_hud.tscn`
+- Tokens: `PLAY_HUD_PLAQUE` `PLAY_HUD_BAG` `PLAY_HUD_COAT` `PLAY_HUD_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. 019 stays parked. Stop new WORLD systems. Next Ready: walk cycle (P1 coat-feel only). Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-evening-places/story-020-strip-stickers.md` — Strip stickers
+- Criteria: 5/5. Torn-off props stay off the beds. Absence locks hold.
+- Tests: `godot/project.test.ts` strip-stickers lock + inverted `PLAY_*_OK` play-paths
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: quiet HUD (`r1-coat-feel/story-005-quiet-hud.md`). 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-020-strip-stickers.md` — Strip stickers

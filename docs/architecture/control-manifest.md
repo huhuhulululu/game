@@ -13,7 +13,7 @@
 
 ## Core
 
-- Required: `ValleyWorld.size_px`, `show_crops`. Actors `Look.BODY = 128`. Camera follow self.
+- Required: `ValleyWorld.size_px`, `show_crops`. Actors `Look.BODY = 192`. Camera follow self.
 - Forbidden: `prop-cover-*`, `prop-hut`, `prop-lodge` on the valley. Stall / anvil / pixel-ball trees on the valley floor.
 - Guardrail: `Look.VALLEY_DUSK = Color(1,1,1)`. `dusk.gdshader` `grade` 0.0.
 

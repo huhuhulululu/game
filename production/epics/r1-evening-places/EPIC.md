@@ -45,4 +45,4 @@ Kitchen, mine, forge, stall, sleep, spoil / icebox, rain, fog, path, seasons, an
 | 017 | Seasons | Visual/Feel | Complete | ADR-0003 |
 | 018 | Mine floors | Integration | Complete | ADR-0002 |
 | 019 | Fireside | Integration | In progress | ADR-0002 |
-| 020 | Strip stickers | Integration | In progress | ADR-0003 |
+| 020 | Strip stickers | Integration | Complete | ADR-0003 |

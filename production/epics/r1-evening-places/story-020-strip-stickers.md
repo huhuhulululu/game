@@ -1,7 +1,7 @@
 # Story 020: Strip stickers
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -18,11 +18,11 @@ Tonight's generated props sat on the painted beds. The live look is 垃圾. Tear
 
 ## Acceptance Criteria
 
-- [ ] Godot play does not hang `prop-hole`, `prop-silk`, `prop-torch`, `prop-camp-pot`, `prop-smith`, `prop-booth`, or any other small generated prop on `bed-valley` / `bed-wild` / `bed-kitchen` / `bed-mine`
-- [ ] Painted beds, cover-coat players, and wood HUD stay; server rules / toasts / prompts stay
-- [ ] No FAIL recrop; `bed-valley.png` not replaced; no new art; no 魂
-- [ ] Play-paths and `godot/project.test.ts` require absence of those hung textures
-- [ ] No look names in `src/`
+- [x] Godot play does not hang `prop-hole`, `prop-silk`, `prop-torch`, `prop-camp-pot`, `prop-smith`, `prop-booth`, or any other small generated prop on `bed-valley` / `bed-wild` / `bed-kitchen` / `bed-mine`
+- [x] Painted beds, cover-coat players, and wood HUD stay; server rules / toasts / prompts stay
+- [x] No FAIL recrop; `bed-valley.png` not replaced; no new art; no 魂
+- [x] Play-paths and `godot/project.test.ts` require absence of those hung textures
+- [x] No look names in `src/`
 
 ## Implementation Notes
 
@@ -49,9 +49,16 @@ Stop hanging stickers in `zone_map.gd`, `valley_logic.gd`, `actor_view.gd`, and 
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + play-path tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Absence locks + 139 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places 001–018 (Complete). 019 stays parked.
 - Unlocks: none. Stop new WORLD systems.
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `godot/project.test.ts` strip-stickers lock + inverted `PLAY_*_OK` play-paths
+**Code Review**: Skipped — lean

@@ -44,6 +44,7 @@ var _map_w := 0
 var _hud_sign: Label
 var _sign_card: Panel
 var _hud_mate: Label
+var _plaque: Panel
 var _plot_sig := ""
 var _ear: ValleyEar
 var _mute_btn: Button
@@ -77,51 +78,52 @@ func _ready() -> void:
 func _hud() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
-	var card := Panel.new()
-	card.position = Vector2(16, 16)
-	card.size = Vector2(320, 148)
-	card.add_theme_stylebox_override("panel", Look.plaque_box())
-	layer.add_child(card)
-	_hud_place = Look.ink_label("山谷", 22)
-	_hud_place.position = Vector2(16, 8)
-	card.add_child(_hud_place)
-	_hud_room = Look.ink_label("", 13, Look.GOLD)
-	_hud_room.position = Vector2(168, 14)
-	card.add_child(_hud_room)
+	_plaque = Panel.new()
+	_plaque.name = "Plaque"
+	_plaque.position = Vector2(16, 16)
+	_plaque.size = Vector2(268, 62)
+	_plaque.add_theme_stylebox_override("panel", Look.plaque_box())
+	layer.add_child(_plaque)
+	_hud_place = Look.ink_label("山谷", 20)
+	_hud_place.position = Vector2(12, 6)
+	_plaque.add_child(_hud_place)
+	_hud_room = Look.ink_label("", 12, Look.GOLD)
+	_hud_room.position = Vector2(148, 10)
+	_plaque.add_child(_hud_room)
 	_hud_ink = Look.ink_label("", 13)
-	_hud_ink.position = Vector2(16, 42)
-	_hud_ink.size = Vector2(288, 22)
-	card.add_child(_hud_ink)
+	_hud_ink.position = Vector2(12, 34)
+	_hud_ink.size = Vector2(244, 20)
+	_plaque.add_child(_hud_ink)
 	_hud_held = Look.ink_label("手里空着", 14, Look.GOLD)
-	_hud_held.position = Vector2(16, 66)
-	_hud_held.size = Vector2(288, 22)
-	card.add_child(_hud_held)
+	_hud_held.position = Vector2(16, 84)
+	_hud_held.size = Vector2(420, 22)
+	layer.add_child(_hud_held)
 	_hud_pot = Look.ink_label("", 13)
-	_hud_pot.position = Vector2(16, 90)
-	_hud_pot.size = Vector2(288, 22)
-	card.add_child(_hud_pot)
+	_hud_pot.position = Vector2(16, 106)
+	_hud_pot.size = Vector2(420, 20)
+	layer.add_child(_hud_pot)
 	_hud_mate = Look.ink_label("", 13, Look.GOLD)
-	_hud_mate.position = Vector2(16, 114)
-	_hud_mate.size = Vector2(288, 24)
-	card.add_child(_hud_mate)
+	_hud_mate.position = Vector2(16, 126)
+	_hud_mate.size = Vector2(420, 20)
+	layer.add_child(_hud_mate)
 	_sign_card = Panel.new()
-	_sign_card.position = Vector2(352, 16)
-	_sign_card.size = Vector2(400, 88)
+	_sign_card.position = Vector2(300, 16)
+	_sign_card.size = Vector2(360, 72)
 	_sign_card.visible = false
 	_sign_card.add_theme_stylebox_override("panel", Look.plaque_box())
 	layer.add_child(_sign_card)
 	_hud_sign = Look.ink_label("", 14, Look.GOLD)
 	_hud_sign.position = Vector2(12, 8)
-	_hud_sign.size = Vector2(376, 72)
+	_hud_sign.size = Vector2(336, 56)
 	_hud_sign.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_sign_card.add_child(_hud_sign)
 	_bag = HBoxContainer.new()
-	_bag.position = Vector2(16, 172)
-	_bag.add_theme_constant_override("separation", 10)
+	_bag.position = Vector2(16, 150)
+	_bag.add_theme_constant_override("separation", 8)
 	layer.add_child(_bag)
 	_ice = HBoxContainer.new()
-	_ice.position = Vector2(16, 228)
-	_ice.add_theme_constant_override("separation", 10)
+	_ice.position = Vector2(16, 196)
+	_ice.add_theme_constant_override("separation", 8)
 	layer.add_child(_ice)
 	_toasts = VBoxContainer.new()
 	_toasts.position = Vector2(900, 16)
@@ -613,29 +615,31 @@ func _food_chip(row: Dictionary) -> String:
 
 func _paint_bag(raws: Array) -> void:
 	var bits: PackedStringArray = []
+	var chips: PackedStringArray = []
+	var first_id := ""
 	for raw in raws:
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
 		var row: Dictionary = raw
+		if first_id == "":
+			first_id = str(row.get("id", ""))
 		bits.append("%s:%s:%s" % [str(row.get("id", "")), _ink_n(row.get("n", 1)), _food_chip(row)])
+		chips.append(_food_chip(row))
 	var sig := "|".join(bits)
 	if sig == _bag_sig:
 		return
 	_bag_sig = sig
 	for child in _bag.get_children():
 		child.queue_free()
-	for raw in raws:
-		if typeof(raw) != TYPE_DICTIONARY:
-			continue
-		var row: Dictionary = raw
-		var id := str(row.get("id", ""))
-		var b := Look.chip_button(_food_chip(row), 148)
-		b.pressed.connect(func() -> void: _take(id))
-		_bag.add_child(b)
+	if chips.is_empty():
+		return
+	var b := Look.chip_button("袋 · " + " · ".join(chips), 520)
+	b.pressed.connect(func() -> void: _take(first_id))
+	_bag.add_child(b)
 
 
 func _paint_ice(raws: Array, zone: String) -> void:
-	# Ice chips stay in the kitchen. Do not hang them on the valley.
+	# Ice stays one kitchen slip. Do not hang chips on the valley.
 	if zone != "kitchen":
 		if _ice_sig != "":
 			_ice_sig = ""
@@ -643,25 +647,27 @@ func _paint_ice(raws: Array, zone: String) -> void:
 				child.queue_free()
 		return
 	var bits: PackedStringArray = []
+	var chips: PackedStringArray = []
+	var first_id := ""
 	for raw in raws:
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
 		var row: Dictionary = raw
+		if first_id == "":
+			first_id = str(row.get("id", ""))
 		bits.append("%s:%s:%s" % [str(row.get("id", "")), _ink_n(row.get("n", 1)), _food_chip(row)])
+		chips.append(_food_chip(row))
 	var sig := "|".join(bits)
 	if sig == _ice_sig:
 		return
 	_ice_sig = sig
 	for child in _ice.get_children():
 		child.queue_free()
-	if bits.is_empty():
+	if chips.is_empty():
 		return
-	_ice.add_child(Look.ink_label("冰柜", 14, Look.GOLD))
-	for raw in raws:
-		if typeof(raw) != TYPE_DICTIONARY:
-			continue
-		var row: Dictionary = raw
-		_ice.add_child(Look.chip_button(_food_chip(row), 148))
+	var b := Look.chip_button("冰柜 · " + " · ".join(chips), 520)
+	b.pressed.connect(func() -> void: _take(first_id))
+	_ice.add_child(b)
 
 
 func _paint_orders(raws: Array, zone: String) -> void:
