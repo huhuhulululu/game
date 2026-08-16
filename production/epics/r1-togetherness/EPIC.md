@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `docs/WORLD.md` + `godot/docs/ART.md`
 > **Architecture Module**: Play + Net + ValleyEar
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0002
 
 ## Overview
 
-Shared vision, pair distance, shout, and room reclaim already live on the Node server. Godot must show them on the painted world from one snap — both coats, 喊 on the other body, a seat that stays. Thin 做 / 喊 / sit if the ear is missing them. Two-iPhone playtest is a later human story.
+Shared vision, pair distance, shout, and room reclaim already live on the Node server. Pair-fish and dual 做 at forge / stall / sleep stay server rules. Godot shows them as two coats on the painted world, not a bonus stat. Two-iPhone playtest is a later human story.
 
 ## Governing ADRs
 
@@ -27,3 +27,4 @@ Shared vision, pair distance, shout, and room reclaim already live on the Node s
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
 | 001 | Shared valley | Integration | Complete | ADR-0002 |
+| 002 | Pair hands | Integration | In progress | ADR-0002 |

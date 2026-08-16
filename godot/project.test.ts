@@ -708,6 +708,35 @@ test("Godot two phones share a shout, a map, and a seat", () => {
   assert.match(world, /this\.near\(/);
 });
 
+test("Play shows pair hands as two coats, not a bonus stat", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_hands.gd"));
+  assert.ok(existsSync("godot/scenes/play_hands.tscn"));
+  const hands = readFileSync("godot/scripts/headless_play_hands.gd", "utf8");
+  assert.match(hands, /scenes\/play\.tscn/);
+  assert.match(hands, /PLAY_PAIR_FISH/);
+  assert.match(hands, /PLAY_PAIR_FORGE/);
+  assert.match(hands, /PLAY_PAIR_STALL/);
+  assert.match(hands, /PLAY_PAIR_SLEEP/);
+  assert.match(hands, /PLAY_HANDS_OK/);
+  assert.match(hands, /两人同钓/);
+  assert.match(hands, /char-warm-fish/);
+  assert.match(hands, /char-warm-forge/);
+  assert.match(hands, /char-warm-sit/);
+  assert.match(hands, /90\.0/);
+  assert.doesNotMatch(hands, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const scene = readFileSync("godot/scenes/play_hands.tscn", "utf8");
+  assert.match(scene, /headless_play_hands\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /两人|一起|等她/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /bond|pair\+|成对\+|魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_hands|PLAY_PAIR_FISH|char-warm-forge/);
+  }
+});
+
 test("Play shows a shared valley without a second phone", () => {
   assert.ok(existsSync("godot/scripts/headless_play_together.gd"));
   assert.ok(existsSync("godot/scenes/play_together.tscn"));

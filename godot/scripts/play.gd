@@ -274,7 +274,7 @@ func _on_snap(s: Dictionary) -> void:
 		_prompt.add_theme_color_override("font_color", Color(0.55, 0.22, 0.14))
 	elif prompt.find("绿") >= 0 or prompt.find("熟了") >= 0:
 		_prompt.add_theme_color_override("font_color", Look.MOSS)
-	elif prompt.find("歇") >= 0:
+	elif prompt.find("歇") >= 0 or prompt.find("两人") >= 0 or prompt.find("一起") >= 0 or prompt.find("等她") >= 0:
 		_prompt.add_theme_color_override("font_color", Look.GOLD)
 	else:
 		_prompt.add_theme_color_override("font_color", Look.INK)

@@ -1,10 +1,16 @@
 # Session state
 
-- Task: `/dev-story` coat walk / sit
-- Status: r1-togetherness Complete. Onboarding already holds. Coat-feel In progress.
+- Task: `/dev-story` pair hands
+- Status: r1-coat-feel Complete. Pair hands In progress.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: ActorView stride + sit ease + play_coats
-- Next: `production/epics/r1-coat-feel/story-001-walk-sit.md`
+- Files: Play-path two coats at fish / forge / stall / sleep
+- Next: `production/epics/r1-togetherness/story-002-pair-hands.md`
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-coat-feel/story-001-walk-sit.md` — Walk and sit-to-stand
+- Tech debt logged: None
+- Next recommended: pair hands (`r1-togetherness/story-002-pair-hands.md`)
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

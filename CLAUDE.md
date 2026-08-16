@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Look rebuild and r1-togetherness are Complete. Onboarding already holds (cover → 开一间 → bed + 做 / 喊). Next: `production/epics/r1-coat-feel/story-001-walk-sit.md`. One painted dusk language. Do not recrop FAIL PNGs. Do not restick FAIL cover props. No 魂.
+Look rebuild, togetherness shared-valley, and coat-feel are Complete. Next: `production/epics/r1-togetherness/story-002-pair-hands.md` — pair-fish and dual 做 as two coats, not a bonus stat. One painted dusk language. Do not recrop FAIL PNGs. Do not pile props on the valley bed. No 魂.
 
 ## Coding Standards
 

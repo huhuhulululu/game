@@ -1,7 +1,7 @@
 # Story 001: Walk and sit-to-stand
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Walk uses a local stride on the existing walk / walk2 sheets (not wall-clock flicker)
-- [ ] Sit and stand ease on the existing sit / stand sheets (no new pack)
-- [ ] `Look.FOOT` stays `0.979`; feet stay planted
-- [ ] Play-path proof prints coat-feel tokens through `play.tscn`
-- [ ] No 魂; no Don't Starve face; no FAIL restick; no Wilson raws
+- [x] Walk uses a local stride on the existing walk / walk2 sheets (not wall-clock flicker)
+- [x] Sit and stand ease on the existing sit / stand sheets (no new pack)
+- [x] `Look.FOOT` stays `0.979`; feet stay planted
+- [x] Play-path proof prints coat-feel tokens through `play.tscn`
+- [x] No 魂; no Don't Starve face; no FAIL restick; no Wilson raws
 
 ## Implementation Notes
 
@@ -43,10 +43,17 @@ Onboarding already holds (cover → 开一间 → bed + 做 / 喊). This slice i
 ## Test Evidence
 
 **Story Type**: Visual/Feel
-**Required evidence**: `godot/project.test.ts` + `play_coats.tscn` tokens
-**Status**: [ ] In progress
+**Required evidence**: `godot/project.test.ts` + `play_coats.tscn` tokens + `production/qa/evidence/coat-walk-sit-evidence.md`
+**Status**: [x] Complete — Play-path tokens + 118 tests
 
 ## Dependencies
 
 - Depends on: r1-two-players cover-coats
 - Unlocks: none
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_COAT_WALK` `PLAY_COAT_SIT` `PLAY_COAT_OK`
+**Code Review**: Skipped — lean

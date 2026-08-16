@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
@@ -26,4 +26,4 @@ Onboarding already holds: cover → 开一间 → painted bed with 做 / 喊. Do
 
 | # | Story | Type | Status | ADR |
 |---|-------|------|--------|-----|
-| 001 | Walk and sit-to-stand | Visual/Feel | In progress | ADR-0003 |
+| 001 | Walk and sit-to-stand | Visual/Feel | Complete | ADR-0003 |
