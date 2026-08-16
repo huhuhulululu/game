@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` painted join
-- Status: r1-coat-feel 001–012 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` quiet hands
+- Status: r1-coat-feel 001–012 Complete; 013 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-012-painted-join.md`
-- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-013-quiet-hands.md`
+- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-013-quiet-hands.md` — Quiet hands
+- Files changed: story, `look.gd` hand_chip, `play.gd` 做/喊/声, `play_quiet.tscn`, `headless_play_quiet.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (quiet-hands lock) + `play_quiet.tscn`
+- Tokens: `PLAY_QUIET_SLIP` `PLAY_QUIET_MUTE` `PLAY_QUIET_OK`
+- Next: `/story-done` after tokens hold. Small wood slips, not a stacked plaque box. No generated sheet. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-012-painted-join.md` — Painted join

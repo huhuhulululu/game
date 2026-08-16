@@ -25,6 +25,6 @@
 
 ## Presentation
 
-- Required: Wood slip / plaque HUD. 做 / 喊. Mute does not send. Coat sheets have real a=0. Kitchen / mine / wild are one valley-language painting. Warm walk is a real step on the idle tan coat. Warm sit is the same tan coat; a smear keeps the painted sit. Room card is dusk wood, not a parchment form. Join-code card is the same dusk wood.
+- Required: Wood slip / plaque HUD. 做 / 喊 / 声 are quiet wood chips, not stacked plaque boxes. Mute does not send. Coat sheets have real a=0. Kitchen / mine / wild are one valley-language painting. Warm walk is a real step on the idle tan coat. Warm sit is the same tan coat; a smear keeps the painted sit. Room card is dusk wood, not a parchment form. Join-code card is the same dusk wood.
 - Forbidden: Sanity rings, Wilson face, second beige form kit, orange full-screen grade. DOM title/subtitle under the canvas. Empty toast/order geom. Black / dusk plates behind coats. Empty-fill or collage place beds.
 - Guardrail: HUD words, not hue-only bars.

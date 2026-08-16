@@ -251,6 +251,42 @@ static func chip_button(text: String, wide := 128) -> Button:
 	return b
 
 
+static func hand_slip() -> StyleBoxTexture:
+	# Tight wood slip for 做 / 喊 / 声. Same tex-slip as the bag. Not a plaque square.
+	var s := StyleBoxTexture.new()
+	s.texture = load("res://assets/art/tex-slip.png") as Texture2D
+	s.texture_margin_left = 10
+	s.texture_margin_top = 8
+	s.texture_margin_right = 10
+	s.texture_margin_bottom = 8
+	s.content_margin_left = 8
+	s.content_margin_top = 4
+	s.content_margin_right = 8
+	s.content_margin_bottom = 4
+	s.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	s.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	return s
+
+
+static func hand_chip(text: String, wide := 64, tall := 36) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(wide, tall)
+	b.size = Vector2(wide, tall)
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_override("font", cjk())
+	b.add_theme_font_size_override("font_size", 15)
+	b.add_theme_color_override("font_color", INK)
+	b.add_theme_color_override("font_hover_color", GOLD)
+	b.add_theme_color_override("font_pressed_color", GOLD)
+	var box := hand_slip()
+	b.add_theme_stylebox_override("normal", box)
+	b.add_theme_stylebox_override("hover", box)
+	b.add_theme_stylebox_override("pressed", box)
+	b.add_theme_stylebox_override("focus", box)
+	return b
+
+
 static func field(placeholder: String) -> LineEdit:
 	var e := LineEdit.new()
 	e.placeholder_text = placeholder

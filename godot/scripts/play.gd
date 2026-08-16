@@ -148,8 +148,8 @@ func _hud() -> void:
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_prompt_bar.add_child(_prompt)
-	var act := Look.wood_button("做", 88)
-	act.position = Vector2(1160, 600)
+	var act := Look.hand_chip("做", 72, 38)
+	act.position = Vector2(1168, 630)
 	act.button_down.connect(func() -> void:
 		_act = true
 		_held = true
@@ -158,8 +158,8 @@ func _hud() -> void:
 	)
 	act.button_up.connect(func() -> void: _held = false)
 	layer.add_child(act)
-	var shout := Look.wood_button("喊", 72)
-	shout.position = Vector2(1070, 560)
+	var shout := Look.hand_chip("喊", 60, 34)
+	shout.position = Vector2(1096, 636)
 	shout.pressed.connect(func() -> void:
 		_ping = true
 		if _ear:
@@ -168,8 +168,9 @@ func _hud() -> void:
 	layer.add_child(shout)
 	_ear = ValleyEar.new()
 	add_child(_ear)
-	_mute_btn = Look.wood_button("声", 72)
-	_mute_btn.position = Vector2(1070, 500)
+	_mute_btn = Look.hand_chip("声", 40, 28)
+	_mute_btn.add_theme_font_size_override("font_size", 13)
+	_mute_btn.position = Vector2(1216, 592)
 	_mute_btn.pressed.connect(_toggle_mute)
 	layer.add_child(_mute_btn)
 	var pad := Control.new()
