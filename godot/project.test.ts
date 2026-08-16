@@ -1249,8 +1249,8 @@ test("Play sits an old camp search on the wild bed", () => {
   assert.match(zone, /Not a chest/);
   const play = readFileSync("godot/scripts/play.gd", "utf8");
   assert.match(play, /日 %s · %s · %s · 金 %s/);
-  assert.match(play, /prompt\.find\("搜"\)/);
-  assert.match(play, /prompt\.find\("并肩"\)/);
+  assert.match(play, /ink\.find\("搜"\)/);
+  assert.match(play, /ink\.find\("并肩"\)/);
   assert.doesNotMatch(play, /_hud_weather/);
   assert.doesNotMatch(play, /魂/);
   const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
