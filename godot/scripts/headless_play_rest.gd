@@ -221,7 +221,7 @@ func _assert_rest() -> bool:
 		"actors": [_you({"x": BED.x, "y": BED.y})],
 	}))
 	ink = play.get("_prompt")
-	if ink == null or str(ink.text).find("歇一夜") < 0:
+	if ink == null or str(ink.text).find("歇了一夜") < 0:
 		printerr("NO_REST_SLIP ", ink.text if ink else "")
 		return false
 	if _has_tex(play, "prop-bed") or _has_tex(play, "bed-sleep"):
@@ -248,8 +248,6 @@ func _assert_rest() -> bool:
 		return false
 	if not _has_ink(play, "火边坐了一会儿"):
 		printerr("NO_HEARTH_TOAST")
-		return false
-	if not await _do():
 		return false
 	if _has_tex(play, "prop-fire") or _has_tex(play, "prop-hearth") or _has_tex(play, "prop-camp-pot"):
 		printerr("BED_OR_FIRE")

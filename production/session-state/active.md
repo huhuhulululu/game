@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` sleep and sit
-- Status: r1-coat-feel 001–023 Complete; 024 In progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` sleep and sit
+- Status: r1-coat-feel 001–024 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-024-sleep-sit.md`
-- Next: `/story-done` after tokens hold. Existing sleep / sit. Existing valley bed. No bed or fire sticker. 023 stays Complete. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
+- Next: none. Stop. Do not generate a new face. Do not hang a bed or a fire. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-024-sleep-sit.md` — Sleep and sit
+- Criteria: 6/6. 做 on the house tile uses the existing sleep. Night at the hearth uses the existing sit. No bed or fire sticker.
+- Tests: `godot/project.test.ts` sleep-sit lock + `PLAY_REST_OK`. `PLAY_COOK_OK` still holds.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Do not generate a new face. Fireside 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-024-sleep-sit.md` — Sleep and sit
