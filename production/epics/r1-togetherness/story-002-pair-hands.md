@@ -1,7 +1,7 @@
 # Story 002: Pair hands
 
 > **Epic**: Togetherness on the painted world
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Pair-fish distance shows two cover-coats in the fish pose on `bed-valley.png` (prompt 两人同钓)
-- [ ] Dual 做 at forge and stall shows two coats, not a pair-stat HUD
-- [ ] Dual sleep shows two sit poses; no second indoor bed
-- [ ] Play-path proof prints pair-hands tokens through `play.tscn`
-- [ ] No 魂; no Don't Starve face; no FAIL restick; no extra valley props; no look names in `src/`
+- [x] Pair-fish distance shows two cover-coats in the fish pose on `bed-valley.png` (prompt 两人同钓)
+- [x] Dual 做 at forge and stall shows two coats, not a pair-stat HUD
+- [x] Dual sleep shows two sit poses; no second indoor bed
+- [x] Play-path proof prints pair-hands tokens through `play.tscn`
+- [x] No 魂; no Don't Starve face; no FAIL restick; no extra valley props; no look names in `src/`
 
 ## Implementation Notes
 
@@ -43,10 +43,17 @@ Server already has `pairFishing`, forge/stall dual 做, and two-person sleep. Do
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `godot/project.test.ts` + `play_hands.tscn` tokens
-**Status**: [ ] In progress
+**Required evidence**: `godot/project.test.ts` + `play_hands.tscn` tokens + `production/qa/evidence/pair-hands-evidence.md`
+**Status**: [x] Complete — Play-path tokens + 119 tests
 
 ## Dependencies
 
 - Depends on: r1-togetherness shared valley, r1-evening-places
 - Unlocks: later two-iPhone playtest (not this slice)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_PAIR_FISH` `PLAY_PAIR_FORGE` `PLAY_PAIR_STALL` `PLAY_PAIR_SLEEP` `PLAY_HANDS_OK`
+**Code Review**: Skipped — lean

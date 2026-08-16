@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `docs/WORLD.md` + `godot/docs/ART.md`
 > **Architecture Module**: ZoneMap + ValleyLogic + Play
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-First-evening rules already work. Kitchen, mine, forge, stall, and sleep still read as a second language (ink stickers, tiled wallpaper). Same painted dusk as the valley bed.
+Kitchen, mine, forge, stall, and sleep sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Server already has `rushed` and pair pass.
 
 ## Governing ADRs
 
@@ -30,3 +30,4 @@ First-evening rules already work. Kitchen, mine, forge, stall, and sleep still r
 | 002 | Mine bed | Visual/Feel | Complete | ADR-0003 |
 | 003 | Forge and stall | Visual/Feel | Complete | ADR-0003 |
 | 004 | Sleep | Visual/Feel | Complete | ADR-0003 |
+| 005 | Kitchen rush | Integration | In progress | ADR-0002 |

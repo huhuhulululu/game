@@ -65,7 +65,7 @@ Existing WORLD / CHARTER / ART beat the template collaboration protocol. Do not 
 
 ## Next studio command
 
-Look rebuild, togetherness shared-valley, and coat-feel are Complete. Next: `production/epics/r1-togetherness/story-002-pair-hands.md` — pair-fish and dual 做 as two coats, not a bonus stat. One painted dusk language. Do not recrop FAIL PNGs. Do not pile props on the valley bed. No 魂.
+Look rebuild, togetherness, and coat-feel are Complete. Next: `production/epics/r1-evening-places/story-005-kitchen-rush.md` — kitchen rush as two coats at hearth / chop / oven / serve. Overcooked only in the kitchen. One painted dusk language. Do not recrop FAIL PNGs. Do not pile props on the valley bed. No 魂.
 
 ## Coding Standards
 

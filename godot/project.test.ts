@@ -708,6 +708,39 @@ test("Godot two phones share a shout, a map, and a seat", () => {
   assert.match(world, /this\.near\(/);
 });
 
+test("Play shows kitchen rush as two coats, only in the kitchen", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_rush.gd"));
+  assert.ok(existsSync("godot/scenes/play_rush.tscn"));
+  const rush = readFileSync("godot/scripts/headless_play_rush.gd", "utf8");
+  assert.match(rush, /scenes\/play\.tscn/);
+  assert.match(rush, /PLAY_RUSH_HOT/);
+  assert.match(rush, /PLAY_RUSH_DO/);
+  assert.match(rush, /PLAY_RUSH_ONLY/);
+  assert.match(rush, /PLAY_RUSH_OK/);
+  assert.match(rush, /堂口热/);
+  assert.match(rush, /char-warm-chop/);
+  assert.match(rush, /char-pine-chop/);
+  assert.match(rush, /bed-kitchen\.png/);
+  assert.match(rush, /prop-hearth\.png/);
+  assert.match(rush, /prop-chop\.png/);
+  assert.match(rush, /prop-oven\.png/);
+  assert.match(rush, /prop-serve\.png/);
+  assert.doesNotMatch(rush, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const scene = readFileSync("godot/scenes/play_rush.tscn", "utf8");
+  assert.match(scene, /headless_play_rush\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /厨房 · 堂口热/);
+  assert.match(play, /_paint_orders/);
+  assert.match(play, /zone != "kitchen"/);
+  assert.match(play, /slip_box/);
+  assert.doesNotMatch(play, /combo|bond|pair\+|成对\+|魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_rush|PLAY_RUSH_HOT|char-warm-chop/);
+  }
+});
+
 test("Play shows pair hands as two coats, not a bonus stat", () => {
   assert.ok(existsSync("godot/scripts/headless_play_hands.gd"));
   assert.ok(existsSync("godot/scenes/play_hands.tscn"));

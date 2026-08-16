@@ -1,10 +1,23 @@
 # Session state
 
-- Task: `/dev-story` pair hands
-- Status: r1-coat-feel Complete. Pair hands In progress.
+- Task: `/dev-story` kitchen rush
+- Status: r1-togetherness pair-hands Complete. Kitchen rush In progress.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path two coats at fish / forge / stall / sleep
-- Next: `production/epics/r1-togetherness/story-002-pair-hands.md`
+- Files: Play-path two coats at kitchen stations; tickets kitchen-only
+- Next: `production/epics/r1-evening-places/story-005-kitchen-rush.md`
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-togetherness/story-002-pair-hands.md` — Pair hands
+- Tech debt logged: None
+- Next recommended: kitchen rush (`r1-evening-places/story-005-kitchen-rush.md`)
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-005-kitchen-rush.md` — Kitchen rush
+- Files changed: story, `play.gd` orders kitchen-only, `play_rush.tscn`
+- Test written: `godot/project.test.ts` (kitchen rush lock)
+- Blockers: None
+- Next: `/story-done` after tokens hold
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

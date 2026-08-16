@@ -274,7 +274,7 @@ func _on_snap(s: Dictionary) -> void:
 		_prompt.add_theme_color_override("font_color", Color(0.55, 0.22, 0.14))
 	elif prompt.find("绿") >= 0 or prompt.find("熟了") >= 0:
 		_prompt.add_theme_color_override("font_color", Look.MOSS)
-	elif prompt.find("歇") >= 0 or prompt.find("两人") >= 0 or prompt.find("一起") >= 0 or prompt.find("等她") >= 0:
+	elif prompt.find("歇") >= 0 or prompt.find("两人") >= 0 or prompt.find("一起") >= 0 or prompt.find("等她") >= 0 or prompt.find("堂口") >= 0:
 		_prompt.add_theme_color_override("font_color", Look.GOLD)
 	else:
 		_prompt.add_theme_color_override("font_color", Look.INK)
@@ -293,7 +293,7 @@ func _on_snap(s: Dictionary) -> void:
 		_hud_pot.text = ""
 	_paint_toasts(s.get("toasts", []))
 	_paint_bag(s.get("bag", []))
-	_paint_orders(s.get("orders", []))
+	_paint_orders(s.get("orders", []), zone)
 	_paint_fish(s)
 	var rows: Array = s.get("tiles", [])
 	if rows.size() > 0:
@@ -566,14 +566,21 @@ func _paint_bag(raws: Array) -> void:
 		_bag.add_child(b)
 
 
-func _paint_orders(raws: Array) -> void:
+func _paint_orders(raws: Array, zone: String) -> void:
+	# Overcooked tickets stay in the kitchen. Do not hang them on the valley.
+	if zone != "kitchen":
+		if _order_sig != "":
+			_order_sig = ""
+			for child in _orders.get_children():
+				child.queue_free()
+		return
 	var bits: PackedStringArray = []
 	for raw in raws:
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
 		var o: Dictionary = raw
 		bits.append("%s:%s" % [str(o.get("recipe", "")), str(o.get("name", ""))])
-	var sig := "|".join(bits)
+	var sig := "kitchen|" + "|".join(bits)
 	if sig == _order_sig:
 		return
 	_order_sig = sig
@@ -584,7 +591,13 @@ func _paint_orders(raws: Array) -> void:
 			continue
 		var o: Dictionary = raw
 		var line := Look.ink_label("%s · %s" % [str(o.get("recipe", "")), str(o.get("name", ""))], 14, Look.GOLD)
-		_orders.add_child(line)
+		line.position = Vector2(12, 6)
+		line.size = Vector2(336, 24)
+		var card := Panel.new()
+		card.custom_minimum_size = Vector2(360, 32)
+		card.add_theme_stylebox_override("panel", Look.slip_box())
+		card.add_child(line)
+		_orders.add_child(card)
 
 
 func _take(item_id: String) -> void:
