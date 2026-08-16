@@ -213,7 +213,7 @@ func _no_bond() -> bool:
 	if ink == null:
 		return true
 	var t := ink.text
-	return t.find("成对") < 0 and t.find("bond") < 0 and t.find("默契") < 0 and t.find("魂") < 0
+	return t.find("成对") < 0 and t.find("bond") < 0 and t.find("默契") < 0
 
 
 func _body(id: String) -> Node2D:

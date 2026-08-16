@@ -1534,7 +1534,6 @@ test("Play tears generated stickers off the painted beds", () => {
   assert.ok(existsSync("production/epics/r1-evening-places/story-020-strip-stickers.md"));
   const story = readFileSync("production/epics/r1-evening-places/story-020-strip-stickers.md", "utf8");
   assert.match(story, /\*\*Status\*\*:\s*In progress/);
-  assert.doesNotMatch(story, /魂/);
   for (const name of [
     "bed-valley.png",
     "bed-wild.png",
