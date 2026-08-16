@@ -269,6 +269,13 @@ func _assert_bag() -> bool:
 	if text.find("青木") < 0 or text.find("蔫了") < 0:
 		printerr("BAG_LOST ", text)
 		return false
+	for child in bag.get_children():
+		if child is Control and (child as Control).size.x > 280.0:
+			printerr("BAG_LONG ", (child as Control).size)
+			return false
+		if child is Control and (child as Control).position.y + bag.position.y > 130.0:
+			printerr("BAG_LOW ", bag.position, (child as Control).position)
+			return false
 	await _feed(_snap({
 		"zone": "kitchen",
 		"tiles": KITCHEN_ROWS,

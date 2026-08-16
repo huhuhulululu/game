@@ -35,9 +35,9 @@ var _place := ""
 
 func _ready() -> void:
 	texture_filter = TEXTURE_FILTER_LINEAR
-	_shadow = Look.contact(Look.BODY * 0.96)
-	_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST * 0.22, 7)
-	_shadow.modulate = Color(1, 1, 1, 1.0)
+	_shadow = Look.contact(Look.BODY * 0.52)
+	_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST, 6)
+	_shadow.modulate = Color(1, 1, 1, 0.90)
 	add_child(_shadow)
 	_glow = Look.ping_glow(88)
 	_glow.visible = false
@@ -59,6 +59,7 @@ func _ready() -> void:
 	add_child(layer)
 	_name = Look.ink_label("", 16, Look.INK)
 	_name.size = Vector2(72, 22)
+	_name.visible = false
 	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layer.add_child(_name)
 	_bars()
@@ -109,8 +110,11 @@ func apply(data: Dictionary, now: float) -> void:
 	var held := str(data.get("held", "")).split(":")[0]
 	var has := bool(data.get("torch", false)) or held == "torch"
 	_torch = has and _place != "kitchen" and _place != "mine"
-	_mine = bool(data.get("mine", false))
-	_name.text = str(data.get("name", ""))
+	_mine = bool(data.get("mine", false)) or (actor_id != "" and actor_id == str(Net.you_id))
+	if _mine:
+		_name.text = ""
+	else:
+		_name.text = str(data.get("name", ""))
 	z_index = 20 + int(position.y / 8.0)
 	_t = now
 	_place_name()
@@ -140,8 +144,17 @@ func _process(dt: float) -> void:
 func _place_name() -> void:
 	if _name == null:
 		return
+	# Your name stays off. Mate ink sits Look.BODY - 28 above the feet, in screen space.
+	if _mine or _name.text == "" or (actor_id != "" and actor_id == str(Net.you_id)):
+		_name.visible = false
+		return
 	var p := get_global_transform_with_canvas().origin
-	_name.position = Vector2(p.x - 36, p.y - Look.BODY - 28 + Look.BODY * 0.10 * _sit)
+	var zoom := 1.0
+	var cam := get_viewport().get_camera_2d()
+	if cam:
+		zoom = maxf(cam.zoom.y, 0.01)
+	var lift := (Look.BODY - 28) * zoom
+	_name.position = Vector2(p.x - 36, p.y - lift - 28.0 * zoom - 12.0 + Look.BODY * 0.10 * _sit * zoom)
 	_name.visible = _name.text != "" and not _mine
 
 
@@ -238,8 +251,8 @@ func _apply() -> void:
 			var grow := 0.85 + (1.0 - pulse) * 0.55
 			_glow.scale = Vector2(grow, grow * 0.72)
 	if _shadow:
-		_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST * 0.22, 7)
-		_shadow.modulate.a = 1.0
+		_shadow.position = Vector2(Look.BODY * Look.SHADOW_EAST, 6)
+		_shadow.modulate.a = 0.90
 	var fight := fishing == "fight" and busy != "sit"
 	if _bar_bg:
 		_bar_bg.visible = fight

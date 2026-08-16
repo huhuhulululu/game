@@ -13,7 +13,7 @@
 
 ## Core
 
-- Required: `ValleyWorld.size_px`, `show_crops`. Actors `Look.BODY = 192`. Camera follow self.
+- Required: `ValleyWorld.size_px`, `show_crops`. Actors `Look.BODY = 240`. Camera follow self. Contact shadow on the path.
 - Forbidden: `prop-cover-*`, `prop-hut`, `prop-lodge` on the valley. Stall / anvil / pixel-ball trees on the valley floor.
 - Guardrail: `Look.VALLEY_DUSK = Color(1,1,1)`. `dusk.gdshader` `grade` 0.0.
 
@@ -25,6 +25,6 @@
 
 ## Presentation
 
-- Required: Wood slip / plaque HUD. 做 / 喊 / 声 are quiet wood chips, not stacked plaque boxes. Empty bottom prompt bar stays hidden; a line is one small wood slip. Name over the coat is quiet ink, or hidden when it is you. Mute does not send. Coat sheets have real a=0. Kitchen / mine / wild are one valley-language painting. Warm walk is a real step on the idle tan coat. Warm sit is the same tan coat; a smear keeps the painted sit. Room card is dusk wood, not a parchment form. Join-code card is the same dusk wood.
+- Required: Wood slip / plaque HUD. Bag is one short slip under the plaque, not a long stripe. 做 / 喊 / 声 are quiet wood chips, not stacked plaque boxes. Empty bottom prompt bar stays hidden; a line is one small wood slip. Your name over the coat is hidden; mate is quiet ink. Mute does not send. Coat sheets have real a=0. Kitchen / mine / wild are one valley-language painting. Warm walk is a real step on the idle tan coat. Warm sit is the same tan coat; a smear keeps the painted sit. Room card is dusk wood, not a parchment form. Join-code card is the same dusk wood.
 - Forbidden: Sanity rings, Wilson face, second beige form kit, orange full-screen grade. DOM title/subtitle under the canvas. Empty toast/order geom. Black / dusk plates behind coats. Empty-fill or collage place beds.
 - Guardrail: HUD words, not hue-only bars.

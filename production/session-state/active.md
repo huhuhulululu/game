@@ -1,10 +1,31 @@
 # Session state
 
-- Task: `/story-done` quiet name
-- Status: r1-coat-feel 001–015 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` coat in the paint
+- Status: r1-coat-feel 001–016 Complete; 017 in progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-015-quiet-name.md`
-- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-017-coat-in-paint.md`
+- Next: `/story-done` after `PLAY_IN_OK`. Hide your name. Short bag under the plaque. Existing coats sit with a contact shadow. No new face. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-017-coat-in-paint.md` — Coat in the paint
+- Files changed: story, `actor_view.gd` name + shadow, `look.gd` BODY 240, `play.gd` short bag, `play_in_paint.tscn`, `headless_play_in_paint.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (coat-in-paint lock) + `play_in_paint.tscn`
+- Tokens: `PLAY_IN_YOU` `PLAY_IN_BAG` `PLAY_IN_SHADOW` `PLAY_IN_OK`
+- Next: `/story-done` after tokens hold. Same idle face. No new person. 016 replaced nothing. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-016-place-beds.md` — Place beds
+- Criteria: 6/6. Opened kitchen / mine / wild / valley. Same dusk language. Replaced nothing.
+- Tests: `godot/project.test.ts` place-beds lock. No new painter. No new play scene.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: coat in the paint (`r1-coat-feel/story-017-coat-in-paint.md`). 019 stays parked. Two-phone stays Blocked (human).
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-016-place-beds.md` — Place beds
+- Files changed: story, evidence. No bed PNG rewritten.
+- Test written: `godot/project.test.ts` (place-beds lock)
+- Tokens: none. Judgment only.
+- Next: `/story-done` — already Complete. Replaced nothing. Then coat-in-paint.
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-015-quiet-name.md` — Quiet name

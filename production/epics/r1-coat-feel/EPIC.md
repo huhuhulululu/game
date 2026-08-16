@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, quiet chrome, one paint, the warm step, the warm sit, the painted room card, the painted join face, quiet hands, the quiet log, and the quiet name hold. Cover-coats sit at `Look.BODY = 192` with real a=0. Warm walk is the same tan coat taking a step, not a sliding idle. A smeared sit is thrown away — the painted sit stays. The 开一间 card is dusk wood, not a parchment form. The 房间码 face is the same dusk wood slip. In-valley 做 / 喊 / 声 are small wood slips, not a stacked plaque box. The bottom prompt bar stays hidden until there is a real line. Your name is hidden; mate is quiet ink, not a boxed nametag. Kitchen / mine / wild read as the same dusk painting. The HUD is a small top-left plaque plus one bag line. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
+Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, quiet chrome, one paint, the warm step, the warm sit, the painted room card, the painted join face, quiet hands, the quiet log, the quiet name, and the place-bed judgment hold. Cover-coats sit at `Look.BODY = 240` with real a=0 and a contact shadow on the path. Warm walk is the same tan coat taking a step, not a sliding idle. A smeared sit is thrown away — the painted sit stays. The 开一间 card is dusk wood, not a parchment form. The 房间码 face is the same dusk wood slip. In-valley 做 / 喊 / 声 are small wood slips, not a stacked plaque box. The bottom prompt bar stays hidden until there is a real line. Your name is hidden; mate is quiet ink, not a boxed nametag. Kitchen / mine / wild already match the valley dusk — nothing replaced. The HUD is a small top-left plaque plus one short bag slip under the plaque. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
 
 ## Governing ADRs
 
@@ -41,3 +41,5 @@ Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat 
 | 013 | Quiet hands | Visual/Feel | Complete | ADR-0003 |
 | 014 | Quiet log | Visual/Feel | Complete | ADR-0003 |
 | 015 | Quiet name | Visual/Feel | Complete | ADR-0003 |
+| 016 | Place beds | Visual/Feel | Complete | ADR-0003 |
+| 017 | Coat in the paint | Visual/Feel | In progress | ADR-0003 |

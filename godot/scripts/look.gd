@@ -18,7 +18,7 @@ const FOG_MIST := Color(0.86, 0.78, 0.64)
 const FOG_SHADE := Color(0.62, 0.54, 0.40)
 const PATH_UNREAD := Color(0.56, 0.42, 0.28, 0.58)
 const PATH_MEMORY := Color(0.68, 0.54, 0.36, 0.20)
-const BODY := 192.0
+const BODY := 240.0
 const FOOT := 0.979
 const SHADOW_EAST := 0.10
 
@@ -343,8 +343,8 @@ static func contact(width: float) -> Sprite2D:
 	var s := Sprite2D.new()
 	s.texture = shadow_tex()
 	s.centered = true
-	s.scale = Vector2(width / 72.0, (width * 0.22) / 40.0)
-	s.z_index = 0
+	s.scale = Vector2(width / 96.0, (width * 0.34) / 40.0)
+	s.z_index = -1
 	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	return s
 

@@ -95,16 +95,17 @@ func _hud() -> void:
 	_hud_ink.size = Vector2(244, 20)
 	_plaque.add_child(_hud_ink)
 	_hud_held = Look.ink_label("手里空着", 14, Look.GOLD)
-	_hud_held.position = Vector2(16, 84)
-	_hud_held.size = Vector2(420, 22)
+	_hud_held.position = Vector2(16, 160)
+	_hud_held.size = Vector2(260, 20)
+	_hud_held.visible = false
 	layer.add_child(_hud_held)
 	_hud_pot = Look.ink_label("", 13)
-	_hud_pot.position = Vector2(16, 106)
-	_hud_pot.size = Vector2(420, 20)
+	_hud_pot.position = Vector2(16, 180)
+	_hud_pot.size = Vector2(260, 20)
 	layer.add_child(_hud_pot)
 	_hud_mate = Look.ink_label("", 13, Look.GOLD)
-	_hud_mate.position = Vector2(16, 126)
-	_hud_mate.size = Vector2(420, 20)
+	_hud_mate.position = Vector2(16, 200)
+	_hud_mate.size = Vector2(260, 20)
 	layer.add_child(_hud_mate)
 	_sign_card = Panel.new()
 	_sign_card.position = Vector2(300, 16)
@@ -118,11 +119,11 @@ func _hud() -> void:
 	_hud_sign.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_sign_card.add_child(_hud_sign)
 	_bag = HBoxContainer.new()
-	_bag.position = Vector2(16, 150)
+	_bag.position = Vector2(16, 82)
 	_bag.add_theme_constant_override("separation", 8)
 	layer.add_child(_bag)
 	_ice = HBoxContainer.new()
-	_ice.position = Vector2(16, 196)
+	_ice.position = Vector2(16, 122)
 	_ice.add_theme_constant_override("separation", 8)
 	layer.add_child(_ice)
 	_toasts = VBoxContainer.new()
@@ -286,7 +287,12 @@ func _on_snap(s: Dictionary) -> void:
 	_paint_mate(s)
 	var you_held := _you_held_name(s)
 	_you_held = _you_held_id(s)
-	_hud_held.text = "手里 · %s" % you_held if you_held != "" else "手里空着"
+	if you_held != "":
+		_hud_held.text = "手里 · %s" % you_held
+		_hud_held.visible = true
+	else:
+		_hud_held.text = "手里空着"
+		_hud_held.visible = false
 	var pot: Array = s.get("pot", [])
 	var ready := str(s.get("potReady", ""))
 	if ready != "":
@@ -502,7 +508,10 @@ func _paint_people(s: Dictionary) -> void:
 		var row := a.duplicate()
 		if str(row.get("zone", "")) == "":
 			row["zone"] = str(s.get("zone", _zone))
-		row["mine"] = id == str(s.get("you", Net.you_id))
+		var you := str(s.get("you", ""))
+		if you == "":
+			you = str(Net.you_id)
+		row["mine"] = id == you
 		node.set_moving(prev.distance_to(next) > 0.4)
 		node.apply(row, Time.get_ticks_msec() / 1000.0)
 		_last_pos[id] = next
@@ -637,7 +646,11 @@ func _paint_bag(raws: Array) -> void:
 		child.queue_free()
 	if chips.is_empty():
 		return
-	var b := Look.chip_button("袋 · " + " · ".join(chips), 520)
+	var b := Look.chip_button("袋 · " + " · ".join(chips), 220)
+	b.custom_minimum_size = Vector2(220, 36)
+	b.size = Vector2(220, 36)
+	b.clip_text = true
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.pressed.connect(func() -> void: _take(first_id))
 	_bag.add_child(b)
 
@@ -669,7 +682,11 @@ func _paint_ice(raws: Array, zone: String) -> void:
 		child.queue_free()
 	if chips.is_empty():
 		return
-	var b := Look.chip_button("冰柜 · " + " · ".join(chips), 520)
+	var b := Look.chip_button("冰柜 · " + " · ".join(chips), 220)
+	b.custom_minimum_size = Vector2(220, 36)
+	b.size = Vector2(220, 36)
+	b.clip_text = true
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.pressed.connect(func() -> void: _take(first_id))
 	_ice.add_child(b)
 
