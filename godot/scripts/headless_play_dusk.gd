@@ -141,7 +141,9 @@ func _no_fail(n: Node) -> bool:
 
 func _assert_dusk() -> bool:
 	await _feed(_snap({}))
-	if not _has_tex(play, "char-warm.png"):
+	await get_tree().create_timer(0.22).timeout
+	await _feed(_snap({}))
+	if not _has_tex(play, "char-warm"):
 		printerr("NO_WARM_COAT")
 		return false
 	if not _has_tex(play, "char-pine"):
@@ -188,6 +190,7 @@ func _assert_dusk() -> bool:
 	if you_ink != null and you_ink.visible:
 		printerr("YOU_TAG")
 		return false
+	await get_tree().process_frame
 	_shot()
 	print("PLAY_DUSK_GRADE")
 	return true

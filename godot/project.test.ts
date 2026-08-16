@@ -2278,8 +2278,8 @@ test("Play grades the existing coats into the bed dusk", () => {
   assert.match(look, /COAT_DUSK/);
   assert.match(look, /func person_mat/);
   assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
-  assert.match(look, /set_shader_parameter\("grade", 0\.44\)/);
-  assert.match(look, /set_shader_parameter\("edge", 0\.14\)/);
+  assert.match(look, /set_shader_parameter\("grade", 0\.58\)/);
+  assert.match(look, /set_shader_parameter\("edge", 0\.12\)/);
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /person_mat/);
   assert.match(actor, /char-%s/);

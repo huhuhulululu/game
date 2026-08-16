@@ -21,8 +21,8 @@ const PATH_MEMORY := Color(0.68, 0.54, 0.36, 0.20)
 const BODY := 240.0
 const FOOT := 0.979
 const SHADOW_EAST := 0.10
-const COAT_DUSK := Color(1.08, 0.82, 0.54)
-const COAT_HAZE := Color(0.68, 0.46, 0.26)
+const COAT_DUSK := Color(1.12, 0.76, 0.46)
+const COAT_HAZE := Color(0.62, 0.40, 0.20)
 
 
 static func cjk() -> Font:
@@ -95,10 +95,10 @@ static func person_mat() -> ShaderMaterial:
 	var m := dusk_mat(0.0)
 	m.set_shader_parameter("dusk", COAT_DUSK)
 	m.set_shader_parameter("haze", COAT_HAZE)
-	m.set_shader_parameter("grade", 0.44)
-	m.set_shader_parameter("fog", 0.05)
-	m.set_shader_parameter("edge", 0.14)
-	m.set_shader_parameter("feet", 0.05)
+	m.set_shader_parameter("grade", 0.58)
+	m.set_shader_parameter("fog", 0.07)
+	m.set_shader_parameter("edge", 0.12)
+	m.set_shader_parameter("feet", 0.06)
 	return m
 
 

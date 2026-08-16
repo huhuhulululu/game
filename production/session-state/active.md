@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` coat dusk
-- Status: r1-coat-feel 001–017 Complete; 018 in progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` coat dusk
+- Status: r1-coat-feel 001–018 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-018-coat-dusk.md`
-- Next: `/story-done` after `PLAY_DUSK_OK`. Warm dusk grade on existing coats. Same face. If the grade is a blob, revert. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Next: Stop. A grade cannot turn the idle sheets into oil paint. Do not generate a new face. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-018-coat-dusk.md` — Coat dusk
+- Criteria: 6/6. Existing coats take a warm umber/gold grade. Same idle face. Bed grade stays 0.0. Not a blob.
+- Tests: `godot/project.test.ts` coat-dusk lock + `PLAY_DUSK_OK`. `PLAY_IN_OK` still holds.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Do not generate a new face. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-018-coat-dusk.md` — Coat dusk
