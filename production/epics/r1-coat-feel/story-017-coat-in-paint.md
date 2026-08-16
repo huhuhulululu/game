@@ -1,7 +1,7 @@
 # Story 017: Coat in the paint
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,12 +18,12 @@ Live leftover after 开一间: the title and valley bed are one painting, but th
 
 ## Acceptance Criteria
 
-- [ ] Your nametag is hidden for real (`PLAY_NAME_YOU`); mate is ink only
-- [ ] Bag is one short slip under the plaque, not a long stripe across the painting
-- [ ] Existing tan / pine coats sit on the path with a contact shadow; scale reads as people (BODY may go above 192); same painted idle face
-- [ ] No new person generated; title couple not pasted; no props hung
-- [ ] `bed-valley.png` not replaced; stickers stay off; no 魂; no look names in `src/`
-- [ ] Play-path + test locks; 015 Complete; 016 Complete; 019 parked; two-phone Blocked
+- [x] Your nametag is hidden for real (`PLAY_NAME_YOU`); mate is ink only
+- [x] Bag is one short slip under the plaque, not a long stripe across the painting
+- [x] Existing tan / pine coats sit on the path with a contact shadow; scale reads as people (BODY may go above 192); same painted idle face
+- [x] No new person generated; title couple not pasted; no props hung
+- [x] `bed-valley.png` not replaced; stickers stay off; no 魂; no look names in `src/`
+- [x] Play-path + test locks; 015 Complete; 016 Complete; 019 parked; two-phone Blocked
 
 ## Implementation Notes
 
@@ -53,9 +53,16 @@ Godot look only. Hide your name even when the snap `you` field is thin. Shorten 
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_in_paint.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 
 - Depends on: r1-coat-feel 001–016 Complete
 - Unlocks: none. Stop new WORLD systems.
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 6/6. Your name is hidden. Bag is a short slip under the plaque. Existing coats sit with a contact shadow at BODY 240. Same idle face.
+**Deviations**: None. Lean: no new person, no generated coat sheet.
+**Test Evidence**: Visual/Feel — `godot/project.test.ts` coat-in-paint lock + `PLAY_IN_OK`. npm test 152 pass. `PLAY_NAME_OK` still holds.
+**Code Review**: Skipped — lean

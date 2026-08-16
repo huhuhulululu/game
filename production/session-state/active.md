@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` coat in the paint
-- Status: r1-coat-feel 001–016 Complete; 017 in progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` coat in the paint
+- Status: r1-coat-feel 001–017 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-017-coat-in-paint.md`
-- Next: `/story-done` after `PLAY_IN_OK`. Hide your name. Short bag under the plaque. Existing coats sit with a contact shadow. No new face. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Next: Stop. Wait unless leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-017-coat-in-paint.md` — Coat in the paint
+- Criteria: 6/6. Your name is hidden. Bag is a short slip under the plaque. Existing coats sit with a contact shadow. Same idle face.
+- Tests: `godot/project.test.ts` coat-in-paint lock + `PLAY_IN_OK`. npm test 152 pass. `PLAY_NAME_OK` still holds.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-017-coat-in-paint.md` — Coat in the paint
