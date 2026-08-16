@@ -2251,3 +2251,52 @@ test("Play sits the existing coats in the painting", () => {
     assert.doesNotMatch(src, /play_in_paint|PLAY_IN_OK|coat-in-paint/);
   }
 });
+
+test("Play grades the existing coats into the bed dusk", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-018-coat-dusk.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-018-coat-dusk.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-017-coat-in-paint.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_dusk.gd"));
+  assert.ok(existsSync("godot/scenes/play_dusk.tscn"));
+  const duskPlay = readFileSync("godot/scripts/headless_play_dusk.gd", "utf8");
+  assert.match(duskPlay, /scenes\/play\.tscn/);
+  assert.match(duskPlay, /PLAY_DUSK_FACE/);
+  assert.match(duskPlay, /PLAY_DUSK_GRADE/);
+  assert.match(duskPlay, /PLAY_DUSK_OK/);
+  assert.match(duskPlay, /char-warm\.png/);
+  assert.match(duskPlay, /NEW_FACE/);
+  assert.doesNotMatch(duskPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_dusk.tscn", "utf8");
+  assert.match(scene, /headless_play_dusk\.gd/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 240/);
+  assert.match(look, /const FOOT := 0\.979/);
+  assert.match(look, /COAT_DUSK/);
+  assert.match(look, /func person_mat/);
+  assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
+  assert.match(look, /set_shader_parameter\("grade", 0\.44\)/);
+  assert.match(look, /set_shader_parameter\("edge", 0\.14\)/);
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /person_mat/);
+  assert.match(actor, /char-%s/);
+  assert.doesNotMatch(actor, /cover-valley/);
+  const shader = readFileSync("godot/shaders/dusk.gdshader", "utf8");
+  assert.match(shader, /uniform float grade/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /大衣吃一口暖褐金 grade/);
+  assert.match(art, /grade` 保持 `0\.0`/);
+  assert.match(art, /person_mat/);
+  assert.match(art, /大衣真透明/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_dusk|PLAY_DUSK_OK|COAT_DUSK/);
+  }
+});

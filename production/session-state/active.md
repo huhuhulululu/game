@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` coat in the paint
-- Status: r1-coat-feel 001–017 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` coat dusk
+- Status: r1-coat-feel 001–017 Complete; 018 in progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-017-coat-in-paint.md`
-- Next: Stop. Wait unless leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Files: `story-018-coat-dusk.md`
+- Next: `/story-done` after `PLAY_DUSK_OK`. Warm dusk grade on existing coats. Same face. If the grade is a blob, revert. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-018-coat-dusk.md` — Coat dusk
+- Files changed: story, `look.gd` person_mat, `dusk.gdshader` west key on grade, `play_dusk.tscn`, `headless_play_dusk.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (coat-dusk lock) + `play_dusk.tscn`
+- Tokens: `PLAY_DUSK_FACE` `PLAY_DUSK_GRADE` `PLAY_DUSK_OK`
+- Next: `/story-done` after tokens hold. Same idle face. No new person. If the grade is a blob, revert. 017 stays Complete. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-017-coat-in-paint.md` — Coat in the paint

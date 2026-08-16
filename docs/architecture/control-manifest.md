@@ -15,7 +15,7 @@
 
 - Required: `ValleyWorld.size_px`, `show_crops`. Actors `Look.BODY = 240`. Camera follow self. Contact shadow on the path.
 - Forbidden: `prop-cover-*`, `prop-hut`, `prop-lodge` on the valley. Stall / anvil / pixel-ball trees on the valley floor.
-- Guardrail: `Look.VALLEY_DUSK = Color(1,1,1)`. `dusk.gdshader` `grade` 0.0.
+- Guardrail: `Look.VALLEY_DUSK = Color(1,1,1)`. `dusk.gdshader` `grade` 0.0 on the bed. Coat warmth is `person_mat` only.
 
 ## Feature
 

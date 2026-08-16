@@ -13,6 +13,9 @@ void fragment() {
 	float foot = smoothstep(1.0 - feet, 1.0, UV.y);
 	a *= 1.0 - foot * 0.62;
 	c.rgb = mix(c.rgb, c.rgb * dusk.rgb, grade);
+	// West key only when a coat grade is on. Beds keep grade 0.0.
+	float west = mix(1.05, 0.93, UV.x);
+	c.rgb *= mix(vec3(1.0), vec3(west, west * 0.97, west * 0.90), grade * 0.45);
 	c.rgb = mix(c.rgb, haze.rgb, fog);
 	COLOR = vec4(c.rgb, a);
 }
