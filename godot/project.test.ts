@@ -801,6 +801,53 @@ test("Play shows a shared valley without a second phone", () => {
   }
 });
 
+test("Play dims the painted bed at night and keeps indoor hearths", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_night.gd"));
+  assert.ok(existsSync("godot/scenes/play_night.tscn"));
+  assert.ok(existsSync("godot/shaders/night.gdshader"));
+  const nightPlay = readFileSync("godot/scripts/headless_play_night.gd", "utf8");
+  assert.match(nightPlay, /scenes\/play\.tscn/);
+  assert.match(nightPlay, /PLAY_NIGHT_DUSK/);
+  assert.match(nightPlay, /PLAY_NIGHT_VALLEY/);
+  assert.match(nightPlay, /PLAY_NIGHT_HEARTH/);
+  assert.match(nightPlay, /PLAY_NIGHT_WILD/);
+  assert.match(nightPlay, /PLAY_NIGHT_OK/);
+  assert.match(nightPlay, /bed-valley\.png/);
+  assert.match(nightPlay, /night\.gdshader/);
+  assert.match(nightPlay, /夜里/);
+  assert.doesNotMatch(nightPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_night.tscn", "utf8");
+  assert.match(scene, /headless_play_night\.gd/);
+  const shader = readFileSync("godot/shaders/night.gdshader", "utf8");
+  assert.match(shader, /painted bed/);
+  assert.match(shader, /0\.78, 0\.68, 0\.52/);
+  assert.doesNotMatch(shader, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /night_mat/);
+  assert.match(look, /NIGHT := Color\(0\.78, 0\.68, 0\.52\)/);
+  assert.match(look, /NIGHT_WILD := Color\(0\.46, 0\.38, 0\.28\)/);
+  assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /set_night/);
+  assert.match(play, /0\.78, 0\.68, 0\.52/);
+  assert.match(play, /0\.46, 0\.38, 0\.28/);
+  assert.match(play, /Never purple night/);
+  assert.match(play, /VALLEY_DUSK/);
+  assert.doesNotMatch(play, /魂/);
+  assert.doesNotMatch(play, /sanity|Sanity/);
+  const valley = readFileSync("godot/scripts/valley_world.gd", "utf8");
+  assert.match(valley, /func set_night/);
+  assert.match(valley, /bed-valley\.png/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /func set_night/);
+  assert.match(zone, /WildBed/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_night|PLAY_NIGHT_VALLEY|night_mat/);
+  }
+});
+
 test("Play smokes title, room, valley, do, shout, kitchen, mine, sit", () => {
   assert.ok(existsSync("godot/scripts/headless_play_smoke.gd"));
   assert.ok(existsSync("godot/scenes/play_smoke.tscn"));

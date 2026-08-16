@@ -321,14 +321,22 @@ func _on_snap(s: Dictionary) -> void:
 		else:
 			_cam.position = target
 	# Painting keeps its own dusk. Never purple night.
+	# Night lives on the bed so painted lamps stay the light.
 	var night := bool(s.get("night", false))
 	var lit := bool(s.get("lit", true))
-	if night and zone != "kitchen" and zone != "mine":
-		_world.modulate = Color(0.46, 0.38, 0.28) if zone == "wild" and not lit else Color(0.78, 0.68, 0.52)
-	elif zone == "kitchen" or zone == "mine":
-		_world.modulate = Color(1.0, 1.0, 1.0)
+	_world.modulate = Color(1.0, 1.0, 1.0) if zone == "kitchen" or zone == "mine" else Look.VALLEY_DUSK
+	if zone == "kitchen" or zone == "mine":
+		_valley.set_night(0.0)
+		_zone_map.set_night(0.0)
+	elif night and zone == "wild":
+		_valley.set_night(0.0)
+		_zone_map.set_night(1.0, Color(0.46, 0.38, 0.28) if not lit else Color(0.78, 0.68, 0.52))
+	elif night:
+		_valley.set_night(1.0, Color(0.78, 0.68, 0.52))
+		_zone_map.set_night(0.0)
 	else:
-		_world.modulate = Look.VALLEY_DUSK
+		_valley.set_night(0.0)
+		_zone_map.set_night(0.0)
 	_paint_people(s)
 	_paint_foes(s.get("enemies", []))
 	if _ear:

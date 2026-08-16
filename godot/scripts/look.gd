@@ -10,6 +10,8 @@ const MOSS := Color(0.25, 0.43, 0.36)
 const DUSK := Color(1.0, 1.0, 1.0)
 const HAZE := Color(0.78, 0.62, 0.46)
 const VALLEY_DUSK := Color(1.0, 1.0, 1.0)
+const NIGHT := Color(0.78, 0.68, 0.52)
+const NIGHT_WILD := Color(0.46, 0.38, 0.28)
 const BODY := 128.0
 const FOOT := 0.979
 const SHADOW_EAST := 0.10
@@ -32,6 +34,15 @@ static func dusk_mat(fog := 0.08) -> ShaderMaterial:
 	m.set_shader_parameter("edge", 0.10)
 	m.set_shader_parameter("feet", 0.16)
 	m.set_shader_parameter("grade", 0.0)
+	return m
+
+
+static func night_mat(shade := NIGHT) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/night.gdshader") as Shader
+	m.set_shader_parameter("night", shade)
+	m.set_shader_parameter("amount", 1.0)
+	m.set_shader_parameter("lamp", 0.50)
 	return m
 
 

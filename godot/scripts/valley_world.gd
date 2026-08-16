@@ -44,3 +44,16 @@ func _fit_bed(bed: Sprite2D) -> void:
 	var sz := size_px()
 	if sheet:
 		bed.scale = Vector2(sz.x / float(sheet.get_width()), sz.y / float(sheet.get_height()))
+
+
+func set_night(amount: float, shade := Look.NIGHT) -> void:
+	var bed := get_node_or_null("Bed") as Sprite2D
+	if bed == null:
+		return
+	bed.modulate = Look.VALLEY_DUSK
+	if amount <= 0.001:
+		bed.material = null
+		return
+	var mat := Look.night_mat(shade)
+	mat.set_shader_parameter("amount", clampf(amount, 0.0, 1.0))
+	bed.material = mat

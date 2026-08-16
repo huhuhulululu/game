@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` place-ear; `/smoke-check` painted evening
-- Status: r1-coat-feel Complete. Two-phone Blocked (human).
+- Task: `/dev-story` painted night (dusk → night on the bed)
+- Status: r1-coat-feel 001–003 Complete; 004 In progress. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: place-ear evidence; `play_smoke.tscn`; `production/qa/evidence/smoke-evening.md`
-- Next: none Ready. Two-phone stays Blocked — do not `/dev-story`.
+- Files: `story-004-painted-night.md`; `night.gdshader`; `play_night.tscn`
+- Next: keep `/dev-story` on painted-night until tokens hold. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-004-painted-night.md` — Painted night
+- Files changed: story, `night.gdshader`, `play.gd` / valley / zone_map night grade, `play_night.tscn`
+- Test written: `godot/project.test.ts` (painted-night lock)
+- Blockers: None
+- Next: `/story-done` after tokens hold. Two-phone stays Blocked (human).
 
 ## Session Extract — /smoke-check 2026-08-16
 - Verdict: PASS

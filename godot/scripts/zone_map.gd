@@ -171,6 +171,18 @@ func _sit_mine_bed() -> void:
 	_sit_bed("bed-mine.png", "MineBed")
 
 
+func set_night(amount: float, shade := Look.NIGHT) -> void:
+	var bed := get_node_or_null("WildBed") as Sprite2D
+	if bed == null:
+		return
+	if amount <= 0.001:
+		bed.material = null
+		return
+	var mat := Look.night_mat(shade)
+	mat.set_shader_parameter("amount", clampf(amount, 0.0, 1.0))
+	bed.material = mat
+
+
 func _sit_bed(name: String, node: String) -> void:
 	var tex := _tex(name)
 	if tex == null:
