@@ -541,9 +541,13 @@ export class World {
   }
 
   private reachWater(p: Actor): boolean {
-    const f = this.facingTile(p);
     const h = toTile(p.x, p.y);
-    return this.waterTile(p.zone, f.x, f.y) || this.waterTile(p.zone, h.x, h.y);
+    if (this.waterTile(p.zone, h.x, h.y)) return true;
+    const f = this.facingTile(p);
+    const map = this.mapFor(p.zone);
+    const cell = map.cell(f.x, f.y);
+    const ch = map.rows[f.y]?.[f.x];
+    return cell === "dock" || ch === "D";
   }
 
   private holdingTorch(p: Actor): boolean {

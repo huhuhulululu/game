@@ -1,7 +1,7 @@
 # Story 022: Water and wild
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -20,12 +20,12 @@ This is coat-feel 022. Evening-places fireside 019 stays parked.
 
 ## Acceptance Criteria
 
-- [ ] 做 on the stream / dock tile starts the existing fish pull; wood slip prompt; no rod sticker
-- [ ] 做 on the valley wild / out-gate tile enters `bed-wild`; no gate sticker
-- [ ] Existing beds and existing fish rules; no new art
-- [ ] Play-path prints `PLAY_WATER_FISH` / `PLAY_ENTER_WILD` / `PLAY_WATER_OK`
-- [ ] BODY 240; camera 2.18; same idle face; stickers off; no 魂
-- [ ] 021 enter-place Complete; fireside 019 parked; two-phone Blocked
+- [x] 做 on the stream / dock tile starts the existing fish pull; wood slip prompt; no rod sticker
+- [x] 做 on the valley wild / out-gate tile enters `bed-wild`; no gate sticker
+- [x] Existing beds and existing fish rules; no new art
+- [x] Play-path prints `PLAY_WATER_FISH` / `PLAY_ENTER_WILD` / `PLAY_WATER_OK`
+- [x] BODY 240; camera 2.18; same idle face; stickers off; no 魂
+- [x] 021 enter-place Complete; fireside 019 parked; two-phone Blocked
 
 ## Implementation Notes
 
@@ -53,9 +53,16 @@ Godot look + the existing dock / gate tiles. 做 on the water or the out-gate mu
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_water.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 
 - Depends on: r1-coat-feel 001–021 Complete
 - Unlocks: none. Stop new WORLD systems.
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 6/6. 做 on the stream / dock tile starts the existing fish pull. 做 on the out-gate enters `bed-wild`. Wood slip prompt. No rod or gate sticker.
+**Deviations**: None. Lean: no new bed, no rod prop, no gate prop.
+**Test Evidence**: Integration — `godot/project.test.ts` water-wild lock + `PLAY_WATER_OK`. `PLAY_ENTER_OK` still holds.
+**Code Review**: Skipped — lean

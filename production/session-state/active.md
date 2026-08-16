@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` water and wild
-- Status: r1-coat-feel 001–021 Complete; 022 water-wild in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` water and wild
+- Status: r1-coat-feel 001–022 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-022-water-wild.md`
-- Next: `/story-done` after `PLAY_WATER_OK`. 做 on water fishes. 做 on the out-gate enters wild. No rod or gate sticker. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Next: none. Stop. Do not generate a new face. Do not hang a rod or a gate. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-022-water-wild.md` — Water and wild
+- Criteria: 6/6. 做 on the stream / dock tile starts the existing fish pull. 做 on the out-gate enters `bed-wild`. No rod or gate sticker.
+- Tests: `godot/project.test.ts` water-wild lock + `PLAY_WATER_OK`. `PLAY_ENTER_OK` still holds.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Do not generate a new face. Fireside 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-022-water-wild.md` — Water and wild
