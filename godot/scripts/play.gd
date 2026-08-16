@@ -127,12 +127,15 @@ func _hud() -> void:
 	layer.add_child(_ice)
 	_toasts = VBoxContainer.new()
 	_toasts.position = Vector2(900, 16)
-	_toasts.size = Vector2(360, 220)
+	_toasts.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toasts.visible = false
 	_toasts.add_theme_constant_override("separation", 6)
 	layer.add_child(_toasts)
 	_orders = VBoxContainer.new()
 	_orders.position = Vector2(900, 250)
-	_orders.size = Vector2(360, 160)
+	_orders.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_orders.visible = false
+	_orders.add_theme_constant_override("separation", 6)
 	layer.add_child(_orders)
 	_prompt_bar = Panel.new()
 	_prompt_bar.position = Vector2(350, 598)
@@ -565,26 +568,33 @@ func _paint_fish(s: Dictionary) -> void:
 func _paint_toasts(raws: Array) -> void:
 	var lines: PackedStringArray = []
 	for raw in raws:
-		lines.append(str(raw))
+		var line := str(raw).strip_edges()
+		if line != "":
+			lines.append(line)
 	var sig := "|".join(lines)
 	if sig == _toast_sig:
+		_toasts.visible = not lines.is_empty()
 		return
 	_toast_sig = sig
 	for child in _toasts.get_children():
 		child.queue_free()
+	if lines.is_empty():
+		_toasts.visible = false
+		return
+	_toasts.visible = true
 	var n := 0
-	for raw in raws:
+	for line in lines:
 		if n >= 4:
 			break
-		var line := Look.ink_label(str(raw), 14)
-		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		line.custom_minimum_size = Vector2(340, 0)
+		var ink := Look.ink_label(line, 14)
+		ink.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ink.custom_minimum_size = Vector2(340, 0)
 		var card := Panel.new()
 		card.custom_minimum_size = Vector2(360, 36)
 		card.add_theme_stylebox_override("panel", Look.plaque_box())
-		card.add_child(line)
-		line.position = Vector2(12, 8)
-		line.size = Vector2(336, 40)
+		card.add_child(ink)
+		ink.position = Vector2(12, 8)
+		ink.size = Vector2(336, 40)
 		_toasts.add_child(card)
 		n += 1
 
@@ -677,15 +687,21 @@ func _paint_orders(raws: Array, zone: String) -> void:
 			_order_sig = ""
 			for child in _orders.get_children():
 				child.queue_free()
+		_orders.visible = false
 		return
 	var bits: PackedStringArray = []
 	for raw in raws:
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
 		var o: Dictionary = raw
-		bits.append("%s:%s" % [str(o.get("recipe", "")), str(o.get("name", ""))])
+		var dish := str(o.get("recipe", "")).strip_edges()
+		var who := str(o.get("name", "")).strip_edges()
+		if dish == "" and who == "":
+			continue
+		bits.append("%s:%s" % [dish, who])
 	var sig := "kitchen|" + "|".join(bits)
 	if sig == _order_sig:
+		_orders.visible = _orders.get_child_count() > 0
 		return
 	_order_sig = sig
 	for child in _orders.get_children():
@@ -694,7 +710,11 @@ func _paint_orders(raws: Array, zone: String) -> void:
 		if typeof(raw) != TYPE_DICTIONARY:
 			continue
 		var o: Dictionary = raw
-		var line := Look.ink_label("%s · %s" % [str(o.get("recipe", "")), str(o.get("name", ""))], 14, Look.GOLD)
+		var dish2 := str(o.get("recipe", "")).strip_edges()
+		var who2 := str(o.get("name", "")).strip_edges()
+		if dish2 == "" and who2 == "":
+			continue
+		var line := Look.ink_label("%s · %s" % [dish2, who2], 14, Look.GOLD)
 		line.position = Vector2(12, 6)
 		line.size = Vector2(336, 24)
 		var card := Panel.new()
@@ -702,6 +722,11 @@ func _paint_orders(raws: Array, zone: String) -> void:
 		card.add_theme_stylebox_override("panel", Look.slip_box())
 		card.add_child(line)
 		_orders.add_child(card)
+	if _orders.get_child_count() == 0:
+		_order_sig = ""
+		_orders.visible = false
+		return
+	_orders.visible = true
 
 
 func _take(item_id: String) -> void:

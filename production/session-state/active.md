@@ -1,10 +1,18 @@
 # Session state
 
-- Task: `/story-done` coat walk cycle
-- Status: r1-coat-feel 001–006 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` quiet chrome
+- Status: r1-coat-feel 001–006 Complete; 007 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-006-coat-walk.md`
-- Next: Stop. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-007-quiet-chrome.md`
+- Next: `/story-done` after tokens hold. Then stop. 019 stays parked. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-007-quiet-chrome.md` — Quiet chrome
+- Files changed: story, `shell.html`, `project.godot`, `play.gd`, `play_chrome.tscn`, `headless_play_chrome.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (quiet-chrome lock) + `play_chrome.tscn`
+- Tokens: `PLAY_CHROME_EMPTY` `PLAY_CHROME_DO` `PLAY_CHROME_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-006-coat-walk.md` — Coat walk cycle

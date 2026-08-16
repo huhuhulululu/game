@@ -1667,3 +1667,45 @@ test("Play walks a four-beat cycle on the existing coats", () => {
     assert.doesNotMatch(src, /play_walk|PLAY_WALK_OK|_walk_beat/);
   }
 });
+
+test("Play kills leftover load text and empty toast chrome", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-007-quiet-chrome.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-007-quiet-chrome.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  assert.ok(existsSync("godot/scripts/headless_play_chrome.gd"));
+  assert.ok(existsSync("godot/scenes/play_chrome.tscn"));
+  const chrome = readFileSync("godot/scripts/headless_play_chrome.gd", "utf8");
+  assert.match(chrome, /scenes\/play\.tscn/);
+  assert.match(chrome, /PLAY_CHROME_EMPTY/);
+  assert.match(chrome, /PLAY_CHROME_DO/);
+  assert.match(chrome, /PLAY_CHROME_OK/);
+  assert.match(chrome, /EMPTY_TOAST_BOX/);
+  assert.match(chrome, /TITLE_COUPLE/);
+  assert.doesNotMatch(chrome, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_chrome.tscn", "utf8");
+  assert.match(scene, /headless_play_chrome\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_toasts.visible = false/);
+  assert.match(play, /_orders.visible = false/);
+  assert.doesNotMatch(play, /360, 220/);
+  assert.doesNotMatch(play, /360, 160/);
+  assert.doesNotMatch(play, /魂/);
+  const shell = readFileSync("godot/html/shell.html", "utf8");
+  assert.doesNotMatch(shell, /status-title/);
+  assert.doesNotMatch(shell, /status-tag/);
+  assert.doesNotMatch(shell, /两部 iPhone/);
+  assert.match(shell, /status-splash/);
+  const proj = readFileSync("godot/project.godot", "utf8");
+  assert.match(proj, /boot_splash\/fullsize=true/);
+  assert.match(proj, /boot_splash\/image="res:\/\/assets\/art\/cover-valley\.png"/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 192/);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /DOM 标题/);
+  assert.match(art, /空木框/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_chrome|PLAY_CHROME_OK|status-title/);
+  }
+});
