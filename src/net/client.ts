@@ -15,6 +15,7 @@ export function mergeSnap(prev: WorldSnap | null, next: WorldSnap): WorldSnap {
     fires: next.full ? next.fires : prev.fires,
     visible: next.visible,
     bag: next.bag,
+    ice: next.ice,
     cookbook: next.cookbook,
     full: false,
   };
@@ -31,6 +32,7 @@ export function connectRoom(
   let closed = false;
   let last: WorldSnap | null = null;
   let tries = 0;
+  let roomId = room;
   const send = (msg: ClientMsg) => {
     if (sock?.readyState === WebSocket.OPEN) sock.send(JSON.stringify(msg));
   };
@@ -39,12 +41,13 @@ export function connectRoom(
     sock = new WebSocket(wsUrl());
     sock.addEventListener("open", () => {
       tries = 0;
-      send({ t: "hello", room, name, prefer: prefer || undefined });
+      send({ t: "hello", room: roomId, name, prefer: prefer || undefined });
     });
     sock.addEventListener("message", (ev) => {
       const msg = JSON.parse(String(ev.data)) as ServerMsg;
       if (msg.t === "snap") {
         last = mergeSnap(last, msg.snap);
+        roomId = last.room;
         onSnap(last);
       }
       if (msg.t === "err") onErr(msg.text);

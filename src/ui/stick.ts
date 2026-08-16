@@ -26,7 +26,7 @@ export function mountStick(root: HTMLElement, name: string): { input: InputState
     const mag = Math.hypot(x, y) || 1;
     input.x = mag > 1 ? x / mag : x;
     input.y = mag > 1 ? y / mag : y;
-    knob.style.transform = `translate(${input.x * 22}px, ${input.y * 22}px)`;
+    knob.style.transform = `translate(${input.x * 36}px, ${input.y * 36}px)`;
   };
 
   const down = (e: PointerEvent) => {

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/headless_play_chrome.gd" id="1_chrome"]
+
+[node name="PlayChrome" type="Node"]
+script = ExtResource("1_chrome")

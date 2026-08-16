@@ -1,0 +1,1023 @@
+extends Node2D
+
+## Valley / mine / kitchen. Authority stays on the server.
+
+var _world: Node2D
+var _valley: ValleyWorld
+var _zone_map: ZoneMap
+var _actors: Dictionary = {}
+var _foes: Array[Node2D] = []
+var _cam: Camera2D
+var _hud_place: Label
+var _hud_room: Label
+var _hud_ink: Label
+var _hud_held: Label
+var _hud_pot: Label
+var _prompt: Label
+var _prompt_bar: Panel
+var _toasts: VBoxContainer
+var _bag: HBoxContainer
+var _ice: HBoxContainer
+var _orders: VBoxContainer
+var _stick_v := Vector2.ZERO
+var _act := false
+var _held := false
+var _ping := false
+var _stick_down := false
+var _stick_origin := Vector2.ZERO
+var _last_pos: Dictionary = {}
+var _tiles: Array = []
+var _zone := "valley"
+var _you_held := ""
+var _cam_locked := false
+var _bag_sig := ""
+var _ice_sig := ""
+var _toast_sig := ""
+var _order_sig := ""
+var _fish_hud: Panel
+var _fish_ok: ColorRect
+var _fish_mark: ColorRect
+var _fish_pull: ColorRect
+var _atlas: TextureRect
+var _visible: Dictionary = {}
+var _map_w := 0
+var _hud_sign: Label
+var _sign_card: Panel
+var _hud_mate: Label
+var _plaque: Panel
+var _plot_sig := ""
+var _ear: ValleyEar
+var _mute_btn: Button
+var _you_at := Vector2.ZERO
+var _walk_aim := Vector2.ZERO
+var _walk_on := false
+var _sent_move := Vector2.ZERO
+var _sent_act := false
+
+
+func _ready() -> void:
+	texture_filter = TEXTURE_FILTER_LINEAR
+	_world = Node2D.new()
+	_world.y_sort_enabled = true
+	add_child(_world)
+	_valley = preload("res://scenes/valley.tscn").instantiate() as ValleyWorld
+	_world.add_child(_valley)
+	_zone_map = ZoneMap.new()
+	_zone_map.visible = false
+	_world.add_child(_zone_map)
+	_cam = Camera2D.new()
+	_cam.zoom = Vector2(2.18, 2.18)
+	_cam.position = _valley.size_px() * 0.5
+	_cam.position_smoothing_enabled = false
+	_cam.position_smoothing_speed = 6
+	add_child(_cam)
+	_cam.make_current()
+	_hud()
+	add_child(Look.air_layer())
+	_bind_hands()
+	_grab_web_focus()
+	if not Net.snap_got.is_connected(_on_snap):
+		Net.snap_got.connect(_on_snap)
+	if Net.last_snap.size() > 0:
+		_on_snap(Net.last_snap)
+
+
+func _hud() -> void:
+	var layer := CanvasLayer.new()
+	add_child(layer)
+	_plaque = Panel.new()
+	_plaque.name = "Plaque"
+	_plaque.position = Vector2(16, 16)
+	_plaque.size = Vector2(268, 62)
+	_plaque.add_theme_stylebox_override("panel", Look.plaque_box())
+	layer.add_child(_plaque)
+	_hud_place = Look.ink_label("山谷", 20)
+	_hud_place.position = Vector2(12, 6)
+	_plaque.add_child(_hud_place)
+	_hud_room = Look.ink_label("", 12, Look.GOLD)
+	_hud_room.position = Vector2(148, 10)
+	_plaque.add_child(_hud_room)
+	_hud_ink = Look.ink_label("", 13)
+	_hud_ink.position = Vector2(12, 34)
+	_hud_ink.size = Vector2(244, 20)
+	_plaque.add_child(_hud_ink)
+	_hud_held = Look.ink_label("手里空着", 14, Look.GOLD)
+	_hud_held.position = Vector2(16, 160)
+	_hud_held.size = Vector2(260, 20)
+	_hud_held.visible = false
+	layer.add_child(_hud_held)
+	_hud_pot = Look.ink_label("", 13)
+	_hud_pot.position = Vector2(16, 180)
+	_hud_pot.size = Vector2(260, 20)
+	layer.add_child(_hud_pot)
+	_hud_mate = Look.ink_label("", 13, Look.GOLD)
+	_hud_mate.position = Vector2(16, 200)
+	_hud_mate.size = Vector2(260, 20)
+	layer.add_child(_hud_mate)
+	_sign_card = Panel.new()
+	_sign_card.position = Vector2(300, 16)
+	_sign_card.size = Vector2(360, 72)
+	_sign_card.visible = false
+	_sign_card.add_theme_stylebox_override("panel", Look.plaque_box())
+	layer.add_child(_sign_card)
+	_hud_sign = Look.ink_label("", 14, Look.GOLD)
+	_hud_sign.position = Vector2(12, 8)
+	_hud_sign.size = Vector2(336, 56)
+	_hud_sign.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_sign_card.add_child(_hud_sign)
+	_bag = HBoxContainer.new()
+	_bag.position = Vector2(16, 82)
+	_bag.add_theme_constant_override("separation", 8)
+	layer.add_child(_bag)
+	_ice = HBoxContainer.new()
+	_ice.position = Vector2(16, 122)
+	_ice.add_theme_constant_override("separation", 8)
+	layer.add_child(_ice)
+	_toasts = VBoxContainer.new()
+	_toasts.position = Vector2(900, 16)
+	_toasts.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toasts.visible = false
+	_toasts.add_theme_constant_override("separation", 6)
+	layer.add_child(_toasts)
+	_orders = VBoxContainer.new()
+	_orders.position = Vector2(900, 250)
+	_orders.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_orders.visible = false
+	_orders.add_theme_constant_override("separation", 6)
+	layer.add_child(_orders)
+	_prompt_bar = Panel.new()
+	_prompt_bar.position = Vector2(460, 640)
+	_prompt_bar.size = Vector2(360, 36)
+	_prompt_bar.visible = false
+	_prompt_bar.add_theme_stylebox_override("panel", Look.slip_box())
+	layer.add_child(_prompt_bar)
+	_prompt = Look.ink_label("", 16)
+	_prompt.position = Vector2(12, 6)
+	_prompt.size = Vector2(336, 24)
+	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_prompt_bar.add_child(_prompt)
+	var act := Look.hand_chip("做", 72, 38)
+	act.position = Vector2(1168, 630)
+	act.button_down.connect(func() -> void:
+		_act = true
+		_held = true
+		if _ear:
+			_ear.tone("act")
+	)
+	act.button_up.connect(func() -> void: _held = false)
+	layer.add_child(act)
+	var shout := Look.hand_chip("喊", 60, 34)
+	shout.position = Vector2(1096, 636)
+	shout.pressed.connect(func() -> void:
+		_ping = true
+		if _ear:
+			_ear.tone("shout")
+	)
+	layer.add_child(shout)
+	_ear = ValleyEar.new()
+	add_child(_ear)
+	_mute_btn = Look.hand_chip("声", 40, 28)
+	_mute_btn.add_theme_font_size_override("font_size", 13)
+	_mute_btn.position = Vector2(1216, 592)
+	_mute_btn.pressed.connect(_toggle_mute)
+	layer.add_child(_mute_btn)
+	var pad := Control.new()
+	pad.name = "StickPad"
+	pad.position = Vector2(36, 560)
+	pad.size = Vector2(120, 120)
+	pad.mouse_filter = Control.MOUSE_FILTER_STOP
+	pad.gui_input.connect(_on_pad)
+	layer.add_child(pad)
+	_fish_hud = Panel.new()
+	_fish_hud.position = Vector2(350, 548)
+	_fish_hud.size = Vector2(560, 44)
+	_fish_hud.visible = false
+	_fish_hud.add_theme_stylebox_override("panel", Look.paper_box())
+	layer.add_child(_fish_hud)
+	_fish_ok = ColorRect.new()
+	_fish_ok.position = Vector2(16 + 528 * 0.38, 10)
+	_fish_ok.size = Vector2(528 * 0.34, 16)
+	_fish_ok.color = Look.MOSS
+	_fish_hud.add_child(_fish_ok)
+	_fish_mark = ColorRect.new()
+	_fish_mark.position = Vector2(16, 8)
+	_fish_mark.size = Vector2(4, 20)
+	_fish_mark.color = Look.INK
+	_fish_hud.add_child(_fish_mark)
+	_fish_pull = ColorRect.new()
+	_fish_pull.position = Vector2(16, 30)
+	_fish_pull.size = Vector2(2, 6)
+	_fish_pull.color = Look.GOLD
+	_fish_hud.add_child(_fish_pull)
+	_atlas = TextureRect.new()
+	_atlas.position = Vector2(16, 290)
+	_atlas.size = Vector2(192, 128)
+	_atlas.visible = false
+	_atlas.texture_filter = TEXTURE_FILTER_NEAREST
+	layer.add_child(_atlas)
+
+
+func _on_pad(e: InputEvent) -> void:
+	if e is InputEventMouseButton:
+		_stick_down = e.pressed
+		_stick_origin = e.position
+		if e.pressed and _ear:
+			_ear.unlock()
+		if not e.pressed:
+			_stick_v = Vector2.ZERO
+	elif e is InputEventMouseMotion and _stick_down:
+		var d: Vector2 = (e.position - _stick_origin) / 48.0
+		if d.length() > 1.0:
+			d = d.normalized()
+		_stick_v = d
+	elif e is InputEventScreenTouch:
+		_stick_down = e.pressed
+		_stick_origin = e.position
+		if not e.pressed:
+			_stick_v = Vector2.ZERO
+	elif e is InputEventScreenDrag:
+		var d2: Vector2 = (e.position - _stick_origin) / 48.0
+		if d2.length() > 1.0:
+			d2 = d2.normalized()
+		_stick_v = d2
+
+
+func _unhandled_input(e: InputEvent) -> void:
+	if e.is_action_pressed("act"):
+		_act = true
+		_held = true
+		if _ear:
+			_ear.unlock()
+			_ear.tone("act")
+	if e.is_action_released("act"):
+		_held = false
+	if e.is_action_pressed("shout"):
+		_ping = true
+		if _ear:
+			_ear.unlock()
+			_ear.tone("shout")
+	if _is_walk_click(e):
+		_walk_aim = _event_world(e)
+		_walk_on = true
+		_grab_web_focus()
+
+
+func _keys() -> Vector2:
+	var v := Vector2.ZERO
+	if Input.is_action_pressed("move_left"):
+		v.x -= 1
+	if Input.is_action_pressed("move_right"):
+		v.x += 1
+	if Input.is_action_pressed("move_up"):
+		v.y -= 1
+	if Input.is_action_pressed("move_down"):
+		v.y += 1
+	if v.length() > 1.0:
+		v = v.normalized()
+	return v
+
+
+func _process(_dt: float) -> void:
+	var v := _keys()
+	if v != Vector2.ZERO:
+		_walk_on = false
+	elif _stick_v != Vector2.ZERO:
+		v = _stick_v
+		_walk_on = false
+	elif _walk_on:
+		v = _walk_vec()
+	_sent_move = v
+	_sent_act = _act
+	Net.send_input(v.x, v.y, _act, _held, _ping)
+	_act = false
+	_ping = false
+
+
+func _on_snap(s: Dictionary) -> void:
+	var zone := str(s.get("zone", "valley"))
+	_hud_place.text = _place(zone, bool(s.get("rush", false)), int(s.get("floor", 0)), str(s.get("biome", "")))
+	_hud_room.text = "房间 %s" % str(s.get("room", Net.room))
+	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
+	# Hunger stays in the sim. The plaque never shows a soul or hunger number.
+	_hud_ink.text = "日 %s · %s · %s · 金 %s" % [_ink_n(s.get("day", 0)), str(s.get("season", "春")), phase, _ink_n(s.get("gold", 0))]
+	var at: Dictionary = s.get("youAt", {})
+	if at.size() > 0:
+		_you_at = Vector2(float(at.get("x", 0)), float(at.get("y", 0)))
+	_show_line(str(s.get("prompt", "")))
+	if not _prompt_bar.visible:
+		if zone == "valley":
+			_show_line(_enter_line())
+		else:
+			_show_line(_place_line(zone, s.get("tiles", _tiles)))
+	_paint_signs(s)
+	_paint_mate(s)
+	var you_held := _you_held_name(s)
+	_you_held = _you_held_id(s)
+	if you_held != "":
+		_hud_held.text = "手里 · %s" % you_held
+		_hud_held.visible = true
+	else:
+		_hud_held.text = "手里空着"
+		_hud_held.visible = false
+	var pot: Array = s.get("pot", [])
+	var ready := str(s.get("potReady", ""))
+	if ready != "":
+		_hud_pot.text = "锅 · %s 好了" % ready
+	elif pot.size() > 0:
+		_hud_pot.text = "锅 · %s" % "、".join(pot)
+	else:
+		_hud_pot.text = ""
+	_paint_toasts(s.get("toasts", []))
+	_paint_bag(s.get("bag", []))
+	_paint_ice(s.get("ice", []), zone)
+	_paint_orders(s.get("orders", []), zone)
+	_paint_fish(s)
+	var rows: Array = s.get("tiles", [])
+	if rows.size() > 0:
+		_tiles = rows
+	if zone != _zone:
+		_cam_locked = false
+		if rows.size() == 0:
+			_tiles = []
+	_show_zone(zone, _tiles)
+	_paint_crops(s)
+	if _zone_map.visible:
+		_zone_map.show_fog(s.get("revealed", []), s.get("visible", []), s.get("fires", []))
+	_remember_vis(s)
+	_paint_atlas(s)
+	var you: Dictionary = s.get("youAt", {})
+	if you.size() > 0:
+		_you_at = Vector2(float(you.get("x", 0)), float(you.get("y", 0)))
+	_cam.zoom = Vector2(_follow_zoom(zone), _follow_zoom(zone))
+	if you.size() > 0:
+		var target := _clamp_cam(_follow_look(_you_at))
+		if not _cam_locked:
+			_cam.position_smoothing_enabled = false
+			_cam.position = target
+			_cam.reset_smoothing()
+			_cam.position_smoothing_enabled = true
+			_cam_locked = true
+		else:
+			_cam.position = target
+	# Painting keeps its own dusk. Never purple night.
+	# Night lives on the bed so painted lamps stay the light.
+	var night := bool(s.get("night", false))
+	var lit := bool(s.get("lit", true))
+	var sea := str(s.get("season", "春"))
+	var shade := Color(0.78, 0.68, 0.52)
+	var dim := Color(0.46, 0.38, 0.28)
+	if sea == "冬":
+		shade = Color(0.72, 0.66, 0.54)
+		dim = Color(0.42, 0.38, 0.32)
+	elif sea == "夏":
+		shade = Color(0.84, 0.70, 0.48)
+	_world.modulate = Color(1.0, 1.0, 1.0) if zone == "kitchen" or zone == "mine" else Look.VALLEY_DUSK
+	if zone == "kitchen" or zone == "mine":
+		_valley.set_night(0.0)
+		_zone_map.set_night(0.0)
+		_valley.set_season("")
+		_zone_map.set_season("")
+	elif night and zone == "wild":
+		_valley.set_night(0.0)
+		_zone_map.set_night(1.0, dim if not lit else shade)
+		_valley.set_season("")
+		_zone_map.set_season("")
+	elif night:
+		_valley.set_night(1.0, shade)
+		_zone_map.set_night(0.0)
+		_valley.set_season("")
+		_zone_map.set_season("")
+	else:
+		_valley.set_night(0.0)
+		_zone_map.set_night(0.0)
+		_valley.set_season(sea)
+		_zone_map.set_season(sea)
+	_zone_map.set_mine_depth(int(s.get("floor", 0)) if zone == "mine" else 0)
+	# Soft dusk rain / haze sit on the bed. Never a weather ring.
+	var wet := _wet(s)
+	var mist := _mist(s)
+	if zone == "kitchen" or zone == "mine":
+		_valley.set_rain(false)
+		_zone_map.set_rain(false)
+		_valley.set_fog(false)
+		_zone_map.set_fog(false)
+	elif zone == "wild":
+		_valley.set_rain(false)
+		_valley.set_fog(false)
+		_zone_map.set_rain(wet)
+		_zone_map.set_fog(mist)
+	else:
+		_valley.set_rain(wet)
+		_valley.set_fog(mist)
+		_zone_map.set_rain(false)
+		_zone_map.set_fog(false)
+	_paint_people(s)
+	_paint_foes(s.get("enemies", []))
+	if _ear:
+		_ear.hear(s)
+
+
+func _toggle_mute() -> void:
+	if _ear == null or _mute_btn == null:
+		return
+	_ear.set_muted(not _ear.muted)
+	_mute_btn.text = "静" if _ear.muted else "声"
+
+
+func _paint_signs(s: Dictionary) -> void:
+	if _hud_sign == null or _sign_card == null:
+		return
+	var bits: PackedStringArray = []
+	var fortune: Variant = s.get("fortune", {})
+	if typeof(fortune) == TYPE_DICTIONARY:
+		var row: Dictionary = fortune
+		var title := str(row.get("title", ""))
+		var life := str(row.get("life", ""))
+		if title != "":
+			bits.append("%s · %s" % [title, life])
+	var board: Array = s.get("board", [])
+	if board.size() > 0:
+		var names: PackedStringArray = []
+		for raw in board:
+			names.append(str(raw))
+		bits.append("今晚 %s" % "、".join(names))
+	_hud_sign.text = "\n".join(bits)
+	_sign_card.visible = bits.size() > 0
+
+
+func _paint_mate(s: Dictionary) -> void:
+	if _hud_mate == null:
+		return
+	var raw: Variant = s.get("partner", {})
+	if typeof(raw) != TYPE_DICTIONARY:
+		_hud_mate.text = ""
+		return
+	var row: Dictionary = raw
+	var name := str(row.get("name", ""))
+	if name == "" or name == "还没来":
+		_hud_mate.text = ""
+		return
+	if bool(row.get("online", false)):
+		var where := str(row.get("where", ""))
+		_hud_mate.text = "%s 在%s" % [name, where] if where != "" else name
+	else:
+		_hud_mate.text = "%s 断线了，人还在原地" % name
+
+
+func _paint_crops(s: Dictionary) -> void:
+	if _valley == null:
+		return
+	if _zone != "valley":
+		return
+	var plots: Array = s.get("plots", [])
+	var bits: PackedStringArray = []
+	for raw in plots:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		bits.append("%s:%s" % [str(row.get("seed", "")), _ink_n(row.get("stage", 0))])
+	var sig := "|".join(bits)
+	if sig == _plot_sig:
+		return
+	_plot_sig = sig
+	_valley.show_crops(plots)
+
+
+func _you_held_name(s: Dictionary) -> String:
+	var me := _me(s)
+	if me.is_empty():
+		return ""
+	return str(me.get("heldName", ""))
+
+
+func _you_held_id(s: Dictionary) -> String:
+	var me := _me(s)
+	if me.is_empty():
+		return ""
+	return str(me.get("held", "")).split(":")[0]
+
+
+func _me(s: Dictionary) -> Dictionary:
+	var you := str(s.get("you", Net.you_id))
+	for raw in s.get("actors", []):
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var a: Dictionary = raw
+		if str(a.get("id", "")) == you:
+			return a
+	return {}
+
+
+func _show_zone(zone: String, rows: Array) -> void:
+	_zone = zone
+	var indoor := zone == "mine" or zone == "kitchen" or zone == "wild"
+	_valley.visible = zone == "valley"
+	_zone_map.visible = indoor
+	if indoor and rows.size() > 0:
+		_zone_map.show_map(zone, rows)
+
+
+func _paint_people(s: Dictionary) -> void:
+	var seen := {}
+	for raw in s.get("actors", []):
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var a: Dictionary = raw
+		var id := str(a.get("id", ""))
+		seen[id] = true
+		if not _actors.has(id):
+			var view := ActorView.new()
+			view.actor_id = id
+			_world.add_child(view)
+			_actors[id] = view
+		var node: ActorView = _actors[id]
+		var prev: Vector2 = _last_pos.get(id, node.position)
+		var next := Vector2(float(a.get("x", 0)), float(a.get("y", 0)))
+		var row := a.duplicate()
+		if str(row.get("zone", "")) == "":
+			row["zone"] = str(s.get("zone", _zone))
+		var you := str(s.get("you", ""))
+		if you == "":
+			you = str(Net.you_id)
+		row["mine"] = id == you
+		node.set_moving(prev.distance_to(next) > 0.4)
+		node.apply(row, Time.get_ticks_msec() / 1000.0)
+		_last_pos[id] = next
+	for id in _actors.keys():
+		if not seen.has(id):
+			(_actors[id] as Node).queue_free()
+			_actors.erase(id)
+
+
+func _paint_foes(_raws: Array) -> void:
+	while _foes.size() > 0:
+		var old: Node2D = _foes.pop_back()
+		old.queue_free()
+	# Encounter stays in the snap. Do not hang a beast sticker.
+
+
+func _ink_n(v: Variant) -> String:
+	return str(int(round(float(v))))
+
+
+func _weather_id(s: Dictionary) -> String:
+	var raw: Variant = s.get("weather", {})
+	if typeof(raw) == TYPE_DICTIONARY:
+		var row: Dictionary = raw
+		var id := str(row.get("id", "clear"))
+		return id if id != "" else "clear"
+	var word := str(raw)
+	return word if word != "" else "clear"
+
+
+func _wet(s: Dictionary) -> bool:
+	var id := _weather_id(s)
+	return id == "rain" or id == "storm"
+
+
+func _mist(s: Dictionary) -> bool:
+	return _weather_id(s) == "fog"
+
+
+func _paint_fish(s: Dictionary) -> void:
+	if _fish_hud == null:
+		return
+	var me := _me(s)
+	# Sit / sleep stays on the valley. Do not reuse the timing bar as a bed HUD.
+	var fight := str(me.get("fishing", "off")) == "fight" and str(me.get("busy", "")) != "sit"
+	_fish_hud.visible = fight
+	if not fight:
+		return
+	var mark := clampf(float(me.get("fishMark", 0)), 0.0, 1.0)
+	var pull := clampf(float(me.get("fishPull", 0)), 0.0, 1.0)
+	var green := mark > 0.38 and mark < 0.72
+	_fish_ok.color = Color(0.38, 0.62, 0.48, 1.0) if green else Look.MOSS
+	_fish_mark.position.x = 16 + 528.0 * mark - 2.0
+	_fish_pull.size.x = max(2.0, 528.0 * pull)
+
+
+func _paint_toasts(raws: Array) -> void:
+	var lines: PackedStringArray = []
+	for raw in raws:
+		var line := str(raw).strip_edges()
+		if line != "":
+			lines.append(line)
+	var sig := "|".join(lines)
+	if sig == _toast_sig:
+		_toasts.visible = not lines.is_empty()
+		return
+	_toast_sig = sig
+	for child in _toasts.get_children():
+		child.queue_free()
+	if lines.is_empty():
+		_toasts.visible = false
+		return
+	_toasts.visible = true
+	var n := 0
+	for line in lines:
+		if n >= 4:
+			break
+		var ink := Look.ink_label(line, 14)
+		ink.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ink.custom_minimum_size = Vector2(340, 0)
+		var card := Panel.new()
+		card.custom_minimum_size = Vector2(360, 36)
+		card.add_theme_stylebox_override("panel", Look.plaque_box())
+		card.add_child(ink)
+		ink.position = Vector2(12, 8)
+		ink.size = Vector2(336, 40)
+		_toasts.add_child(card)
+		n += 1
+
+
+func _spoil_word(fresh: float) -> String:
+	if fresh >= 70.0:
+		return ""
+	if fresh >= 40.0:
+		return "还行"
+	if fresh > 0.0:
+		return "蔫了"
+	return "坏了"
+
+
+func _food_chip(row: Dictionary) -> String:
+	var id := str(row.get("id", ""))
+	var base := str(row.get("name", id))
+	for mark in ["·鲜", "·还行", "·蔫了", "·坏了"]:
+		base = base.replace(mark, "")
+	var tick := ""
+	if row.has("fresh"):
+		tick = _spoil_word(float(row.get("fresh", 100)))
+	var n := _ink_n(row.get("n", 1))
+	if tick != "":
+		return "%s·%s×%s" % [base, tick, n]
+	return "%s×%s" % [base, n]
+
+
+func _paint_bag(raws: Array) -> void:
+	var bits: PackedStringArray = []
+	var chips: PackedStringArray = []
+	var first_id := ""
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		if first_id == "":
+			first_id = str(row.get("id", ""))
+		bits.append("%s:%s:%s" % [str(row.get("id", "")), _ink_n(row.get("n", 1)), _food_chip(row)])
+		chips.append(_food_chip(row))
+	var sig := "|".join(bits)
+	if sig == _bag_sig:
+		return
+	_bag_sig = sig
+	for child in _bag.get_children():
+		child.queue_free()
+	if chips.is_empty():
+		return
+	var b := Look.chip_button("袋 · " + " · ".join(chips), 220)
+	b.custom_minimum_size = Vector2(220, 36)
+	b.size = Vector2(220, 36)
+	b.clip_text = true
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	b.pressed.connect(func() -> void: _take(first_id))
+	_bag.add_child(b)
+
+
+func _paint_ice(raws: Array, zone: String) -> void:
+	# Ice stays one kitchen slip. Do not hang chips on the valley.
+	if zone != "kitchen":
+		if _ice_sig != "":
+			_ice_sig = ""
+			for child in _ice.get_children():
+				child.queue_free()
+		return
+	var bits: PackedStringArray = []
+	var chips: PackedStringArray = []
+	var first_id := ""
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = raw
+		if first_id == "":
+			first_id = str(row.get("id", ""))
+		bits.append("%s:%s:%s" % [str(row.get("id", "")), _ink_n(row.get("n", 1)), _food_chip(row)])
+		chips.append(_food_chip(row))
+	var sig := "|".join(bits)
+	if sig == _ice_sig:
+		return
+	_ice_sig = sig
+	for child in _ice.get_children():
+		child.queue_free()
+	if chips.is_empty():
+		return
+	var b := Look.chip_button("冰柜 · " + " · ".join(chips), 220)
+	b.custom_minimum_size = Vector2(220, 36)
+	b.size = Vector2(220, 36)
+	b.clip_text = true
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	b.pressed.connect(func() -> void: _take(first_id))
+	_ice.add_child(b)
+
+
+func _paint_orders(raws: Array, zone: String) -> void:
+	# Overcooked tickets stay in the kitchen. Do not hang them on the valley.
+	if zone != "kitchen":
+		if _order_sig != "":
+			_order_sig = ""
+			for child in _orders.get_children():
+				child.queue_free()
+		_orders.visible = false
+		return
+	var bits: PackedStringArray = []
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var o: Dictionary = raw
+		var dish := str(o.get("recipe", "")).strip_edges()
+		var who := str(o.get("name", "")).strip_edges()
+		if dish == "" and who == "":
+			continue
+		bits.append("%s:%s" % [dish, who])
+	var sig := "kitchen|" + "|".join(bits)
+	if sig == _order_sig:
+		_orders.visible = _orders.get_child_count() > 0
+		return
+	_order_sig = sig
+	for child in _orders.get_children():
+		child.queue_free()
+	for raw in raws:
+		if typeof(raw) != TYPE_DICTIONARY:
+			continue
+		var o: Dictionary = raw
+		var dish2 := str(o.get("recipe", "")).strip_edges()
+		var who2 := str(o.get("name", "")).strip_edges()
+		if dish2 == "" and who2 == "":
+			continue
+		var line := Look.ink_label("%s · %s" % [dish2, who2], 14, Look.GOLD)
+		line.position = Vector2(12, 6)
+		line.size = Vector2(336, 24)
+		var card := Panel.new()
+		card.custom_minimum_size = Vector2(360, 32)
+		card.add_theme_stylebox_override("panel", Look.slip_box())
+		card.add_child(line)
+		_orders.add_child(card)
+	if _orders.get_child_count() == 0:
+		_order_sig = ""
+		_orders.visible = false
+		return
+	_orders.visible = true
+
+
+func _enter_line() -> String:
+	if _valley == null:
+		return ""
+	var kind := _valley.enter_kind(_you_at.x, _you_at.y)
+	if kind == "kitchen":
+		return "进厨房"
+	if kind == "mine":
+		return "进矿"
+	if kind == "wild":
+		return "出谷 · 荒野"
+	if kind == "water":
+		return "下竿"
+	if kind == "sleep":
+		return "歇一夜"
+	return ""
+
+
+func _place_line(zone: String, rows: Array) -> String:
+	var lines: Array = rows
+	if lines.size() == 0:
+		lines = _tiles
+	if lines.size() == 0:
+		return ""
+	var tx := int(floor(_you_at.x / ValleyLogic.TILE))
+	var ty := int(floor(_you_at.y / ValleyLogic.TILE))
+	if ty < 0 or ty >= lines.size():
+		return ""
+	var row := str(lines[ty])
+	if tx < 0 or tx >= row.length():
+		return ""
+	var tile := row[tx]
+	if zone == "kitchen" and tile == "Q":
+		return "入锅"
+	if zone == "mine" and tile == "o":
+		return "挖"
+	return ""
+
+
+func _show_line(prompt: String) -> void:
+	var ink := prompt.strip_edges()
+	_prompt.text = ink
+	if ink == "":
+		_prompt_bar.visible = false
+		return
+	if ink == "起竿" or ink.find("太暗") >= 0 or ink.find("咬") >= 0 or ink.find("还早") >= 0:
+		_prompt.add_theme_color_override("font_color", Color(0.55, 0.22, 0.14))
+	elif ink.find("绿") >= 0 or ink.find("熟了") >= 0:
+		_prompt.add_theme_color_override("font_color", Look.MOSS)
+	elif ink.find("歇") >= 0 or ink.find("两人") >= 0 or ink.find("一起") >= 0 or ink.find("等她") >= 0 or ink.find("堂口") >= 0 or ink.find("烤") >= 0 or ink.find("搜") >= 0 or ink.find("并肩") >= 0:
+		_prompt.add_theme_color_override("font_color", Look.GOLD)
+	else:
+		_prompt.add_theme_color_override("font_color", Look.INK)
+	var wide := clampf(72.0 + float(ink.length()) * 16.0, 120.0, 360.0)
+	_prompt_bar.size = Vector2(wide, 36)
+	_prompt_bar.position = Vector2((1280.0 - wide) * 0.5, 640)
+	_prompt.size = Vector2(wide - 24.0, 24)
+	_prompt_bar.visible = true
+
+
+func _take(item_id: String) -> void:
+	if _you_held != "":
+		_show_line("手里满了")
+		return
+	Net.send_take(item_id)
+
+
+func _is_walk_click(e: InputEvent) -> bool:
+	if e is InputEventMouseButton:
+		var mouse := e as InputEventMouseButton
+		return mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT
+	if e is InputEventScreenTouch:
+		return (e as InputEventScreenTouch).pressed
+	return false
+
+
+func _event_world(e: InputEvent) -> Vector2:
+	var screen := Vector2.ZERO
+	if e is InputEventMouse:
+		screen = (e as InputEventMouse).position
+	elif e is InputEventScreenTouch:
+		screen = (e as InputEventScreenTouch).position
+	else:
+		return _you_at
+	var xf := get_viewport().get_canvas_transform().affine_inverse()
+	return xf * screen
+
+
+func _walk_vec() -> Vector2:
+	var delta := _walk_aim - _you_at
+	if delta.length() < 10.0:
+		_walk_on = false
+		return Vector2.ZERO
+	return delta.normalized()
+
+
+func _bind_hands() -> void:
+	_bind_key("move_left", KEY_A)
+	_bind_key("move_left", KEY_LEFT)
+	_bind_key("move_right", KEY_D)
+	_bind_key("move_right", KEY_RIGHT)
+	_bind_key("move_up", KEY_W)
+	_bind_key("move_up", KEY_UP)
+	_bind_key("move_down", KEY_S)
+	_bind_key("move_down", KEY_DOWN)
+	_bind_key("act", KEY_SPACE)
+	_bind_key("act", KEY_J)
+	_bind_key("shout", KEY_H)
+
+
+func _bind_key(action: String, code: Key) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+	for old in InputMap.action_get_events(action):
+		if old is InputEventKey and int((old as InputEventKey).keycode) == int(code):
+			return
+	var ev := InputEventKey.new()
+	ev.keycode = code
+	ev.physical_keycode = code
+	InputMap.action_add_event(action, ev)
+
+
+func _grab_web_focus() -> void:
+	if not OS.has_feature("web"):
+		return
+	JavaScriptBridge.eval("var c=document.getElementById('canvas');if(c){c.tabIndex=0;c.focus();}")
+
+
+func _follow_zoom(zone: String) -> float:
+	# Kitchen / mine stay tight. Valley / wild sit in the path, not a mural stamp.
+	if zone == "kitchen" or zone == "mine":
+		return 2.45
+	return 2.18
+
+
+func _follow_look(feet: Vector2) -> Vector2:
+	# Look a little above the feet so the coat sits in the path frame.
+	return Vector2(feet.x, feet.y - Look.BODY * 0.40)
+
+
+func _clamp_cam(p: Vector2) -> Vector2:
+	var vp := get_viewport_rect().size
+	var half := Vector2(vp.x / (2.0 * _cam.zoom.x), vp.y / (2.0 * _cam.zoom.y))
+	var sz := _valley.size_px() if _zone == "valley" else _zone_map.size_px()
+	if sz.x <= half.x * 2.0:
+		p.x = sz.x * 0.5
+	else:
+		p.x = clampf(p.x, half.x, sz.x - half.x)
+	if sz.y <= half.y * 2.0:
+		p.y = sz.y * 0.5
+	else:
+		p.y = clampf(p.y, half.y, sz.y - half.y)
+	return p
+
+
+func _remember_vis(s: Dictionary) -> void:
+	_visible.clear()
+	for raw in s.get("visible", []):
+		_visible[int(raw)] = true
+	if _tiles.size() > 0:
+		_map_w = str(_tiles[0]).length()
+
+
+func _paint_atlas(s: Dictionary) -> void:
+	if _atlas == null:
+		return
+	if _tiles.is_empty() or _zone == "valley":
+		_atlas.visible = false
+		return
+	_atlas.visible = true
+	var h := _tiles.size()
+	var w := str(_tiles[0]).length()
+	if w <= 0 or h <= 0:
+		return
+	var fog := _zone == "wild"
+	var seen := {}
+	for raw in s.get("revealed", []):
+		seen[int(raw)] = true
+	var lit := {}
+	for raw in s.get("fires", []):
+		lit[int(raw)] = true
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		var row := str(_tiles[y])
+		for x in mini(w, row.length()):
+			var key := y * w + x
+			if fog and not seen.has(key):
+				img.set_pixel(x, y, Color(0.36, 0.26, 0.16, 0.55))
+				continue
+			var ch := row[x]
+			var c := Color(0.62, 0.52, 0.34, 0.9)
+			if ch == "~" or ch == "D":
+				c = Color(0.22, 0.42, 0.50, 0.95)
+			elif ch == ",":
+				c = Color(0.70, 0.54, 0.32, 0.95)
+			elif ch == "t" or ch == "T":
+				c = Color(0.22, 0.38, 0.24, 0.95)
+			elif ch == "K" or lit.has(key):
+				c = Color(0.86, 0.46, 0.22, 1.0)
+			elif ch == "L":
+				c = Color(0.78, 0.42, 0.18, 1.0)
+			elif ch == "P":
+				c = Color(0.52, 0.38, 0.22, 0.9)
+			if fog and not _visible.has(key):
+				c.a = 0.55
+			img.set_pixel(x, y, c)
+	var you_ping := float(_me(s).get("ping", 0))
+	var mate_ping := 0.0
+	var mate: Dictionary = {}
+	var partner_raw: Variant = s.get("partner", {})
+	if typeof(partner_raw) == TYPE_DICTIONARY:
+		mate_ping = float((partner_raw as Dictionary).get("ping", 0))
+	var at_raw: Variant = s.get("partnerAt", {})
+	if typeof(at_raw) == TYPE_DICTIONARY:
+		mate = at_raw
+	var same_zone := mate.size() > 0 and str(mate.get("zone", _zone)) == _zone
+	if same_zone and mate_ping > 0.04:
+		_atlas_flash(img, w, h, float(mate.get("x", 0)), float(mate.get("y", 0)), Color(0.96, 0.90, 0.78, 0.95))
+	var you: Dictionary = s.get("youAt", {})
+	if you.size() > 0 and you_ping > 0.04:
+		_atlas_flash(img, w, h, float(you.get("x", 0)), float(you.get("y", 0)), Color(0.96, 0.90, 0.78, 0.95))
+	if same_zone:
+		_atlas_dot(img, w, h, float(mate.get("x", 0)), float(mate.get("y", 0)), Color(0.25, 0.43, 0.36, 1.0))
+	if you.size() > 0:
+		_atlas_dot(img, w, h, float(you.get("x", 0)), float(you.get("y", 0)), Color(0.77, 0.36, 0.15, 1.0))
+	_atlas.texture = ImageTexture.create_from_image(img)
+	var cell := 4.0 if _zone == "wild" or _zone == "valley" else 6.0
+	_atlas.custom_minimum_size = Vector2(w * cell, h * cell)
+	_atlas.size = Vector2(w * cell, h * cell)
+
+
+func _atlas_dot(img: Image, w: int, h: int, px: float, py: float, c: Color) -> void:
+	var x := clampi(int(px / 36.0), 0, w - 1)
+	var y := clampi(int(py / 36.0), 0, h - 1)
+	img.set_pixel(x, y, c)
+
+
+func _atlas_flash(img: Image, w: int, h: int, px: float, py: float, c: Color) -> void:
+	var cx := clampi(int(px / 36.0), 0, w - 1)
+	var cy := clampi(int(py / 36.0), 0, h - 1)
+	for y in range(maxi(0, cy - 1), mini(h, cy + 2)):
+		for x in range(maxi(0, cx - 1), mini(w, cx + 2)):
+			img.set_pixel(x, y, c)
+
+
+func _place(z: String, rush: bool, floor: int, biome := "") -> String:
+	if z == "kitchen":
+		return "厨房 · 堂口热" if rush else "厨房"
+	if z == "mine":
+		return "矿 %s层" % str(floor) if floor > 0 else "矿里"
+	if z == "wild":
+		return "荒野 · %s" % biome if biome != "" and biome != "野地" else "荒野"
+	return "山谷"

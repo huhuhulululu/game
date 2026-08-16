@@ -21,7 +21,13 @@ export interface ActorSnap {
   held: string;
   heldName: string;
   fishing: string;
+  fishMark: number;
+  fishPull: number;
   hunger: number;
+  torch: boolean;
+  ping: number;
+  away?: boolean;
+  busy?: "" | "chop" | "sit" | "fish" | "forge";
 }
 
 export interface EnemySnap {
@@ -31,6 +37,7 @@ export interface EnemySnap {
   maxHp: number;
   hue: string;
   name: string;
+  flash: number;
 }
 
 export interface OrderSnap {
@@ -48,13 +55,14 @@ export interface WorldSnap {
   fortune: { title: string; life: string; tilt: string } | null;
   weather: { id: string; name: string };
   waitingFortune: ("left" | "right")[];
-  bag: { id: string; n: number; name: string }[];
+  bag: { id: string; n: number; name: string; fresh?: number }[];
+  ice: { id: string; n: number; name: string; fresh?: number }[];
   gear: string[];
   cookbook: string[];
   pot: string[];
   potReady: string;
   plots: { seed?: string; stage: number }[];
-  partner: { name: string; zone: Zone; online: boolean; biome?: string; ping?: number } | null;
+  partner: { name: string; zone: Zone; online: boolean; biome?: string; ping?: number; where?: string } | null;
   zone: Zone;
   tiles: string[];
   floor: number;
@@ -64,6 +72,7 @@ export interface WorldSnap {
   dusk: boolean;
   lit: boolean;
   rush: boolean;
+  combo: number;
   revealed: number[];
   visible: number[];
   fires: number[];
@@ -82,6 +91,8 @@ export interface WorldSnap {
   toasts: string[];
   prompt: string;
   skills: { fish: number; cook: number; fight: number; forge: number };
+  album: { fish: number; fishMax: number; cook: number; cookMax: number; map: number };
+  board: string[];
 }
 
 export type ClientMsg =

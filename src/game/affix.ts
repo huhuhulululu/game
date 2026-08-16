@@ -30,6 +30,7 @@ export interface GearInst {
   luck: number;
   bond: number;
   ilvl: number;
+  pairId?: string;
 }
 
 export const PREFIXES: AffixDef[] = [

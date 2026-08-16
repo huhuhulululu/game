@@ -112,11 +112,46 @@ export function shopStock(day: number): { id: string; price: number }[] {
     { id: "egg", price: 6 },
     { id: "tea", price: 10 },
     { id: "flint", price: 6 },
+    { id: "osmanthus", price: 18 },
     { id: "wood_blade", price: 24 },
   ];
   if (day >= 2) base.push({ id: "lucky_bell", price: 40 });
   if (day >= 3) base.push({ id: "iron_blade", price: 70 });
   return base;
+}
+
+export const STALL_DEPOSIT = 2;
+
+export function todayPairExtra(day: number): { id: string; mate?: string } {
+  const extras: { id: string; mate?: string }[] = [
+    { id: "ring_left", mate: "ring_right" },
+    { id: "osmanthus" },
+    { id: "lucky_bell" },
+  ];
+  return extras[((day % extras.length) + extras.length) % extras.length];
+}
+
+export function pickStallGoods(day: number, rand: () => number): { id: string; price: number }[] {
+  const pool = shopStock(day);
+  const ev = todayEvent(day);
+  const priceOf = (id: string, fallback: number) => {
+    const row = pool.find((p) => p.id === id);
+    return Math.max(1, Math.floor((row?.price ?? fallback) * (1 - ev.shop)));
+  };
+  const seeds = pool.filter((p) => p.id.endsWith("_seed"));
+  const seed = seeds[Math.floor(rand() * Math.max(1, seeds.length))] ?? { id: "tomato_seed", price: 8 };
+  const n = 2 + (rand() < 0.5 ? 1 : 0);
+  const out = [{ id: seed.id, price: priceOf(seed.id, seed.price) }];
+  const used = new Set([seed.id]);
+  const rest = pool.filter((p) => p.id !== seed.id);
+  let guard = 0;
+  while (out.length < n && rest.length && guard++ < 24) {
+    const row = rest[Math.floor(rand() * rest.length)];
+    if (used.has(row.id)) continue;
+    used.add(row.id);
+    out.push({ id: row.id, price: priceOf(row.id, row.price) });
+  }
+  return out;
 }
 
 export function gachaPool(pity: number): { id: string; w: number }[] {

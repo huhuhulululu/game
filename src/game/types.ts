@@ -32,6 +32,7 @@ export interface ItemDef {
 export interface Stack {
   id: string;
   n: number;
+  fresh?: number;
 }
 
 export interface EquipIds {
@@ -123,7 +124,8 @@ export interface GameContext {
   audio: {
     muted: boolean;
     setMuted: (v: boolean) => void;
-    tone: (kind: "tap" | "chop" | "sizzle" | "serve" | "ok" | "soft" | "water" | "hit" | "drop" | "level") => void;
+    setAmbient: (kind: import("./feel").AmbientKind) => void;
+    tone: (kind: import("./audio").ToneKind) => void;
     unlock: () => void;
   };
 }

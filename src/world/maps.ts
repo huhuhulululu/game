@@ -11,8 +11,8 @@ export const VALLEY = [
   "#....C..A...PPPP...N..I..........#",
   "#...........PPPP.................#",
   "#....,,,,,,,,,,,,,,,,,,,,,.......#",
-  "#~~~~D~~~~~~D~~~~~~~~~~~~~~~~~~~~#",
-  "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#",
+  "#~~~~D~~~~~~D~~~~~~~~~~~~~~~~~,,~#",
+  "#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~,,~#",
   "#................................#",
   "#......SS....GG....BB....YY......#",
   "#......S.................Y.....O.#",
@@ -28,7 +28,7 @@ export const KITCHEN = [
   "#C..........U..#",
   "#..............#",
   "#L.............#",
-  "#6...........W.#",
+  "#6.....R.....W.#",
   "################",
 ];
 
@@ -37,11 +37,11 @@ export function mineTemplate(seed: number, floor: number): string[] {
     [
       "################",
       "#L.............#",
-      "#..o......e...#",
+      "#..o.......e...#",
       "#..............#",
       "#......Z.......#",
       "#..............#",
-      "#...e......o..#",
+      "#...e.......o..#",
       "#..............#",
       "################",
     ],
@@ -114,7 +114,9 @@ export type Cell =
   | "tree"
   | "rock"
   | "nest"
-  | "savanna";
+  | "savanna"
+  | "ice"
+  | "camp";
 
 const VALLEY_KEY: Record<string, Cell> = {
   "#": "wall",
@@ -154,6 +156,7 @@ const KITCHEN_KEY: Record<string, Cell> = {
   "5": "pantry",
   "6": "pantry",
   L: "leave",
+  R: "ice",
 };
 
 const WILD_KEY: Record<string, Cell> = {
@@ -175,6 +178,7 @@ const WILD_KEY: Record<string, Cell> = {
   b: "rock",
   n: "nest",
   s: "savanna",
+  J: "camp",
 };
 
 const MINE_KEY: Record<string, Cell> = {
@@ -237,6 +241,8 @@ export function buildMap(rows: string[], kind: "valley" | "kitchen" | "mine" | "
     "rock",
     "nest",
     "savanna",
+    "ice",
+    "camp",
   ]);
   return {
     rows,

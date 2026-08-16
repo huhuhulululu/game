@@ -197,8 +197,14 @@ function meets(have: FoodValue, recipe: PotRecipe, ids: string[]): boolean {
   return true;
 }
 
-export function matchPot(ids: string[], rand: () => number): PotRecipe {
+export function matchPot(ids: string[], rand: () => number, fresh = 100): PotRecipe {
   const have = sumTags(ids);
+  const mul = fresh >= 55 ? 1 : fresh >= 25 ? 0.55 : 0.12;
+  if (mul < 1) {
+    for (const k of Object.keys(have) as FoodTag[]) {
+      have[k] = (have[k] ?? 0) * mul;
+    }
+  }
   const hits = POT_RECIPES.filter((r) => meets(have, r, ids));
   const best = Math.max(...hits.map((r) => r.priority));
   const top = hits.filter((r) => r.priority === best);

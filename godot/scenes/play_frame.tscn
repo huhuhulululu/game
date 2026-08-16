@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/headless_play_frame.gd" id="1_frame"]
+
+[node name="PlayFrame" type="Node"]
+script = ExtResource("1_frame")
