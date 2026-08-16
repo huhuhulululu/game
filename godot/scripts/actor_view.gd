@@ -121,7 +121,7 @@ func _place_name() -> void:
 	if _name_card == null:
 		return
 	var p := get_global_transform_with_canvas().origin
-	_name_card.position = Vector2(p.x - 36, p.y - Look.BODY * (1.0 - 0.10 * _sit) - 28)
+	_name_card.position = Vector2(p.x - 36, p.y - Look.BODY - 28 + Look.BODY * 0.10 * _sit)
 	_name_card.visible = _name.text != ""
 
 
