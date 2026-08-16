@@ -1,7 +1,7 @@
 # Story 018: Mine floors
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Floor 1 → floor 2 sits on the same `bed-mine.png`; place can say `矿 N层`; `downFloor` stays in the server
-- [ ] Lower floor may take a deeper dusk shade; one mine painting, not a new tileset
-- [ ] Kitchen / valley / wild stay as they are; encounter toast can sit from the snap
-- [ ] Play-path proof prints mine-floor tokens through `play.tscn`
-- [ ] No 魂; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Floor 1 → floor 2 sits on the same `bed-mine.png`; place can say `矿 N层`; `downFloor` stays in the server
+- [x] Lower floor may take a deeper dusk shade; one mine painting, not a new tileset
+- [x] Kitchen / valley / wild stay as they are; encounter toast can sit from the snap
+- [x] Play-path proof prints mine-floor tokens through `play.tscn`
+- [x] No 魂; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -48,9 +48,16 @@ Server already keeps mine layers and the encounter table. Do not move those rule
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_floor.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 137 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places mine bed, seasons
-- Unlocks: none in this epic
+- Unlocks: 火边 only if this holds
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_FLOOR_ONE` `PLAY_FLOOR_TWO` `PLAY_FLOOR_HEARTH` `PLAY_FLOOR_OK`
+**Code Review**: Skipped — lean

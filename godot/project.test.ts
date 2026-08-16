@@ -1039,6 +1039,40 @@ test("Play sits two dusk wells on the wild bed", () => {
   }
 });
 
+test("Play sits 火边 from the snap, not a fire ring", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_side.gd"));
+  assert.ok(existsSync("godot/scenes/play_side.tscn"));
+  assert.ok(!existsSync("godot/assets/art/prop-fireside.png"));
+  assert.ok(!existsSync("tools/paint_side_look.py"));
+  const sidePlay = readFileSync("godot/scripts/headless_play_side.gd", "utf8");
+  assert.match(sidePlay, /scenes\/play\.tscn/);
+  assert.match(sidePlay, /PLAY_SIDE_FIRE/);
+  assert.match(sidePlay, /PLAY_SIDE_LAMP/);
+  assert.match(sidePlay, /PLAY_SIDE_ALONE/);
+  assert.match(sidePlay, /PLAY_SIDE_OK/);
+  assert.match(sidePlay, /火边坐了一会儿/);
+  assert.match(sidePlay, /char-warm-sit/);
+  assert.match(sidePlay, /prop-fire\.png/);
+  assert.match(sidePlay, /prop-hearth\.png/);
+  assert.match(sidePlay, /bed-valley\.png/);
+  assert.doesNotMatch(sidePlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_side.tscn", "utf8");
+  assert.match(scene, /headless_play_side\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.match(play, /Hunger stays in the sim/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /_hud_bond/);
+  assert.doesNotMatch(play, /魂/);
+  const story = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_side|PLAY_SIDE_FIRE|prop-fireside|paint_side/);
+  }
+});
+
 test("Play sits mine floor 1 then floor 2 on one mine bed", () => {
   assert.ok(existsSync("godot/scripts/headless_play_floor.gd"));
   assert.ok(existsSync("godot/scenes/play_floor.tscn"));
@@ -1074,7 +1108,7 @@ test("Play sits mine floor 1 then floor 2 on one mine bed", () => {
   assert.doesNotMatch(play, /_hud_season/);
   assert.doesNotMatch(play, /魂/);
   const story = readFileSync("production/epics/r1-evening-places/story-018-mine-floors.md", "utf8");
-  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  assert.match(story, /\*\*Status\*\*:\s*Complete/);
   const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts", "src/world/maps.ts"];
   for (const p of srcFiles) {
     const src = readFileSync(p, "utf8");

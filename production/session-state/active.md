@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` mine floors on one mine bed
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–017 Complete; 018 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed.
+- Task: `/dev-story` fireside on existing sit and fire
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–018 Complete; 019 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed. Stop new WORLD systems after fireside.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-018-mine-floors.md`; `play_floor.tscn`
-- Next: `/story-done` mine-floors after tokens hold. Next Ready: 火边. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+- Files: `story-019-fireside.md`; `play_side.tscn`
+- Next: `/story-done` fireside after tokens hold. Next Ready: walk cycle (P1 coat-feel only). No more WORLD systems. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-019-fireside.md` — Fireside
+- Files changed: story, `play_side.tscn`
+- Test written: `godot/project.test.ts` (fireside lock)
+- Tokens: `PLAY_SIDE_FIRE` `PLAY_SIDE_LAMP` `PLAY_SIDE_ALONE` `PLAY_SIDE_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Stop new WORLD systems. Next Ready: walk cycle (P1 coat-feel only). Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-018-mine-floors.md` — Mine floors
+- Tech debt logged: None
+- Next recommended: fireside (`r1-evening-places/story-019-fireside.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-018-mine-floors.md` — Mine floors

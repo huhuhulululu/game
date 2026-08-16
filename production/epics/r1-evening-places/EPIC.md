@@ -8,7 +8,7 @@
 
 ## Overview
 
-Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain, painted fog, a painted wild path, a lantern-stick, a pair of dusk wells, a silk nest, an old-camp search, a wild stumble, a night bite, the four seasons, and mine floors sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Wild cook is haul → pot on the fire. Rain and fog sit on the outdoor beds. Unread wild is a dusk wash that lifts as you walk. Held light is a small lantern-stick on the night path. Two earth mouths and one dusk nest sit on the wild bed. Old camp keeps fire and rock; search stays in the snap. Walking unread wild can toast a stumble from the snap. Unlit night wild can toast a bite from the snap. The wood plaque already turns 春夏秋冬; a light paper grade sits on the same painted beds. Mine floor 1 → 2 stays on `bed-mine`; place already says `矿 N层`. Weather look is closed. Wild set pieces and forage stay closed.
+Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain, painted fog, a painted wild path, a lantern-stick, a pair of dusk wells, a silk nest, an old-camp search, a wild stumble, a night bite, the four seasons, mine floors, and a fireside sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Wild cook is haul → pot on the fire. Rain and fog sit on the outdoor beds. Unread wild is a dusk wash that lifts as you walk. Held light is a small lantern-stick on the night path. Two earth mouths and one dusk nest sit on the wild bed. Old camp keeps fire and rock; search stays in the snap. Walking unread wild can toast a stumble from the snap. Unlit night wild can toast a bite from the snap. The wood plaque already turns 春夏秋冬; a light paper grade sits on the same painted beds. Mine floor 1 → 2 stays on `bed-mine`; place already says `矿 N层`. Two coats at a lit fire can toast `火边坐了一会儿` from the snap. Weather look is closed. Wild set pieces and forage stay closed. Stop new WORLD systems after fireside.
 
 ## Governing ADRs
 
@@ -43,4 +43,5 @@ Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, painted rain
 | 015 | Scout find | Integration | Complete | ADR-0002 |
 | 016 | Night bite | Integration | Complete | ADR-0002 |
 | 017 | Seasons | Visual/Feel | Complete | ADR-0003 |
-| 018 | Mine floors | Integration | In progress | ADR-0002 |
+| 018 | Mine floors | Integration | Complete | ADR-0002 |
+| 019 | Fireside | Integration | In progress | ADR-0002 |
