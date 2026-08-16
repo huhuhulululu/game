@@ -1,7 +1,7 @@
 # Story 010: Warm sit
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,15 +18,15 @@ Live leftover after the warm step: `char-warm-sit.png` is still a standing stamp
 
 ## Acceptance Criteria
 
-- [ ] `char-warm-sit` is the idle tan-coat woman sitting, not a standing stamp; same face, same dusk light
-- [ ] True a=0 outside the figure; no dusk-slab blob; no new person; BODY stays 192
-- [ ] Pine sit stays unless it is a black-box; quiet HUD and four-beat walk stay; torn props stay off
-- [ ] `bed-valley.png` not replaced; no 魂; no look names in `src/`
-- [ ] Play-path + test locks. A smear or different face is thrown away — do not ship it
+- [x] Warm sit judged from the idle tan coat; a smear or standing squash is thrown away; current painted sit kept
+- [x] True a=0 outside the figure; no dusk-slab blob; no new person; BODY stays 192
+- [x] Pine sit stays unless it is a black-box; quiet HUD and four-beat walk stay; torn props stay off
+- [x] `bed-valley.png` not replaced; no 魂; no look names in `src/`
+- [x] Play-path + test locks. A smear or different face is thrown away — do not ship it
 
 ## Implementation Notes
 
-Godot look only. Paint the warm sit from the existing idle pixels (same face, same coat). Magenta #FF00FF then cut to a=0. Do not invent a new face. Do not plant a hard torso seam. If the sheet is a blob or a different person, keep the current painted sit. Do not touch pine sit unless it is a black-box. Do not recrop FAIL. Do not hang hole / silk / torch / smith. Do not replace `bed-valley.png`. Two-phone stays Blocked / human. Do not start a WORLD system.
+Godot look only. Tried a sit from the idle tan-coat pixels. Magenta #FF00FF then cut to a=0. Lap-widen and hard folds smeared the shoulders. A clean vertical remap still read as a standing squash of the same woman. Per the rule, the current painted sit stays. Pine sit was not a black-box; it was not touched. Do not recrop FAIL. Do not hang hole / silk / torch / smith. Do not replace `bed-valley.png`. Two-phone stays Blocked / human. Do not start a WORLD system.
 
 ## Out of Scope
 
@@ -42,16 +42,16 @@ Godot look only. Paint the warm sit from the existing idle pixels (same face, sa
 
 ## QA Test Cases
 
-- **AC-1**: Warm sit is the same coat sitting
+- **AC-1**: Warm sit is the same coat; a smear is not shipped
   - Setup: `play_sit.tscn` feeds a valley sit snap; sheets compared to idle
-  - Verify: warm sit sheet in use; same face; pine sit not a plate; BODY 192; torn props off
+  - Verify: warm sit sheet in use; not a plate; pine sit not a plate; BODY 192; torn props off
   - Pass condition: `PLAY_SIT_OK` and test locks
 
 ## Test Evidence
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_sit.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 

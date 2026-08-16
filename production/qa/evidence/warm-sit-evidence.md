@@ -7,9 +7,9 @@
 
 ## What this slice covers
 
-- Warm sit is painted from the idle tan coat, then judged
-- A smear, blob, or standing squash is thrown away — the current painted sit stays
-- Same dusk light. Magenta then cut to a=0
+- Warm sit was painted from the idle tan coat, then judged
+- Lap-widen smeared the shoulders. A clean vertical remap was still a standing squash
+- Current painted sit kept. Not a new face. Not a blob plate
 - Pine sit was not a black-box; it was left alone
 - Quiet HUD and four-beat walk stay
 
@@ -36,4 +36,4 @@ PLAY_SIT_OK
 
 ## Sign-off
 
-`/dev-story` lean. Generated folds were a smear or a standing squash. Current painted sit kept. Pine sit untouched. No 魂.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. Generated sit was a smear or a standing squash — current painted sit kept. Pine sit untouched. No 魂. `npm test`: 145 pass. `PLAY_SIT_OK`. `PLAY_STEP_OK` and `PLAY_PAINT_OK` still hold. HTML5 re-exported.

@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` warm sit
-- Status: r1-coat-feel 001–009 Complete; 010 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` warm sit
+- Status: r1-coat-feel 001–010 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-010-warm-sit.md`
-- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-010-warm-sit.md` — Warm sit
+- Criteria: 5/5. Generated sit was a smear or a standing squash. Current painted sit kept. Pine sit untouched. Same dusk. No new face.
+- Tests: `godot/project.test.ts` warm-sit lock + `PLAY_SIT_OK`. npm test 145 pass. `PLAY_STEP_OK` and `PLAY_PAINT_OK` still hold.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Wait unless leftover geom remains. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-010-warm-sit.md` — Warm sit
