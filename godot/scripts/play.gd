@@ -305,8 +305,11 @@ func _on_snap(s: Dictionary) -> void:
 	if at.size() > 0:
 		_you_at = Vector2(float(at.get("x", 0)), float(at.get("y", 0)))
 	_show_line(str(s.get("prompt", "")))
-	if not _prompt_bar.visible and zone == "valley":
-		_show_line(_enter_line())
+	if not _prompt_bar.visible:
+		if zone == "valley":
+			_show_line(_enter_line())
+		else:
+			_show_line(_place_line(zone, s.get("tiles", _tiles)))
 	_paint_signs(s)
 	_paint_mate(s)
 	var you_held := _you_held_name(s)
@@ -778,6 +781,27 @@ func _enter_line() -> String:
 		return "出谷 · 荒野"
 	if kind == "water":
 		return "下竿"
+	return ""
+
+
+func _place_line(zone: String, rows: Array) -> String:
+	var lines: Array = rows
+	if lines.size() == 0:
+		lines = _tiles
+	if lines.size() == 0:
+		return ""
+	var tx := int(floor(_you_at.x / ValleyLogic.TILE))
+	var ty := int(floor(_you_at.y / ValleyLogic.TILE))
+	if ty < 0 or ty >= lines.size():
+		return ""
+	var row := str(lines[ty])
+	if tx < 0 or tx >= row.length():
+		return ""
+	var tile := row[tx]
+	if zone == "kitchen" and tile == "Q":
+		return "入锅"
+	if zone == "mine" and tile == "o":
+		return "挖"
 	return ""
 
 

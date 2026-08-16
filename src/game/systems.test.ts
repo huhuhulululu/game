@@ -1811,6 +1811,41 @@ describe("living systems", () => {
     assert.equal(walker.zone, "wild");
   });
 
+  it("doing on the pot tile cooks, and doing on the vein tile digs", () => {
+    const kettle = new World("KETTLE");
+    kettle.addPlayer("a", "暖", "left");
+    const cook = kettle.players.get("a");
+    assert.ok(cook);
+    const pot = kettle.kitchenMap.find("Q")[0];
+    assert.ok(pot);
+    const potAt = tileCenter(pot.x, pot.y);
+    cook.zone = "kitchen";
+    cook.x = potAt.x;
+    cook.y = potAt.y;
+    cook.facing = 2;
+    cook.held = "herb:ready:100";
+    assert.ok(kettle.snapshot("a").prompt.includes("入锅"));
+    tap(kettle, "a");
+    assert.equal(kettle.pot.length, 1);
+    assert.equal(kettle.pot[0], "herb");
+    const shaft = new World("VEIN2");
+    shaft.addPlayer("a", "暖", "left");
+    const miner = shaft.players.get("a");
+    assert.ok(miner);
+    shaft.mineMap = buildMap(mineTemplate(1, 1), "mine");
+    const ore = shaft.mineMap.find("o")[0];
+    assert.ok(ore);
+    const oreAt = tileCenter(ore.x, ore.y);
+    miner.zone = "mine";
+    miner.x = oreAt.x;
+    miner.y = oreAt.y;
+    miner.facing = 0;
+    shaft.rand = () => 0.01;
+    assert.ok(shaft.snapshot("a").prompt.includes("挖"));
+    tap(shaft, "a");
+    assert.ok(miner.held.startsWith("ore"));
+  });
+
   it("dug ore goes in the hand, the forge counts it, and the pot sends it to the workshop", () => {
     const w = new World("ORE2");
     w.addPlayer("a", "暖", "left");

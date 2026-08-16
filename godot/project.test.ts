@@ -2492,3 +2492,50 @@ test("Play lets 做 on water start the fish pull and 做 on the out-gate enter t
     assert.doesNotMatch(src, /play_water|PLAY_WATER_OK|_enter_line/);
   }
 });
+
+test("Play lets 做 on the pot cook and 做 on the vein dig", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-023-cook-dig.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-023-cook-dig.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-022-water-wild.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_cook.gd"));
+  assert.ok(existsSync("godot/scenes/play_cook.tscn"));
+  const cookPlay = readFileSync("godot/scripts/headless_play_cook.gd", "utf8");
+  assert.match(cookPlay, /scenes\/play\.tscn/);
+  assert.match(cookPlay, /PLAY_COOK/);
+  assert.match(cookPlay, /PLAY_DIG/);
+  assert.match(cookPlay, /PLAY_COOK_OK/);
+  assert.match(cookPlay, /入锅/);
+  assert.match(cookPlay, /bed-kitchen\.png/);
+  assert.match(cookPlay, /bed-mine\.png/);
+  assert.match(cookPlay, /POT_OR_PICK/);
+  assert.doesNotMatch(cookPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_cook.tscn", "utf8");
+  assert.match(scene, /headless_play_cook\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_place_line/);
+  assert.match(play, /入锅/);
+  assert.match(play, /2\.18/);
+  assert.match(play, /hand_chip\("做"/);
+  assert.doesNotMatch(play, /prop-pot|prop-vein|魂/);
+  const world = readFileSync("src/sim/world.ts", "utf8");
+  assert.match(world, /reachAt/);
+  assert.doesNotMatch(world, /play_cook|PLAY_COOK_OK|_place_line/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 240/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /做到锅上就入锅/);
+  assert.match(art, /不要另贴锅和镐/);
+  assert.match(art, /大衣真透明/);
+  const srcFiles = ["src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_cook|PLAY_COOK_OK|_place_line/);
+  }
+});

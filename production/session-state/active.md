@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` water and wild
-- Status: r1-coat-feel 001–022 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` cook and dig
+- Status: r1-coat-feel 001–022 Complete; 023 cook-dig in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-022-water-wild.md`
-- Next: none. Stop. Do not generate a new face. Do not hang a rod or a gate. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Files: `story-023-cook-dig.md`
+- Next: `/story-done` after `PLAY_COOK_OK`. 做 on the pot cooks. 做 on the vein digs. No pot or pick sticker. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-023-cook-dig.md` — Cook and dig
+- Files changed: story, `world.ts` reachAt, `play.gd` pot / vein slip, `play_cook.tscn`, `headless_play_cook.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (cook-dig lock) + `play_cook.tscn`
+- Tokens: `PLAY_COOK` `PLAY_DIG` `PLAY_COOK_OK`
+- Next: `/story-done` after tokens hold. Existing pot / dig rules. Existing beds. No pot or pick sticker. 022 stays Complete. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-022-water-wild.md` — Water and wild

@@ -550,6 +550,15 @@ export class World {
     return cell === "dock" || ch === "D";
   }
 
+  private reachAt(p: Actor, want: string): { x: number; y: number } | null {
+    const map = this.mapFor(p.zone);
+    const h = toTile(p.x, p.y);
+    if (map.cell(h.x, h.y) === want) return h;
+    const f = this.facingTile(p);
+    if (map.cell(f.x, f.y) === want) return f;
+    return null;
+  }
+
   private holdingTorch(p: Actor): boolean {
     return p.torch > 0 || parseHeld(p.held).id === "torch";
   }
@@ -665,7 +674,7 @@ export class World {
     if (p.zone === "mine") {
       if (cell === "leave" || reach === "L") return "出矿";
       if (cell === "stairs") return "再下一层";
-      if (cell === "ore") return "挖";
+      if (this.reachAt(p, "ore")) return "挖";
       if (cell === "chest") return "开匣";
       return "挥";
     }
@@ -674,7 +683,7 @@ export class World {
       if (cell === "pantry") return "取";
       if (cell === "cut") return "切";
       if (cell === "stove") return "炉";
-      if (cell === "plate") {
+      if (this.reachAt(p, "plate")) {
         if (this.potReady) return `取 · ${potById(this.potReady).name}`;
         if (this.potCook > 0) return "锅还在响";
         if (this.holdingForgeMat(p)) return "拿去工坊";
@@ -769,7 +778,8 @@ export class World {
     if (p.zone === "mine") {
       if (cell === "leave" || reach === "L") return this.leaveToValley(p);
       if (cell === "stairs") return this.downFloor();
-      if (cell === "ore") return this.dig(p, f.x, f.y);
+      const ore = this.reachAt(p, "ore");
+      if (ore) return this.dig(p, ore.x, ore.y);
       if (cell === "chest") return this.chest(p, f.x, f.y);
       return this.swing(p);
     }
@@ -778,7 +788,7 @@ export class World {
       if (cell === "pantry") return this.pantry(p, map.pantryId(f.x, f.y));
       if (cell === "cut") return this.cut(p, f.x, f.y);
       if (cell === "stove") return this.stove(p, f.x, f.y);
-      if (cell === "plate") return this.potAct(p);
+      if (this.reachAt(p, "plate")) return this.potAct(p);
       if (cell === "window") return this.serve(p);
       if (cell === "ice") return this.iceAct(p);
       if (cell === "trash") {
