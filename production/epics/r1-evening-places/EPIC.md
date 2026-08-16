@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: `docs/WORLD.md` + `godot/docs/ART.md`
 > **Architecture Module**: ZoneMap + ValleyLogic + Play
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
@@ -30,4 +30,4 @@ Kitchen, mine, forge, stall, and sleep sit one painted dusk language. Kitchen ru
 | 002 | Mine bed | Visual/Feel | Complete | ADR-0003 |
 | 003 | Forge and stall | Visual/Feel | Complete | ADR-0003 |
 | 004 | Sleep | Visual/Feel | Complete | ADR-0003 |
-| 005 | Kitchen rush | Integration | In progress | ADR-0002 |
+| 005 | Kitchen rush | Integration | Complete | ADR-0002 |

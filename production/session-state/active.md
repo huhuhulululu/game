@@ -1,10 +1,22 @@
 # Session state
 
-- Task: `/dev-story` kitchen rush
-- Status: r1-togetherness pair-hands Complete. Kitchen rush In progress.
+- Task: `/story-done` kitchen rush; asset-audit beds/props; two-phone story
+- Status: r1-evening-places Complete. No Ready. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path two coats at kitchen stations; tickets kitchen-only
-- Next: `production/epics/r1-evening-places/story-005-kitchen-rush.md`
+- Files: kitchen-rush evidence; beds-props audit PASS; story-003 Blocked
+- Next: `production/epics/r1-togetherness/story-003-two-phone.md` (human — do not `/dev-story`)
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-005-kitchen-rush.md` — Kitchen rush
+- Tech debt logged: None
+- Next recommended: none Ready; two-phone is Blocked (human)
+
+## Session Extract — /asset-audit 2026-08-16
+- In-scope beds and magenta props: PASS (no leftover dusk RGB, no prop edge boxes)
+- Valley bed: PASS — not touched
+- FAIL stickers: still FAIL — not recropped
+- `/team-polish`: no-op (no in-scope fails)
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

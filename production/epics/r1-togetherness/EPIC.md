@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `docs/WORLD.md` + `godot/docs/ART.md`
 > **Architecture Module**: Play + Net + ValleyEar
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0002
 
 ## Overview
 
-Shared vision, pair distance, shout, and room reclaim already live on the Node server. Pair-fish and dual 做 at forge / stall / sleep stay server rules. Godot shows them as two coats on the painted world, not a bonus stat. Two-iPhone playtest is a later human story.
+Shared vision, pair distance, shout, and room reclaim already live on the Node server. Pair-fish and dual 做 stay server rules. Godot shows them as two coats. Two-iPhone playtest is a Blocked human story — do not `/dev-story` it.
 
 ## Governing ADRs
 
@@ -28,3 +28,4 @@ Shared vision, pair distance, shout, and room reclaim already live on the Node s
 |---|-------|------|--------|-----|
 | 001 | Shared valley | Integration | Complete | ADR-0002 |
 | 002 | Pair hands | Integration | Complete | ADR-0002 |
+| 003 | Two-phone playtest | Integration | Blocked (human) | ADR-0002 |

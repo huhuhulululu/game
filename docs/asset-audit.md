@@ -1,5 +1,7 @@
 # Asset Audit Report -- Art -- 2026-08-15
 
+2026-08-16 addendum: new beds and magenta props (`bed-kitchen`, `bed-mine`, `bed-wild`, `prop-smith`, `prop-booth`, kitchen stations) **PASS**. Valley bed still clean. FAIL cover stickers below stay FAIL — do not recrop. Full table: `production/qa/evidence/beds-props-audit.md`.
+
 Target: `godot/assets/art` (not the template `assets/art/`).
 Standards: `design/art/art-bible.md`, `godot/docs/ART.md`, `CLAUDE.md`.
 Review: lean. Read-only this turn — **do not recrop**.

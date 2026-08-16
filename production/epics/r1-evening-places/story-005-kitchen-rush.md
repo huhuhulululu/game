@@ -1,7 +1,7 @@
 # Story 005: Kitchen rush
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Rush shows two cover-coats on `bed-kitchen.png` at hearth / chop / oven / serve (place 厨房 · 堂口热)
-- [ ] Dual 做 uses the existing chop pose; no new pack
-- [ ] Order slips stay wood and kitchen-only; no rush tickets on the valley
-- [ ] Play-path proof prints kitchen-rush tokens through `play.tscn`
-- [ ] No 魂; no Don't Starve face; no FAIL restick; no extra valley props; no look names in `src/`
+- [x] Rush shows two cover-coats on `bed-kitchen.png` at hearth / chop / oven / serve (place 厨房 · 堂口热)
+- [x] Dual 做 uses the existing chop pose; no new pack
+- [x] Order slips stay wood and kitchen-only; no rush tickets on the valley
+- [x] Play-path proof prints kitchen-rush tokens through `play.tscn`
+- [x] No 魂; no Don't Starve face; no FAIL restick; no extra valley props; no look names in `src/`
 
 ## Implementation Notes
 
@@ -44,10 +44,17 @@ Server already has `rushed`, orders, and pair pass. Do not move those rules into
 ## Test Evidence
 
 **Story Type**: Integration
-**Required evidence**: `godot/project.test.ts` + `play_rush.tscn` tokens
-**Status**: [ ] In progress
+**Required evidence**: `godot/project.test.ts` + `play_rush.tscn` tokens + `production/qa/evidence/kitchen-rush-evidence.md`
+**Status**: [x] Complete — Play-path tokens + 120 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places kitchen bed, r1-togetherness pair hands
 - Unlocks: later two-iPhone playtest (not this slice)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_RUSH_HOT` `PLAY_RUSH_DO` `PLAY_RUSH_ONLY` `PLAY_RUSH_OK`
+**Code Review**: Skipped — lean
