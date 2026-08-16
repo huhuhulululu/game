@@ -1,7 +1,7 @@
 # Story 009: Warm step
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,11 +18,11 @@ Live leftover after one paint: warm walk / walk2 sit on the painted idle. That r
 
 ## Acceptance Criteria
 
-- [ ] `char-warm-walk` / `char-warm-walk2` are a real step, not a copy of idle; same face, same tan coat, same dusk light
-- [ ] True a=0 outside the figure; no dusk-slab blob; no new person; BODY stays 192
-- [ ] Pine walk still holds; quiet HUD and four-beat filenames stay; torn props stay off
-- [ ] `bed-valley.png` not replaced; no 魂; no look names in `src/`
-- [ ] Play-path + test locks. A blob or different face is thrown away — do not ship it
+- [x] `char-warm-walk` / `char-warm-walk2` are a real step, not a copy of idle; same face, same tan coat, same dusk light
+- [x] True a=0 outside the figure; no dusk-slab blob; no new person; BODY stays 192
+- [x] Pine walk still holds; quiet HUD and four-beat filenames stay; torn props stay off
+- [x] `bed-valley.png` not replaced; no 魂; no look names in `src/`
+- [x] Play-path + test locks. A blob or different face is thrown away — do not ship it
 
 ## Implementation Notes
 
@@ -51,7 +51,7 @@ Godot look only. Paint the warm step from the existing idle pixels (same face, s
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_step.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 

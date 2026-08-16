@@ -17,5 +17,5 @@ Rebuild epics (CHARTER P1 look). Old `p1-look/story-001-valley-painted-bed.md` i
 | r1-village-wild | Feature | Farm / fortune / board / wild | WORLD + ART | 1 | Complete |
 | r1-evening-places | Feature | Kitchen / mine / forge / stall / sleep / rush / spoil / campfire / rain / fog / path / torch / hole / silk / old-camp / scout / night-bite / seasons / mine-floors / fireside / strip-stickers | WORLD + ART | 20 | 001–018, 020 Complete; 019 parked |
 | r1-togetherness | Feature | Shared valley / pair hands / two-phone | WORLD + ART | 3 | 001–002 Complete; 003 Blocked (human) |
-| r1-coat-feel | Feature | Walk / sit / thin audio / place ear / painted night / quiet HUD / coat walk / quiet chrome / one paint / warm step | ART + CHARTER | 9 | 001–008 Complete; 009 In progress |
+| r1-coat-feel | Feature | Walk / sit / thin audio / place ear / painted night / quiet HUD / coat walk / quiet chrome / one paint / warm step | ART + CHARTER | 9 | Complete |
 | p1-look (old) | — | sticker bed | — | 1 | Superseded |

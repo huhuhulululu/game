@@ -36,4 +36,4 @@ PLAY_STEP_OK
 
 ## Sign-off
 
-`/dev-story` lean. Tokens pending play-path. 019 parked. Two-phone Blocked / human.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. Same tan-coat face. Real foot. No sliding stamp. No 魂. `npm test`: 144 pass. `PLAY_STEP_OK`. `PLAY_PAINT_OK` still holds. HTML5 re-exported.
