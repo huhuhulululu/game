@@ -1039,6 +1039,46 @@ test("Play sits two dusk wells on the wild bed", () => {
   }
 });
 
+test("Play sits one dusk nest on the wild bed", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_silk.gd"));
+  assert.ok(existsSync("godot/scenes/play_silk.tscn"));
+  assert.ok(existsSync("godot/assets/art/prop-silk.png"));
+  assert.ok(existsSync("tools/paint_silk_look.py"));
+  const paint = readFileSync("tools/paint_silk_look.py", "utf8");
+  assert.match(paint, /Does not touch the cover/);
+  assert.match(paint, /key_magenta/);
+  assert.match(paint, /real a=0/);
+  assert.match(paint, /prop-silk/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
+  assert.doesNotMatch(paint, /bed-valley/);
+  assert.doesNotMatch(paint, /Wilson|Don't Starve|Dont Starve|魂|spider|tentacle/i);
+  const silkPlay = readFileSync("godot/scripts/headless_play_silk.gd", "utf8");
+  assert.match(silkPlay, /scenes\/play\.tscn/);
+  assert.match(silkPlay, /PLAY_SILK_WILD/);
+  assert.match(silkPlay, /PLAY_SILK_SWING/);
+  assert.match(silkPlay, /PLAY_SILK_HEARTH/);
+  assert.match(silkPlay, /PLAY_SILK_OK/);
+  assert.match(silkPlay, /prop-silk\.png/);
+  assert.match(silkPlay, /挥/);
+  assert.doesNotMatch(silkPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity|spider|tentacle/i);
+  const scene = readFileSync("godot/scenes/play_silk.tscn", "utf8");
+  assert.match(scene, /headless_play_silk\.gd/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /prop-silk\.png/);
+  assert.match(zone, /SilkNest/);
+  assert.match(zone, /Paper silk and umber twigs/);
+  assert.doesNotMatch(zone, /prop-beast\.png/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_silk|PLAY_SILK_WILD|prop-silk|paint_silk/);
+  }
+});
+
 test("Play sits dusk haze on valley and wild, not a fear veil", () => {
   assert.ok(existsSync("godot/scripts/headless_play_fog.gd"));
   assert.ok(existsSync("godot/scenes/play_fog.tscn"));

@@ -336,4 +336,9 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 	elif ch == "L":
 		_prop(_tex("prop-gate.png"), x - 0.2, y - 0.55, 48, 56, 8)
 	elif ch == "n":
-		pass
+		# One dusk nest on the wild bed. Paper silk and umber twigs. Not a den.
+		var silk := _tex("prop-silk.png")
+		if silk:
+			var nest := Look.hung(silk, Vector2((x - 0.18) * TILE, (y - 0.22) * TILE), Vector2(40, 32), 5, 0.05)
+			nest.name = "SilkNest"
+			add_child(nest)

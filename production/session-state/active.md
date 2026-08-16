@@ -1,18 +1,24 @@
 # Session state
 
-- Task: `/dev-story` painted dusk wells on wild holes
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–011 Complete; 012 In progress. Two-phone Blocked (human). Weather look closed.
+- Task: `/dev-story` painted dusk nest on wild silk
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–012 Complete; 013 In progress. Two-phone Blocked (human). Weather look closed.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-012-painted-wormhole.md`; `prop-hole.png`; `zone_map` earth mouths; `play_hole.tscn`
-- Next: `/story-done` painted-wormhole after tokens hold. No more weather. Do not `/dev-story` two-phone.
+- Files: `story-013-painted-silk.md`; `prop-silk.png`; `zone_map` dusk nest; `play_silk.tscn`
+- Next: `/story-done` painted-silk after tokens hold. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
 
 ## Session Extract — /dev-story 2026-08-16
-- Story: `production/epics/r1-evening-places/story-012-painted-wormhole.md` — Painted wormhole
-- Files changed: story, `prop-hole.png`, `zone_map` dusk wells, `play_hole.tscn`
-- Test written: `godot/project.test.ts` (painted-hole lock)
-- Tokens: `PLAY_HOLE_WILD` `PLAY_HOLE_PAIR` `PLAY_HOLE_HEARTH` `PLAY_HOLE_OK`
+- Story: `production/epics/r1-evening-places/story-013-painted-silk.md` — Painted silk
+- Files changed: story, `prop-silk.png`, `zone_map` dusk nest, `play_silk.tscn`
+- Test written: `godot/project.test.ts` (painted-silk lock)
+- Tokens: `PLAY_SILK_WILD` `PLAY_SILK_SWING` `PLAY_SILK_HEARTH` `PLAY_SILK_OK`
 - Blockers: None
-- Next: `/story-done` after tokens hold. Weather stays closed. Two-phone stays Blocked (human). 丝巢 next only if hole holds.
+- Next: `/story-done` after tokens hold. Weather stays closed. Two-phone stays Blocked (human). Do not invent more wild props.
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-012-painted-wormhole.md` — Painted wormhole
+- Tech debt logged: None
+- Next recommended: painted silk (`r1-evening-places/story-013-painted-silk.md`)
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

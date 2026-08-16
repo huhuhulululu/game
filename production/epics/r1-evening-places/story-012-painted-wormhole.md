@@ -1,7 +1,7 @@
 # Story 012: Painted wormhole
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Two magenta-key dusk wells sit on wild `H` tiles; the painted `bed-wild` stays
-- [ ] Pair snap can stand both coats at a hole (one may wait); hop and shared vision stay in the server
-- [ ] Kitchen / mine / village stay clear of the well; plaque unchanged
-- [ ] Play-path proof prints painted-hole tokens through `play.tscn`
-- [ ] No 魂; no tentacle mouth; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Two magenta-key dusk wells sit on wild `H` tiles; the painted `bed-wild` stays
+- [x] Pair snap can stand both coats at a hole (one may wait); hop and shared vision stay in the server
+- [x] Kitchen / mine / village stay clear of the well; plaque unchanged
+- [x] Play-path proof prints painted-hole tokens through `play.tscn`
+- [x] No 魂; no tentacle mouth; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -46,9 +46,16 @@ Server already hops a pair of wild `H` tiles and writes vision after the hop. Do
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_hole.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 131 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places painted torch
 - Unlocks: 丝巢 only if this holds
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_HOLE_WILD` `PLAY_HOLE_PAIR` `PLAY_HOLE_HEARTH` `PLAY_HOLE_OK`
+**Code Review**: Skipped — lean
