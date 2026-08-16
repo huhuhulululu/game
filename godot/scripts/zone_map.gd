@@ -12,7 +12,7 @@ var _zone := ""
 var _fog: Sprite2D
 var _glow: Node2D
 var _fog_sig := ""
-var _wash: Image
+var _path_img: Image
 
 
 func size_px() -> Vector2:
@@ -81,16 +81,16 @@ func show_fog(revealed: Array, visible: Array, fires: Array) -> void:
 				img.set_pixel(x, y, Look.PATH_MEMORY)
 			else:
 				img.set_pixel(x, y, Color(0, 0, 0, 0))
-	_wash = img
+	_path_img = img
 	_fog.texture = ImageTexture.create_from_image(img)
 	_fog.scale = Vector2(TILE, TILE)
 	_paint_fires(fires)
 
 
 func wash_at(x: int, y: int) -> Color:
-	if _wash == null or x < 0 or y < 0 or x >= _w or y >= _h:
+	if _path_img == null or x < 0 or y < 0 or x >= _w or y >= _h:
 		return Color(0, 0, 0, 0)
-	return _wash.get_pixel(x, y)
+	return _path_img.get_pixel(x, y)
 
 
 func _paint_fires(fires: Array) -> void:
