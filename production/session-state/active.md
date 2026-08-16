@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` old-camp search on wild `J`
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–013 Complete; 014 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces closed.
+- Task: `/dev-story` scout-find stumble on unread wild
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–014 Complete; 015 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-014-old-camp.md`; `play_camp.tscn`; prompt gold for 搜 / 并肩
-- Next: `/story-done` old-camp after tokens hold. Next Ready: 探路脚下绊到草石. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+- Files: `story-015-scout-find.md`; `play_scout.tscn`
+- Next: `/story-done` scout-find after tokens hold. Next Ready: 夜里没火被黑暗咬一口. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-015-scout-find.md` — Scout find
+- Files changed: story, `play_scout.tscn`
+- Test written: `godot/project.test.ts` (scout-find lock)
+- Tokens: `PLAY_SCOUT_WILD` `PLAY_SCOUT_TRIP` `PLAY_SCOUT_HEARTH` `PLAY_SCOUT_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Next Ready: 夜里没火被黑暗咬一口. Weather stays closed. Two-phone stays Blocked (human). Do not invent more wild props.
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-014-old-camp.md` — Old camp
+- Tech debt logged: None
+- Next recommended: scout find (`r1-evening-places/story-015-scout-find.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-014-old-camp.md` — Old camp

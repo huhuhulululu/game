@@ -1,7 +1,7 @@
 # Story 014: Old camp
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Wild `J` keeps the existing fire + rock sit; no new remnant prop
-- [ ] Prompt `搜旧营` / `并肩搜旧营` and loot toasts show from the snap; `lootCamp` stays in the server
-- [ ] Kitchen / mine / village stay clear of the camp sit; plaque unchanged
-- [ ] Play-path proof prints old-camp tokens through `play.tscn`
-- [ ] No 魂; no Wilson camp; no DST chest; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Wild `J` keeps the existing fire + rock sit; no new remnant prop
+- [x] Prompt `搜旧营` / `并肩搜旧营` and loot toasts show from the snap; `lootCamp` stays in the server
+- [x] Kitchen / mine / village stay clear of the camp sit; plaque unchanged
+- [x] Play-path proof prints old-camp tokens through `play.tscn`
+- [x] No 魂; no Wilson camp; no DST chest; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -47,9 +47,16 @@ Server already searches a camp once and rolls better when the pair is near. Do n
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_camp.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 133 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places painted silk
 - Unlocks: 探路脚下绊到草石 only if this holds
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_CAMP_WILD` `PLAY_CAMP_LOOT` `PLAY_CAMP_PAIR` `PLAY_CAMP_HEARTH` `PLAY_CAMP_OK`
+**Code Review**: Skipped — lean

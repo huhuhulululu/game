@@ -1039,6 +1039,36 @@ test("Play sits two dusk wells on the wild bed", () => {
   }
 });
 
+test("Play sits a wild stumble from the snap, not a forage sticker", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_scout.gd"));
+  assert.ok(existsSync("godot/scenes/play_scout.tscn"));
+  assert.ok(!existsSync("godot/assets/art/prop-forage.png"));
+  assert.ok(!existsSync("tools/paint_scout_look.py"));
+  const scoutPlay = readFileSync("godot/scripts/headless_play_scout.gd", "utf8");
+  assert.match(scoutPlay, /scenes\/play\.tscn/);
+  assert.match(scoutPlay, /PLAY_SCOUT_WILD/);
+  assert.match(scoutPlay, /PLAY_SCOUT_TRIP/);
+  assert.match(scoutPlay, /PLAY_SCOUT_HEARTH/);
+  assert.match(scoutPlay, /PLAY_SCOUT_OK/);
+  assert.match(scoutPlay, /脚下绊到/);
+  assert.match(scoutPlay, /山草/);
+  assert.match(scoutPlay, /wash_at/);
+  assert.doesNotMatch(scoutPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_scout.tscn", "utf8");
+  assert.match(scene, /headless_play_scout\.gd/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.doesNotMatch(zone, /prop-forage|prop-scout|脚下绊到/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_scout|PLAY_SCOUT_WILD|prop-forage|paint_scout/);
+  }
+});
+
 test("Play sits an old camp search on the wild bed", () => {
   assert.ok(existsSync("godot/scripts/headless_play_camp.gd"));
   assert.ok(existsSync("godot/scenes/play_camp.tscn"));
