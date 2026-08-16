@@ -1,7 +1,7 @@
 # Story 011: Painted torch
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] A magenta-key lantern-stick sits in the cover-coat hand on the wild path from snap `torch` / held `torch`
-- [ ] Night wild with snap `lit` keeps the valley night shade; kitchen / mine stay hearth-lit and do not hang the stick
-- [ ] Village lamps stay in the painting; plaque stays `日 · 季 · 相 · 金`
-- [ ] Play-path proof prints painted-torch tokens through `play.tscn`
-- [ ] No 魂; no Wilson torch; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] A magenta-key lantern-stick sits in the cover-coat hand on the wild path from snap `torch` / held `torch`
+- [x] Night wild with snap `lit` keeps the valley night shade; kitchen / mine stay hearth-lit and do not hang the stick
+- [x] Village lamps stay in the painting; plaque stays `日 · 季 · 相 · 金`
+- [x] Play-path proof prints painted-torch tokens through `play.tscn`
+- [x] No 魂; no Wilson torch; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -46,9 +46,16 @@ Server already crafts flint + wood + grass at a lit fire, burns the held light, 
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_torch.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 130 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places painted path
 - Unlocks: 虫洞 then 丝巢 only if this holds
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_TORCH_HAND` `PLAY_TORCH_PATH` `PLAY_TORCH_HEARTH` `PLAY_TORCH_OK`
+**Code Review**: Skipped — lean

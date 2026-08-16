@@ -327,7 +327,12 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 		_prop(_tex("prop-fire.png"), x - 0.2, y - 0.3, 44, 40, 6)
 		_prop(_tex("prop-rock.png"), x + 0.35, y - 0.05, 22, 20, 5)
 	elif ch == "H":
-		_wash(x, y, Color(0.08, 0.06, 0.04, 0.82))
+		# Two dusk wells on the wild bed. Warm umber mouth, not a black ring.
+		var tex := _tex("prop-hole.png")
+		if tex:
+			var well := Look.hung(tex, Vector2((x - 0.22) * TILE, (y - 0.20) * TILE), Vector2(46, 34), 5, 0.05)
+			well.name = "EarthMouth"
+			add_child(well)
 	elif ch == "L":
 		_prop(_tex("prop-gate.png"), x - 0.2, y - 0.55, 48, 56, 8)
 	elif ch == "n":

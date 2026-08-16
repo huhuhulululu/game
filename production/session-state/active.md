@@ -1,18 +1,24 @@
 # Session state
 
-- Task: `/dev-story` painted lantern-stick on the night path
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–010 Complete; 011 In progress. Two-phone Blocked (human). Weather look closed.
+- Task: `/dev-story` painted dusk wells on wild holes
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–011 Complete; 012 In progress. Two-phone Blocked (human). Weather look closed.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-011-painted-torch.md`; `prop-torch.png`; ActorView lantern-stick; `play_torch.tscn`
-- Next: `/story-done` painted-torch after tokens hold. No more weather. Do not `/dev-story` two-phone.
+- Files: `story-012-painted-wormhole.md`; `prop-hole.png`; `zone_map` earth mouths; `play_hole.tscn`
+- Next: `/story-done` painted-wormhole after tokens hold. No more weather. Do not `/dev-story` two-phone.
 
 ## Session Extract — /dev-story 2026-08-16
-- Story: `production/epics/r1-evening-places/story-011-painted-torch.md` — Painted torch
-- Files changed: story, `prop-torch.png`, ActorView lantern-stick, `play_torch.tscn`
-- Test written: `godot/project.test.ts` (painted-torch lock)
-- Tokens: `PLAY_TORCH_HAND` `PLAY_TORCH_PATH` `PLAY_TORCH_HEARTH` `PLAY_TORCH_OK`
+- Story: `production/epics/r1-evening-places/story-012-painted-wormhole.md` — Painted wormhole
+- Files changed: story, `prop-hole.png`, `zone_map` dusk wells, `play_hole.tscn`
+- Test written: `godot/project.test.ts` (painted-hole lock)
+- Tokens: `PLAY_HOLE_WILD` `PLAY_HOLE_PAIR` `PLAY_HOLE_HEARTH` `PLAY_HOLE_OK`
 - Blockers: None
-- Next: `/story-done` after tokens hold. Weather stays closed. Two-phone stays Blocked (human). 虫洞 next only if torch holds.
+- Next: `/story-done` after tokens hold. Weather stays closed. Two-phone stays Blocked (human). 丝巢 next only if hole holds.
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-011-painted-torch.md` — Painted torch
+- Tech debt logged: None
+- Next recommended: painted wormhole (`r1-evening-places/story-012-painted-wormhole.md`)
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

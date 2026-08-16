@@ -998,6 +998,47 @@ test("Play sits a lantern-stick in the coat hand on the night path", () => {
   }
 });
 
+test("Play sits two dusk wells on the wild bed", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_hole.gd"));
+  assert.ok(existsSync("godot/scenes/play_hole.tscn"));
+  assert.ok(existsSync("godot/assets/art/prop-hole.png"));
+  assert.ok(existsSync("tools/paint_hole_look.py"));
+  const paint = readFileSync("tools/paint_hole_look.py", "utf8");
+  assert.match(paint, /Does not touch the cover/);
+  assert.match(paint, /key_magenta/);
+  assert.match(paint, /real a=0/);
+  assert.match(paint, /prop-hole/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
+  assert.doesNotMatch(paint, /bed-valley/);
+  assert.doesNotMatch(paint, /Wilson|Don't Starve|Dont Starve|魂|tentacle/i);
+  const holePlay = readFileSync("godot/scripts/headless_play_hole.gd", "utf8");
+  assert.match(holePlay, /scenes\/play\.tscn/);
+  assert.match(holePlay, /PLAY_HOLE_WILD/);
+  assert.match(holePlay, /PLAY_HOLE_PAIR/);
+  assert.match(holePlay, /PLAY_HOLE_HEARTH/);
+  assert.match(holePlay, /PLAY_HOLE_OK/);
+  assert.match(holePlay, /prop-hole\.png/);
+  assert.match(holePlay, /钻洞/);
+  assert.match(holePlay, /钻进了洞的另一头/);
+  assert.doesNotMatch(holePlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity|tentacle/i);
+  const scene = readFileSync("godot/scenes/play_hole.tscn", "utf8");
+  assert.match(scene, /headless_play_hole\.gd/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /prop-hole\.png/);
+  assert.match(zone, /EarthMouth/);
+  assert.match(zone, /Warm umber mouth/);
+  assert.doesNotMatch(zone, /0\.08, 0\.06, 0\.04/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_hole|PLAY_HOLE_WILD|prop-hole|paint_hole/);
+  }
+});
+
 test("Play sits dusk haze on valley and wild, not a fear veil", () => {
   assert.ok(existsSync("godot/scripts/headless_play_fog.gd"));
   assert.ok(existsSync("godot/scenes/play_fog.tscn"));
