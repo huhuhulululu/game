@@ -35,4 +35,4 @@ PLAY_HUD_OK
 
 ## Sign-off
 
-`/dev-story` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. One painted language. No 魂. No Don't Starve inventory stripe.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. One painted language. No 魂. No Don't Starve inventory stripe. `npm test`: 140 pass.

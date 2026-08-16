@@ -1596,7 +1596,7 @@ test("Play tears generated stickers off the painted beds", () => {
 test("Play sits a quiet plaque and one bag line", () => {
   assert.ok(existsSync("production/epics/r1-coat-feel/story-005-quiet-hud.md"));
   const story = readFileSync("production/epics/r1-coat-feel/story-005-quiet-hud.md", "utf8");
-  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  assert.match(story, /\*\*Status\*\*:\s*Complete/);
   assert.ok(existsSync("godot/scripts/headless_play_hud.gd"));
   assert.ok(existsSync("godot/scenes/play_hud.tscn"));
   const hud = readFileSync("godot/scripts/headless_play_hud.gd", "utf8");

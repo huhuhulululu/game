@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
@@ -30,4 +30,4 @@ Onboarding, walk / sit, thin ear, place ear, and painted night hold. Night is a 
 | 002 | Thin audio | Integration | Complete | ADR-0002 |
 | 003 | Place ear | Integration | Complete | ADR-0002 |
 | 004 | Painted night | Visual/Feel | Complete | ADR-0003 |
-| 005 | Quiet HUD | Visual/Feel | In progress | ADR-0003 |
+| 005 | Quiet HUD | Visual/Feel | Complete | ADR-0003 |

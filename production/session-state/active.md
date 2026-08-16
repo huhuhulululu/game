@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` quiet HUD and larger cover-coats
-- Status: r1-coat-feel 001–004 Complete; 005 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` quiet HUD
+- Status: r1-coat-feel 001–005 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-005-quiet-hud.md`, `play.gd`, `look.gd`, `play_hud.tscn`
-- Next: `/story-done` quiet-hud after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-005-quiet-hud.md`
+- Next: Stop. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. Next Ready: walk cycle (P1 coat-feel only).
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-005-quiet-hud.md` — Quiet HUD
+- Criteria: 5/5. One bag slip; small plaque; Look.BODY 192 on existing coats.
+- Tests: `godot/project.test.ts` quiet-hud lock + `PLAY_HUD_OK`. npm test 140 pass.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop new WORLD systems. 019 stays parked. Two-phone stays Blocked (human). Next Ready: walk cycle (P1 coat-feel only).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-005-quiet-hud.md` — Quiet HUD
