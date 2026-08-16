@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, quiet chrome, and one paint hold. Cover-coats sit at `Look.BODY = 192` with real a=0. Kitchen / mine / wild read as the same dusk painting. The HUD is a small top-left plaque plus one bag line. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
+Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, quiet chrome, one paint, and the warm step hold. Cover-coats sit at `Look.BODY = 192` with real a=0. Warm walk is the same tan coat taking a step, not a sliding idle. Kitchen / mine / wild read as the same dusk painting. The HUD is a small top-left plaque plus one bag line. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
 
 ## Governing ADRs
 
@@ -34,3 +34,4 @@ Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat 
 | 006 | Coat walk cycle | Visual/Feel | Complete | ADR-0003 |
 | 007 | Quiet chrome | Visual/Feel | Complete | ADR-0003 |
 | 008 | One paint | Visual/Feel | Complete | ADR-0003 |
+| 009 | Warm step | Visual/Feel | In progress | ADR-0003 |

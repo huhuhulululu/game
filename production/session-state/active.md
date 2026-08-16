@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` one paint
-- Status: r1-coat-feel 001–008 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` warm step
+- Status: r1-coat-feel 001–008 Complete; 009 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-008-one-paint.md`
-- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-009-warm-step.md`
+- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-009-warm-step.md` — Warm step
+- Files changed: story, `paint_warm_step.py`, `char-warm-walk.png`, `char-warm-walk2.png`, `play_step.tscn`, `headless_play_step.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (warm-step lock) + `play_step.tscn`
+- Tokens: `PLAY_STEP_WARM` `PLAY_STEP_PINE` `PLAY_STEP_OK`
+- Next: `/story-done` after tokens hold. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-008-one-paint.md` — One paint

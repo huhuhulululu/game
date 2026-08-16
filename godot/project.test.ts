@@ -1768,3 +1768,52 @@ test("Play sits real coat alpha and one painted place language", () => {
     assert.doesNotMatch(src, /play_paint|PLAY_PAINT_OK|paint_one_paint/);
   }
 });
+
+test("Play walks the same tan coat, not a sliding idle stamp", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-009-warm-step.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-009-warm-step.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-008-one-paint.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_step.gd"));
+  assert.ok(existsSync("godot/scenes/play_step.tscn"));
+  const stepPlay = readFileSync("godot/scripts/headless_play_step.gd", "utf8");
+  assert.match(stepPlay, /scenes\/play\.tscn/);
+  assert.match(stepPlay, /PLAY_STEP_WARM/);
+  assert.match(stepPlay, /PLAY_STEP_PINE/);
+  assert.match(stepPlay, /PLAY_STEP_OK/);
+  assert.match(stepPlay, /char-warm-walk\.png/);
+  assert.match(stepPlay, /char-warm-walk2\.png/);
+  assert.match(stepPlay, /char-pine-walk\.png/);
+  assert.match(stepPlay, /SLIDING_STAMP/);
+  assert.match(stepPlay, /NEW_FACE/);
+  assert.match(stepPlay, /Look\.BODY/);
+  assert.doesNotMatch(stepPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_step.tscn", "utf8");
+  assert.match(scene, /headless_play_step\.gd/);
+  const painter = readFileSync("tools/paint_warm_step.py", "utf8");
+  assert.match(painter, /Does not write cover-valley\.png, bed-valley\.png, or any pine sheet/);
+  assert.match(painter, /#FF00FF|255\.0, 0\.0, 255\.0/);
+  assert.match(painter, /char-warm-walk\.png/);
+  assert.doesNotMatch(painter, /cover\.crop/);
+  assert.doesNotMatch(painter, /char-pine-walk\.png.*=/);
+  assert.doesNotMatch(painter, /Wilson|Don't Starve|Dont Starve|魂/i);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 192/);
+  assert.match(look, /const FOOT := 0\.979/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /魂/);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /暖的走是同一件驼大衣迈步/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_step|PLAY_STEP_OK|paint_warm_step/);
+  }
+});
