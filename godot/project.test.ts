@@ -836,6 +836,42 @@ test("Play shows spoil ticks and the kitchen icebox", () => {
   }
 });
 
+test("Play sits a camp pot on a lit wild fire", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_fire.gd"));
+  assert.ok(existsSync("godot/scenes/play_fire.tscn"));
+  assert.ok(existsSync("godot/assets/art/prop-camp-pot.png"));
+  assert.ok(existsSync("tools/paint_camp_look.py"));
+  const paint = readFileSync("tools/paint_camp_look.py", "utf8");
+  assert.match(paint, /Does not touch the cover/);
+  assert.match(paint, /key_magenta/);
+  assert.match(paint, /real a=0/);
+  assert.match(paint, /prop-camp-pot/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
+  assert.doesNotMatch(paint, /bed-valley/);
+  assert.doesNotMatch(paint, /Wilson|Don't Starve|Dont Starve|魂/i);
+  const firePlay = readFileSync("godot/scripts/headless_play_fire.gd", "utf8");
+  assert.match(firePlay, /scenes\/play\.tscn/);
+  assert.match(firePlay, /PLAY_FIRE_BED/);
+  assert.match(firePlay, /PLAY_FIRE_POT/);
+  assert.match(firePlay, /PLAY_FIRE_COOK/);
+  assert.match(firePlay, /PLAY_FIRE_OK/);
+  assert.match(firePlay, /prop-camp-pot\.png/);
+  assert.match(firePlay, /prop-fire\.png/);
+  assert.match(firePlay, /烤鱼/);
+  assert.doesNotMatch(firePlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_fire.tscn", "utf8");
+  assert.match(scene, /headless_play_fire\.gd/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /prop-camp-pot\.png/);
+  assert.match(zone, /prop-fire\.png/);
+  assert.doesNotMatch(zone, /lamp := ColorRect/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_fire|PLAY_FIRE_POT|prop-camp-pot/);
+  }
+});
+
 test("Play dims the painted bed at night and keeps indoor hearths", () => {
   assert.ok(existsSync("godot/scripts/headless_play_night.gd"));
   assert.ok(existsSync("godot/scenes/play_night.tscn"));

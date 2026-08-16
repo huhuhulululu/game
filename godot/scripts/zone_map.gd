@@ -91,16 +91,17 @@ func _paint_fires(fires: Array) -> void:
 		child.queue_free()
 	if _zone != "wild":
 		return
+	var tex := _tex("prop-camp-pot.png")
+	if tex == null:
+		return
 	for raw in fires:
 		var key := int(raw)
 		var fx := key % _w
 		var fy := int(key / _w)
-		var lamp := ColorRect.new()
-		lamp.position = Vector2(fx * TILE + 6, fy * TILE + 6)
-		lamp.size = Vector2(TILE - 12, TILE - 12)
-		lamp.color = Color(0.88, 0.48, 0.22, 0.42)
-		lamp.z_index = 0
-		_glow.add_child(lamp)
+		# Haul sits in a pot on the lit fire. Not the old kitchen pot sheet.
+		var pot := Look.hung(tex, Vector2(fx * TILE + 4.0, fy * TILE - 12.0), Vector2(28, 32), 9, 0.04)
+		pot.name = "CampPot"
+		_glow.add_child(pot)
 
 
 func _tex(name: String) -> Texture2D:

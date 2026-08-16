@@ -1,7 +1,7 @@
 # Story 006: Spoil and icebox
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Kitchen icebox stays the existing magenta-key `prop-cool` on tile `R`; do not hang DST `prop-icebox`
-- [ ] Food chips show spoil ticks from snap `fresh` (还行 / 蔫了 / 坏了)
-- [ ] Kitchen shows ice chips from snap `ice`; valley does not
-- [ ] Play-path proof prints spoil-icebox tokens through `play.tscn`
-- [ ] No 魂; no Don't Starve face; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Kitchen icebox stays the existing magenta-key `prop-cool` on tile `R`; do not hang DST `prop-icebox`
+- [x] Food chips show spoil ticks from snap `fresh` (还行 / 蔫了 / 坏了)
+- [x] Kitchen shows ice chips from snap `ice`; valley does not
+- [x] Play-path proof prints spoil-icebox tokens through `play.tscn`
+- [x] No 魂; no Don't Starve face; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -46,9 +46,16 @@ Server already ages bag / ice. Do not move those rules into Godot. Sit the cool 
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_spoil.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 125 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places kitchen bed
 - Unlocks: none (two-phone stays human)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_SPOIL_COOL` `PLAY_SPOIL_WILT` `PLAY_SPOIL_ICE` `PLAY_SPOIL_OK`
+**Code Review**: Skipped — lean

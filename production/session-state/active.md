@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` spoil / icebox on the painted kitchen
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 006 In progress. Two-phone Blocked (human).
+- Task: `/dev-story` campfire pot on the painted wild
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–006 Complete; 007 In progress. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-006-spoil-icebox.md`; `play.gd` spoil ticks + kitchen ice chips; `play_spoil.tscn`
-- Next: `/story-done` spoil-icebox after tokens hold. Do not `/dev-story` two-phone.
+- Files: `story-007-campfire-pot.md`; `prop-camp-pot.png`; `zone_map.gd` pot on lit fires; `play_fire.tscn`
+- Next: `/story-done` campfire-pot after tokens hold. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-007-campfire-pot.md` — Campfire pot
+- Files changed: story, `prop-camp-pot.png`, `zone_map.gd` pot on lit fires, `play_fire.tscn`
+- Test written: `godot/project.test.ts` (campfire pot lock)
+- Tokens: `PLAY_FIRE_BED` `PLAY_FIRE_POT` `PLAY_FIRE_COOK` `PLAY_FIRE_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-006-spoil-icebox.md` — Spoil and icebox
+- Tech debt logged: None
+- Next recommended: campfire pot (`r1-evening-places/story-007-campfire-pot.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-006-spoil-icebox.md` — Spoil and icebox
