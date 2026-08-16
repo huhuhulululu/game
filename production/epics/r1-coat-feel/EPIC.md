@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
@@ -40,4 +40,4 @@ Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat 
 | 012 | Painted join | Visual/Feel | Complete | ADR-0003 |
 | 013 | Quiet hands | Visual/Feel | Complete | ADR-0003 |
 | 014 | Quiet log | Visual/Feel | Complete | ADR-0003 |
-| 015 | Quiet name | Visual/Feel | In progress | ADR-0003 |
+| 015 | Quiet name | Visual/Feel | Complete | ADR-0003 |

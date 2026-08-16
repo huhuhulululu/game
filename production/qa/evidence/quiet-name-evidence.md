@@ -34,4 +34,4 @@ PLAY_NAME_OK
 
 ## Sign-off
 
-`/dev-story` lean. Your name is hidden. Mate is ink. No boxed nametag. No 魂.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. Your name is hidden. Mate is ink. No boxed nametag. No 魂. `npm test`: 150 pass. `PLAY_NAME_OK`. `PLAY_LOG_OK` still holds. HTML5 re-exported.

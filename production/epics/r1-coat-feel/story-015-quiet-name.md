@@ -1,7 +1,7 @@
 # Story 015: Quiet name
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,12 +18,12 @@ Live leftover after the quiet log: a boxed label floats over the coat (晓 / 暖
 
 ## Acceptance Criteria
 
-- [ ] Your name plate is hidden; no boxed DST nametag over your coat
-- [ ] Mate keeps a small ink name, no ornate wood frame
-- [ ] Title stays the painted cover; hands stay small slips; log stays hidden when empty; BODY stays 192
-- [ ] HUD stays plaque + one bag slip; torn props stay off
-- [ ] `bed-valley.png` not replaced; no 魂; no look names in `src/`
-- [ ] Play-path + test locks; 014 stays Complete
+- [x] Your name plate is hidden; no boxed DST nametag over your coat
+- [x] Mate keeps a small ink name, no ornate wood frame
+- [x] Title stays the painted cover; hands stay small slips; log stays hidden when empty; BODY stays 192
+- [x] HUD stays plaque + one bag slip; torn props stay off
+- [x] `bed-valley.png` not replaced; no 魂; no look names in `src/`
+- [x] Play-path + test locks; 014 stays Complete
 
 ## Implementation Notes
 
@@ -52,7 +52,7 @@ Godot look only. Do not invent a new nametag chrome. Drop `name_box` / `tex-plaq
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_name.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 
