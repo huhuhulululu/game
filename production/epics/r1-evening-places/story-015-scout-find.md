@@ -1,7 +1,7 @@
 # Story 015: Scout find
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Walking unread wild tiles can show a `脚下绊到` toast from the snap; `scoutFind` stays in the server
-- [ ] Bag can show the tripped item from the snap; no new grass / stone / seed prop; no new loot table
-- [ ] Kitchen / mine / village do not trip forage; plaque unchanged
-- [ ] Play-path proof prints scout-find tokens through `play.tscn`
-- [ ] No 魂; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Walking unread wild tiles can show a `脚下绊到` toast from the snap; `scoutFind` stays in the server
+- [x] Bag can show the tripped item from the snap; no new grass / stone / seed prop; no new loot table
+- [x] Kitchen / mine / village do not trip forage; plaque unchanged
+- [x] Play-path proof prints scout-find tokens through `play.tscn`
+- [x] No 魂; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -47,9 +47,16 @@ Server already trips forage while revealing wild tiles. Do not move those rules 
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_scout.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 134 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places old camp
-- Unlocks: none in this epic (wild forage closes)
+- Unlocks: 夜里没火被黑暗咬一口 only if this holds
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_SCOUT_WILD` `PLAY_SCOUT_TRIP` `PLAY_SCOUT_HEARTH` `PLAY_SCOUT_OK`
+**Code Review**: Skipped — lean

@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` scout-find stumble on unread wild
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–014 Complete; 015 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed.
+- Task: `/dev-story` night bite on unlit wild
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–015 Complete; 016 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-015-scout-find.md`; `play_scout.tscn`
-- Next: `/story-done` scout-find after tokens hold. Next Ready: 夜里没火被黑暗咬一口. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+- Files: `story-016-night-bite.md`; `play_bite.tscn`
+- Next: `/story-done` night-bite after tokens hold. Next Ready: 春夏秋冬会转. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-016-night-bite.md` — Night bite
+- Files changed: story, `play_bite.tscn`
+- Test written: `godot/project.test.ts` (night-bite lock)
+- Tokens: `PLAY_BITE_WILD` `PLAY_BITE_EDGE` `PLAY_BITE_HEARTH` `PLAY_BITE_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Next Ready: 春夏秋冬会转. Weather stays closed. Two-phone stays Blocked (human). Do not invent more wild props.
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-015-scout-find.md` — Scout find
+- Tech debt logged: None
+- Next recommended: night bite (`r1-evening-places/story-016-night-bite.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-015-scout-find.md` — Scout find

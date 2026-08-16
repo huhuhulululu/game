@@ -1039,6 +1039,36 @@ test("Play sits two dusk wells on the wild bed", () => {
   }
 });
 
+test("Play sits a night bite from the snap, not a fear veil", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_bite.gd"));
+  assert.ok(existsSync("godot/scenes/play_bite.tscn"));
+  assert.ok(!existsSync("godot/assets/art/prop-bite.png"));
+  assert.ok(!existsSync("tools/paint_bite_look.py"));
+  const bitePlay = readFileSync("godot/scripts/headless_play_bite.gd", "utf8");
+  assert.match(bitePlay, /scenes\/play\.tscn/);
+  assert.match(bitePlay, /PLAY_BITE_WILD/);
+  assert.match(bitePlay, /PLAY_BITE_EDGE/);
+  assert.match(bitePlay, /PLAY_BITE_HEARTH/);
+  assert.match(bitePlay, /PLAY_BITE_OK/);
+  assert.match(bitePlay, /被黑暗咬了一口/);
+  assert.match(bitePlay, /太暗了/);
+  assert.match(bitePlay, /出谷 · 夜里没火会咬人/);
+  assert.match(bitePlay, /night\.gdshader/);
+  assert.doesNotMatch(bitePlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_bite.tscn", "utf8");
+  assert.match(scene, /headless_play_bite\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.match(play, /Never purple night/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /魂/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_bite|PLAY_BITE_WILD|prop-bite|paint_bite/);
+  }
+});
+
 test("Play sits a wild stumble from the snap, not a forage sticker", () => {
   assert.ok(existsSync("godot/scripts/headless_play_scout.gd"));
   assert.ok(existsSync("godot/scenes/play_scout.tscn"));
