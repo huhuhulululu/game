@@ -919,6 +919,52 @@ test("Play sits dusk rain on valley and wild, not a weather ring", () => {
   }
 });
 
+test("Play sits dusk haze on valley and wild, not a fear veil", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_fog.gd"));
+  assert.ok(existsSync("godot/scenes/play_fog.tscn"));
+  assert.ok(existsSync("godot/shaders/fog.gdshader"));
+  const fogPlay = readFileSync("godot/scripts/headless_play_fog.gd", "utf8");
+  assert.match(fogPlay, /scenes\/play\.tscn/);
+  assert.match(fogPlay, /PLAY_FOG_CLEAR/);
+  assert.match(fogPlay, /PLAY_FOG_VALLEY/);
+  assert.match(fogPlay, /PLAY_FOG_HEARTH/);
+  assert.match(fogPlay, /PLAY_FOG_MINE/);
+  assert.match(fogPlay, /PLAY_FOG_WILD/);
+  assert.match(fogPlay, /PLAY_FOG_OK/);
+  assert.match(fogPlay, /bed-valley\.png/);
+  assert.match(fogPlay, /fog\.gdshader/);
+  assert.doesNotMatch(fogPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_fog.tscn", "utf8");
+  assert.match(scene, /headless_play_fog\.gd/);
+  const shader = readFileSync("godot/shaders/fog.gdshader", "utf8");
+  assert.match(shader, /painted bed/);
+  assert.match(shader, /0\.86, 0\.78, 0\.64/);
+  assert.match(shader, /0\.62, 0\.54, 0\.40/);
+  assert.doesNotMatch(shader, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /fog_mat/);
+  assert.match(look, /FOG_MIST := Color\(0\.86, 0\.78, 0\.64\)/);
+  assert.match(look, /FOG_SHADE := Color\(0\.62, 0\.54, 0\.40\)/);
+  assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /set_fog/);
+  assert.match(play, /Never a weather ring/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /魂/);
+  const valley = readFileSync("godot/scripts/valley_world.gd", "utf8");
+  assert.match(valley, /func set_fog/);
+  assert.match(valley, /bed-valley\.png/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /func set_fog/);
+  assert.match(zone, /_zone != "wild"/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_fog|PLAY_FOG_VALLEY|fog_mat/);
+  }
+});
+
 test("Play dims the painted bed at night and keeps indoor hearths", () => {
   assert.ok(existsSync("godot/scripts/headless_play_night.gd"));
   assert.ok(existsSync("godot/scenes/play_night.tscn"));

@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` painted rain on valley / wild beds
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–007 Complete; 008 In progress. Two-phone Blocked (human).
+- Task: `/dev-story` painted fog on valley / wild beds
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–008 Complete; 009 In progress. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-008-painted-rain.md`; `rain.gdshader`; `set_rain` on valley / wild; `play_rain.tscn`
-- Next: `/story-done` painted-rain after tokens hold. Do not `/dev-story` two-phone.
+- Files: `story-009-painted-fog.md`; `fog.gdshader`; `set_fog` on valley / wild; `play_fog.tscn`
+- Next: `/story-done` painted-fog after tokens hold. No more weather slices. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-009-painted-fog.md` — Painted fog
+- Files changed: story, `fog.gdshader`, `look.gd` fog_mat, valley / zone_map `set_fog`, `play_fog.tscn`
+- Test written: `godot/project.test.ts` (painted-fog lock)
+- Tokens: `PLAY_FOG_CLEAR` `PLAY_FOG_VALLEY` `PLAY_FOG_HEARTH` `PLAY_FOG_MINE` `PLAY_FOG_WILD` `PLAY_FOG_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. No more weather slices. Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-008-painted-rain.md` — Painted rain
+- Tech debt logged: None
+- Next recommended: painted fog (`r1-evening-places/story-009-painted-fog.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-008-painted-rain.md` — Painted rain

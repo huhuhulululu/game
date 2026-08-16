@@ -344,17 +344,24 @@ func _on_snap(s: Dictionary) -> void:
 	else:
 		_valley.set_night(0.0)
 		_zone_map.set_night(0.0)
-	# Soft dusk rain sits on the bed. Never a weather ring.
+	# Soft dusk rain / haze sit on the bed. Never a weather ring.
 	var wet := _wet(s)
+	var mist := _mist(s)
 	if zone == "kitchen" or zone == "mine":
 		_valley.set_rain(false)
 		_zone_map.set_rain(false)
+		_valley.set_fog(false)
+		_zone_map.set_fog(false)
 	elif zone == "wild":
 		_valley.set_rain(false)
+		_valley.set_fog(false)
 		_zone_map.set_rain(wet)
+		_zone_map.set_fog(mist)
 	else:
 		_valley.set_rain(wet)
+		_valley.set_fog(mist)
 		_zone_map.set_rain(false)
+		_zone_map.set_fog(false)
 	_paint_people(s)
 	_paint_foes(s.get("enemies", []))
 	if _ear:
@@ -537,6 +544,10 @@ func _weather_id(s: Dictionary) -> String:
 func _wet(s: Dictionary) -> bool:
 	var id := _weather_id(s)
 	return id == "rain" or id == "storm"
+
+
+func _mist(s: Dictionary) -> bool:
+	return _weather_id(s) == "fog"
 
 
 func _paint_fish(s: Dictionary) -> void:

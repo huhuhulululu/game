@@ -1,7 +1,7 @@
 # Story 008: Painted rain
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Valley / wild beds sit soft dusk rain from snap `weather` rain / storm
-- [ ] Kitchen / mine stay dry; plaque stays `日 · 季 · 相 · 金` (no weather ring)
-- [ ] Wild rain snap can show the server toast that the fire went out; Godot does not age fires
-- [ ] Play-path proof prints painted-rain tokens through `play.tscn`
-- [ ] No 魂; no Don't Starve overlay; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Valley / wild beds sit soft dusk rain from snap `weather` rain / storm
+- [x] Kitchen / mine stay dry; plaque stays `日 · 季 · 相 · 金` (no weather ring)
+- [x] Wild rain snap can show the server toast that the fire went out; Godot does not age fires
+- [x] Play-path proof prints painted-rain tokens through `play.tscn`
+- [x] No 魂; no Don't Starve overlay; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -46,9 +46,16 @@ Server already rolls weather and puts wild fires out in the rain. Do not move th
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_rain.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 127 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places campfire pot, r1-coat-feel painted night
 - Unlocks: none (two-phone stays human)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_RAIN_CLEAR` `PLAY_RAIN_VALLEY` `PLAY_RAIN_HEARTH` `PLAY_RAIN_MINE` `PLAY_RAIN_WILD` `PLAY_RAIN_OK`
+**Code Review**: Skipped — lean

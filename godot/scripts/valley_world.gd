@@ -78,3 +78,24 @@ func set_rain(wet: bool) -> void:
 	rain.scale = Vector2(sz.x / 8.0, sz.y / 8.0)
 	rain.material = Look.rain_mat()
 	rain.visible = true
+
+
+func set_fog(mist: bool) -> void:
+	var fog := get_node_or_null("Fog") as Sprite2D
+	if not mist:
+		if fog:
+			fog.visible = false
+		return
+	if fog == null:
+		fog = Sprite2D.new()
+		fog.name = "Fog"
+		fog.centered = false
+		fog.z_index = 11
+		var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+		img.fill(Color(1, 1, 1, 1))
+		fog.texture = ImageTexture.create_from_image(img)
+		add_child(fog)
+	var sz := size_px()
+	fog.scale = Vector2(sz.x / 8.0, sz.y / 8.0)
+	fog.material = Look.fog_mat()
+	fog.visible = true
