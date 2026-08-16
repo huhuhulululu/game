@@ -2106,3 +2106,55 @@ test("Play hides the empty bottom log until a real line", () => {
     assert.doesNotMatch(src, /play_log|PLAY_LOG_OK|_show_line/);
   }
 });
+
+test("Play hides your boxed name and leaves mate as quiet ink", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-015-quiet-name.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-015-quiet-name.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-014-quiet-log.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_name.gd"));
+  assert.ok(existsSync("godot/scenes/play_name.tscn"));
+  const namePlay = readFileSync("godot/scripts/headless_play_name.gd", "utf8");
+  assert.match(namePlay, /scenes\/play\.tscn/);
+  assert.match(namePlay, /PLAY_NAME_YOU/);
+  assert.match(namePlay, /PLAY_NAME_MATE/);
+  assert.match(namePlay, /PLAY_NAME_OK/);
+  assert.match(namePlay, /NAME_BOX/);
+  assert.match(namePlay, /Look\.BODY/);
+  assert.doesNotMatch(namePlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_name.tscn", "utf8");
+  assert.match(scene, /headless_play_name\.gd/);
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /_place_name/);
+  assert.match(actor, /Look\.BODY - 28/);
+  assert.match(actor, /not _mine/);
+  assert.doesNotMatch(actor, /name_box/);
+  assert.doesNotMatch(actor, /_name_card/);
+  assert.doesNotMatch(actor, /魂/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /row\["mine"\]/);
+  assert.match(play, /_show_line/);
+  assert.match(play, /hand_chip\("做"/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /魂/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 192/);
+  assert.match(look, /const FOOT := 0\.979/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /自己头上没有木框名牌/);
+  assert.match(art, /底下没有空木条/);
+  assert.match(art, /谷里的做喊声是小木签/);
+  assert.match(art, /大衣真透明/);
+  assert.match(art, /一行木签/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_name|PLAY_NAME_OK|_name_card/);
+  }
+});

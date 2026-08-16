@@ -23,7 +23,7 @@ var _sprite: Sprite2D
 var _shadow: Sprite2D
 var _glow: Sprite2D
 var _name: Label
-var _name_card: Panel
+var _mine := false
 var _bar_bg: Panel
 var _bar_ok: ColorRect
 var _bar_mark: ColorRect
@@ -57,15 +57,10 @@ func _ready() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 8
 	add_child(layer)
-	_name_card = Panel.new()
-	_name_card.size = Vector2(72, 34)
-	_name_card.add_theme_stylebox_override("panel", Look.name_box())
-	layer.add_child(_name_card)
-	_name = Look.ink_label("", 22, Look.INK)
-	_name.position = Vector2(10, 4)
-	_name.size = Vector2(52, 26)
+	_name = Look.ink_label("", 16, Look.INK)
+	_name.size = Vector2(72, 22)
 	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name_card.add_child(_name)
+	layer.add_child(_name)
 	_bars()
 	_apply()
 
@@ -114,6 +109,7 @@ func apply(data: Dictionary, now: float) -> void:
 	var held := str(data.get("held", "")).split(":")[0]
 	var has := bool(data.get("torch", false)) or held == "torch"
 	_torch = has and _place != "kitchen" and _place != "mine"
+	_mine = bool(data.get("mine", false))
 	_name.text = str(data.get("name", ""))
 	z_index = 20 + int(position.y / 8.0)
 	_t = now
@@ -142,11 +138,11 @@ func _process(dt: float) -> void:
 
 
 func _place_name() -> void:
-	if _name_card == null:
+	if _name == null:
 		return
 	var p := get_global_transform_with_canvas().origin
-	_name_card.position = Vector2(p.x - 36, p.y - Look.BODY - 28 + Look.BODY * 0.10 * _sit)
-	_name_card.visible = _name.text != ""
+	_name.position = Vector2(p.x - 36, p.y - Look.BODY - 28 + Look.BODY * 0.10 * _sit)
+	_name.visible = _name.text != "" and not _mine
 
 
 func set_moving(v: bool) -> void:

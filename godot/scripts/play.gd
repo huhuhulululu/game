@@ -502,6 +502,7 @@ func _paint_people(s: Dictionary) -> void:
 		var row := a.duplicate()
 		if str(row.get("zone", "")) == "":
 			row["zone"] = str(s.get("zone", _zone))
+		row["mine"] = id == str(s.get("you", Net.you_id))
 		node.set_moving(prev.distance_to(next) > 0.4)
 		node.apply(row, Time.get_ticks_msec() / 1000.0)
 		_last_pos[id] = next

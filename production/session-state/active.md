@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` quiet log
-- Status: r1-coat-feel 001–014 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` quiet name
+- Status: r1-coat-feel 001–014 Complete; 015 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-014-quiet-log.md`
-- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-015-quiet-name.md`
+- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-015-quiet-name.md` — Quiet name
+- Files changed: story, `actor_view.gd` ink name, `play.gd` mine flag, `play_name.tscn`, `headless_play_name.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (quiet-name lock) + `play_name.tscn`
+- Tokens: `PLAY_NAME_YOU` `PLAY_NAME_MATE` `PLAY_NAME_OK`
+- Next: `/story-done` after tokens hold. Your name hidden. Mate is ink. No boxed nametag. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-014-quiet-log.md` — Quiet log
