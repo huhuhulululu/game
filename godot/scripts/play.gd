@@ -138,13 +138,14 @@ func _hud() -> void:
 	_orders.add_theme_constant_override("separation", 6)
 	layer.add_child(_orders)
 	_prompt_bar = Panel.new()
-	_prompt_bar.position = Vector2(350, 598)
-	_prompt_bar.size = Vector2(580, 64)
+	_prompt_bar.position = Vector2(460, 640)
+	_prompt_bar.size = Vector2(360, 36)
+	_prompt_bar.visible = false
 	_prompt_bar.add_theme_stylebox_override("panel", Look.slip_box())
 	layer.add_child(_prompt_bar)
-	_prompt = Look.ink_label("", 20)
-	_prompt.position = Vector2(18, 14)
-	_prompt.size = Vector2(544, 36)
+	_prompt = Look.ink_label("", 16)
+	_prompt.position = Vector2(12, 6)
+	_prompt.size = Vector2(336, 24)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_prompt_bar.add_child(_prompt)
@@ -280,16 +281,7 @@ func _on_snap(s: Dictionary) -> void:
 	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
 	# Hunger stays in the sim. The plaque never shows a soul or hunger number.
 	_hud_ink.text = "日 %s · %s · %s · 金 %s" % [_ink_n(s.get("day", 0)), str(s.get("season", "春")), phase, _ink_n(s.get("gold", 0))]
-	var prompt := str(s.get("prompt", ""))
-	_prompt.text = prompt
-	if prompt == "起竿" or prompt.find("太暗") >= 0 or prompt.find("咬") >= 0 or prompt.find("还早") >= 0:
-		_prompt.add_theme_color_override("font_color", Color(0.55, 0.22, 0.14))
-	elif prompt.find("绿") >= 0 or prompt.find("熟了") >= 0:
-		_prompt.add_theme_color_override("font_color", Look.MOSS)
-	elif prompt.find("歇") >= 0 or prompt.find("两人") >= 0 or prompt.find("一起") >= 0 or prompt.find("等她") >= 0 or prompt.find("堂口") >= 0 or prompt.find("烤") >= 0 or prompt.find("搜") >= 0 or prompt.find("并肩") >= 0:
-		_prompt.add_theme_color_override("font_color", Look.GOLD)
-	else:
-		_prompt.add_theme_color_override("font_color", Look.INK)
+	_show_line(str(s.get("prompt", "")))
 	_paint_signs(s)
 	_paint_mate(s)
 	var you_held := _you_held_name(s)
@@ -730,9 +722,30 @@ func _paint_orders(raws: Array, zone: String) -> void:
 	_orders.visible = true
 
 
+func _show_line(prompt: String) -> void:
+	var ink := prompt.strip_edges()
+	_prompt.text = ink
+	if ink == "":
+		_prompt_bar.visible = false
+		return
+	if ink == "起竿" or ink.find("太暗") >= 0 or ink.find("咬") >= 0 or ink.find("还早") >= 0:
+		_prompt.add_theme_color_override("font_color", Color(0.55, 0.22, 0.14))
+	elif ink.find("绿") >= 0 or ink.find("熟了") >= 0:
+		_prompt.add_theme_color_override("font_color", Look.MOSS)
+	elif ink.find("歇") >= 0 or ink.find("两人") >= 0 or ink.find("一起") >= 0 or ink.find("等她") >= 0 or ink.find("堂口") >= 0 or ink.find("烤") >= 0 or ink.find("搜") >= 0 or ink.find("并肩") >= 0:
+		_prompt.add_theme_color_override("font_color", Look.GOLD)
+	else:
+		_prompt.add_theme_color_override("font_color", Look.INK)
+	var wide := clampf(72.0 + float(ink.length()) * 16.0, 120.0, 360.0)
+	_prompt_bar.size = Vector2(wide, 36)
+	_prompt_bar.position = Vector2((1280.0 - wide) * 0.5, 640)
+	_prompt.size = Vector2(wide - 24.0, 24)
+	_prompt_bar.visible = true
+
+
 func _take(item_id: String) -> void:
 	if _you_held != "":
-		_prompt.text = "手里满了"
+		_show_line("手里满了")
 		return
 	Net.send_take(item_id)
 

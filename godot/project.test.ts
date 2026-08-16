@@ -290,7 +290,8 @@ test("Godot client plays fish, mine and kitchen from the same snap", () => {
   assert.match(play, /chip_button/);
   assert.match(play, /slip_box/);
   assert.match(play, /_prompt_bar/);
-  assert.match(play, /580, 64/);
+  assert.match(play, /_show_line/);
+  assert.doesNotMatch(play, /580, 64/);
   assert.doesNotMatch(play, /StyleBoxFlat/);
   assert.doesNotMatch(play, /wood_button\(label/);
   assert.match(play, /_ink_n/);
@@ -2053,5 +2054,55 @@ test("Play sits quiet wood chips for 做 喊 声, not a stacked plaque box", () 
   for (const p of srcFiles) {
     const src = readFileSync(p, "utf8");
     assert.doesNotMatch(src, /play_quiet|PLAY_QUIET_OK|hand_chip/);
+  }
+});
+
+test("Play hides the empty bottom log until a real line", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-014-quiet-log.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-014-quiet-log.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-013-quiet-hands.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_log.gd"));
+  assert.ok(existsSync("godot/scenes/play_log.tscn"));
+  const logPlay = readFileSync("godot/scripts/headless_play_log.gd", "utf8");
+  assert.match(logPlay, /scenes\/play\.tscn/);
+  assert.match(logPlay, /PLAY_LOG_EMPTY/);
+  assert.match(logPlay, /PLAY_LOG_LINE/);
+  assert.match(logPlay, /PLAY_LOG_OK/);
+  assert.match(logPlay, /EMPTY_LOG/);
+  assert.match(logPlay, /DST_LOG/);
+  assert.match(logPlay, /Look\.BODY/);
+  assert.doesNotMatch(logPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_log.tscn", "utf8");
+  assert.match(scene, /headless_play_log\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_show_line/);
+  assert.match(play, /_prompt_bar\.visible = false/);
+  assert.match(play, /hand_chip\("做"/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.match(play, /chip_button/);
+  assert.doesNotMatch(play, /580, 64/);
+  assert.doesNotMatch(play, /魂/);
+  const chrome = readFileSync("godot/scripts/headless_play_chrome.gd", "utf8");
+  assert.match(chrome, /EMPTY_PROMPT_BAR/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 192/);
+  assert.match(look, /const FOOT := 0\.979/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /底下没有空木条/);
+  assert.match(art, /谷里的做喊声是小木签/);
+  assert.match(art, /开一间的牌是黄昏木头/);
+  assert.match(art, /大衣真透明/);
+  assert.match(art, /一行木签/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_log|PLAY_LOG_OK|_show_line/);
   }
 });

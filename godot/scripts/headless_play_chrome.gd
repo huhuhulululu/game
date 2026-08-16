@@ -217,6 +217,16 @@ func _leftover() -> bool:
 		if orders.size.y >= 140.0 and _live_kids(orders) == 0:
 			printerr("RESERVED_ORDER ", orders.size)
 			return true
+	var bar: Control = play.get("_prompt_bar")
+	if bar != null:
+		var prompt: Label = play.get("_prompt")
+		var has := prompt != null and str(prompt.text).strip_edges() != ""
+		if bar.visible and not has:
+			printerr("EMPTY_PROMPT_BAR")
+			return true
+		if bar.visible and bar.size.x >= 500.0:
+			printerr("DST_LOG ", bar.size)
+			return true
 	return _empty_tr(play)
 
 

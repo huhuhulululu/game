@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` quiet hands
-- Status: r1-coat-feel 001–013 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` quiet log
+- Status: r1-coat-feel 001–013 Complete; 014 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-013-quiet-hands.md`
-- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-014-quiet-log.md`
+- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-014-quiet-log.md` — Quiet log
+- Files changed: story, `play.gd` prompt slip, `play_log.tscn`, `headless_play_log.gd`, chrome leftover, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (quiet-log lock) + `play_log.tscn`
+- Tokens: `PLAY_LOG_EMPTY` `PLAY_LOG_LINE` `PLAY_LOG_OK`
+- Next: `/story-done` after tokens hold. Empty bar stays off. No new log UI. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-013-quiet-hands.md` — Quiet hands

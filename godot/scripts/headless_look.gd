@@ -47,13 +47,13 @@ func _initialize() -> void:
 	bag.position = Vector2(16, 150)
 	hud.add_child(bag)
 	var bar := Panel.new()
-	bar.position = Vector2(350, 598)
-	bar.size = Vector2(580, 64)
+	bar.position = Vector2(560, 640)
+	bar.size = Vector2(160, 36)
 	bar.add_theme_stylebox_override("panel", Look.slip_box())
 	hud.add_child(bar)
-	var prompt := Look.ink_label("下竿", 20)
-	prompt.position = Vector2(18, 14)
-	prompt.size = Vector2(544, 36)
+	var prompt := Look.ink_label("下竿", 16)
+	prompt.position = Vector2(12, 6)
+	prompt.size = Vector2(136, 24)
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	bar.add_child(prompt)
