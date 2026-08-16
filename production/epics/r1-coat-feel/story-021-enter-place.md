@@ -1,7 +1,7 @@
 # Story 021: Enter place
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -20,12 +20,12 @@ This is coat-feel 021. Evening-places fireside 019 stays parked.
 
 ## Acceptance Criteria
 
-- [ ] Walk to a painted kitchen / mine / wild edge and 做; the bed changes
-- [ ] Existing `bed-kitchen.png` / `bed-mine.png` / `bed-wild.png` sit; no new bed unless empty fill
-- [ ] No door sticker; no new props; prompt is a small wood slip
-- [ ] Play-path prints `PLAY_ENTER_KITCHEN` / `PLAY_ENTER_MINE` / `PLAY_ENTER_OK`
-- [ ] BODY 240; camera 2.18; same idle face; stickers off; no 魂
-- [ ] 020 html5-hands Complete; fireside 019 parked; two-phone Blocked
+- [x] Walk to a painted kitchen / mine / wild edge and 做; the bed changes
+- [x] Existing `bed-kitchen.png` / `bed-mine.png` / `bed-wild.png` sit; no new bed unless empty fill
+- [x] No door sticker; no new props; prompt is a small wood slip
+- [x] Play-path prints `PLAY_ENTER_KITCHEN` / `PLAY_ENTER_MINE` / `PLAY_ENTER_OK`
+- [x] BODY 240; camera 2.18; same idle face; stickers off; no 魂
+- [x] 020 html5-hands Complete; fireside 019 parked; two-phone Blocked
 
 ## Implementation Notes
 
@@ -53,9 +53,16 @@ Godot look + the existing enter tiles. 做 on the door tile must reach. Do not g
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_enter.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 
 - Depends on: r1-coat-feel 001–020 Complete
 - Unlocks: none. Stop new WORLD systems.
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 6/6. 做 on the kitchen / mine tile enters. Existing beds sit. Wood slip prompt. No door sticker.
+**Deviations**: None. Lean: no new bed, no door prop.
+**Test Evidence**: Integration — `godot/project.test.ts` enter-place lock + `PLAY_ENTER_OK`. `PLAY_HANDS_OK` still holds.
+**Code Review**: Skipped — lean

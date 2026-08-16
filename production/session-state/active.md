@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` enter place
-- Status: r1-coat-feel 001–020 Complete; 021 enter-place in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` enter place
+- Status: r1-coat-feel 001–021 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-021-enter-place.md`
-- Next: `/story-done` after `PLAY_ENTER_OK`. 做 at a painted door changes the bed. No door sticker. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Next: Stop. 做 at a painted door changes the bed. No door sticker. Do not generate a new face. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-021-enter-place.md` — Enter place
+- Criteria: 6/6. 做 on the kitchen / mine tile enters. Existing beds sit. No door sticker.
+- Tests: `godot/project.test.ts` enter-place lock + `PLAY_ENTER_OK`. `PLAY_HANDS_OK` still holds.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Do not generate a new face. Fireside 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-020-html5-hands.md` — HTML5 hands
