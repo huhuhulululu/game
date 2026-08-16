@@ -179,18 +179,28 @@ func _real_alpha(name: String) -> bool:
 	if img.get_pixel(2, 2).a > 0.03 or img.get_pixel(img.get_width() - 3, 2).a > 0.03:
 		printerr("SIT_PLATE ", name)
 		return false
-	var leftover := 0
+	if img.get_pixel(2, img.get_height() - 3).a > 0.03:
+		printerr("SIT_PLATE_FOOT ", name)
+		return false
+	return true
+
+
+func _no_slab(name: String) -> bool:
+	var img := _png(name)
+	if img == null:
+		printerr("NO_SHEET ", name)
+		return false
+	var h := img.get_height()
+	var w := img.get_width()
+	var col := w - 8
+	var n := 0
 	var y := 0
-	while y < img.get_height():
-		var x := 0
-		while x < img.get_width():
-			var p := img.get_pixel(x, y)
-			if p.a < 0.02 and (p.r + p.g + p.b) > 0.04:
-				leftover += 1
-			x += 4
-		y += 4
-	if leftover > 8:
-		printerr("SIT_LEFTOVER ", name, " ", leftover)
+	while y < h:
+		if img.get_pixel(col, y).a > 0.08:
+			n += 1
+		y += 1
+	if n > int(0.88 * float(h)):
+		printerr("SIT_SLAB ", name, " ", n)
 		return false
 	return true
 
@@ -238,6 +248,10 @@ func _assert_sheets() -> bool:
 	if not _real_alpha("char-warm-sit.png"):
 		return false
 	if not _real_alpha("char-pine-sit.png"):
+		return false
+	if not _no_slab("char-warm-sit.png"):
+		return false
+	if not _no_slab("char-pine-sit.png"):
 		return false
 	if not _not_idle_copy(idle, sit):
 		return false

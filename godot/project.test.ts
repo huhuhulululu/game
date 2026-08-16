@@ -1836,6 +1836,7 @@ test("Play sits the same tan coat, not a smear or a new face", () => {
   assert.match(sitPlay, /char-warm-sit\.png/);
   assert.match(sitPlay, /char-pine-sit\.png/);
   assert.match(sitPlay, /SIT_PLATE/);
+  assert.match(sitPlay, /SIT_SLAB/);
   assert.match(sitPlay, /Look\.BODY/);
   assert.doesNotMatch(sitPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
   const scene = readFileSync("godot/scenes/play_sit.tscn", "utf8");
