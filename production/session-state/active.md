@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` campfire pot on the painted wild
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–006 Complete; 007 In progress. Two-phone Blocked (human).
+- Task: `/dev-story` painted rain on valley / wild beds
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–007 Complete; 008 In progress. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-007-campfire-pot.md`; `prop-camp-pot.png`; `zone_map.gd` pot on lit fires; `play_fire.tscn`
-- Next: `/story-done` campfire-pot after tokens hold. Do not `/dev-story` two-phone.
+- Files: `story-008-painted-rain.md`; `rain.gdshader`; `set_rain` on valley / wild; `play_rain.tscn`
+- Next: `/story-done` painted-rain after tokens hold. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-008-painted-rain.md` — Painted rain
+- Files changed: story, `rain.gdshader`, `look.gd` rain_mat, valley / zone_map `set_rain`, `play_rain.tscn`
+- Test written: `godot/project.test.ts` (painted-rain lock)
+- Tokens: `PLAY_RAIN_CLEAR` `PLAY_RAIN_VALLEY` `PLAY_RAIN_HEARTH` `PLAY_RAIN_MINE` `PLAY_RAIN_WILD` `PLAY_RAIN_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Two-phone stays Blocked (human).
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-007-campfire-pot.md` — Campfire pot
+- Tech debt logged: None
+- Next recommended: painted rain (`r1-evening-places/story-008-painted-rain.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-007-campfire-pot.md` — Campfire pot

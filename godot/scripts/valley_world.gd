@@ -57,3 +57,24 @@ func set_night(amount: float, shade := Look.NIGHT) -> void:
 	var mat := Look.night_mat(shade)
 	mat.set_shader_parameter("amount", clampf(amount, 0.0, 1.0))
 	bed.material = mat
+
+
+func set_rain(wet: bool) -> void:
+	var rain := get_node_or_null("Rain") as Sprite2D
+	if not wet:
+		if rain:
+			rain.visible = false
+		return
+	if rain == null:
+		rain = Sprite2D.new()
+		rain.name = "Rain"
+		rain.centered = false
+		rain.z_index = 12
+		var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+		img.fill(Color(1, 1, 1, 1))
+		rain.texture = ImageTexture.create_from_image(img)
+		add_child(rain)
+	var sz := size_px()
+	rain.scale = Vector2(sz.x / 8.0, sz.y / 8.0)
+	rain.material = Look.rain_mat()
+	rain.visible = true

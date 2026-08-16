@@ -872,6 +872,53 @@ test("Play sits a camp pot on a lit wild fire", () => {
   }
 });
 
+test("Play sits dusk rain on valley and wild, not a weather ring", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_rain.gd"));
+  assert.ok(existsSync("godot/scenes/play_rain.tscn"));
+  assert.ok(existsSync("godot/shaders/rain.gdshader"));
+  const rainPlay = readFileSync("godot/scripts/headless_play_rain.gd", "utf8");
+  assert.match(rainPlay, /scenes\/play\.tscn/);
+  assert.match(rainPlay, /PLAY_RAIN_CLEAR/);
+  assert.match(rainPlay, /PLAY_RAIN_VALLEY/);
+  assert.match(rainPlay, /PLAY_RAIN_HEARTH/);
+  assert.match(rainPlay, /PLAY_RAIN_MINE/);
+  assert.match(rainPlay, /PLAY_RAIN_WILD/);
+  assert.match(rainPlay, /PLAY_RAIN_OK/);
+  assert.match(rainPlay, /bed-valley\.png/);
+  assert.match(rainPlay, /rain\.gdshader/);
+  assert.match(rainPlay, /雨把火浇灭了/);
+  assert.doesNotMatch(rainPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_rain.tscn", "utf8");
+  assert.match(scene, /headless_play_rain\.gd/);
+  const shader = readFileSync("godot/shaders/rain.gdshader", "utf8");
+  assert.match(shader, /painted bed/);
+  assert.match(shader, /0\.82, 0\.74, 0\.62/);
+  assert.match(shader, /0\.42, 0\.32, 0\.22/);
+  assert.doesNotMatch(shader, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /rain_mat/);
+  assert.match(look, /RAIN_DROP := Color\(0\.82, 0\.74, 0\.62\)/);
+  assert.match(look, /RAIN_WET := Color\(0\.42, 0\.32, 0\.22\)/);
+  assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /set_rain/);
+  assert.match(play, /Never a weather ring/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /魂/);
+  const valley = readFileSync("godot/scripts/valley_world.gd", "utf8");
+  assert.match(valley, /func set_rain/);
+  assert.match(valley, /bed-valley\.png/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /func set_rain/);
+  assert.match(zone, /_zone != "wild"/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_rain|PLAY_RAIN_VALLEY|rain_mat/);
+  }
+});
+
 test("Play dims the painted bed at night and keeps indoor hearths", () => {
   assert.ok(existsSync("godot/scripts/headless_play_night.gd"));
   assert.ok(existsSync("godot/scenes/play_night.tscn"));

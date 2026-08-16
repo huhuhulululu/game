@@ -12,6 +12,8 @@ const HAZE := Color(0.78, 0.62, 0.46)
 const VALLEY_DUSK := Color(1.0, 1.0, 1.0)
 const NIGHT := Color(0.78, 0.68, 0.52)
 const NIGHT_WILD := Color(0.46, 0.38, 0.28)
+const RAIN_DROP := Color(0.82, 0.74, 0.62)
+const RAIN_WET := Color(0.42, 0.32, 0.22)
 const BODY := 128.0
 const FOOT := 0.979
 const SHADOW_EAST := 0.10
@@ -43,6 +45,15 @@ static func night_mat(shade := NIGHT) -> ShaderMaterial:
 	m.set_shader_parameter("night", shade)
 	m.set_shader_parameter("amount", 1.0)
 	m.set_shader_parameter("lamp", 0.50)
+	return m
+
+
+static func rain_mat(amount := 0.55) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/rain.gdshader") as Shader
+	m.set_shader_parameter("amount", amount)
+	m.set_shader_parameter("drop", RAIN_DROP)
+	m.set_shader_parameter("wet", RAIN_WET)
 	return m
 
 

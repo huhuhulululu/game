@@ -1,7 +1,7 @@
 # Story 007: Campfire pot
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Lit wild fires sit a magenta-key camp pot on the existing `prop-fire` (haul → pot)
-- [ ] Play shows 烤 / 烤鱼 from the server snap; no kitchen Crock on the wild
-- [ ] Old ink `prop-pot` stays on disk and is not hung
-- [ ] Play-path proof prints campfire-pot tokens through `play.tscn`
-- [ ] No 魂; no Don't Starve face; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Lit wild fires sit a magenta-key camp pot on the existing `prop-fire` (haul → pot)
+- [x] Play shows 烤 / 烤鱼 from the server snap; no kitchen Crock on the wild
+- [x] Old ink `prop-pot` stays on disk and is not hung
+- [x] Play-path proof prints campfire-pot tokens through `play.tscn`
+- [x] No 魂; no Don't Starve face; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -46,9 +46,16 @@ Server already cooks at a lit fire. Do not move those rules into Godot. Sit a sm
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_fire.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 126 tests
 
 ## Dependencies
 
 - Depends on: r1-village-wild, r1-evening-places kitchen
 - Unlocks: none (two-phone stays human)
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_FIRE_BED` `PLAY_FIRE_POT` `PLAY_FIRE_COOK` `PLAY_FIRE_OK`
+**Code Review**: Skipped — lean

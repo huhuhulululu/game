@@ -8,7 +8,7 @@
 
 ## Overview
 
-Kitchen, mine, forge, stall, sleep, spoil / icebox, and a campfire pot sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Wild cook is haul → pot on the fire.
+Kitchen, mine, forge, stall, sleep, spoil / icebox, a campfire pot, and painted rain sit one painted dusk language. Kitchen rush is two coats at the existing stations. Overcooked stays in the kitchen. Wild cook is haul → pot on the fire. Rain sits on the outdoor beds; the server still puts wild fires out.
 
 ## Governing ADRs
 
@@ -32,4 +32,5 @@ Kitchen, mine, forge, stall, sleep, spoil / icebox, and a campfire pot sit one p
 | 004 | Sleep | Visual/Feel | Complete | ADR-0003 |
 | 005 | Kitchen rush | Integration | Complete | ADR-0002 |
 | 006 | Spoil and icebox | Integration | Complete | ADR-0002 |
-| 007 | Campfire pot | Visual/Feel | In progress | ADR-0003 |
+| 007 | Campfire pot | Visual/Feel | Complete | ADR-0003 |
+| 008 | Painted rain | Visual/Feel | In progress | ADR-0003 |
