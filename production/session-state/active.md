@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` html5 hands
-- Status: r1-coat-feel 001–019 Complete; 020 html5-hands in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` html5 hands
+- Status: r1-coat-feel 001–020 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-020-html5-hands.md`
-- Next: `/story-done` after `PLAY_HANDS_OK`. Walk and 做 must fire. No joystick ring. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Next: Stop. Walk and 做 fire. No joystick ring. Do not generate a new face. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-020-html5-hands.md` — HTML5 hands
+- Criteria: 6/6. WASD, click-to-walk, and 做 fire. Canvas takes focus. No joystick ring.
+- Tests: `godot/project.test.ts` html5-hands lock + `PLAY_HANDS_OK`. `PLAY_FRAME_OK` still holds.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Do not generate a new face. Fireside 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-019-path-frame.md` — Path frame

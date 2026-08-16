@@ -252,7 +252,6 @@ func _assert_hands() -> bool:
 		return false
 	act.button_down.emit()
 	await get_tree().process_frame
-	await get_tree().process_frame
 	if not bool(play.get("_sent_act")):
 		printerr("NO_DO")
 		return false

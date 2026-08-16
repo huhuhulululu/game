@@ -108,7 +108,7 @@ body {
 
 	</head>
 	<body>
-		<canvas id="canvas">
+		<canvas id="canvas" tabindex="0">
 			需要能画 canvas 的浏览器。
 		</canvas>
 
@@ -124,7 +124,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":23042528,"index.wasm":43699190},"focusCanvas":true,"gdextensionLibs":[]};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":23052544,"index.wasm":43699190},"focusCanvas":true,"gdextensionLibs":[]};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -207,6 +207,13 @@ const engine = new Engine(GODOT_CONFIG);
 			displayFailureNotice(missingMsg + missing.join('\n'));
 		}
 	} else {
+		const canvas = document.getElementById('canvas');
+		if (canvas) {
+			canvas.tabIndex = 0;
+			canvas.addEventListener('pointerdown', function () {
+				canvas.focus();
+			});
+		}
 		setStatusMode('progress');
 		engine.startGame({
 			'onProgress': function (current, total) {
@@ -220,6 +227,9 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			setStatusMode('hidden');
+			if (canvas) {
+				canvas.focus();
+			}
 		}, displayFailureNotice);
 	}
 }());

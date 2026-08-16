@@ -1,7 +1,7 @@
 # Story 020: HTML5 hands
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -20,12 +20,12 @@ This is coat-feel 020. Evening-places fireside 019 stays parked. Evening-places 
 
 ## Acceptance Criteria
 
-- [ ] WASD / virtual stick / click-to-walk send walk; 做 / 喊 fire
-- [ ] Play-path actually moves the coat and prints `PLAY_HANDS_MOVE` / `PLAY_HANDS_DO` / `PLAY_HANDS_OK`
-- [ ] If Godot already hears input but the web export does not, fix canvas focus / input map / unhandled click
-- [ ] No DST joystick chrome ring; 做 / 喊 stay quiet wood slips
-- [ ] BODY 240; camera 2.18; same idle face; no new art; stickers off; no 魂
-- [ ] 019 path-frame Complete; fireside 019 parked; two-phone Blocked
+- [x] WASD / virtual stick / click-to-walk send walk; 做 / 喊 fire
+- [x] Play-path actually moves the coat and prints `PLAY_HANDS_MOVE` / `PLAY_HANDS_DO` / `PLAY_HANDS_OK`
+- [x] If Godot already hears input but the web export does not, fix canvas focus / input map / unhandled click
+- [x] No DST joystick chrome ring; 做 / 喊 stay quiet wood slips
+- [x] BODY 240; camera 2.18; same idle face; no new art; stickers off; no 魂
+- [x] 019 path-frame Complete; fireside 019 parked; two-phone Blocked
 
 ## Implementation Notes
 
@@ -54,9 +54,16 @@ Godot look / input only. Do not generate a new face. Do not hang a sticker pad. 
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_html5.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 
 - Depends on: r1-coat-feel 001–019 Complete
 - Unlocks: none. Stop new WORLD systems.
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 6/6. WASD, click-to-walk, and 做 fire. Canvas takes focus. No joystick ring. Same idle face. Same bed.
+**Deviations**: None. Lean: input only. No sticker pad.
+**Test Evidence**: Integration — `godot/project.test.ts` html5-hands lock + `PLAY_HANDS_OK`. `PLAY_FRAME_OK` still holds.
+**Code Review**: Skipped — lean
