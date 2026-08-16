@@ -810,9 +810,11 @@ test("Play dims the painted bed at night and keeps indoor hearths", () => {
   assert.match(nightPlay, /PLAY_NIGHT_DUSK/);
   assert.match(nightPlay, /PLAY_NIGHT_VALLEY/);
   assert.match(nightPlay, /PLAY_NIGHT_HEARTH/);
+  assert.match(nightPlay, /PLAY_NIGHT_MINE/);
   assert.match(nightPlay, /PLAY_NIGHT_WILD/);
   assert.match(nightPlay, /PLAY_NIGHT_OK/);
   assert.match(nightPlay, /bed-valley\.png/);
+  assert.match(nightPlay, /bed-mine\.png/);
   assert.match(nightPlay, /night\.gdshader/);
   assert.match(nightPlay, /夜里/);
   assert.doesNotMatch(nightPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);

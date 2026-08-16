@@ -4,12 +4,13 @@
 - Status: r1-coat-feel 001–003 Complete; 004 In progress. Two-phone Blocked (human).
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-004-painted-night.md`; `night.gdshader`; `play_night.tscn`
-- Next: keep `/dev-story` on painted-night until tokens hold. Do not `/dev-story` two-phone.
+- Next: `/story-done` painted-night after tokens hold. Do not `/dev-story` two-phone.
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-004-painted-night.md` — Painted night
-- Files changed: story, `night.gdshader`, `play.gd` / valley / zone_map night grade, `play_night.tscn`
+- Files changed: story, `night.gdshader`, `play.gd` / valley / zone_map night grade, `play_night.tscn` (+ mine hearth token)
 - Test written: `godot/project.test.ts` (painted-night lock)
+- Tokens: `PLAY_NIGHT_DUSK` `PLAY_NIGHT_VALLEY` `PLAY_NIGHT_HEARTH` `PLAY_NIGHT_MINE` `PLAY_NIGHT_WILD` `PLAY_NIGHT_OK`
 - Blockers: None
 - Next: `/story-done` after tokens hold. Two-phone stays Blocked (human).
 

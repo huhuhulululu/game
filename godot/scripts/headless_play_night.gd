@@ -29,6 +29,17 @@ const WILD_ROWS := [
 	"#~~~,,,,~~~#",
 	"############",
 ]
+const MINE_ROWS := [
+	"################",
+	"#L.............#",
+	"#..o.......e...#",
+	"#..............#",
+	"#...Y..Z.......#",
+	"#..............#",
+	"#...e.......o..#",
+	"#..............#",
+	"################",
+]
 
 
 var play: Node2D
@@ -57,6 +68,9 @@ func _run() -> void:
 		get_tree().quit(1)
 		return
 	if not await _assert_kitchen_night():
+		get_tree().quit(1)
+		return
+	if not await _assert_mine_night():
 		get_tree().quit(1)
 		return
 	if not await _assert_wild_night():
@@ -242,6 +256,41 @@ func _assert_kitchen_night() -> bool:
 	if not _no_fail(zone_map):
 		return false
 	print("PLAY_NIGHT_HEARTH")
+	return true
+
+
+func _assert_mine_night() -> bool:
+	await _feed(_snap({
+		"night": true,
+		"dusk": false,
+		"floor": 1,
+		"zone": "mine",
+		"tiles": MINE_ROWS,
+		"actors": [_actor({"x": 108.0, "y": 108.0})],
+		"youAt": {"x": 108.0, "y": 108.0},
+	}))
+	var valley: Node2D = play.get("_valley")
+	var zone_map: Node2D = play.get("_zone_map")
+	var world: Node2D = play.get("_world")
+	var mine := zone_map.get_node_or_null("MineBed") as Sprite2D if zone_map else null
+	if valley != null and valley.visible:
+		printerr("VALLEY_ON_MINE_NIGHT")
+		return false
+	if zone_map == null or not zone_map.visible:
+		printerr("MINE_HIDDEN_NIGHT")
+		return false
+	if mine == null or str(mine.texture.resource_path).find("bed-mine.png") < 0:
+		printerr("MINE_BED")
+		return false
+	if _bed_night(mine):
+		printerr("MINE_NIGHT_GRADE")
+		return false
+	if world == null or world.modulate != Color(1, 1, 1):
+		printerr("MINE_DIM ", world.modulate if world else "")
+		return false
+	if not _no_fail(zone_map):
+		return false
+	print("PLAY_NIGHT_MINE")
 	return true
 
 

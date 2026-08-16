@@ -37,8 +37,8 @@ Dusk becomes night on the existing beds. Do not hang a second lamp pack. Do not 
 ## QA Test Cases
 
 - **AC-1**: Play dims the painted bed at night and keeps indoor hearths
-  - Setup: `play_night.tscn` feeds dusk, night valley, night kitchen, night wild
-  - Verify: bed grade + plaque 夜里; kitchen stays lit; no FAIL restick
+  - Setup: `play_night.tscn` feeds dusk, night valley, night kitchen, night mine, night wild
+  - Verify: bed grade + plaque 夜里; kitchen / mine stay lit; no FAIL restick
   - Pass condition: `PLAY_NIGHT_OK` and test locks
 
 ## Test Evidence
