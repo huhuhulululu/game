@@ -17,6 +17,8 @@ var _t := 0.0
 var _stride := 0.0
 var _sit := 0.0
 var _was_moving := false
+var _want_move := false
+var _coast := 0.0
 var _sprite: Sprite2D
 var _shadow: Sprite2D
 var _glow: Sprite2D
@@ -97,7 +99,10 @@ func _bars() -> void:
 
 func apply(data: Dictionary, now: float) -> void:
 	position = Vector2(float(data.get("x", 0)), float(data.get("y", 0)))
-	facing = int(data.get("facing", 2))
+	var next_face := int(data.get("facing", 2))
+	if next_face != facing:
+		_stride = 0.0
+	facing = next_face
 	warm = str(data.get("side", "left")) != "right"
 	ping = float(data.get("ping", 0))
 	away = bool(data.get("away", false))
@@ -119,6 +124,13 @@ func apply(data: Dictionary, now: float) -> void:
 func _process(dt: float) -> void:
 	var want_sit := busy == "sit"
 	_sit = move_toward(_sit, 1.0 if want_sit else 0.0, dt / 0.22)
+	if _want_move and not want_sit:
+		moving = true
+		_coast = 0.10
+	else:
+		_coast = maxf(_coast - dt, 0.0)
+		if _coast <= 0.0 or want_sit:
+			moving = false
 	var can_walk := moving and not want_sit and _sit < 0.2
 	if can_walk:
 		if not _was_moving:
@@ -138,7 +150,10 @@ func _place_name() -> void:
 
 
 func set_moving(v: bool) -> void:
-	moving = v
+	_want_move = v
+	if v:
+		moving = true
+		_coast = 0.10
 	_apply()
 
 
@@ -153,6 +168,24 @@ func _tex(path: String) -> Texture2D:
 	return load("res://assets/art/%s" % path) as Texture2D
 
 
+func _walk_beat() -> int:
+	return int(floor(_stride / 0.18)) % 4
+
+
+func _walk_tex(w: String, face: String) -> Texture2D:
+	# Four beats on the existing sheets: walk, stand, walk2, stand.
+	var beat := _walk_beat()
+	if beat == 0:
+		return _tex("char-%s-%swalk.png" % [w, face])
+	if beat == 2:
+		return _tex("char-%s-%swalk2.png" % [w, face])
+	if face == "side-":
+		return _tex("char-%s-side.png" % w)
+	if face == "back-":
+		return _tex("char-%s-back.png" % w)
+	return _tex("char-%s.png" % w)
+
+
 func _sheet() -> Texture2D:
 	var w := "warm" if warm else "pine"
 	if _sit > 0.45:
@@ -163,18 +196,17 @@ func _sheet() -> Texture2D:
 		return _tex("char-%s-chop.png" % w)
 	if busy == "forge":
 		return _tex("char-%s-forge.png" % w)
-	var step := int(floor(_stride / 0.18)) % 2 == 0
 	if facing == 0:
 		if not moving:
 			return _tex("char-%s-back.png" % w)
-		return _tex("char-%s-back-walk.png" % w) if step else _tex("char-%s-back-walk2.png" % w)
+		return _walk_tex(w, "back-")
 	if facing == 1 or facing == 3:
 		if not moving:
 			return _tex("char-%s-side.png" % w)
-		return _tex("char-%s-side-walk.png" % w) if step else _tex("char-%s-side-walk2.png" % w)
+		return _walk_tex(w, "side-")
 	if not moving:
 		return _tex("char-%s.png" % w)
-	return _tex("char-%s-walk.png" % w) if step else _tex("char-%s-walk2.png" % w)
+	return _walk_tex(w, "")
 
 
 func _apply() -> void:
@@ -189,7 +221,13 @@ func _apply() -> void:
 		var drop := Look.BODY * 0.035 * _sit
 		var bob := 0.0
 		if moving and _sit < 0.2:
-			bob = -abs(sin(_stride / 0.36 * TAU)) * 2.0
+			var u := fmod(_stride / 0.18, 4.0)
+			var pass := 0.0
+			if u >= 1.0 and u < 2.0:
+				pass = sin((u - 1.0) * PI)
+			elif u >= 3.0:
+				pass = sin((u - 3.0) * PI)
+			bob = -pass * 6.0
 		_sprite.position = Vector2(0.0, plant + drop + bob)
 	_sprite.flip_h = facing == 3
 	_sit_lamp()

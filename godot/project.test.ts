@@ -1629,3 +1629,41 @@ test("Play sits a quiet plaque and one bag line", () => {
     assert.doesNotMatch(src, /play_hud|PLAY_HUD_OK|Look\.BODY/);
   }
 });
+
+test("Play walks a four-beat cycle on the existing coats", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-006-coat-walk.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-006-coat-walk.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_walk.gd"));
+  assert.ok(existsSync("godot/scenes/play_walk.tscn"));
+  const walk = readFileSync("godot/scripts/headless_play_walk.gd", "utf8");
+  assert.match(walk, /scenes\/play\.tscn/);
+  assert.match(walk, /PLAY_WALK_A/);
+  assert.match(walk, /PLAY_WALK_PASS/);
+  assert.match(walk, /PLAY_WALK_B/);
+  assert.match(walk, /PLAY_WALK_OK/);
+  assert.match(walk, /char-warm-walk\.png/);
+  assert.match(walk, /char-warm-walk2\.png/);
+  assert.match(walk, /char-warm\.png/);
+  assert.match(walk, /char-warm-side-walk\.png/);
+  assert.doesNotMatch(walk, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_walk.tscn", "utf8");
+  assert.match(scene, /headless_play_walk\.gd/);
+  const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
+  assert.match(actor, /_walk_beat/);
+  assert.match(actor, /% 4/);
+  assert.match(actor, /0\.18/);
+  assert.match(actor, /char-%s-%swalk2/);
+  assert.match(actor, /Look\.FOOT/);
+  assert.doesNotMatch(actor, /Wilson|Don't Starve|Dont Starve|Wanderer/i);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 192/);
+  assert.match(look, /const FOOT := 0\.979/);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /四拍/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_walk|PLAY_WALK_OK|_walk_beat/);
+  }
+});

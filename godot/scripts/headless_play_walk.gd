@@ -1,6 +1,6 @@
 extends Node
 
-## Play.tscn walks then sits the cover-coats. Same sheets. No new pack.
+## Play.tscn walks a four-beat cycle on the existing coats. No new pack.
 
 const YOU := "p1"
 const MATE := "p2"
@@ -12,6 +12,25 @@ const FAIL := [
 	"prop-cover-verge",
 	"prop-hut",
 	"prop-lodge",
+]
+const TORN := [
+	"prop-hole.png",
+	"prop-silk.png",
+	"prop-torch.png",
+	"prop-camp-pot.png",
+	"prop-smith.png",
+	"prop-booth.png",
+	"prop-beast.png",
+]
+const BAG_EIGHT := [
+	{"id": "fish", "n": 1, "name": "鱼", "fresh": 30},
+	{"id": "wood", "n": 2, "name": "青木"},
+	{"id": "herb", "n": 1, "name": "山草", "fresh": 90},
+	{"id": "wheat", "n": 2, "name": "麦"},
+	{"id": "egg", "n": 1, "name": "蛋", "fresh": 80},
+	{"id": "ore", "n": 1, "name": "矿石"},
+	{"id": "stone", "n": 1, "name": "石"},
+	{"id": "berry", "n": 1, "name": "果", "fresh": 50},
 ]
 
 
@@ -34,13 +53,16 @@ func _process(_dt: float) -> void:
 
 
 func _run() -> void:
-	if not await _assert_walk():
+	if not await _assert_front():
 		get_tree().quit(1)
 		return
-	if not await _assert_sit():
+	if not await _assert_pass():
 		get_tree().quit(1)
 		return
-	print("PLAY_COAT_OK")
+	if not await _assert_two():
+		get_tree().quit(1)
+		return
+	print("PLAY_WALK_OK")
 	get_tree().quit(0)
 
 
@@ -59,7 +81,6 @@ func _you(extra: Dictionary) -> Dictionary:
 		"fishPull": 0.0,
 		"busy": "",
 		"ping": 0.0,
-		"away": false,
 	}
 	for key in extra.keys():
 		row[key] = extra[key]
@@ -81,7 +102,6 @@ func _mate(extra: Dictionary) -> Dictionary:
 		"fishPull": 0.0,
 		"busy": "",
 		"ping": 0.0,
-		"away": false,
 	}
 	for key in extra.keys():
 		row[key] = extra[key]
@@ -106,7 +126,7 @@ func _snap(extra: Dictionary) -> Dictionary:
 		"actors": [_you({}), _mate({})],
 		"youAt": {"x": 290.0, "y": 342.0},
 		"prompt": "",
-		"bag": [],
+		"bag": BAG_EIGHT,
 		"pot": [],
 		"potReady": "",
 		"toasts": [],
@@ -152,6 +172,10 @@ func _no_fail(n: Node) -> bool:
 				if path.find(str(bad)) >= 0:
 					printerr("FAIL_PROP ", path)
 					return false
+			for torn in TORN:
+				if path.find(str(torn)) >= 0:
+					printerr("HUNG_TORN ", path)
+					return false
 	for child in n.get_children():
 		if not _no_fail(child):
 			return false
@@ -165,61 +189,97 @@ func _body(id: String) -> Node2D:
 	return actors[id] as Node2D
 
 
-func _assert_walk() -> bool:
-	await _feed(_snap({}))
-	await _feed(_snap({}))
-	var valley: Node2D = play.get("_valley")
-	if valley == null or not valley.visible:
-		printerr("VALLEY_HIDDEN")
+func _sheet_file(id: String) -> String:
+	var body := _body(id)
+	if body == null:
+		return ""
+	var sprite: Sprite2D = body.get("_sprite") as Sprite2D
+	if sprite == null or sprite.texture == null:
+		return ""
+	return str(sprite.texture.resource_path).get_file()
+
+
+func _live_kids(box: Node) -> int:
+	if box == null:
+		return 0
+	var n := 0
+	for child in box.get_children():
+		if not child.is_queued_for_deletion():
+			n += 1
+	return n
+
+
+func _assert_quiet() -> bool:
+	var plaque: Panel = play.get("_plaque")
+	if plaque == null or plaque.size.y > 80.0:
+		printerr("PLAQUE_LOST")
 		return false
-	if not _no_fail(valley):
+	if _live_kids(play.get("_bag")) > 2:
+		printerr("BAG_STRIPE")
 		return false
-	await _feed(_snap({
-		"actors": [_you({"x": 338.0}), _mate({"x": 396.0})],
-		"youAt": {"x": 338.0, "y": 342.0},
-	}))
-	await get_tree().create_timer(0.10).timeout
-	if not _has_tex(play, "char-warm-walk"):
-		printerr("NO_WARM_WALK")
+	var body := _body(YOU)
+	var sprite: Sprite2D = body.get("_sprite") as Sprite2D if body else null
+	if sprite == null or sprite.texture == null:
+		printerr("NO_SPRITE")
 		return false
-	if not _has_tex(play, "char-pine-walk"):
-		printerr("NO_PINE_WALK")
+	var h := float(sprite.texture.get_height()) * sprite.scale.y
+	if abs(h - Look.BODY) > 1.0 or Look.BODY < 180.0:
+		printerr("COAT_SCALE ", h, " ", Look.BODY)
 		return false
-	var warm := _body(YOU)
-	if warm == null or float(warm.get("_stride")) <= 0.0:
-		printerr("NO_STRIDE")
-		return false
-	print("PLAY_COAT_WALK")
 	return true
 
 
-func _assert_sit() -> bool:
-	await _feed(_snap({
-		"actors": [_you({"busy": "sit", "x": 338.0}), _mate({"busy": "sit", "x": 396.0})],
-		"youAt": {"x": 338.0, "y": 342.0},
-		"prompt": "歇一夜（田会自己长）",
-	}))
-	await get_tree().create_timer(0.28).timeout
-	if not _has_tex(play, "char-warm-sit"):
-		printerr("NO_WARM_SIT")
-		return false
-	if not _has_tex(play, "char-pine-sit"):
-		printerr("NO_PINE_SIT")
-		return false
-	var warm := _body(YOU)
-	if warm == null or float(warm.get("_sit")) < 0.8:
-		printerr("SIT_BLEND ", warm.get("_sit") if warm else "")
-		return false
-	print("PLAY_COAT_SIT")
+func _assert_front() -> bool:
+	await _feed(_snap({}))
 	await _feed(_snap({
 		"actors": [_you({"x": 338.0}), _mate({"x": 396.0})],
 		"youAt": {"x": 338.0, "y": 342.0},
 	}))
-	await get_tree().create_timer(0.28).timeout
-	if _has_tex(play, "char-warm-sit"):
-		printerr("STILL_SIT")
+	await get_tree().create_timer(0.08).timeout
+	if _sheet_file(YOU) != "char-warm-walk.png":
+		printerr("NO_WALK_A ", _sheet_file(YOU))
 		return false
-	if warm == null or float(warm.get("_sit")) > 0.25:
-		printerr("STAND_BLEND ", warm.get("_sit") if warm else "")
+	if _sheet_file(MATE) != "char-pine-walk.png":
+		printerr("NO_PINE_A ", _sheet_file(MATE))
 		return false
+	if not _assert_quiet():
+		return false
+	if not _no_fail(play):
+		return false
+	if _has_tex(play, "cover-valley.png"):
+		printerr("TITLE_COUPLE")
+		return false
+	print("PLAY_WALK_A")
+	return true
+
+
+func _assert_pass() -> bool:
+	await get_tree().create_timer(0.20).timeout
+	if _sheet_file(YOU) != "char-warm.png":
+		printerr("NO_WALK_PASS ", _sheet_file(YOU))
+		return false
+	if _sheet_file(MATE) != "char-pine.png":
+		printerr("NO_PINE_PASS ", _sheet_file(MATE))
+		return false
+	print("PLAY_WALK_PASS")
+	return true
+
+
+func _assert_two() -> bool:
+	await get_tree().create_timer(0.18).timeout
+	if _sheet_file(YOU) != "char-warm-walk2.png":
+		printerr("NO_WALK_B ", _sheet_file(YOU))
+		return false
+	if _sheet_file(MATE) != "char-pine-walk2.png":
+		printerr("NO_PINE_B ", _sheet_file(MATE))
+		return false
+	await _feed(_snap({
+		"actors": [_you({"x": 390.0, "facing": 1}), _mate({"x": 448.0, "facing": 1})],
+		"youAt": {"x": 390.0, "y": 342.0},
+	}))
+	await get_tree().create_timer(0.08).timeout
+	if _sheet_file(YOU) != "char-warm-side-walk.png":
+		printerr("NO_SIDE_A ", _sheet_file(YOU))
+		return false
+	print("PLAY_WALK_B")
 	return true
