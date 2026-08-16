@@ -48,6 +48,11 @@ var _plaque: Panel
 var _plot_sig := ""
 var _ear: ValleyEar
 var _mute_btn: Button
+var _you_at := Vector2.ZERO
+var _walk_aim := Vector2.ZERO
+var _walk_on := false
+var _sent_move := Vector2.ZERO
+var _sent_act := false
 
 
 func _ready() -> void:
@@ -69,6 +74,8 @@ func _ready() -> void:
 	_cam.make_current()
 	_hud()
 	add_child(Look.air_layer())
+	_bind_hands()
+	_grab_web_focus()
 	if not Net.snap_got.is_connected(_on_snap):
 		Net.snap_got.connect(_on_snap)
 	if Net.last_snap.size() > 0:
@@ -176,6 +183,7 @@ func _hud() -> void:
 	_mute_btn.pressed.connect(_toggle_mute)
 	layer.add_child(_mute_btn)
 	var pad := Control.new()
+	pad.name = "StickPad"
 	pad.position = Vector2(36, 560)
 	pad.size = Vector2(120, 120)
 	pad.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -249,6 +257,10 @@ func _unhandled_input(e: InputEvent) -> void:
 		if _ear:
 			_ear.unlock()
 			_ear.tone("shout")
+	if _is_walk_click(e):
+		_walk_aim = _event_world(e)
+		_walk_on = true
+		_grab_web_focus()
 
 
 func _keys() -> Vector2:
@@ -268,8 +280,15 @@ func _keys() -> Vector2:
 
 func _process(_dt: float) -> void:
 	var v := _keys()
-	if v == Vector2.ZERO:
+	if v != Vector2.ZERO:
+		_walk_on = false
+	elif _stick_v != Vector2.ZERO:
 		v = _stick_v
+		_walk_on = false
+	elif _walk_on:
+		v = _walk_vec()
+	_sent_move = v
+	_sent_act = _act
 	Net.send_input(v.x, v.y, _act, _held, _ping)
 	_act = false
 	_ping = false
@@ -320,9 +339,11 @@ func _on_snap(s: Dictionary) -> void:
 	_remember_vis(s)
 	_paint_atlas(s)
 	var you: Dictionary = s.get("youAt", {})
+	if you.size() > 0:
+		_you_at = Vector2(float(you.get("x", 0)), float(you.get("y", 0)))
 	_cam.zoom = Vector2(_follow_zoom(zone), _follow_zoom(zone))
 	if you.size() > 0:
-		var target := _clamp_cam(_follow_look(Vector2(float(you.get("x", 0)), float(you.get("y", 0)))))
+		var target := _clamp_cam(_follow_look(_you_at))
 		if not _cam_locked:
 			_cam.position_smoothing_enabled = false
 			_cam.position = target
@@ -766,6 +787,67 @@ func _take(item_id: String) -> void:
 		_show_line("手里满了")
 		return
 	Net.send_take(item_id)
+
+
+func _is_walk_click(e: InputEvent) -> bool:
+	if e is InputEventMouseButton:
+		var mouse := e as InputEventMouseButton
+		return mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT
+	if e is InputEventScreenTouch:
+		return (e as InputEventScreenTouch).pressed
+	return false
+
+
+func _event_world(e: InputEvent) -> Vector2:
+	var screen := Vector2.ZERO
+	if e is InputEventMouse:
+		screen = (e as InputEventMouse).position
+	elif e is InputEventScreenTouch:
+		screen = (e as InputEventScreenTouch).position
+	else:
+		return _you_at
+	var xf := get_viewport().get_canvas_transform().affine_inverse()
+	return xf * screen
+
+
+func _walk_vec() -> Vector2:
+	var delta := _walk_aim - _you_at
+	if delta.length() < 10.0:
+		_walk_on = false
+		return Vector2.ZERO
+	return delta.normalized()
+
+
+func _bind_hands() -> void:
+	_bind_key("move_left", KEY_A)
+	_bind_key("move_left", KEY_LEFT)
+	_bind_key("move_right", KEY_D)
+	_bind_key("move_right", KEY_RIGHT)
+	_bind_key("move_up", KEY_W)
+	_bind_key("move_up", KEY_UP)
+	_bind_key("move_down", KEY_S)
+	_bind_key("move_down", KEY_DOWN)
+	_bind_key("act", KEY_SPACE)
+	_bind_key("act", KEY_J)
+	_bind_key("shout", KEY_H)
+
+
+func _bind_key(action: String, code: Key) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+	for old in InputMap.action_get_events(action):
+		if old is InputEventKey and int((old as InputEventKey).keycode) == int(code):
+			return
+	var ev := InputEventKey.new()
+	ev.keycode = code
+	ev.physical_keycode = code
+	InputMap.action_add_event(action, ev)
+
+
+func _grab_web_focus() -> void:
+	if not OS.has_feature("web"):
+		return
+	JavaScriptBridge.eval("var c=document.getElementById('canvas');if(c){c.tabIndex=0;c.focus();}")
 
 
 func _follow_zoom(zone: String) -> float:

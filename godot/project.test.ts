@@ -2344,3 +2344,52 @@ test("Play frames the existing coat in the painted path", () => {
     assert.doesNotMatch(src, /play_frame|PLAY_FRAME_OK|_follow_look/);
   }
 });
+
+test("Play HTML5 hands move the coat and fire 做", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-020-html5-hands.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-020-html5-hands.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-019-path-frame.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  const strip = readFileSync("production/epics/r1-evening-places/story-020-strip-stickers.md", "utf8");
+  assert.match(strip, /\*\*Status\*\*:\s*Complete/);
+  assert.ok(existsSync("godot/scripts/headless_play_html5.gd"));
+  assert.ok(existsSync("godot/scenes/play_html5.tscn"));
+  const hands = readFileSync("godot/scripts/headless_play_html5.gd", "utf8");
+  assert.match(hands, /scenes\/play\.tscn/);
+  assert.match(hands, /PLAY_HANDS_MOVE/);
+  assert.match(hands, /PLAY_HANDS_DO/);
+  assert.match(hands, /PLAY_HANDS_OK/);
+  assert.match(hands, /KEY_D/);
+  assert.match(hands, /button_down/);
+  assert.match(hands, /JOYSTICK_CHROME/);
+  assert.doesNotMatch(hands, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_html5.tscn", "utf8");
+  assert.match(scene, /headless_play_html5\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_walk_on/);
+  assert.match(play, /_bind_hands/);
+  assert.match(play, /_grab_web_focus/);
+  assert.match(play, /StickPad/);
+  assert.match(play, /2\.18/);
+  assert.match(play, /hand_chip\("做"/);
+  assert.match(play, /hand_chip\("喊"/);
+  assert.doesNotMatch(play, /joystick|摇杆圈|魂/);
+  const shell = readFileSync("godot/html/shell.html", "utf8");
+  assert.match(shell, /tabindex="0"/);
+  assert.match(shell, /canvas\.focus/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 240/);
+  assert.match(look, /const FOOT := 0\.979/);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /网页点路能走/);
+  assert.match(art, /不要饥荒摇杆圈/);
+  assert.match(art, /大衣真透明/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_html5|PLAY_HANDS_MOVE|_walk_on|_grab_web_focus/);
+  }
+});

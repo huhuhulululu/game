@@ -106,7 +106,7 @@ body {
 		$GODOT_HEAD_INCLUDE
 	</head>
 	<body>
-		<canvas id="canvas">
+		<canvas id="canvas" tabindex="0">
 			需要能画 canvas 的浏览器。
 		</canvas>
 
@@ -205,6 +205,13 @@ const engine = new Engine(GODOT_CONFIG);
 			displayFailureNotice(missingMsg + missing.join('\n'));
 		}
 	} else {
+		const canvas = document.getElementById('canvas');
+		if (canvas) {
+			canvas.tabIndex = 0;
+			canvas.addEventListener('pointerdown', function () {
+				canvas.focus();
+			});
+		}
 		setStatusMode('progress');
 		engine.startGame({
 			'onProgress': function (current, total) {
@@ -218,6 +225,9 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			setStatusMode('hidden');
+			if (canvas) {
+				canvas.focus();
+			}
 		}, displayFailureNotice);
 	}
 }());
