@@ -1,7 +1,7 @@
 # Story 007: Quiet chrome
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,11 +18,11 @@ Live playtest after the walk cycle: leftover chrome. DOM title/subtitle bleeds u
 
 ## Acceptance Criteria
 
-- [ ] DOM title/subtitle text does not bleed under the canvas; only the painted cover title shows
-- [ ] 做 does not flash an empty leftover panel; no leftover geom / empty debug panels
-- [ ] Title stays the painted cover; no title-couple paste; no new art; no new character
-- [ ] Quiet HUD, BODY 192, stickers off, `bed-valley.png` untouched; no 魂
-- [ ] Play-path + test locks; no look names in `src/`
+- [x] DOM title/subtitle text does not bleed under the canvas; only the painted cover title shows
+- [x] 做 does not flash an empty leftover panel; no leftover geom / empty debug panels
+- [x] Title stays the painted cover; no title-couple paste; no new art; no new character
+- [x] Quiet HUD, BODY 192, stickers off, `bed-valley.png` untouched; no 魂
+- [x] Play-path + test locks; no look names in `src/`
 
 ## Implementation Notes
 
@@ -50,9 +50,16 @@ Godot look + HTML5 shell only. Kill `#status-title` / `#status-tag` in `godot/ht
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_chrome.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — `PLAY_CHROME_OK` + 142 tests
 
 ## Dependencies
 
 - Depends on: r1-coat-feel 001–006 Complete
 - Unlocks: none. Stop. Wait unless leftover geom remains.
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `godot/project.test.ts` quiet-chrome lock + `PLAY_CHROME_OK`
+**Code Review**: Skipped — lean

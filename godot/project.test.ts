@@ -35,6 +35,9 @@ test("Godot HTML5 export is what phones open", () => {
   assert.match(html, /<canvas/);
   assert.match(html, /Engine/);
   assert.doesNotMatch(html, /\$GODOT_/);
+  assert.doesNotMatch(html, /status-title/);
+  assert.doesNotMatch(html, /status-tag/);
+  assert.doesNotMatch(html, /两部 iPhone/);
   assert.ok(existsSync("godot/export/web/index.wasm"));
   assert.ok(existsSync("godot/export/web/index.pck"));
   assert.ok(existsSync("godot/export/web/index.js"));
@@ -1703,6 +1706,10 @@ test("Play kills leftover load text and empty toast chrome", () => {
   const art = readFileSync("godot/docs/ART.md", "utf8");
   assert.match(art, /DOM 标题/);
   assert.match(art, /空木框/);
+  const html = readFileSync("godot/export/web/index.html", "utf8");
+  assert.doesNotMatch(html, /status-title/);
+  assert.doesNotMatch(html, /status-tag/);
+  assert.doesNotMatch(html, /两部 iPhone/);
   const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
   for (const p of srcFiles) {
     const src = readFileSync(p, "utf8");

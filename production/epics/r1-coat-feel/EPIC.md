@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, and the coat walk cycle hold. Leftover load text and empty toast chrome are the open look slice. Cover-coats sit at `Look.BODY = 192`. The HUD is a small top-left plaque plus one bag line. Title stays the painted cover. No new pack.
+Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, and quiet chrome hold. Cover-coats sit at `Look.BODY = 192`. The HUD is a small top-left plaque plus one bag line. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
 
 ## Governing ADRs
 
@@ -32,4 +32,4 @@ Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, and the c
 | 004 | Painted night | Visual/Feel | Complete | ADR-0003 |
 | 005 | Quiet HUD | Visual/Feel | Complete | ADR-0003 |
 | 006 | Coat walk cycle | Visual/Feel | Complete | ADR-0003 |
-| 007 | Quiet chrome | Visual/Feel | In progress | ADR-0003 |
+| 007 | Quiet chrome | Visual/Feel | Complete | ADR-0003 |

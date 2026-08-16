@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` quiet chrome
-- Status: r1-coat-feel 001–006 Complete; 007 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` quiet chrome
+- Status: r1-coat-feel 001–007 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-007-quiet-chrome.md`
-- Next: `/story-done` after tokens hold. Then stop. 019 stays parked. Do not start another WORLD system.
+- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-007-quiet-chrome.md` — Quiet chrome
+- Criteria: 5/5. DOM title/subtitle gone. Empty toast/order geom gone. Painted cover stays the title.
+- Tests: `godot/project.test.ts` quiet-chrome lock + `PLAY_CHROME_OK`. npm test 142 pass.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Wait unless leftover geom remains. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-007-quiet-chrome.md` — Quiet chrome

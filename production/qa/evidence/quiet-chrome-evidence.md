@@ -35,4 +35,4 @@ PLAY_CHROME_OK
 
 ## Sign-off
 
-`/dev-story` lean. Tokens locked in `godot/project.test.ts`. Play-path still to run.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. One painted language. No DOM title bleed. No empty toast box. No 魂. `npm test`: 142 pass. `PLAY_CHROME_OK`. HTML5 re-exported.
