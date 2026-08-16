@@ -1935,3 +1935,65 @@ test("Play sits a dusk wood room card on the painted cover", () => {
     assert.doesNotMatch(src, /play_room|PLAY_ROOM_OK|paint_room_card|tex-room/);
   }
 });
+
+test("Play sits the join-code face on the same dusk wood slip", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-012-painted-join.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-012-painted-join.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-011-painted-room.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_join.gd"));
+  assert.ok(existsSync("godot/scenes/play_join.tscn"));
+  const joinPlay = readFileSync("godot/scripts/headless_play_join.gd", "utf8");
+  assert.match(joinPlay, /show_room/);
+  assert.match(joinPlay, /PLAY_JOIN_WOOD/);
+  assert.match(joinPlay, /PLAY_JOIN_CODE/);
+  assert.match(joinPlay, /PLAY_JOIN_OK/);
+  assert.match(joinPlay, /tex-room\.png/);
+  assert.match(joinPlay, /tex-slip\.png/);
+  assert.match(joinPlay, /cover-valley\.png/);
+  assert.match(joinPlay, /JoinCode/);
+  assert.match(joinPlay, /PARCHMENT_CARD/);
+  assert.match(joinPlay, /Look\.BODY/);
+  assert.doesNotMatch(joinPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_join.tscn", "utf8");
+  assert.match(scene, /headless_play_join\.gd/);
+  const room = readFileSync("godot/scripts/room.gd", "utf8");
+  assert.match(room, /cover-valley/);
+  assert.match(room, /room_box/);
+  assert.match(room, /chip_button\("开一间"/);
+  assert.match(room, /chip_button\("回"/);
+  assert.match(room, /JoinCode/);
+  assert.match(room, /_show_join/);
+  assert.match(room, /wood_field/);
+  assert.doesNotMatch(room, /plaque_box/);
+  assert.doesNotMatch(room, /_code_row/);
+  assert.doesNotMatch(room, /char-warm|char-pine|Wanderer/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /func room_box/);
+  assert.match(look, /tex-room/);
+  assert.match(look, /func wood_field/);
+  assert.match(look, /const BODY := 192/);
+  assert.match(look, /const FOOT := 0\.979/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.match(play, /chip_button/);
+  assert.doesNotMatch(play, /魂/);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /房间码的牌也是同一块黄昏木头/);
+  assert.match(art, /开一间的牌是黄昏木头/);
+  assert.match(art, /大衣真透明/);
+  assert.match(art, /一行木签/);
+  assert.match(art, /暖的走是同一件驼大衣迈步/);
+  assert.match(art, /四拍/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_join|PLAY_JOIN_OK|tex-join/);
+  }
+});

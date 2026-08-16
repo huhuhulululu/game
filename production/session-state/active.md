@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/story-done` painted room
-- Status: r1-coat-feel 001–011 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` painted join
+- Status: r1-coat-feel 001–011 Complete; 012 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-011-painted-room.md`
-- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-012-painted-join.md`
+- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-012-painted-join.md` — Painted join
+- Files changed: story, `room.gd` join face, `play_join.tscn`, `headless_play_join.gd`, ART, control-manifest, `godot/project.test.ts`
+- Test written: `godot/project.test.ts` (painted-join lock) + `play_join.tscn`
+- Tokens: `PLAY_JOIN_WOOD` `PLAY_JOIN_CODE` `PLAY_JOIN_OK`
+- Next: `/story-done` after tokens hold. Same wood slip as 开一间. No generated panel. 019 stays parked. Stop new WORLD systems. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-011-painted-room.md` — Painted room

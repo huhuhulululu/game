@@ -3,12 +3,12 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: Complete
+> **Status**: In progress
 > **Governing ADRs**: ADR-0003
 
 ## Overview
 
-Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, quiet chrome, one paint, the warm step, the warm sit, and the painted room card hold. Cover-coats sit at `Look.BODY = 192` with real a=0. Warm walk is the same tan coat taking a step, not a sliding idle. A smeared sit is thrown away — the painted sit stays. The 开一间 card is dusk wood, not a parchment form. Kitchen / mine / wild read as the same dusk painting. The HUD is a small top-left plaque plus one bag line. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
+Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat walk cycle, quiet chrome, one paint, the warm step, the warm sit, the painted room card, and the painted join face hold. Cover-coats sit at `Look.BODY = 192` with real a=0. Warm walk is the same tan coat taking a step, not a sliding idle. A smeared sit is thrown away — the painted sit stays. The 开一间 card is dusk wood, not a parchment form. The 房间码 face is the same dusk wood slip. Kitchen / mine / wild read as the same dusk painting. The HUD is a small top-left plaque plus one bag line. Load shows only the painted cover. Empty toast chrome stays off. No new pack.
 
 ## Governing ADRs
 
@@ -37,3 +37,4 @@ Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat 
 | 009 | Warm step | Visual/Feel | Complete | ADR-0003 |
 | 010 | Warm sit | Visual/Feel | Complete | ADR-0003 |
 | 011 | Painted room | Visual/Feel | Complete | ADR-0003 |
+| 012 | Painted join | Visual/Feel | In progress | ADR-0003 |

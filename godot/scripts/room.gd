@@ -1,14 +1,19 @@
 extends Control
 
 ## Open a room on the same cover. Everyday names, readable ink.
+## Join face is the same dusk wood slip — not a leftover form row.
 
 var _name: LineEdit
 var _code: LineEdit
-var _code_row: HBoxContainer
 var _err: Label
 var _prefer := "left"
 var _warm: Button
 var _pine: Button
+var _open_btn: Button
+var _have_btn: Button
+var _join_btn: Button
+var _back_btn: Button
+var _tag: Label
 
 
 func _ready() -> void:
@@ -54,12 +59,12 @@ func _panel() -> void:
 	title.size = Vector2(400, 48)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	panel.add_child(title)
-	var tag := Look.ink_label("一个人开间。进谷后再把四位码念给另一个人。", 15, Look.INK)
-	tag.position = Vector2(36, 100)
-	tag.size = Vector2(408, 40)
-	tag.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	panel.add_child(tag)
+	_tag = Look.ink_label("一个人开间。进谷后再把四位码念给另一个人。", 15, Look.INK)
+	_tag.position = Vector2(36, 100)
+	_tag.size = Vector2(408, 40)
+	_tag.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	panel.add_child(_tag)
 	var name_l := Look.ink_label("你的名字", 14, Look.GOLD)
 	name_l.position = Vector2(48, 150)
 	panel.add_child(name_l)
@@ -80,32 +85,57 @@ func _panel() -> void:
 	sides.add_child(_warm)
 	sides.add_child(_pine)
 	_paint_sides()
-	var create := Look.chip_button("开一间", 384)
-	create.position = Vector2(48, 300)
-	create.pressed.connect(_open)
-	panel.add_child(create)
-	var have := Look.chip_button("我有房间码", 384)
-	have.position = Vector2(48, 360)
-	have.pressed.connect(func() -> void: _code_row.visible = true)
-	panel.add_child(have)
-	_code_row = HBoxContainer.new()
-	_code_row.position = Vector2(48, 420)
-	_code_row.size = Vector2(384, 54)
-	_code_row.visible = false
-	_code_row.add_theme_constant_override("separation", 10)
-	panel.add_child(_code_row)
+	_open_btn = Look.chip_button("开一间", 384)
+	_open_btn.position = Vector2(48, 300)
+	_open_btn.pressed.connect(_open)
+	panel.add_child(_open_btn)
+	_have_btn = Look.chip_button("我有房间码", 384)
+	_have_btn.position = Vector2(48, 360)
+	_have_btn.pressed.connect(_show_join)
+	panel.add_child(_have_btn)
 	_code = Look.wood_field("四位码")
-	_code.max_length = 6
-	_code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_code_row.add_child(_code)
-	var go := Look.chip_button("进去", 100)
-	go.pressed.connect(_join)
-	_code_row.add_child(go)
+	_code.name = "JoinCode"
+	_code.max_length = 4
+	_code.position = Vector2(48, 300)
+	_code.size = Vector2(384, 54)
+	_code.visible = false
+	panel.add_child(_code)
+	_back_btn = Look.chip_button("回", 184)
+	_back_btn.position = Vector2(48, 360)
+	_back_btn.pressed.connect(_show_open)
+	_back_btn.visible = false
+	panel.add_child(_back_btn)
+	_join_btn = Look.chip_button("进去", 184)
+	_join_btn.position = Vector2(248, 360)
+	_join_btn.pressed.connect(_join)
+	_join_btn.visible = false
+	panel.add_child(_join_btn)
 	_err = Look.ink_label("", 15, Color(0.55, 0.22, 0.14))
 	_err.position = Vector2(48, 478)
 	_err.size = Vector2(384, 48)
 	_err.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	panel.add_child(_err)
+
+
+func _show_join() -> void:
+	_open_btn.visible = false
+	_have_btn.visible = false
+	_code.visible = true
+	_back_btn.visible = true
+	_join_btn.visible = true
+	_tag.text = "写下四位码。同一夜。"
+	_err.text = ""
+
+
+func _show_open() -> void:
+	_open_btn.visible = true
+	_have_btn.visible = true
+	_code.visible = false
+	_code.text = ""
+	_back_btn.visible = false
+	_join_btn.visible = false
+	_tag.text = "一个人开间。进谷后再把四位码念给另一个人。"
+	_err.text = ""
 
 
 func _paint_sides() -> void:
