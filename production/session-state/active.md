@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` quiet hands
-- Status: r1-coat-feel 001–012 Complete; 013 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` quiet hands
+- Status: r1-coat-feel 001–013 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-013-quiet-hands.md`
-- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-013-quiet-hands.md` — Quiet hands
+- Criteria: 6/6. 做 / 喊 / 声 are small wood slips, not stacked plaque boxes. Mute stays tiny. No DST wheel. No generated sheet.
+- Tests: `godot/project.test.ts` quiet-hands lock + `PLAY_QUIET_OK`. npm test 148 pass. `PLAY_JOIN_OK` and `PLAY_ROOM_OK` still hold.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Wait unless leftover geom remains. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-013-quiet-hands.md` — Quiet hands

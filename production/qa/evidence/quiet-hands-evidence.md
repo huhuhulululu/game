@@ -35,4 +35,4 @@ PLAY_QUIET_OK
 
 ## Sign-off
 
-`/dev-story` lean. Hands are quiet wood slips. Cover stays. No clip-art. No 魂.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. Hands are quiet wood slips. Cover stays. No clip-art. No 魂. `npm test`: 148 pass. `PLAY_QUIET_OK`. `PLAY_JOIN_OK` and `PLAY_ROOM_OK` still hold. HTML5 re-exported.

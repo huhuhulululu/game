@@ -1,7 +1,7 @@
 # Story 013: Quiet hands
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,12 +18,12 @@ Live leftover after the painted join: in-valley 声 / 喊 / 做 are three identi
 
 ## Acceptance Criteria
 
-- [ ] 做 / 喊 are small wood slips (`tex-slip`), not stacked `tex-plaque` squares
-- [ ] Mute 声 stays a tiny slip; no DST action wheel
-- [ ] Title stays the painted cover; no title-couple paste; BODY stays 192
-- [ ] A clip-art button sheet is thrown away — keep simple wood slips; torn props stay off
-- [ ] `bed-valley.png` not replaced; HUD stays plaque + one bag slip; no 魂; no look names in `src/`
-- [ ] Play-path + test locks; 011 / 012 stay Complete
+- [x] 做 / 喊 are small wood slips (`tex-slip`), not stacked `tex-plaque` squares
+- [x] Mute 声 stays a tiny slip; no DST action wheel
+- [x] Title stays the painted cover; no title-couple paste; BODY stays 192
+- [x] A clip-art button sheet is thrown away — keep simple wood slips; torn props stay off
+- [x] `bed-valley.png` not replaced; HUD stays plaque + one bag slip; no 魂; no look names in `src/`
+- [x] Play-path + test locks; 011 / 012 stay Complete
 
 ## Implementation Notes
 
@@ -52,7 +52,7 @@ Godot look only. Reuse `tex-slip.png`. Do not generate a new button sheet. Shipp
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_quiet.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 
