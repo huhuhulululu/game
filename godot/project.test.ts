@@ -505,6 +505,46 @@ test("Kitchen sits one dusk bed and stations through Play", () => {
   }
 });
 
+test("Mine sits one dusk bed and veins through Play", () => {
+  for (const name of ["bed-mine.png", "prop-vein.png", "prop-steps.png", "prop-cache.png", "prop-mouth.png"]) {
+    assert.ok(existsSync(`godot/assets/art/${name}`));
+  }
+  const paint = readFileSync("tools/paint_mine_look.py", "utf8");
+  assert.match(paint, /Does not touch the cover/);
+  assert.match(paint, /key_magenta/);
+  assert.match(paint, /real a=0/);
+  assert.match(paint, /bed-mine/);
+  assert.match(paint, /prop-vein/);
+  assert.doesNotMatch(paint, /save\(.*cover-valley/);
+  assert.doesNotMatch(paint, /Wilson|Don't Starve|Dont Starve|魂/i);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /bed-mine\.png/);
+  assert.match(zone, /_sit_mine_bed/);
+  assert.match(zone, /prop-vein\.png/);
+  assert.match(zone, /prop-steps\.png/);
+  assert.match(zone, /tex-stone\.png/);
+  assert.doesNotMatch(zone, /prop-stairs\.png/);
+  assert.doesNotMatch(zone, /prop-door-open\.png/);
+  assert.doesNotMatch(zone, /prop-cover-|prop-hut|prop-lodge/);
+  assert.ok(existsSync("godot/scripts/headless_play_mine.gd"));
+  assert.ok(existsSync("godot/scenes/play_mine.tscn"));
+  const playMine = readFileSync("godot/scripts/headless_play_mine.gd", "utf8");
+  assert.match(playMine, /scenes\/play\.tscn/);
+  assert.match(playMine, /PLAY_MINE_BED/);
+  assert.match(playMine, /PLAY_MINE_ORE/);
+  assert.match(playMine, /PLAY_MINE_OK/);
+  assert.match(playMine, /bed-mine\.png/);
+  assert.match(playMine, /prop-vein\.png/);
+  assert.doesNotMatch(playMine, /魂|Wilson|Don't Starve|Dont Starve/i);
+  const playMineScene = readFileSync("godot/scenes/play_mine.tscn", "utf8");
+  assert.match(playMineScene, /headless_play_mine\.gd/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /bed-mine|prop-vein|prop-steps|prop-cache|prop-mouth/);
+  }
+});
+
 test("Cover-coat people walk and act on the painted bed", () => {
   const actor = readFileSync("godot/scripts/actor_view.gd", "utf8");
   assert.match(actor, /char-%s/);

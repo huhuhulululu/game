@@ -147,6 +147,8 @@ func _paint(zone: String, rows: PackedStringArray) -> void:
 		_sit_wild_bed()
 	elif zone == "kitchen":
 		_sit_kitchen_bed()
+	elif zone == "mine":
+		_sit_mine_bed()
 	else:
 		_floor(_tex("tex-stone.png"), w, h)
 	for y in h:
@@ -160,6 +162,10 @@ func _sit_wild_bed() -> void:
 
 func _sit_kitchen_bed() -> void:
 	_sit_bed("bed-kitchen.png", "KitchenBed")
+
+
+func _sit_mine_bed() -> void:
+	_sit_bed("bed-mine.png", "MineBed")
 
 
 func _sit_bed(name: String, node: String) -> void:
@@ -220,13 +226,13 @@ func _bit(zone: String, ch: String, x: int, y: int) -> void:
 		return
 	if zone == "mine":
 		if ch == "o":
-			_prop(_tex("prop-ore.png"), x - 0.1, y - 0.15, 40, 36, 5)
+			_prop(_tex("prop-vein.png"), x - 0.1, y - 0.15, 40, 36, 5)
 		elif ch == "Z":
-			_prop(_tex("prop-stairs.png"), x - 0.1, y - 0.2, 40, 40, 5)
+			_prop(_tex("prop-steps.png"), x - 0.1, y - 0.2, 40, 40, 5)
 		elif ch == "Y":
-			_prop(_tex("prop-ore.png"), x - 0.05, y - 0.1, 36, 34, 5)
+			_prop(_tex("prop-cache.png"), x - 0.05, y - 0.1, 36, 34, 5)
 		elif ch == "L":
-			_prop(_tex("prop-door-open.png"), x - 0.2, y - 0.5, 46, 54, 8)
+			_prop(_tex("prop-mouth.png"), x - 0.2, y - 0.5, 46, 54, 8)
 		return
 	if zone != "wild":
 		return

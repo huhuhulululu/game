@@ -1,9 +1,9 @@
 # Session state
 
-- Task: `/story-done` kitchen bed
-- Status: kitchen Complete. Mine / forge / stall / sleep Ready.
+- Task: `/dev-story` mine bed
+- Status: kitchen Complete. Mine In progress. Forge / stall / sleep Ready.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path kitchen scene + kitchen bed + HTML5
+- Files: Play-path mine scene + mine bed
 - Next: `production/epics/r1-evening-places/story-002-mine-bed.md`
 
 ## Session Extract — /story-done 2026-08-16

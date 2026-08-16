@@ -1,7 +1,7 @@
 # Story 002: Mine bed
 
 > **Epic**: Evening places look
-> **Status**: Ready
+> **Status**: In progress
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,19 +16,35 @@
 
 ## Acceptance Criteria
 
-- [ ] Mine sits one painted dusk bed, not tiled stone wallpaper
-- [ ] Ore / stairs / door sit magenta-key props with real `a=0`, or bake into the bed
-- [ ] No FAIL restick; no 魂; no Don't Starve face
+- [ ] Mine sits one painted `bed-mine.png`, not tiled `tex-stone` wallpaper
+- [ ] Ore / stairs / chest / door sit new magenta-key props with real `a=0`
+- [ ] Old ink mine pack stays on disk and is not hung in Play
+- [ ] Play-path proof prints mine tokens through `play.tscn`
+- [ ] No FAIL cover props; no 魂; no look names in `src/`
 
 ## Implementation Notes
 
-Keep `tex-stone.png` string if tests lock it. Do not recrop FAIL. Kitchen is a separate story.
+Do not overwrite `prop-ore` / `prop-stairs` / `prop-door-open`. Sit new names. Keep `tex-stone.png` for mine walls (test lock). Do not recrop FAIL. Do not restyle kitchen.
 
 ## Out of Scope
 
 - Kitchen restyle
-- Forge / stall
+- Forge / stall on the valley
+- Sleep look
 - Recrop FAIL PNGs
+
+## QA Test Cases
+
+- **AC-1**: Play sits the mine bed and dusk veins
+  - Setup: `play_mine.tscn` feeds a mine snap into `play.tscn`
+  - Verify: `bed-mine`, vein / steps / mouth; no `prop-stairs` / FAIL
+  - Pass condition: `PLAY_MINE_OK` and test locks
+
+## Test Evidence
+
+**Story Type**: Visual/Feel
+**Required evidence**: `godot/project.test.ts` + `play_mine.tscn` tokens + `production/qa/evidence/mine-bed-evidence.md`
+**Status**: [ ] In progress
 
 ## Dependencies
 
