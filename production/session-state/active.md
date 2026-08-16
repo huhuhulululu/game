@@ -1,10 +1,24 @@
 # Session state
 
-- Task: `/dev-story` night bite on unlit wild
-- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–015 Complete; 016 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed.
+- Task: `/dev-story` seasons on one dusk bed
+- Status: r1-coat-feel 001–004 Complete; r1-evening-places 001–016 Complete; 017 In progress. Two-phone Blocked (human). Weather look closed. Wild set pieces and forage closed.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-016-night-bite.md`; `play_bite.tscn`
-- Next: `/story-done` night-bite after tokens hold. Next Ready: 春夏秋冬会转. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+- Files: `story-017-seasons.md`; `play_sea.tscn`
+- Next: `/story-done` seasons after tokens hold. Next Ready: 矿多层. No more weather. Do not invent more wild props. Do not `/dev-story` two-phone.
+
+## Session Extract — /dev-story 2026-08-16
+- Story: `production/epics/r1-evening-places/story-017-seasons.md` — Seasons
+- Files changed: story, `play_sea.tscn`, `look.gd` season_paper, valley / zone_map `set_season`
+- Test written: `godot/project.test.ts` (seasons lock)
+- Tokens: `PLAY_SEA_TURN` `PLAY_SEA_SUMMER` `PLAY_SEA_WINTER` `PLAY_SEA_HEARTH` `PLAY_SEA_OK`
+- Blockers: None
+- Next: `/story-done` after tokens hold. Next Ready: 矿多层. Weather stays closed. Two-phone stays Blocked (human). Do not invent more wild props.
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-016-night-bite.md` — Night bite
+- Tech debt logged: None
+- Next recommended: seasons (`r1-evening-places/story-017-seasons.md`)
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-evening-places/story-016-night-bite.md` — Night bite

@@ -31,6 +31,17 @@ static func cjk() -> Font:
 	return base
 
 
+static func season_paper(sea: String) -> Color:
+	# One dusk language. Winter cooler paper, summer warmer. Not four beds.
+	if sea == "夏":
+		return Color(1.0, 0.94, 0.86)
+	if sea == "秋":
+		return Color(0.96, 0.90, 0.82)
+	if sea == "冬":
+		return Color(0.88, 0.86, 0.84)
+	return VALLEY_DUSK
+
+
 static func dusk_mat(fog := 0.08) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/dusk.gdshader") as Shader

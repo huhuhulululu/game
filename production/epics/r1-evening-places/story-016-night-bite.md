@@ -1,7 +1,7 @@
 # Story 016: Night bite
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Night wild with no held light / no campfire can show `被黑暗咬了一口` from the snap; `tickDark` stays in the server
-- [ ] Painted night stays; no bite VFX sticker; no fear veil
-- [ ] Village grass / path / farm stay lamp-safe; kitchen / mine stay hearth-lit; plaque unchanged
-- [ ] Play-path proof prints night-bite tokens through `play.tscn`
-- [ ] No 魂; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
+- [x] Night wild with no held light / no campfire can show `被黑暗咬了一口` from the snap; `tickDark` stays in the server
+- [x] Painted night stays; no bite VFX sticker; no fear veil
+- [x] Village grass / path / farm stay lamp-safe; kitchen / mine stay hearth-lit; plaque unchanged
+- [x] Play-path proof prints night-bite tokens through `play.tscn`
+- [x] No 魂; no FAIL restick; `bed-valley.png` not replaced; no look names in `src/`
 
 ## Implementation Notes
 
@@ -47,9 +47,16 @@ Server already bites unlit wild at night and keeps the valley village lamp-safe.
 
 **Story Type**: Integration
 **Required evidence**: `godot/project.test.ts` + `play_bite.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 135 tests
 
 ## Dependencies
 
 - Depends on: r1-evening-places scout find, r1-coat-feel painted night
-- Unlocks: none in this epic
+- Unlocks: 春夏秋冬会转 only if this holds
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Integration — `PLAY_BITE_WILD` `PLAY_BITE_EDGE` `PLAY_BITE_HEARTH` `PLAY_BITE_OK`
+**Code Review**: Skipped — lean

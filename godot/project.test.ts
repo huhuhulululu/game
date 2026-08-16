@@ -1039,6 +1039,48 @@ test("Play sits two dusk wells on the wild bed", () => {
   }
 });
 
+test("Play turns 春夏秋冬 on one dusk bed, not four beds", () => {
+  assert.ok(existsSync("godot/scripts/headless_play_sea.gd"));
+  assert.ok(existsSync("godot/scenes/play_sea.tscn"));
+  assert.ok(!existsSync("godot/assets/art/bed-valley-winter.png"));
+  assert.ok(!existsSync("tools/paint_sea_look.py"));
+  const seaPlay = readFileSync("godot/scripts/headless_play_sea.gd", "utf8");
+  assert.match(seaPlay, /scenes\/play\.tscn/);
+  assert.match(seaPlay, /PLAY_SEA_TURN/);
+  assert.match(seaPlay, /PLAY_SEA_SUMMER/);
+  assert.match(seaPlay, /PLAY_SEA_WINTER/);
+  assert.match(seaPlay, /PLAY_SEA_HEARTH/);
+  assert.match(seaPlay, /PLAY_SEA_OK/);
+  assert.match(seaPlay, /春夏秋冬/);
+  assert.match(seaPlay, /bed-valley\.png/);
+  assert.doesNotMatch(seaPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_sea.tscn", "utf8");
+  assert.match(scene, /headless_play_sea\.gd/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /func season_paper/);
+  assert.match(look, /One dusk language\. Winter cooler paper, summer warmer\. Not four beds\./);
+  assert.match(look, /set_shader_parameter\("grade", 0\.0\)/);
+  const world = readFileSync("godot/scripts/valley_world.gd", "utf8");
+  assert.match(world, /func set_season/);
+  const zone = readFileSync("godot/scripts/zone_map.gd", "utf8");
+  assert.match(zone, /func set_season/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_valley\.set_season/);
+  assert.match(play, /_zone_map\.set_season/);
+  assert.match(play, /日 %s · %s · %s · 金 %s/);
+  assert.match(play, /Never purple night/);
+  assert.doesNotMatch(play, /_hud_weather/);
+  assert.doesNotMatch(play, /_hud_season/);
+  assert.doesNotMatch(play, /魂/);
+  const story = readFileSync("production/epics/r1-evening-places/story-017-seasons.md", "utf8");
+  assert.match(story, /Status:\s*In progress/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts", "src/game/season.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_sea|PLAY_SEA_TURN|season_paper|paint_sea/);
+  }
+});
+
 test("Play sits a night bite from the snap, not a fear veil", () => {
   assert.ok(existsSync("godot/scripts/headless_play_bite.gd"));
   assert.ok(existsSync("godot/scenes/play_bite.tscn"));

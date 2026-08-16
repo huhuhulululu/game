@@ -331,19 +331,35 @@ func _on_snap(s: Dictionary) -> void:
 	# Night lives on the bed so painted lamps stay the light.
 	var night := bool(s.get("night", false))
 	var lit := bool(s.get("lit", true))
+	var sea := str(s.get("season", "春"))
+	var shade := Color(0.78, 0.68, 0.52)
+	var dim := Color(0.46, 0.38, 0.28)
+	if sea == "冬":
+		shade = Color(0.72, 0.66, 0.54)
+		dim = Color(0.42, 0.38, 0.32)
+	elif sea == "夏":
+		shade = Color(0.84, 0.70, 0.48)
 	_world.modulate = Color(1.0, 1.0, 1.0) if zone == "kitchen" or zone == "mine" else Look.VALLEY_DUSK
 	if zone == "kitchen" or zone == "mine":
 		_valley.set_night(0.0)
 		_zone_map.set_night(0.0)
+		_valley.set_season("")
+		_zone_map.set_season("")
 	elif night and zone == "wild":
 		_valley.set_night(0.0)
-		_zone_map.set_night(1.0, Color(0.46, 0.38, 0.28) if not lit else Color(0.78, 0.68, 0.52))
+		_zone_map.set_night(1.0, dim if not lit else shade)
+		_valley.set_season("")
+		_zone_map.set_season("")
 	elif night:
-		_valley.set_night(1.0, Color(0.78, 0.68, 0.52))
+		_valley.set_night(1.0, shade)
 		_zone_map.set_night(0.0)
+		_valley.set_season("")
+		_zone_map.set_season("")
 	else:
 		_valley.set_night(0.0)
 		_zone_map.set_night(0.0)
+		_valley.set_season(sea)
+		_zone_map.set_season(sea)
 	# Soft dusk rain / haze sit on the bed. Never a weather ring.
 	var wet := _wet(s)
 	var mist := _mist(s)

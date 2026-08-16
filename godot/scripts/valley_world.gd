@@ -46,6 +46,16 @@ func _fit_bed(bed: Sprite2D) -> void:
 		bed.scale = Vector2(sz.x / float(sheet.get_width()), sz.y / float(sheet.get_height()))
 
 
+func set_season(sea: String) -> void:
+	var bed := get_node_or_null("Bed") as Sprite2D
+	if bed == null:
+		return
+	# One dusk language. Winter cooler paper, summer warmer. Not four beds.
+	if bed.material != null:
+		return
+	bed.modulate = Look.season_paper(sea) if sea != "" else Look.VALLEY_DUSK
+
+
 func set_night(amount: float, shade := Look.NIGHT) -> void:
 	var bed := get_node_or_null("Bed") as Sprite2D
 	if bed == null:

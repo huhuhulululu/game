@@ -181,6 +181,16 @@ func _sit_mine_bed() -> void:
 	_sit_bed("bed-mine.png", "MineBed")
 
 
+func set_season(sea: String) -> void:
+	if _zone != "wild":
+		return
+	var bed := get_node_or_null("WildBed") as Sprite2D
+	if bed == null or bed.material != null:
+		return
+	# One dusk language. Winter cooler paper, summer warmer. Not four beds.
+	bed.modulate = Look.season_paper(sea) if sea != "" else Color(1, 1, 1)
+
+
 func set_night(amount: float, shade := Look.NIGHT) -> void:
 	var bed := get_node_or_null("WildBed") as Sprite2D
 	if bed == null:
