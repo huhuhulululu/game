@@ -1,7 +1,7 @@
 # Story 012: Painted join
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,12 +18,12 @@ Live leftover after the painted room card: tapping 我有房间码 still reveals
 
 ## Acceptance Criteria
 
-- [ ] Same `RoomCard` / `tex-room.png` after 我有房间码; no second panel; no `plaque_box` / `paper_box` on this card
-- [ ] Four-digit field is a HUD wood chip; confirm 进去 and back 回 are HUD wood chips
-- [ ] Title stays the painted cover; no title-couple paste; BODY stays 192
-- [ ] A clip-art join panel is thrown away — keep the simple wood slip; torn props stay off
-- [ ] `bed-valley.png` not replaced; HUD stays plaque + one bag slip; no 魂; no look names in `src/`
-- [ ] Play-path + test locks; 011 stays Complete
+- [x] Same `RoomCard` / `tex-room.png` after 我有房间码; no second panel; no `plaque_box` / `paper_box` on this card
+- [x] Four-digit field is a HUD wood chip; confirm 进去 and back 回 are HUD wood chips
+- [x] Title stays the painted cover; no title-couple paste; BODY stays 192
+- [x] A clip-art join panel is thrown away — keep the simple wood slip; torn props stay off
+- [x] `bed-valley.png` not replaced; HUD stays plaque + one bag slip; no 魂; no look names in `src/`
+- [x] Play-path + test locks; 011 stays Complete
 
 ## Implementation Notes
 
@@ -52,7 +52,7 @@ Godot look only. Reuse `tex-room.png`. Do not generate `tex-join.png`. Shipping 
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_join.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete
 
 ## Dependencies
 

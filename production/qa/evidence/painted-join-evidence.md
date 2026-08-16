@@ -35,4 +35,4 @@ PLAY_JOIN_OK
 
 ## Sign-off
 
-`/dev-story` lean. Join face is the same wood slip. Chips are wood slips. Cover stays. No clip-art. No 魂.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. Join face is the same wood slip. Chips are wood slips. Cover stays. No clip-art. No 魂. `npm test`: 147 pass. `PLAY_JOIN_OK`. `PLAY_ROOM_OK` still holds. HTML5 re-exported.
