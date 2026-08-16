@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: `docs/WORLD.md` + `godot/docs/ART.md`
 > **Architecture Module**: ZoneMap + ValleyLogic + Play
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
@@ -29,4 +29,4 @@ First-evening rules already work. Kitchen, mine, forge, stall, and sleep still r
 | 001 | Kitchen bed | Visual/Feel | Complete | ADR-0003 |
 | 002 | Mine bed | Visual/Feel | Complete | ADR-0003 |
 | 003 | Forge and stall | Visual/Feel | Complete | ADR-0003 |
-| 004 | Sleep | Visual/Feel | In progress | ADR-0003 |
+| 004 | Sleep | Visual/Feel | Complete | ADR-0003 |

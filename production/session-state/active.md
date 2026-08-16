@@ -1,10 +1,16 @@
 # Session state
 
-- Task: `/dev-story` sleep
-- Status: kitchen + mine + forge Complete. Sleep In progress.
+- Task: `/story-done` sleep
+- Status: r1-evening-places Complete (kitchen, mine, forge/stall, sleep).
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: Play-path sleep scene + cover-coat sit
-- Next: `production/epics/r1-evening-places/story-004-sleep.md`
+- Files: Play-path sleep scene + cover-coat sit + HTML5 re-export
+- Next: none in this epic. P1 leftover is two-phone play (no Ready story file).
+
+## Session Extract — /story-done 2026-08-16
+- Verdict: COMPLETE
+- Story: `production/epics/r1-evening-places/story-004-sleep.md` — Sleep
+- Tech debt logged: None
+- Next recommended: None identified in this epic
 
 ## Session Extract — /story-done 2026-08-16
 - Verdict: COMPLETE

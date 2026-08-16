@@ -1,7 +1,7 @@
 # Story 004: Sleep
 
 > **Epic**: Evening places look
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-- [ ] Sleep / lie-down uses the cover-coat sit pose on `bed-valley.png`, not a second indoor room
-- [ ] Timing bar stays off while `busy == sit` (no bed HUD)
-- [ ] Smith / booth stay small and grounded on the valley
-- [ ] Play-path proof prints sleep tokens through `play.tscn`
-- [ ] No 魂; no Don't Starve face; no FAIL restick; no look names in `src/`
+- [x] Sleep / lie-down uses the cover-coat sit pose on `bed-valley.png`, not a second indoor room
+- [x] Timing bar stays off while `busy == sit` (no bed HUD)
+- [x] Smith / booth stay small and grounded on the valley
+- [x] Play-path proof prints sleep tokens through `play.tscn`
+- [x] No 魂; no Don't Starve face; no FAIL restick; no look names in `src/`
 
 ## Implementation Notes
 
@@ -43,9 +43,16 @@ Cabin is already on `bed-valley.png`. Prefer the existing cover-coat sit pose ov
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_sleep.tscn` tokens + `production/qa/evidence/sleep-look-evidence.md`
-**Status**: [ ] In progress
+**Status**: [x] Complete — Play-path tokens + 116 tests
 
 ## Dependencies
 
 - Depends on: r1-two-players cover-coats
 - Unlocks: none in this epic
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `PLAY_SLEEP_SIT` `PLAY_SLEEP_VALLEY` `PLAY_SLEEP_OK`
+**Code Review**: Skipped — lean
