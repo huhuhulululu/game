@@ -1,10 +1,10 @@
 # Session state
 
-- Task: `/story-done` coat dusk
-- Status: r1-coat-feel 001–018 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` path frame
+- Status: r1-coat-feel 001–018 Complete; 019 path-frame in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-018-coat-dusk.md`
-- Next: Stop. A grade cannot turn the idle sheets into oil paint. Do not generate a new face. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Files: `story-019-path-frame.md`
+- Next: `/story-done` after `PLAY_FRAME_OK`. Camera sits the coat in the path. No new art. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-018-coat-dusk.md` — Coat dusk

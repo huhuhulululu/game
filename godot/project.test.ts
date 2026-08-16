@@ -2300,3 +2300,47 @@ test("Play grades the existing coats into the bed dusk", () => {
     assert.doesNotMatch(src, /play_dusk|PLAY_DUSK_OK|COAT_DUSK/);
   }
 });
+
+test("Play frames the existing coat in the painted path", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-019-path-frame.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-019-path-frame.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-018-coat-dusk.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_frame.gd"));
+  assert.ok(existsSync("godot/scenes/play_frame.tscn"));
+  const framePlay = readFileSync("godot/scripts/headless_play_frame.gd", "utf8");
+  assert.match(framePlay, /scenes\/play\.tscn/);
+  assert.match(framePlay, /PLAY_FRAME_ZOOM/);
+  assert.match(framePlay, /PLAY_FRAME_SIT/);
+  assert.match(framePlay, /PLAY_FRAME_OK/);
+  assert.match(framePlay, /char-warm\.png/);
+  assert.match(framePlay, /MURAL_ZOOM/);
+  assert.doesNotMatch(framePlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_frame.tscn", "utf8");
+  assert.match(scene, /headless_play_frame\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_follow_zoom/);
+  assert.match(play, /_follow_look/);
+  assert.match(play, /_clamp_cam/);
+  assert.match(play, /2\.18/);
+  assert.doesNotMatch(play, /else Vector2\(1\.58, 1\.58\)/);
+  assert.match(play, /hand_chip\("做"/);
+  assert.doesNotMatch(play, /魂/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 240/);
+  assert.match(look, /const FOOT := 0\.979/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /镜头跟着大衣走在路上/);
+  assert.match(art, /大衣真透明/);
+  const srcFiles = ["src/sim/world.ts", "src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_frame|PLAY_FRAME_OK|_follow_look/);
+  }
+});

@@ -61,7 +61,7 @@ func _ready() -> void:
 	_zone_map.visible = false
 	_world.add_child(_zone_map)
 	_cam = Camera2D.new()
-	_cam.zoom = Vector2(1.58, 1.58)
+	_cam.zoom = Vector2(2.18, 2.18)
 	_cam.position = _valley.size_px() * 0.5
 	_cam.position_smoothing_enabled = false
 	_cam.position_smoothing_speed = 6
@@ -320,9 +320,9 @@ func _on_snap(s: Dictionary) -> void:
 	_remember_vis(s)
 	_paint_atlas(s)
 	var you: Dictionary = s.get("youAt", {})
-	_cam.zoom = Vector2(2.45, 2.45) if zone == "kitchen" or zone == "mine" else Vector2(1.58, 1.58)
+	_cam.zoom = Vector2(_follow_zoom(zone), _follow_zoom(zone))
 	if you.size() > 0:
-		var target := _clamp_cam(Vector2(float(you.get("x", 0)), float(you.get("y", 0))))
+		var target := _clamp_cam(_follow_look(Vector2(float(you.get("x", 0)), float(you.get("y", 0)))))
 		if not _cam_locked:
 			_cam.position_smoothing_enabled = false
 			_cam.position = target
@@ -766,6 +766,18 @@ func _take(item_id: String) -> void:
 		_show_line("手里满了")
 		return
 	Net.send_take(item_id)
+
+
+func _follow_zoom(zone: String) -> float:
+	# Kitchen / mine stay tight. Valley / wild sit in the path, not a mural stamp.
+	if zone == "kitchen" or zone == "mine":
+		return 2.45
+	return 2.18
+
+
+func _follow_look(feet: Vector2) -> Vector2:
+	# Look a little above the feet so the coat sits in the path frame.
+	return Vector2(feet.x, feet.y - Look.BODY * 0.40)
 
 
 func _clamp_cam(p: Vector2) -> Vector2:
