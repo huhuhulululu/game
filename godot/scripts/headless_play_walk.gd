@@ -229,18 +229,28 @@ func _assert_quiet() -> bool:
 	return true
 
 
+func _wait_sheet(id: String, name: String, limit: float) -> bool:
+	var t := 0.0
+	while t < limit:
+		if _sheet_file(id) == name:
+			return true
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	printerr("SHEET_WAIT ", id, " want ", name, " got ", _sheet_file(id))
+	return false
+
+
 func _assert_front() -> bool:
 	await _feed(_snap({}))
+	await _feed(_snap({}))
+	await get_tree().create_timer(0.14).timeout
 	await _feed(_snap({
 		"actors": [_you({"x": 338.0}), _mate({"x": 396.0})],
 		"youAt": {"x": 338.0, "y": 342.0},
 	}))
-	await get_tree().create_timer(0.08).timeout
-	if _sheet_file(YOU) != "char-warm-walk.png":
-		printerr("NO_WALK_A ", _sheet_file(YOU))
+	if not await _wait_sheet(YOU, "char-warm-walk.png", 0.30):
 		return false
-	if _sheet_file(MATE) != "char-pine-walk.png":
-		printerr("NO_PINE_A ", _sheet_file(MATE))
+	if not await _wait_sheet(MATE, "char-pine-walk.png", 0.30):
 		return false
 	if not _assert_quiet():
 		return false
@@ -254,32 +264,24 @@ func _assert_front() -> bool:
 
 
 func _assert_pass() -> bool:
-	await get_tree().create_timer(0.20).timeout
-	if _sheet_file(YOU) != "char-warm.png":
-		printerr("NO_WALK_PASS ", _sheet_file(YOU))
+	if not await _wait_sheet(YOU, "char-warm.png", 0.40):
 		return false
-	if _sheet_file(MATE) != "char-pine.png":
-		printerr("NO_PINE_PASS ", _sheet_file(MATE))
+	if not await _wait_sheet(MATE, "char-pine.png", 0.40):
 		return false
 	print("PLAY_WALK_PASS")
 	return true
 
 
 func _assert_two() -> bool:
-	await get_tree().create_timer(0.18).timeout
-	if _sheet_file(YOU) != "char-warm-walk2.png":
-		printerr("NO_WALK_B ", _sheet_file(YOU))
+	if not await _wait_sheet(YOU, "char-warm-walk2.png", 0.40):
 		return false
-	if _sheet_file(MATE) != "char-pine-walk2.png":
-		printerr("NO_PINE_B ", _sheet_file(MATE))
+	if not await _wait_sheet(MATE, "char-pine-walk2.png", 0.40):
 		return false
 	await _feed(_snap({
 		"actors": [_you({"x": 390.0, "facing": 1}), _mate({"x": 448.0, "facing": 1})],
 		"youAt": {"x": 390.0, "y": 342.0},
 	}))
-	await get_tree().create_timer(0.08).timeout
-	if _sheet_file(YOU) != "char-warm-side-walk.png":
-		printerr("NO_SIDE_A ", _sheet_file(YOU))
+	if not await _wait_sheet(YOU, "char-warm-side-walk.png", 0.30):
 		return false
 	print("PLAY_WALK_B")
 	return true

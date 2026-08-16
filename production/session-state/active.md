@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` coat walk cycle
-- Status: r1-coat-feel 001–005 Complete; 006 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` coat walk cycle
+- Status: r1-coat-feel 001–006 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-006-coat-walk.md`, `actor_view.gd`, `play_walk.tscn`
-- Next: `/story-done` coat-walk after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Files: `story-006-coat-walk.md`
+- Next: Stop. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-006-coat-walk.md` — Coat walk cycle
+- Criteria: 5/5. Four-beat walk on existing coats. BODY 192. Quiet HUD holds.
+- Tests: `godot/project.test.ts` coat-walk lock + `PLAY_WALK_OK`. npm test 141 pass.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop new WORLD systems. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-006-coat-walk.md` — Coat walk cycle

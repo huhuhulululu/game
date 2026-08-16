@@ -1,7 +1,7 @@
 # Story 006: Coat walk cycle
 
 > **Epic**: Coat walk and sit feel
-> **Status**: In progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Manifest Version**: 2026-08-15
@@ -18,11 +18,11 @@ Live playtest after quiet HUD: the cover-coats are the right size, but walk is t
 
 ## Acceptance Criteria
 
-- [ ] Walk is a four-beat cycle on existing `char-warm` / `char-pine` walk, walk2, and stand sheets — not a two-frame flicker
-- [ ] `Look.BODY` stays 192; `Look.FOOT` stays 0.979; quiet HUD stays the small plaque + one bag slip
-- [ ] No new character; title couple not pasted into the valley; face is not DST
-- [ ] Torn-off props stay off the beds; `bed-valley.png` not replaced; no 魂
-- [ ] Play-path + test locks; no look names in `src/`
+- [x] Walk is a four-beat cycle on existing `char-warm` / `char-pine` walk, walk2, and stand sheets — not a two-frame flicker
+- [x] `Look.BODY` stays 192; `Look.FOOT` stays 0.979; quiet HUD stays the small plaque + one bag slip
+- [x] No new character; title couple not pasted into the valley; face is not DST
+- [x] Torn-off props stay off the beds; `bed-valley.png` not replaced; no 魂
+- [x] Play-path + test locks; no look names in `src/`
 
 ## Implementation Notes
 
@@ -49,9 +49,17 @@ Godot look only. Cycle the existing front / side / back walk sheets with the mat
 
 **Story Type**: Visual/Feel
 **Required evidence**: `godot/project.test.ts` + `play_walk.tscn` tokens
-**Status**: [ ] In progress
+**Status**: [x] Complete — `PLAY_WALK_OK` + 141 tests
 
 ## Dependencies
 
 - Depends on: r1-coat-feel 001–005 Complete
 - Unlocks: none. Stop new WORLD systems.
+
+## Completion Notes
+**Completed**: 2026-08-16
+**Criteria**: 5/5 passing
+**Deviations**: None. Lean: QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped (no chat gates).
+**Test Evidence**: Visual/Feel — `godot/project.test.ts` coat-walk lock + `PLAY_WALK_OK`
+**Code Review**: Skipped — lean
+

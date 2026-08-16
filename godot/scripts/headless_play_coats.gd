@@ -178,11 +178,22 @@ func _assert_walk() -> bool:
 		"actors": [_you({"x": 338.0}), _mate({"x": 396.0})],
 		"youAt": {"x": 338.0, "y": 342.0},
 	}))
-	await get_tree().create_timer(0.10).timeout
-	if not _has_tex(play, "char-warm-walk"):
+	var t := 0.0
+	var saw_warm := false
+	var saw_pine := false
+	while t < 0.40:
+		if _has_tex(play, "char-warm-walk"):
+			saw_warm = true
+		if _has_tex(play, "char-pine-walk"):
+			saw_pine = true
+		if saw_warm and saw_pine:
+			break
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	if not saw_warm:
 		printerr("NO_WARM_WALK")
 		return false
-	if not _has_tex(play, "char-pine-walk"):
+	if not saw_pine:
 		printerr("NO_PINE_WALK")
 		return false
 	var warm := _body(YOU)

@@ -1633,7 +1633,7 @@ test("Play sits a quiet plaque and one bag line", () => {
 test("Play walks a four-beat cycle on the existing coats", () => {
   assert.ok(existsSync("production/epics/r1-coat-feel/story-006-coat-walk.md"));
   const story = readFileSync("production/epics/r1-coat-feel/story-006-coat-walk.md", "utf8");
-  assert.match(story, /\*\*Status\*\*:\s*In progress/);
+  assert.match(story, /\*\*Status\*\*:\s*Complete/);
   assert.ok(existsSync("godot/scripts/headless_play_walk.gd"));
   assert.ok(existsSync("godot/scenes/play_walk.tscn"));
   const walk = readFileSync("godot/scripts/headless_play_walk.gd", "utf8");

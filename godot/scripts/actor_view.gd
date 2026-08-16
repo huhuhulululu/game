@@ -128,14 +128,14 @@ func _process(dt: float) -> void:
 		moving = true
 		_coast = 0.10
 	else:
-		_coast = maxf(_coast - dt, 0.0)
+		_coast = max(_coast - dt, 0.0)
 		if _coast <= 0.0 or want_sit:
 			moving = false
 	var can_walk := moving and not want_sit and _sit < 0.2
 	if can_walk:
 		if not _was_moving:
 			_stride = 0.0
-		_stride += dt
+		_stride += minf(dt, 0.05)
 	_was_moving = can_walk
 	_place_name()
 	_apply()
@@ -221,13 +221,14 @@ func _apply() -> void:
 		var drop := Look.BODY * 0.035 * _sit
 		var bob := 0.0
 		if moving and _sit < 0.2:
-			var u := fmod(_stride / 0.18, 4.0)
-			var pass := 0.0
-			if u >= 1.0 and u < 2.0:
-				pass = sin((u - 1.0) * PI)
-			elif u >= 3.0:
-				pass = sin((u - 3.0) * PI)
-			bob = -pass * 6.0
+			var phase := _stride / 0.18
+			phase = phase - floor(phase / 4.0) * 4.0
+			var lift := 0.0
+			if phase >= 1.0 and phase < 2.0:
+				lift = sin((phase - 1.0) * PI)
+			elif phase >= 3.0:
+				lift = sin((phase - 3.0) * PI)
+			bob = -lift * 6.0
 		_sprite.position = Vector2(0.0, plant + drop + bob)
 	_sprite.flip_h = facing == 3
 	_sit_lamp()

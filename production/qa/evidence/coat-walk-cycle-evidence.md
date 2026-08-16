@@ -34,4 +34,4 @@ PLAY_WALK_OK
 
 ## Sign-off
 
-`/dev-story` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. One painted language. No 魂.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. One painted language. No 魂. `npm test`: 141 pass.
