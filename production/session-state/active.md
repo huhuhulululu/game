@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` path frame
-- Status: r1-coat-feel 001–018 Complete; 019 path-frame in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` path frame
+- Status: r1-coat-feel 001–019 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-019-path-frame.md`
-- Next: `/story-done` after `PLAY_FRAME_OK`. Camera sits the coat in the path. No new art. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Next: Stop. Camera sits the coat in the path. Do not generate a new face. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-019-path-frame.md` — Path frame
+- Criteria: 6/6. Valley zoom 2.18 follows the coat. Same idle face. Same bed. Painting stayed readable — not reverted.
+- Tests: `godot/project.test.ts` path-frame lock + `PLAY_FRAME_OK`. `PLAY_DUSK_OK` `PLAY_IN_OK` `PLAY_NAME_OK` still hold.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Do not generate a new face. Fireside 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-018-coat-dusk.md` — Coat dusk

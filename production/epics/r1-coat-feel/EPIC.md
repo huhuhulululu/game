@@ -3,7 +3,7 @@
 > **Layer**: Feature
 > **GDD**: `godot/docs/ART.md` + `docs/WORLD.md`
 > **Architecture Module**: ActorView
-> **Status**: In progress
+> **Status**: Complete
 > **Governing ADRs**: ADR-0003
 
 ## Overview
@@ -44,4 +44,4 @@ Onboarding, walk / sit, thin ear, place ear, painted night, quiet HUD, the coat 
 | 016 | Place beds | Visual/Feel | Complete | ADR-0003 |
 | 017 | Coat in the paint | Visual/Feel | Complete | ADR-0003 |
 | 018 | Coat dusk | Visual/Feel | Complete | ADR-0003 |
-| 019 | Path frame | Visual/Feel | In progress | ADR-0003 |
+| 019 | Path frame | Visual/Feel | Complete | ADR-0003 |
