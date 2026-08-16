@@ -26,6 +26,10 @@ func size_px() -> Vector2:
 	return _logic.size_px() if _logic else ValleyLogic.SIZE_PX
 
 
+func enter_kind(px: float, py: float) -> String:
+	return _logic.enter_kind(px, py) if _logic else ""
+
+
 func show_crops(plots: Array) -> void:
 	if _logic:
 		_logic.show_crops(plots)

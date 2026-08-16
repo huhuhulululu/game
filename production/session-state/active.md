@@ -1,10 +1,10 @@
 # Session state
 
-- Task: `/story-done` html5 hands
-- Status: r1-coat-feel 001–020 Complete. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/dev-story` enter place
+- Status: r1-coat-feel 001–020 Complete; 021 enter-place in progress. r1-evening-places 001–018, 020 Complete; fireside 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
-- Files: `story-020-html5-hands.md`
-- Next: Stop. Walk and 做 fire. No joystick ring. Do not generate a new face. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
+- Files: `story-021-enter-place.md`
+- Next: `/story-done` after `PLAY_ENTER_OK`. 做 at a painted door changes the bed. No door sticker. Fireside 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system. No next HUD chrome.
 
 ## Session Extract — /story-done 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-020-html5-hands.md` — HTML5 hands

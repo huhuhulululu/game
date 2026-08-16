@@ -58,6 +58,28 @@ func size_px() -> Vector2:
 	return SIZE_PX
 
 
+func enter_kind(px: float, py: float) -> String:
+	var tx := int(floor(px / TILE))
+	var ty := int(floor(py / TILE))
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var gx := tx + dx
+			var gy := ty + dy
+			if gy < 0 or gy >= ROWS.size():
+				continue
+			var row := ROWS[gy]
+			if gx < 0 or gx >= row.length():
+				continue
+			var ch := row[gx]
+			if ch == "I":
+				return "kitchen"
+			if ch == "E":
+				return "mine"
+			if ch == "V":
+				return "wild"
+	return ""
+
+
 func show_crops(plots: Array) -> void:
 	if _crops == null:
 		_crops = Node2D.new()

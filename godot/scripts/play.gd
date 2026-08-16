@@ -301,7 +301,12 @@ func _on_snap(s: Dictionary) -> void:
 	var phase := "夜里" if bool(s.get("night", false)) else ("黄昏" if bool(s.get("dusk", false)) else "白天")
 	# Hunger stays in the sim. The plaque never shows a soul or hunger number.
 	_hud_ink.text = "日 %s · %s · %s · 金 %s" % [_ink_n(s.get("day", 0)), str(s.get("season", "春")), phase, _ink_n(s.get("gold", 0))]
+	var at: Dictionary = s.get("youAt", {})
+	if at.size() > 0:
+		_you_at = Vector2(float(at.get("x", 0)), float(at.get("y", 0)))
 	_show_line(str(s.get("prompt", "")))
+	if not _prompt_bar.visible and zone == "valley":
+		_show_line(_enter_line())
 	_paint_signs(s)
 	_paint_mate(s)
 	var you_held := _you_held_name(s)
@@ -759,6 +764,19 @@ func _paint_orders(raws: Array, zone: String) -> void:
 		_orders.visible = false
 		return
 	_orders.visible = true
+
+
+func _enter_line() -> String:
+	if _valley == null:
+		return ""
+	var kind := _valley.enter_kind(_you_at.x, _you_at.y)
+	if kind == "kitchen":
+		return "进厨房"
+	if kind == "mine":
+		return "进矿"
+	if kind == "wild":
+		return "出谷 · 荒野"
+	return ""
 
 
 func _show_line(prompt: String) -> void:

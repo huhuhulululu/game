@@ -1753,6 +1753,35 @@ describe("living systems", () => {
     assert.ok(w.snapshot("a").prompt.includes("出矿"));
   });
 
+  it("doing on a door tile enters the kitchen or the mine", () => {
+    const inn = new World("INN");
+    inn.addPlayer("a", "暖", "left");
+    const cook = inn.players.get("a");
+    assert.ok(cook);
+    const kitchenDoor = inn.valley.find("I")[0];
+    assert.ok(kitchenDoor);
+    const kitchenAt = tileCenter(kitchenDoor.x, kitchenDoor.y);
+    cook.x = kitchenAt.x;
+    cook.y = kitchenAt.y;
+    cook.facing = 2;
+    assert.ok(inn.snapshot("a").prompt.includes("进厨房"));
+    tap(inn, "a");
+    assert.equal(cook.zone, "kitchen");
+    const shaft = new World("SHAFT");
+    shaft.addPlayer("a", "暖", "left");
+    const miner = shaft.players.get("a");
+    assert.ok(miner);
+    const mineDoor = shaft.valley.find("E")[0];
+    assert.ok(mineDoor);
+    const mineAt = tileCenter(mineDoor.x, mineDoor.y);
+    miner.x = mineAt.x;
+    miner.y = mineAt.y;
+    miner.facing = 2;
+    assert.ok(shaft.snapshot("a").prompt.includes("进矿"));
+    tap(shaft, "a");
+    assert.equal(miner.zone, "mine");
+  });
+
   it("dug ore goes in the hand, the forge counts it, and the pot sends it to the workshop", () => {
     const w = new World("ORE2");
     w.addPlayer("a", "暖", "left");

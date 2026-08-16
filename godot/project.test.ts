@@ -2393,3 +2393,52 @@ test("Play HTML5 hands move the coat and fire 做", () => {
     assert.doesNotMatch(src, /play_html5|PLAY_HANDS_MOVE|_walk_on|_grab_web_focus/);
   }
 });
+
+test("Play enters a painted place with 做, not a door sticker", () => {
+  assert.ok(existsSync("production/epics/r1-coat-feel/story-021-enter-place.md"));
+  const story = readFileSync("production/epics/r1-coat-feel/story-021-enter-place.md", "utf8");
+  assert.match(story, /\*\*Status\*\*:\s*(In progress|Complete)/);
+  const closed = readFileSync("production/epics/r1-coat-feel/story-020-html5-hands.md", "utf8");
+  assert.match(closed, /\*\*Status\*\*:\s*Complete/);
+  const parked = readFileSync("production/epics/r1-evening-places/story-019-fireside.md", "utf8");
+  assert.match(parked, /\*\*Status\*\*:\s*In progress/);
+  assert.ok(existsSync("godot/scripts/headless_play_enter.gd"));
+  assert.ok(existsSync("godot/scenes/play_enter.tscn"));
+  const enterPlay = readFileSync("godot/scripts/headless_play_enter.gd", "utf8");
+  assert.match(enterPlay, /scenes\/play\.tscn/);
+  assert.match(enterPlay, /PLAY_ENTER_KITCHEN/);
+  assert.match(enterPlay, /PLAY_ENTER_MINE/);
+  assert.match(enterPlay, /PLAY_ENTER_OK/);
+  assert.match(enterPlay, /bed-kitchen\.png/);
+  assert.match(enterPlay, /bed-mine\.png/);
+  assert.match(enterPlay, /DOOR_STICKER/);
+  assert.doesNotMatch(enterPlay, /魂|Wilson|Don't Starve|Dont Starve|Charlie|sanity/i);
+  const scene = readFileSync("godot/scenes/play_enter.tscn", "utf8");
+  assert.match(scene, /headless_play_enter\.gd/);
+  const play = readFileSync("godot/scripts/play.gd", "utf8");
+  assert.match(play, /_enter_line/);
+  assert.match(play, /进厨房/);
+  assert.match(play, /2\.18/);
+  assert.match(play, /hand_chip\("做"/);
+  assert.doesNotMatch(play, /prop-door-open|魂/);
+  const logic = readFileSync("godot/scripts/valley_logic.gd", "utf8");
+  assert.match(logic, /func enter_kind/);
+  assert.doesNotMatch(logic, /prop-door-open/);
+  const world = readFileSync("src/sim/world.ts", "utf8");
+  assert.match(world, /reachCh/);
+  assert.match(world, /enterKitchen/);
+  const look = readFileSync("godot/scripts/look.gd", "utf8");
+  assert.match(look, /const BODY := 240/);
+  const bedPng = readFileSync("godot/assets/art/bed-valley.png");
+  assert.equal(bedPng.readUInt32BE(16), 1224);
+  assert.equal(bedPng.readUInt32BE(20), 612);
+  const art = readFileSync("godot/docs/ART.md", "utf8");
+  assert.match(art, /做到画上的门就进/);
+  assert.match(art, /不要另贴一扇门/);
+  assert.match(art, /大衣真透明/);
+  const srcFiles = ["src/scenes/look.test.ts"];
+  for (const p of srcFiles) {
+    const src = readFileSync(p, "utf8");
+    assert.doesNotMatch(src, /play_enter|PLAY_ENTER_OK|_enter_line/);
+  }
+});

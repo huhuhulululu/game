@@ -601,6 +601,17 @@ export class World {
     return { x: t.x + d.x, y: t.y + d.y };
   }
 
+  private reachCh(p: Actor): string {
+    const map = this.mapFor(p.zone);
+    const f = this.facingTile(p);
+    const h = toTile(p.x, p.y);
+    const face = map.rows[f.y]?.[f.x] ?? "";
+    if (face === "E" || face === "I" || face === "V" || face === "L") return face;
+    const here = map.rows[h.y]?.[h.x] ?? "";
+    if (here === "E" || here === "I" || here === "V" || here === "L") return here;
+    return face;
+  }
+
   private prompt(p: Actor): string {
     if (p.chop) return "切着";
     if (p.fish?.phase === "wait") return this.pairFishing() ? "两人同钓 · 水面还没动" : "水面还没动";
@@ -620,12 +631,13 @@ export class World {
     const f = this.facingTile(p);
     const cell = map.cell(f.x, f.y);
     const ch = map.rows[f.y]?.[f.x];
+    const reach = this.reachCh(p);
     if (p.zone === "valley") {
       if (cell === "dock") return "下竿";
       if (cell === "plot") return this.plotPrompt(f.x, f.y);
       if (cell === "bush" || cell === "osmanthus") return "采";
-      if (ch === "E") return "进矿";
-      if (ch === "I") return "进厨房";
+      if (reach === "E") return "进矿";
+      if (reach === "I") return "进厨房";
       if (ch === "A") {
         if (!this.isNight()) return "还早。天黑再歇。";
         if (this.present().length === 2 && this.readySleep.size === 1 && !this.readySleep.has(p.id)) return "也躺下，一起歇一夜";
@@ -633,7 +645,7 @@ export class World {
         return "歇一夜（田会自己长）";
       }
       if (cell === "cabin") return this.isNight() ? "对着铺才能歇" : "还早。天黑再歇。";
-      if (ch === "V" || cell === "gate") return this.isNight() ? "出谷 · 夜里没火会咬人" : "出谷 · 荒野";
+      if (reach === "V" || cell === "gate") return this.isNight() ? "出谷 · 夜里没火会咬人" : "出谷 · 荒野";
       if (cell === "shop") return this.shopPrompt();
       if (cell === "forge") return this.forgeJob ? "锻 · 绿的时候按" : "打造 · 矿×2 木×1";
       if (cell === "gacha") return this.save.fortuneId ? "今日已问过" : "问今日";
@@ -641,14 +653,14 @@ export class World {
       if (this.idleFace(cell) && eatValue(p.held)) return "吃";
     }
     if (p.zone === "mine") {
-      if (cell === "leave") return "出矿";
+      if (cell === "leave" || reach === "L") return "出矿";
       if (cell === "stairs") return "再下一层";
       if (cell === "ore") return "挖";
       if (cell === "chest") return "开匣";
       return "挥";
     }
     if (p.zone === "kitchen") {
-      if (cell === "leave") return "出厨房";
+      if (cell === "leave" || reach === "L") return "出厨房";
       if (cell === "pantry") return "取";
       if (cell === "cut") return "切";
       if (cell === "stove") return "炉";
@@ -671,7 +683,7 @@ export class World {
       if (cell === "trash") return "丢掉";
     }
     if (p.zone === "wild") {
-      if (cell === "leave") return "回山谷";
+      if (cell === "leave" || reach === "L") return "回山谷";
       if (cell === "dock") return "下竿";
       if (cell === "bush") return "采";
       if (cell === "tree") return "砍";
@@ -720,6 +732,7 @@ export class World {
     const f = this.facingTile(p);
     const cell = map.cell(f.x, f.y);
     const ch = map.rows[f.y]?.[f.x];
+    const reach = this.reachCh(p);
     if (this.idleFace(cell) && !this.canPass(p) && this.tryEat(p)) return;
 
     if (p.zone === "valley") {
@@ -727,14 +740,14 @@ export class World {
       if (cell === "plot") return this.plot(p, f.x, f.y);
       if (cell === "bush") return this.forage(p, "herb", 0.7, f.x, f.y);
       if (cell === "osmanthus") return this.forage(p, "osmanthus", 0.35, f.x, f.y);
-      if (ch === "E") return this.enterMine(p);
-      if (ch === "I") return this.enterKitchen(p);
+      if (reach === "E") return this.enterMine(p);
+      if (reach === "I") return this.enterKitchen(p);
       if (ch === "A") return this.sleep(p.id);
       if (cell === "cabin") {
         this.toast(this.isNight() ? "也得对着铺" : "还早。天黑再歇。");
         return;
       }
-      if (ch === "V" || cell === "gate") return this.enterWild(p);
+      if (reach === "V" || cell === "gate") return this.enterWild(p);
       if (cell === "shop") return this.shopAct(p);
       if (cell === "forge") return this.forgeAct(p);
       if (cell === "gacha") return this.askFortune(p);
@@ -744,14 +757,14 @@ export class World {
       return;
     }
     if (p.zone === "mine") {
-      if (cell === "leave") return this.leaveToValley(p);
+      if (cell === "leave" || reach === "L") return this.leaveToValley(p);
       if (cell === "stairs") return this.downFloor();
       if (cell === "ore") return this.dig(p, f.x, f.y);
       if (cell === "chest") return this.chest(p, f.x, f.y);
       return this.swing(p);
     }
     if (p.zone === "kitchen") {
-      if (cell === "leave") return this.leaveToValley(p);
+      if (cell === "leave" || reach === "L") return this.leaveToValley(p);
       if (cell === "pantry") return this.pantry(p, map.pantryId(f.x, f.y));
       if (cell === "cut") return this.cut(p, f.x, f.y);
       if (cell === "stove") return this.stove(p, f.x, f.y);
@@ -771,7 +784,7 @@ export class World {
       this.toast("先面向案板、锅或堂口");
     }
     if (p.zone === "wild") {
-      if (cell === "leave") return this.leaveToValley(p);
+      if (cell === "leave" || reach === "L") return this.leaveToValley(p);
       if (cell === "dock") return this.cast(p);
       if (cell === "bush") return this.forage(p, chance(0.35, this.rand) ? "mushroom" : "herb", 0.75, f.x, f.y);
       if (cell === "tree") return this.chopTree(p, f.x, f.y);
