@@ -31,7 +31,8 @@ func show_map(zone: String, rows: Array) -> void:
 	_sig = sig
 	_fog_sig = ""
 	for child in get_children():
-		child.queue_free()
+		remove_child(child)
+		child.free()
 	_fog = null
 	_glow = null
 	texture_filter = TEXTURE_FILTER_LINEAR
