@@ -34,4 +34,4 @@ PLAY_LOG_OK
 
 ## Sign-off
 
-`/dev-story` lean. Empty bar stays off. A line is one small wood slip. No new log UI. No 魂.
+`/story-done` lean. QL-TEST-COVERAGE skipped. LP-CODE-REVIEW skipped. Empty bar stays off. A line is one small wood slip. No new log UI. No 魂. `npm test`: 149 pass. `PLAY_LOG_OK`. `PLAY_QUIET_OK` still holds. HTML5 re-exported.

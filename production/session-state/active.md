@@ -1,10 +1,17 @@
 # Session state
 
-- Task: `/dev-story` quiet log
-- Status: r1-coat-feel 001–013 Complete; 014 In progress. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
+- Task: `/story-done` quiet log
+- Status: r1-coat-feel 001–014 Complete. r1-evening-places 001–018, 020 Complete; 019 parked. Two-phone Blocked (human). Weather look closed. Stop new WORLD systems.
 - Review: lean (no chat gates; director/agent spawn skipped)
 - Files: `story-014-quiet-log.md`
-- Next: `/story-done` after tokens hold. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+- Next: Stop. Wait unless a real leftover geom remains. 019 stays parked. Do not `/dev-story` two-phone. Do not start another WORLD system.
+
+## Session Extract — /story-done 2026-08-16
+- Story: `production/epics/r1-coat-feel/story-014-quiet-log.md` — Quiet log
+- Criteria: 6/6. Empty bottom bar stays hidden. A real line is one small wood slip. No new log UI.
+- Tests: `godot/project.test.ts` quiet-log lock + `PLAY_LOG_OK`. npm test 149 pass. `PLAY_QUIET_OK` still holds.
+- Review: lean (QL-TEST-COVERAGE skipped; LP-CODE-REVIEW skipped)
+- Next recommended: none. Stop. Wait unless leftover geom remains. 019 stays parked. Two-phone stays Blocked (human).
 
 ## Session Extract — /dev-story 2026-08-16
 - Story: `production/epics/r1-coat-feel/story-014-quiet-log.md` — Quiet log
